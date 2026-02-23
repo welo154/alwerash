@@ -1,11 +1,8 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "noEmit": true,
-    "rootDir": "."
+    "rootDir": ".."
   },
-  "include": ["*.ts"],
+  "include": ["*.ts", "../src/auth/password.ts"],
   "exclude": ["node_modules"]
 }
