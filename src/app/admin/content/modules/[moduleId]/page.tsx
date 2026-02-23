@@ -125,7 +125,7 @@ export default async function AdminModuleDetail({
               </div>
             </li>
           ))}
-          {module.lessons.length === 0 && (
+          {courseModule.lessons.length === 0 && (
             <li className="rounded border p-4 text-sm opacity-60">
               No lessons yet. Add one above.
             </li>

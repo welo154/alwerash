@@ -10,7 +10,7 @@
  * - If the user exists, updates name and password hash, and ensures ADMIN role exists.
  */
 import { PrismaClient, Role } from "@prisma/client";
-import { hashPassword } from "../src/server/auth/password";
+import { hashPassword } from "../src/auth/password";
 
 const prisma = new PrismaClient();
 

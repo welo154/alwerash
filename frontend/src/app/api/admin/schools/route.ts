@@ -9,7 +9,7 @@ export const GET = handleRoute(async () => {
   return NextResponse.json({ schools });
 });
 
-export const POST = handleRoute(async (req) => {
+export const POST = handleRoute(async (req: Request) => {
   await requireRole(["ADMIN"]);
   const body = await req.json().catch(() => null);
   const school = await adminCreateSchool(body);

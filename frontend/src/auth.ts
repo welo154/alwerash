@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
           where: { userId: token.sub },
           select: { role: true },
         });
-        (token as { roles?: string[] }).roles = roles.map((r) => r.role);
+        (token as { roles?: string[] }).roles = roles.map((r: { role: string }) => r.role);
       }
       return token;
     },

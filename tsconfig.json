@@ -25,6 +25,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@backend/*": [
+        "./backend/src/*"
+      ],
       "@prisma/client": [
         "./node_modules/.prisma/client"
       ]

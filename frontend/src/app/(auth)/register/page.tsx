@@ -1,7 +1,6 @@
 // file: src/app/(auth)/register/page.tsx
 import { redirect } from "next/navigation";
 import { registerUser, RegisterInput } from "@backend/auth/auth.service";
-import { signIn } from "@/auth";
 
 export default function RegisterPage() {
   async function action(formData: FormData) {
@@ -15,16 +14,11 @@ export default function RegisterPage() {
 
     const parsed = RegisterInput.safeParse(raw);
     if (!parsed.success) {
-      // keep it simple Week 1: redirect with a generic error
       redirect("/register?error=invalid");
     }
 
     await registerUser(parsed.data);
-    await signIn("credentials", {
-      email: parsed.data.email,
-      password: parsed.data.password,
-      redirectTo: "/dashboard",
-    });
+    redirect("/login?registered=1");
   }
 
   return (

@@ -1,10 +1,10 @@
 // file: src/app/api/admin/courses/[courseId]/route.ts
 import { NextResponse } from "next/server";
-import { handleRouteWithParams } from "@backend/lib/route";
+import { handleRouteWithParams, type RouteContext } from "@backend/lib/route";
 import { requireRole } from "@backend/auth/require";
 import { adminDeleteCourse, adminUpdateCourse } from "@backend/content/admin.service";
 
-export const PATCH = handleRouteWithParams(async (req, ctx) => {
+export const PATCH = handleRouteWithParams(async (req: Request, ctx: RouteContext) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const courseId = params.courseId;
@@ -14,7 +14,7 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   return NextResponse.json({ course });
 });
 
-export const DELETE = handleRouteWithParams(async (_req, ctx) => {
+export const DELETE = handleRouteWithParams(async (_req: Request, ctx: RouteContext) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const courseId = params.courseId;

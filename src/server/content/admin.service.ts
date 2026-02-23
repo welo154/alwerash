@@ -173,7 +173,11 @@ export async function adminListModules(courseId?: string) {
   });
 }
 
-export async function adminGetModule(id: string) {
+export type ModuleWithLessons = Prisma.ModuleGetPayload<{
+  include: { course: true; lessons: true };
+}>;
+
+export async function adminGetModule(id: string): Promise<ModuleWithLessons> {
   const m = await prisma.module.findUnique({
     where: { id },
     include: {

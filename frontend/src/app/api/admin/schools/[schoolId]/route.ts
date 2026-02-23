@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { handleRouteWithParams } from "@backend/lib/route";
+import { handleRouteWithParams, type RouteContext } from "@backend/lib/route";
 import { requireRole } from "@backend/auth/require";
 import {
   adminDeleteSchool,
   adminGetSchool,
   adminUpdateSchool,
-} from "@/server/content/admin.service";
+} from "@backend/content/admin.service";
 
-export const GET = handleRouteWithParams(async (_req, ctx) => {
+export const GET = handleRouteWithParams(async (_req: Request, ctx: RouteContext) => {
   await requireRole(["ADMIN"]);
   const { schoolId } = await ctx.params;
   if (!schoolId) return NextResponse.json({ error: "BAD_REQUEST", message: "schoolId required" }, { status: 400 });
@@ -24,7 +24,7 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   return NextResponse.json({ school });
 });
 
-export const DELETE = handleRouteWithParams(async (_req, ctx) => {
+export const DELETE = handleRouteWithParams(async (_req: Request, ctx: RouteContext) => {
   await requireRole(["ADMIN"]);
   const { schoolId } = await ctx.params;
   if (!schoolId) return NextResponse.json({ error: "BAD_REQUEST", message: "schoolId required" }, { status: 400 });
