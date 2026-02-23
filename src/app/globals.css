@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens - swap this file or edit variables to change the design.
+ * Blue theme by default.
+ */
+:root {
+  --color-primary: rgb(37 99 235);
+  --color-primary-hover: rgb(29 78 216);
+  --color-primary-light: rgb(239 246 255);
+  --color-text: rgb(15 23 42);
+  --color-text-muted: rgb(100 116 139);
+  --color-border: rgb(226 232 240);
+  --color-bg: rgb(255 255 255);
+  --color-bg-muted: rgb(248 250 252);
+}
+
+/* Pointer cursor for all clickable elements */
+a,
+button,
+summary,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+select,
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]) {
+  cursor: pointer;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out;
+}
+
+/* Card hover - lift up with smooth transition */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+}
+
+/* Fade-in animation for sections */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Stagger children for sequential fade-in */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }

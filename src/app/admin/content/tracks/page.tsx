@@ -1,90 +1,71 @@
-// file: src/app/admin/content/tracks/page.tsx
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import Image from "next/image";
 import { requireRole } from "@/server/auth/require";
-import { adminCreateTrack, adminListSchools, adminListTracks } from "@/server/content/admin.service";
+import { adminListTracks } from "@/server/content/admin.service";
+import { AdminTracksPageClient } from "./AdminTracksPage";
+import { CreateTrackForm } from "./CreateTrackForm";
 
-type SchoolItem = Awaited<ReturnType<typeof adminListSchools>>[number];
-type TrackItem = Awaited<ReturnType<typeof adminListTracks>>[number] & {
-  school?: { title: string } | null;
-  schoolId?: string;
-};
+type TrackItem = Awaited<ReturnType<typeof adminListTracks>>[number];
 
-export default async function AdminTracksPage() {
+export default async function AdminTracksPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string }>;
+}) {
   await requireRole(["ADMIN"]);
-  const [tracks, schools] = await Promise.all([
-    adminListTracks(),
-    adminListSchools(),
-  ]);
-
-  async function create(formData: FormData) {
-    "use server";
-    await requireRole(["ADMIN"]);
-    const schoolId = String(formData.get("schoolId") ?? "");
-    if (!schoolId) return;
-    await adminCreateTrack({
-      schoolId,
-      title: String(formData.get("title") ?? ""),
-      slug: String(formData.get("slug") ?? "").trim().toLowerCase(),
-      description: String(formData.get("description") ?? "") || undefined,
-      order: Number(formData.get("order") ?? 0),
-      published: formData.get("published") === "on",
-    });
-    revalidatePath("/admin/content/tracks");
-  }
+  const tracks = await adminListTracks();
+  const params = await searchParams;
+  const showAddModal = params?.add === "1";
 
   return (
-    <div className="p-6 space-y-6">
-      <Link className="underline text-sm" href="/admin/content">← Back to Content Admin</Link>
-      <h1 className="text-2xl font-semibold">Tracks</h1>
+    <div className="p-8">
+      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Tracks</h1>
 
-      <form action={create} className="rounded border p-4 space-y-2 max-w-xl">
-        <h2 className="font-semibold">Create Track</h2>
-        <div>
-          <label className="block text-sm mb-1">School</label>
-          <select name="schoolId" required className="w-full rounded border p-2">
-            <option value="">Select school…</option>
-            {schools.map((s: SchoolItem) => (
-              <option key={s.id} value={s.id}>{s.title}</option>
-            ))}
-          </select>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="title" placeholder="Title (e.g. Ornaments)" className="rounded border p-2" required />
-          <input name="slug" placeholder="slug (e.g. ornaments)" className="rounded border p-2" required />
-        </div>
-        <textarea name="description" placeholder="Description" className="w-full rounded border p-2" />
-        <div className="flex items-center gap-3">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
-            <input name="order" type="number" defaultValue={0} min={0} className="w-24 rounded border p-2" />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input name="published" type="checkbox" />
-            Published
-          </label>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white" disabled={schools.length === 0}>
-            Create Track
-          </button>
-        </div>
-      </form>
-
-      <ul className="space-y-2">
-        {tracks.map((t: TrackItem) => (
-          <li key={t.id} className="rounded border p-3 flex items-center justify-between">
-            <div>
-              <div className="font-semibold">{t.title}</div>
-              <div className="text-sm opacity-70">
-                {t.school?.title ?? t.schoolId} • {t.slug} • {t.published ? "published" : "draft"}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {tracks.map((t) => (
+          <Link
+            key={t.id}
+            href={`/admin/content/tracks/${t.id}`}
+            className="group card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md"
+          >
+            {t.coverImage ? (
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-slate-100">
+                <Image
+                  src={t.coverImage}
+                  alt=""
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                />
+              </div>
+            ) : (
+              <div className="aspect-video w-full shrink-0 bg-slate-100" />
+            )}
+            <div className="flex flex-1 flex-col p-4">
+              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">{t.title}</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {t.school?.title ?? t.schoolId} • {t.slug}
+              </p>
+              <div className="mt-auto pt-3">
+                <span
+                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    t.published
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {t.published ? "Published" : "Draft"}
+                </span>
               </div>
             </div>
-            <Link className="underline" href={`/admin/content/tracks/${t.id}`}>Manage</Link>
-          </li>
+          </Link>
         ))}
-        {tracks.length === 0 && (
-          <li className="rounded border p-4 text-sm opacity-60">No tracks yet.</li>
-        )}
-      </ul>
+        <AdminTracksPageClient
+          showAddModal={showAddModal}
+          createForm={<CreateTrackForm />}
+        />
+      </div>
     </div>
   );
 }

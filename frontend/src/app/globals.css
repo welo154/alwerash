@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens - swap this file or edit variables to change the design.
+ * Blue theme by default.
+ */
+:root {
+  --color-primary: rgb(37 99 235);
+  --color-primary-hover: rgb(29 78 216);
+  --color-primary-light: rgb(239 246 255);
+  --color-text: rgb(15 23 42);
+  --color-text-muted: rgb(100 116 139);
+  --color-border: rgb(226 232 240);
+  --color-bg: rgb(255 255 255);
+  --color-bg-muted: rgb(248 250 252);
+}

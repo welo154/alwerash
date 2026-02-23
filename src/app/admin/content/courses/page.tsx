@@ -1,117 +1,70 @@
-// file: src/app/admin/content/courses/page.tsx
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import Image from "next/image";
 import { requireRole } from "@/server/auth/require";
-import {
-  adminCreateCourse,
-  adminListCourses,
-  adminListTracks,
-} from "@/server/content/admin.service";
+import { adminListCourses } from "@/server/content/admin.service";
+import { AdminCoursesPageClient } from "./AdminCoursesPage";
+import { CreateCourseForm } from "./CreateCourseForm";
 
-export default async function AdminCoursesPage() {
+type CourseItem = Awaited<ReturnType<typeof adminListCourses>>[number];
+
+export default async function AdminCoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string }>;
+}) {
   await requireRole(["ADMIN"]);
-  const [courses, tracks] = await Promise.all([
-    adminListCourses(),
-    adminListTracks(),
-  ]);
-
-  async function create(formData: FormData) {
-    "use server";
-    await requireRole(["ADMIN"]);
-    const trackId = String(formData.get("trackId") ?? "").trim();
-    const title = String(formData.get("title") ?? "").trim();
-    if (!title) return;
-    await adminCreateCourse({
-      trackId: trackId || undefined,
-      title,
-      summary: String(formData.get("summary") ?? "").trim() || undefined,
-      order: Number(formData.get("order") ?? 0),
-      published: formData.get("published") === "on",
-    });
-    revalidatePath("/admin/content/courses");
-  }
+  const courses = await adminListCourses();
+  const params = await searchParams;
+  const showAddModal = params?.add === "1";
 
   return (
-    <div className="p-6 space-y-6">
-      <Link className="underline text-sm" href="/admin/content">
-        ← Back to Content Admin
-      </Link>
+    <div className="p-8">
+      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Courses</h1>
 
-      <h1 className="text-2xl font-semibold">Courses</h1>
-
-      <form action={create} className="rounded border p-4 space-y-2 max-w-xl">
-        <h2 className="font-semibold">Create Course</h2>
-        <div>
-          <label className="block text-sm mb-1">Track (optional — group under a track)</label>
-          <select name="trackId" className="w-full rounded border p-2">
-            <option value="">None (no track)</option>
-            {tracks.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.school?.title ? `${t.school.title} → ${t.title}` : t.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Title</label>
-          <input
-            name="title"
-            placeholder="Course title"
-            className="w-full rounded border p-2"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Summary</label>
-          <textarea
-            name="summary"
-            placeholder="Brief description"
-            className="w-full rounded border p-2"
-          />
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
-            <input name="order" type="number" defaultValue={0} min={0} className="w-24 rounded border p-2" />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input name="published" type="checkbox" />
-            Published
-          </label>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-            Create Course
-          </button>
-        </div>
-      </form>
-
-      <div>
-        <h2 className="font-semibold mb-2">All Courses</h2>
-        <ul className="space-y-2">
-          {courses.map((c) => (
-            <li
-              key={c.id}
-              className="rounded border p-3 flex items-center justify-between"
-            >
-              <div>
-                <div className="font-semibold">{c.title}</div>
-                <div className="text-sm opacity-70">
-                  Track: {c.track ? `${c.track.title}` : "None"} • {c.published ? "published" : "draft"}
-                </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {courses.map((c) => (
+          <Link
+            key={c.id}
+            href={`/admin/content/courses/${c.id}`}
+            className="group card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md"
+          >
+            {c.coverImage ? (
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-slate-100">
+                <Image
+                  src={c.coverImage}
+                  alt=""
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                />
               </div>
-              <Link
-                className="underline"
-                href={`/admin/content/courses/${c.id}`}
-              >
-                Edit
-              </Link>
-            </li>
-          ))}
-          {courses.length === 0 && (
-            <li className="rounded border p-4 text-sm opacity-60">
-              No courses yet. Create one above.
-            </li>
-          )}
-        </ul>
+            ) : (
+              <div className="aspect-video w-full shrink-0 bg-slate-100" />
+            )}
+            <div className="flex flex-1 flex-col p-4">
+              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">{c.title}</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {c.track ? `${c.track.title}` : "No track"}
+              </p>
+              <div className="mt-auto pt-3">
+                <span
+                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    c.published
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {c.published ? "Published" : "Draft"}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+        <AdminCoursesPageClient
+          showAddModal={showAddModal}
+          createForm={<CreateCourseForm />}
+        />
       </div>
     </div>
   );

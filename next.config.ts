@@ -1,8 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Workaround for Next.js 15 generated route types "is not a module" error
   typescript: { ignoreBuildErrors: true },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

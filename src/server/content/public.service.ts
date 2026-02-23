@@ -11,6 +11,7 @@ export async function publicListTracks() {
       title: true,
       slug: true,
       description: true,
+      coverImage: true,
       order: true,
       school: { select: { id: true, title: true, slug: true } },
     },
@@ -25,6 +26,7 @@ export async function publicGetTrackBySlug(slug: string) {
       title: true,
       slug: true,
       description: true,
+      coverImage: true,
       order: true,
       published: true,
       school: { select: { id: true, title: true, slug: true } },
@@ -70,4 +72,70 @@ export async function publicGetCourseById(courseId: string) {
   if (course.track && !course.track.published) throw new AppError("NOT_FOUND", 404, "Course not found");
 
   return course;
+}
+
+export async function publicListFeaturedCourses(limit = 8) {
+  return prisma.course.findMany({
+    where: { published: true },
+    take: limit,
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      title: true,
+      summary: true,
+      coverImage: true,
+      track: { select: { title: true, slug: true } },
+    },
+  });
+}
+
+export async function publicGetSimilarCourses(courseId: string, trackSlug: string, limit = 4) {
+  return prisma.course.findMany({
+    where: {
+      published: true,
+      id: { not: courseId },
+      track: { slug: trackSlug, published: true },
+    },
+    take: limit,
+    orderBy: { order: "asc" },
+    select: {
+      id: true,
+      title: true,
+      summary: true,
+      coverImage: true,
+    },
+  });
+}
+
+/** Search published tracks and courses by query (title). */
+export async function publicSearch(query: string, limit = 10) {
+  const q = query.trim().toLowerCase();
+  if (!q) return { tracks: [], courses: [] };
+
+  const [tracks, courses] = await Promise.all([
+    prisma.track.findMany({
+      where: {
+        published: true,
+        title: { contains: q, mode: "insensitive" },
+      },
+      take: limit,
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, slug: true },
+    }),
+    prisma.course.findMany({
+      where: {
+        published: true,
+        title: { contains: q, mode: "insensitive" },
+      },
+      take: limit,
+      orderBy: { title: "asc" },
+      select: {
+        id: true,
+        title: true,
+        track: { select: { slug: true, title: true } },
+      },
+    }),
+  ]);
+
+  return { tracks, courses };
 }

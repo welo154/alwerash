@@ -3,8 +3,8 @@ import { z } from "zod";
 
 // --- Shared ---
 
-/** CUID format (starts with c, 25 chars) */
-export const Cuid = z.string().regex(/^c[a-z0-9]{24}$/i, "Invalid ID format");
+/** CUID format (CUID1: 25 chars, CUID2: 24 chars - starts with c, alphanumeric) */
+export const Cuid = z.string().regex(/^c[a-z0-9]{20,30}$/i, "Invalid ID format");
 
 /** Slug: lowercase, trimmed, kebab-case */
 export const Slug = z
@@ -17,11 +17,19 @@ export const Slug = z
     "Slug must be lowercase letters, numbers, and hyphens only"
   );
 
-/** URL or empty string (for optional coverImage, etc.) */
+/** URL or empty string (for optional coverImage, etc.). Invalid URLs are treated as undefined. */
 export const OptionalUrl = z
-  .union([z.string().url().max(2000), z.literal("")])
+  .string()
   .optional()
-  .transform((v) => (v === "" ? undefined : v));
+  .transform((v) => {
+    if (!v || (v = v.trim()) === "") return undefined;
+    try {
+      const url = new URL(v);
+      return url.toString().length <= 2000 ? url.toString() : undefined;
+    } catch {
+      return undefined;
+    }
+  });
 
 /** Pagination query params */
 export const PaginationSchema = z.object({
@@ -48,6 +56,7 @@ export const TrackCreateSchema = z.object({
   title: z.string().min(2, "Title too short").max(200),
   slug: Slug,
   description: z.string().max(2000).optional(),
+  coverImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
 });

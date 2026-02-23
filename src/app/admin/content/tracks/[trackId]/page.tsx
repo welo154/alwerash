@@ -1,6 +1,6 @@
 // file: src/app/admin/content/tracks/[trackId]/page.tsx
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { prisma } from "@/server/db/prisma";
 import { requireRole } from "@/server/auth/require";
@@ -12,6 +12,7 @@ type TrackWithRelations = {
   title: string;
   slug: string;
   description: string | null;
+  coverImage: string | null;
   order: number;
   published: boolean;
   schoolId: string;
@@ -28,7 +29,14 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     include: { courses: { orderBy: { createdAt: "asc" } }, school: true },
   } as { where: { id: string }; include: { courses: { orderBy: { createdAt: "asc" } }; school: true } })) as TrackWithRelations | null;
 
-  if (!track) return <div className="p-6">Track not found</div>;
+  if (!track)
+    return (
+      <div className="p-8">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-red-800">
+          Track not found
+        </div>
+      </div>
+    );
 
   async function update(formData: FormData) {
     "use server";
@@ -39,10 +47,11 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
       title: String(formData.get("title") ?? ""),
       slug: String(formData.get("slug") ?? ""),
       description: String(formData.get("description") ?? "") || undefined,
+      coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
-    revalidatePath(`/admin/content/tracks/${id}`);
+    redirect(`/admin/content/tracks/${id}?toast=Track+updated`);
   }
 
   async function createCourse(formData: FormData) {
@@ -57,7 +66,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
-    revalidatePath(`/admin/content/tracks/${id}`);
+    redirect(`/admin/content/tracks/${id}?toast=Course+added`);
   }
 
   async function deleteTrack(formData: FormData) {
@@ -66,90 +75,226 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     const id = String(formData.get("trackId") ?? "");
     if (!id) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const t = (await prisma.track.findUnique({ where: { id }, select: { schoolId: true } } as any)) as { schoolId: string } | null;
+    const t = (await prisma.track.findUnique({ where: { id }, select: { schoolId: true } } as any)) as { schoolId: string } | null;
     await adminDeleteTrack(id);
-    if (t?.schoolId) redirect(`/admin/content/schools/${t.schoolId}`);
-    else redirect("/admin/content/tracks");
+    if (t?.schoolId) redirect(`/admin/content/schools/${t.schoolId}?toast=Track+deleted`);
+    else redirect("/admin/content/tracks?toast=Track+deleted");
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2 text-sm">
-        <Link className="underline" href="/admin/content">← Content Admin</Link>
+    <div className="p-8">
+      {/* Breadcrumb */}
+      <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <Link
+          href="/admin/content/tracks"
+          className="rounded-lg px-2 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        >
+          ← Tracks
+        </Link>
         {track.school && (
           <>
-            <span>·</span>
-            <Link className="underline" href={`/admin/content/schools/${track.school.id}`}>
+            <span className="text-slate-400">/</span>
+            <Link
+              href={`/admin/content/schools/${track.school.id}`}
+              className="rounded-lg px-2 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            >
               {track.school.title}
             </Link>
           </>
         )}
+      </nav>
+
+      {/* Header with cover */}
+      <div className="mb-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {track.coverImage && (
+          <div className="relative aspect-[3/1] w-full bg-slate-100">
+            <Image
+              src={track.coverImage}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
+              sizes="100vw"
+            />
+          </div>
+        )}
+        <div className="p-6">
+          <h1 className="text-2xl font-semibold text-slate-900">{track.title}</h1>
+          <p className="mt-1 text-sm text-slate-500">{track.slug}</p>
+          <span
+            className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              track.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            {track.published ? "Published" : "Draft"}
+          </span>
+        </div>
       </div>
-      <h1 className="text-2xl font-semibold">Track: {track.title}</h1>
 
-      <form action={update} className="rounded border p-4 space-y-2 max-w-xl">
-        <input type="hidden" name="trackId" value={trackId} />
-        <div className="grid grid-cols-2 gap-2">
-          <input name="title" defaultValue={track.title} className="rounded border p-2" required />
-          <input name="slug" defaultValue={track.slug} className="rounded border p-2" required />
-        </div>
-        <textarea name="description" defaultValue={track.description ?? ""} className="w-full rounded border p-2" />
-        <div className="flex items-center gap-3">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
-            <input name="order" type="number" defaultValue={track.order} min={0} className="w-24 rounded border p-2" />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input name="published" type="checkbox" defaultChecked={track.published} />
-            Published
-          </label>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white">Save</button>
-        </div>
-      </form>
-
-      <form action={deleteTrack} className="mt-2">
-        <input type="hidden" name="trackId" value={trackId} />
-        <ConfirmDeleteButton
-          label="Delete track"
-          confirmMessage="Delete this track and all its courses? Courses will be unassigned (not deleted). This cannot be undone."
-        />
-      </form>
-
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Courses</h2>
-
-        <form action={createCourse} className="rounded border p-4 space-y-2 max-w-xl">
+      {/* Edit Track Card */}
+      <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Edit Track</h2>
+        <form action={update} className="space-y-4">
           <input type="hidden" name="trackId" value={trackId} />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs text-zinc-500 mb-0.5">Course title</label>
-              <input name="title" placeholder="e.g. Geometric Ornamentation" className="w-full rounded border p-2" required />
+              <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
+              <input
+                name="title"
+                defaultValue={track.title}
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
-              <input name="order" type="number" defaultValue={0} min={0} className="w-full rounded border p-2" />
+              <label className="mb-1 block text-sm font-medium text-slate-700">Slug</label>
+              <input
+                name="slug"
+                defaultValue={track.slug}
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
             </div>
           </div>
-          <textarea name="summary" placeholder="Summary" className="w-full rounded border p-2" />
-          <label className="flex items-center gap-2 text-sm">
-            <input name="published" type="checkbox" />
-            Published
-          </label>
-          <button className="rounded bg-black px-4 py-2 text-white">Create course</button>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
+            <input
+              name="coverImage"
+              type="url"
+              defaultValue={track.coverImage ?? ""}
+              placeholder="https://..."
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Description</label>
+            <textarea
+              name="description"
+              defaultValue={track.description ?? ""}
+              rows={3}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <div>
+              <label className="mb-1 block text-xs text-slate-500">Order</label>
+              <input
+                name="order"
+                type="number"
+                defaultValue={track.order}
+                min={0}
+                className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <input
+                name="published"
+                type="checkbox"
+                defaultChecked={track.published}
+                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              Published
+            </label>
+            <button
+              type="submit"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Save
+            </button>
+          </div>
         </form>
 
-        <ul className="space-y-2">
-          {track.courses.map((c: { id: string; title: string; published: boolean }) => (
-            <li key={c.id} className="rounded border p-3 flex items-center justify-between">
+        <form action={deleteTrack} className="mt-6 border-t border-slate-200 pt-6">
+          <input type="hidden" name="trackId" value={trackId} />
+          <ConfirmDeleteButton
+            label="Delete track"
+            confirmMessage="Delete this track and all its courses? Courses will be unassigned (not deleted). This cannot be undone."
+          />
+        </form>
+      </section>
+
+      {/* Courses Section */}
+      <section>
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Courses</h2>
+
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-medium text-slate-700">Add Course</h3>
+          <form action={createCourse} className="space-y-4">
+            <input type="hidden" name="trackId" value={trackId} />
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <div className="font-semibold">{c.title}</div>
-                <div className="text-sm opacity-70">{c.published ? "published" : "draft"}</div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Course title</label>
+                <input
+                  name="title"
+                  placeholder="e.g. Geometric Ornamentation"
+                  required
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
               </div>
-              <Link className="underline" href={`/admin/content/courses/${c.id}`}>Manage</Link>
-            </li>
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Order</label>
+                <input
+                  name="order"
+                  type="number"
+                  defaultValue={0}
+                  min={0}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Summary</label>
+              <textarea
+                name="summary"
+                placeholder="Brief description"
+                rows={2}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <input
+                name="published"
+                type="checkbox"
+                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              Published
+            </label>
+            <button
+              type="submit"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Add Course
+            </button>
+          </form>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {track.courses.map((c: { id: string; title: string; published: boolean }) => (
+            <Link
+              key={c.id}
+              href={`/admin/content/courses/${c.id}`}
+              className="group card-hover flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
+            >
+              <div>
+                <div className="font-semibold text-slate-900 group-hover:text-blue-600">{c.title}</div>
+                <span
+                  className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {c.published ? "Published" : "Draft"}
+                </span>
+              </div>
+              <span className="text-sm text-blue-600 group-hover:underline">Manage →</span>
+            </Link>
           ))}
-        </ul>
-      </div>
+          {track.courses.length === 0 && (
+            <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-sm text-slate-500">
+              No courses in this track yet. Add one above.
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,67 +1,52 @@
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { requireRole } from "@/server/auth/require";
-import { adminCreateSchool, adminListSchools } from "@/server/content/admin.service";
+import { adminListSchools } from "@/server/content/admin.service";
+import { AdminSchoolsPageClient } from "./AdminSchoolsPage";
+import { CreateSchoolForm } from "./CreateSchoolForm";
 
-export default async function AdminSchoolsPage() {
+export default async function AdminSchoolsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string }>;
+}) {
   await requireRole(["ADMIN"]);
   const schools = await adminListSchools();
-
-  async function create(formData: FormData) {
-    "use server";
-    await requireRole(["ADMIN"]);
-    await adminCreateSchool({
-      title: String(formData.get("title") ?? ""),
-      slug: String(formData.get("slug") ?? "").trim().toLowerCase(),
-      description: String(formData.get("description") ?? "").trim() || undefined,
-      order: Number(formData.get("order") ?? 0),
-      published: formData.get("published") === "on",
-    });
-    revalidatePath("/admin/content/schools");
-  }
+  const params = await searchParams;
+  const showAddModal = params?.add === "1";
 
   return (
-    <div className="p-6 space-y-6">
-      <Link className="underline text-sm" href="/admin/content">
-        ← Back to Content Admin
-      </Link>
-      <h1 className="text-2xl font-semibold">Schools</h1>
+    <div className="p-8">
+      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Schools</h1>
 
-      <form action={create} className="rounded border p-4 space-y-2 max-w-xl">
-        <h2 className="font-semibold">Create School</h2>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="title" placeholder="Title (e.g. Arts)" className="rounded border p-2" required />
-          <input name="slug" placeholder="slug (e.g. arts)" className="rounded border p-2" required />
-        </div>
-        <textarea name="description" placeholder="Description" className="w-full rounded border p-2" />
-        <div className="flex items-center gap-3">
-          <input name="order" type="number" defaultValue={0} className="w-24 rounded border p-2" />
-          <label className="flex items-center gap-2 text-sm">
-            <input name="published" type="checkbox" />
-            Published
-          </label>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-            Create School
-          </button>
-        </div>
-      </form>
-
-      <ul className="space-y-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {schools.map((s) => (
-          <li key={s.id} className="rounded border p-3 flex items-center justify-between">
-            <div>
-              <div className="font-semibold">{s.title}</div>
-              <div className="text-sm opacity-70">{s.slug} • {s.published ? "published" : "draft"}</div>
+          <Link
+            key={s.id}
+            href={`/admin/content/schools/${s.id}`}
+            className="group card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md"
+          >
+            <div className="flex flex-1 flex-col p-4">
+              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">{s.title}</h3>
+              <p className="mt-1 text-sm text-slate-500">{s.slug}</p>
+              <div className="mt-auto pt-3">
+                <span
+                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    s.published
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {s.published ? "Published" : "Draft"}
+                </span>
+              </div>
             </div>
-            <Link className="underline" href={`/admin/content/schools/${s.id}`}>
-              Manage
-            </Link>
-          </li>
+          </Link>
         ))}
-        {schools.length === 0 && (
-          <li className="rounded border p-4 text-sm opacity-60">No schools yet.</li>
-        )}
-      </ul>
+        <AdminSchoolsPageClient
+          showAddModal={showAddModal}
+          createForm={<CreateSchoolForm />}
+        />
+      </div>
     </div>
   );
 }

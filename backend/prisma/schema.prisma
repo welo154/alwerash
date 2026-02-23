@@ -1,0 +1,420 @@
+// file: prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  GUEST
+  LEARNER
+  INSTRUCTOR
+  ADMIN
+}
+
+enum LessonType {
+  VIDEO
+  ARTICLE
+  RESOURCE
+}
+
+enum ThreadType {
+  DM
+  COURSE
+}
+
+enum SubscriptionProvider {
+  STRIPE
+  PAYMOB
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  INCOMPLETE
+  TRIALING
+  ENDED
+}
+
+enum EntitlementProduct {
+  ALL_ACCESS
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum PaymentEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+  NEEDS_CHANGES
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  country       String?
+  passwordHash  String?   @map("password_hash")
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  roles           UserRole[]
+  accounts        Account[]
+  sessions        Session[]
+  submissions     Submission[]
+  submissionFiles SubmissionFile[]
+  sentMessages    Message[] @relation("MessageSender")
+  threadMembers   ThreadParticipant[]
+  subscriptions   Subscription[]
+  entitlements    Entitlement[]
+  lessonProgress  LessonProgress[]
+
+  @@map("users")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  role      Role
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@index([role])
+  @@map("user_roles")
+}
+
+/**
+ * Auth.js / NextAuth tables (Prisma Adapter)
+ * (We keep these even if we use JWT sessions now — useful later for OAuth, etc.)
+ * Naming and @map() supported by Auth.js.
+ */
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ===== Content =====
+// Hierarchy: School > Track > Course (track optional) > Module > Lesson
+
+model School {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  order       Int      @default(0)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tracks Track[]
+
+  @@index([published])
+  @@map("schools")
+}
+
+model Track {
+  id        String   @id @default(cuid())
+  schoolId  String   @map("school_id")
+  title     String
+  slug      String   @unique
+  description String?
+  order     Int      @default(0)
+  published Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  school   School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  courses  Course[]
+
+  @@index([schoolId])
+  @@index([published])
+  @@map("tracks")
+}
+
+model Course {
+  id         String   @id @default(cuid())
+  trackId    String?  @map("track_id")
+  title      String
+  summary    String?
+  coverImage String?  @map("cover_image")
+  order      Int      @default(0)
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  track   Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  modules Module[]
+  threads Thread[]
+
+  @@index([trackId, order])
+  @@map("courses")
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  courseId  String   @map("course_id")
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@map("modules")
+}
+
+model Lesson {
+  id        String     @id @default(cuid())
+  moduleId  String     @map("module_id")
+  title     String
+  type      LessonType @default(VIDEO)
+  order     Int        @default(0)
+  published Boolean    @default(false)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  module      Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  video       LessonVideo?
+  assignments Assignment[]
+  progress    LessonProgress[]
+
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+model LessonVideo {
+  id            String @id @default(cuid())
+  lessonId      String @unique @map("lesson_id")
+  muxAssetId    String @map("mux_asset_id")
+  muxPlaybackId String @map("mux_playback_id")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_video")
+}
+
+model Assignment {
+  id           String   @id @default(cuid())
+  lessonId     String   @map("lesson_id")
+  title        String
+  instructions String?
+  rubricJson   Json?    @map("rubric_json")
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  lesson      Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([lessonId])
+  @@map("assignments")
+}
+
+model Submission {
+  id                String           @id @default(cuid())
+  assignmentId      String           @map("assignment_id")
+  userId            String           @map("user_id")
+  status            SubmissionStatus @default(DRAFT)
+  textAnswer        String?          @map("text_answer") @db.Text
+  externalLink      String?          @map("external_link")
+  instructorFeedback String?         @map("instructor_feedback") @db.Text
+  grade             Int?             @map("grade")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  assignment Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files      SubmissionFile[]
+
+  @@index([assignmentId])
+  @@index([userId])
+  @@map("submissions")
+}
+
+model SubmissionFile {
+  id           String   @id @default(cuid())
+  submissionId String   @map("submission_id")
+  userId       String   @map("user_id")
+  fileKey      String   @map("file_key")
+  mime         String
+  size         Int
+  checksum     String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([userId])
+  @@map("submission_files")
+}
+
+// ===== Messaging =====
+
+model Thread {
+  id        String     @id @default(cuid())
+  type      ThreadType
+  courseId  String?    @map("course_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  course        Course?             @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  participants  ThreadParticipant[]
+  messages      Message[]
+
+  @@index([courseId])
+  @@map("threads")
+}
+
+model ThreadParticipant {
+  id        String   @id @default(cuid())
+  threadId  String   @map("thread_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+  @@map("thread_participants")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String   @map("thread_id")
+  senderId  String   @map("sender_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User   @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+// ===== Payments / Access =====
+
+model Subscription {
+  id                     String               @id @default(cuid())
+  userId                 String               @map("user_id")
+  provider               SubscriptionProvider
+  providerSubscriptionId String               @unique @map("provider_subscription_id")
+  status                 SubscriptionStatus
+  plan                   String
+  currency               String
+  currentPeriodEnd       DateTime?            @map("current_period_end")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([provider, status])
+  @@map("subscriptions")
+}
+
+model Entitlement {
+  id        String            @id @default(cuid())
+  userId    String            @map("user_id")
+  product   EntitlementProduct
+  status    EntitlementStatus
+  expiresAt DateTime?         @map("expires_at")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, product])
+  @@index([status, expiresAt])
+  @@map("entitlements")
+}
+
+model PaymentEvent {
+  id              String            @id @default(cuid())
+  provider        SubscriptionProvider
+  providerEventId String            @map("provider_event_id")
+  type            String
+  receivedAt      DateTime          @default(now()) @map("received_at")
+  processedAt     DateTime?         @map("processed_at")
+  status          PaymentEventStatus @default(RECEIVED)
+
+  @@unique([provider, providerEventId])
+  @@index([provider, status])
+  @@map("payment_events")
+}
+
+// ===== Learning =====
+
+model LessonProgress {
+  userId               String   @map("user_id")
+  lessonId             String   @map("lesson_id")
+  watchSeconds         Int      @default(0) @map("watch_seconds")
+  lastPositionSeconds  Int      @default(0) @map("last_position_seconds")
+  completedAt          DateTime? @map("completed_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@id([userId, lessonId])
+  @@index([lessonId])
+  @@map("lesson_progress")
+}

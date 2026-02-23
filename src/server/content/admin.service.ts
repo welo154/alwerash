@@ -23,9 +23,16 @@ function handlePrismaError(e: unknown): never {
   throw e;
 }
 
-function parse<T>(schema: { safeParse: (v: unknown) => { success: true; data: T } | { success: false; error: { flatten: () => unknown } } }, input: unknown): T {
+function parse<T>(schema: { safeParse: (v: unknown) => { success: true; data: T } | { success: false; error: { flatten: () => { formErrors: string[]; fieldErrors: Record<string, string[]> } } } }, input: unknown): T {
   const parsed = schema.safeParse(input);
-  if (!parsed.success) throw new AppError("BAD_REQUEST", 400, "Invalid input", parsed.error.flatten());
+  if (!parsed.success) {
+    const flat = parsed.error.flatten();
+    const msg =
+      flat.formErrors[0] ??
+      Object.values(flat.fieldErrors).flat().filter(Boolean)[0] ??
+      "Invalid input";
+    throw new AppError("BAD_REQUEST", 400, msg, flat);
+  }
   return parsed.data;
 }
 
@@ -71,7 +78,7 @@ export async function adminDeleteSchool(schoolId: string) {
 // --- Tracks ---
 export async function adminListTracks(schoolId?: string) {
   return prisma.track.findMany({
-    where: schoolId ? { schoolId } : undefined,
+    ...(schoolId && { where: { schoolId } }),
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     include: { school: { select: { id: true, title: true, slug: true } } },
   });

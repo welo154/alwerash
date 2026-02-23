@@ -1,10 +1,26 @@
 // file: src/app/courses/[courseId]/page.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { publicGetCourseById } from "@/server/content/public.service";
+import { auth } from "@/auth";
+import {
+  publicGetCourseById,
+  publicGetSimilarCourses,
+} from "@/server/content/public.service";
+import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 
-export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
+export default async function CoursePage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const session = await auth();
+  const hasAccess =
+    session?.user?.id &&
+    ((session.user as { roles?: string[] }).roles?.includes("ADMIN") ||
+      (await hasActiveSubscription(session.user.id)));
+
   const { courseId } = await params;
   let course;
   try {
@@ -14,41 +30,271 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     throw e;
   }
 
+  const similarCourses = course.track
+    ? await publicGetSimilarCourses(courseId, course.track.slug)
+    : [];
+
+  const lessonCount = course.modules.reduce(
+    (acc, m) => acc + m.lessons.length,
+    0
+  );
+  const whatYouLearn = course.modules.flatMap((m) =>
+    m.lessons.map((l) => l.title)
+  );
+
   return (
-    <div className="p-6 space-y-4">
-      {course.track ? (
-        <Link className="underline text-sm" href={`/tracks/${course.track.slug}`}>
-          ← Back to {course.track.title}
-        </Link>
-      ) : (
-        <Link className="underline text-sm" href="/tracks">← Back to Tracks</Link>
-      )}
+    <div className="min-h-screen bg-slate-50">
+      {/* Breadcrumb */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+          <nav className="flex gap-2 text-sm text-slate-600">
+            <Link href="/" className="hover:text-blue-600">
+              Home
+            </Link>
+            <span>/</span>
+            <Link href="/tracks" className="hover:text-blue-600">
+              Learning paths
+            </Link>
+            {course.track ? (
+              <>
+                <span>/</span>
+                <Link
+                  href={`/tracks/${course.track.slug}`}
+                  className="hover:text-blue-600"
+                >
+                  {course.track.title}
+                </Link>
+              </>
+            ) : null}
+            <span>/</span>
+            <span className="text-slate-900">{course.title}</span>
+          </nav>
+        </div>
+      </div>
 
-      <h1 className="text-2xl font-semibold">{course.title}</h1>
-      {course.summary ? <p>{course.summary}</p> : null}
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Modules</h2>
-        {course.modules.length === 0 ? (
-          <p className="text-sm opacity-60">No modules yet.</p>
-        ) : (
-          course.modules.map((m) => (
-            <div key={m.id} className="rounded border p-4">
-              <h2 className="text-lg font-semibold">{m.title}</h2>
-              <ul className="mt-2 space-y-1">
-                {m.lessons.map((l) => (
-                  <li key={l.id} className="text-sm">
-                    {l.title} <span className="opacity-60">({l.type})</span>
-                  </li>
-                ))}
-                {m.lessons.length === 0 ? (
-                  <li className="text-sm opacity-60">No published lessons yet.</li>
-                ) : null}
-              </ul>
+      {/* Hero */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12">
+          <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
+            {/* Cover image - Yanfaa style */}
+            <div className="flex-1">
+              <div className="aspect-video relative w-full overflow-hidden rounded-xl bg-slate-200 shadow-lg">
+                {course.coverImage ? (
+                  <Image
+                    src={course.coverImage}
+                    alt={course.title}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    priority
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-400">
+                    Course preview
+                  </div>
+                )}
+              </div>
             </div>
-          ))
-        )
-      }
+
+            {/* Sidebar - Price & CTA */}
+            <aside className="w-full lg:w-96 shrink-0">
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
+                  {course.title}
+                </h1>
+                {course.track && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    {course.track.title} Track
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
+                  <span>{course.modules.length} modules</span>
+                  <span>•</span>
+                  <span>{lessonCount} lessons</span>
+                </div>
+                {hasAccess ? (
+                  <p className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+                    ✓ You have access to this course
+                  </p>
+                ) : (
+                  <div className="mt-4 space-y-2">
+                    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                      {session
+                        ? "Subscribe to access course content."
+                        : "Sign in and subscribe to access course content."}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {!session && (
+                        <Link
+                          href={`/login?next=${encodeURIComponent(`/courses/${courseId}`)}`}
+                          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          Sign in
+                        </Link>
+                      )}
+                      <Link
+                        href="/subscription"
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                      >
+                        Subscribe
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Instructor placeholder */}
+              <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-semibold text-slate-900">Instructor</h3>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-slate-200" />
+                  <div>
+                    <p className="font-medium text-slate-900">Expert Instructor</p>
+                    <p className="text-sm text-slate-600">
+                      Industry professional
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content + Sidebar (What you'll learn) */}
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12">
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
+          <main className="flex-1 space-y-8">
+            {/* Description */}
+            {course.summary && (
+              <section>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  What to expect
+                </h2>
+                <p className="mt-3 text-slate-600">{course.summary}</p>
+              </section>
+            )}
+
+            {/* Curriculum */}
+            <section>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Curriculum
+              </h2>
+              {course.modules.length === 0 ? (
+                <p className="mt-3 text-slate-500">No modules yet.</p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {course.modules.map((m, i) => (
+                    <details
+                      key={m.id}
+                      className="group rounded-lg border border-slate-200 bg-white"
+                    >
+                      <summary className="flex cursor-pointer items-center justify-between px-4 py-3 font-medium text-slate-900">
+                        <span>
+                          {i + 1}. {m.title}
+                        </span>
+                        <span className="text-sm font-normal text-slate-500">
+                          {m.lessons.length} lessons
+                        </span>
+                      </summary>
+                      <ul className="border-t border-slate-200 px-4 py-2">
+                        {m.lessons.map((l, j) => (
+                          <li
+                            key={l.id}
+                            className="flex items-center gap-3 py-2 text-sm text-slate-600"
+                          >
+                            <span className="text-slate-400">
+                              {String(l.type).charAt(0)}
+                            </span>
+                            <span>
+                              {i + 1}.{j + 1} {l.title}
+                            </span>
+                          </li>
+                        ))}
+                        {m.lessons.length === 0 && (
+                          <li className="py-2 text-sm text-slate-500">
+                            No published lessons yet.
+                          </li>
+                        )}
+                      </ul>
+                    </details>
+                  ))}
+                </div>
+              )}
+            </section>
+          </main>
+
+          {/* What you'll learn - sidebar on desktop */}
+          <aside className="w-full lg:w-80 shrink-0">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-4">
+              <h3 className="font-semibold text-slate-900">
+                What you&apos;ll learn
+              </h3>
+              {whatYouLearn.length > 0 ? (
+                <ul className="mt-4 space-y-2">
+                  {whatYouLearn.slice(0, 8).map((item, i) => (
+                    <li
+                      key={i}
+                      className="flex gap-2 text-sm text-slate-600"
+                    >
+                      <span className="text-green-600">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                  {whatYouLearn.length > 8 && (
+                    <li className="text-sm text-slate-500">
+                      +{whatYouLearn.length - 8} more
+                    </li>
+                  )}
+                </ul>
+              ) : (
+                <p className="mt-4 text-sm text-slate-500">
+                  Lesson list coming soon.
+                </p>
+              )}
+            </div>
+          </aside>
+        </div>
+
+        {/* Similar courses */}
+        {similarCourses.length > 0 && (
+          <section className="mt-12 border-t border-slate-200 pt-12">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Similar courses
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {similarCourses.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/courses/${c.id}`}
+                  className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-lg"
+                >
+                  <div className="aspect-video relative overflow-hidden bg-slate-100">
+                    {c.coverImage ? (
+                      <Image
+                        src={c.coverImage}
+                        alt={c.title}
+                        fill
+                        unoptimized
+                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    ) : (
+                      <div className="h-full w-full" />
+                    )}
+                  </div>
+                  <h3 className="p-4 pt-3 font-medium text-slate-900">{c.title}</h3>
+                  {c.summary && (
+                    <p className="px-4 pb-4 line-clamp-2 text-sm text-slate-600">
+                      {c.summary}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
