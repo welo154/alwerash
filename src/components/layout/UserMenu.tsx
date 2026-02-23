@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { useRef, useEffect, useState } from "react";
 
@@ -36,10 +37,13 @@ export function UserMenu({ user }: UserMenuProps) {
         aria-haspopup="true"
       >
         {user.image ? (
-          <img
+          <Image
             src={user.image}
             alt={user.name ?? "Profile"}
+            width={36}
+            height={36}
             className="h-9 w-9 rounded-full object-cover"
+            unoptimized
           />
         ) : (
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">

@@ -10,8 +10,8 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   const moduleId = params.moduleId;
   if (!moduleId) return NextResponse.json({ error: "BAD_REQUEST", message: "moduleId required" }, { status: 400 });
   const body = await req.json().catch(() => null);
-  const module = await adminUpdateModule(moduleId, body);
-  return NextResponse.json({ module });
+  const updated = await adminUpdateModule(moduleId, body);
+  return NextResponse.json({ module: updated });
 });
 
 export const DELETE = handleRouteWithParams(async (_req, ctx) => {

@@ -74,8 +74,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     await requireRole(["ADMIN"]);
     const id = String(formData.get("trackId") ?? "");
     if (!id) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const t = (await prisma.track.findUnique({ where: { id }, select: { schoolId: true } } as any)) as { schoolId: string } | null;
+    const t = await prisma.track.findUnique({ where: { id }, select: { schoolId: true } });
     await adminDeleteTrack(id);
     if (t?.schoolId) redirect(`/admin/content/schools/${t.schoolId}?toast=Track+deleted`);
     else redirect("/admin/content/tracks?toast=Track+deleted");

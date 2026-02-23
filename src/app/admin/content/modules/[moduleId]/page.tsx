@@ -16,7 +16,7 @@ export default async function AdminModuleDetail({
   await requireRole(["ADMIN"]);
   const { moduleId } = await params;
 
-  const module = await adminGetModule(moduleId);
+  const courseModule = await adminGetModule(moduleId);
 
   async function update(formData: FormData) {
     "use server";
@@ -28,7 +28,7 @@ export default async function AdminModuleDetail({
       order: Number(formData.get("order") ?? 0),
     });
     revalidatePath(`/admin/content/modules/${id}`);
-    revalidatePath(`/admin/content/courses/${module.courseId}`);
+    revalidatePath(`/admin/content/courses/${courseModule.courseId}`);
   }
 
   async function createLesson(formData: FormData) {
@@ -50,12 +50,12 @@ export default async function AdminModuleDetail({
     <div className="p-6 space-y-6">
       <Link
         className="underline text-sm"
-        href={`/admin/content/courses/${module.courseId}`}
+        href={`/admin/content/courses/${courseModule.courseId}`}
       >
         ← Back to Course
       </Link>
 
-      <h1 className="text-2xl font-semibold">Module: {module.title}</h1>
+      <h1 className="text-2xl font-semibold">Module: {courseModule.title}</h1>
 
       <form action={update} className="rounded border p-4 space-y-2 max-w-xl">
         <input type="hidden" name="moduleId" value={moduleId} />
@@ -64,14 +64,14 @@ export default async function AdminModuleDetail({
             <label className="block text-xs text-zinc-500 mb-0.5">Module title</label>
             <input
               name="title"
-              defaultValue={module.title}
+              defaultValue={courseModule.title}
               className="w-full rounded border p-2"
               required
             />
           </div>
           <div>
             <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
-            <input name="order" type="number" defaultValue={module.order} min={0} className="w-24 rounded border p-2" />
+            <input name="order" type="number" defaultValue={courseModule.order} min={0} className="w-24 rounded border p-2" />
           </div>
         </div>
         <button type="submit" className="rounded bg-black px-4 py-2 text-white">
@@ -112,7 +112,7 @@ export default async function AdminModuleDetail({
         </form>
 
         <ul className="space-y-2">
-          {module.lessons.map((l) => (
+          {courseModule.lessons.map((l) => (
             <li
               key={l.id}
               className="rounded border p-3 flex items-center justify-between"

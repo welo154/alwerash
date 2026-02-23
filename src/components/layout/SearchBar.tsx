@@ -65,7 +65,9 @@ export function SearchBar() {
         onFocus={() => query.trim() && setOpen(true)}
         className="w-full rounded-lg border border-slate-200 px-4 py-2 pr-10 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         aria-label="Search courses and tracks"
+        role="combobox"
         aria-expanded={showDropdown}
+        aria-controls="search-results-listbox"
         aria-haspopup="listbox"
         autoComplete="off"
       />
@@ -75,6 +77,7 @@ export function SearchBar() {
 
       {showDropdown && (
         <div
+          id="search-results-listbox"
           role="listbox"
           className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[min(70vh,400px)] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg"
         >

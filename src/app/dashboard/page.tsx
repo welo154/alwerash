@@ -21,6 +21,7 @@ export default async function DashboardPage() {
         {JSON.stringify(session.user, null, 2)}
       </pre>
       <div className="flex flex-wrap gap-3">
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- signout is an API route, not a page */}
         <a
           className="inline-block rounded bg-black px-4 py-2 text-white no-underline"
           href="/api/auth/signout?callbackUrl=/login"
