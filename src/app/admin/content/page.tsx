@@ -8,6 +8,9 @@ export default function AdminContentHome() {
       <p className="text-sm text-zinc-600">
         Hierarchy: <strong>School</strong> (e.g. Arts) → <strong>Track</strong> (e.g. Ornaments) → <strong>Course</strong> (e.g. Geometric Ornamentation) → <strong>Modules</strong> → Lessons. A course can have no track.
       </p>
+      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+        <strong>Upload video:</strong> Go to <strong>Manage Courses</strong> → open a course → open a <strong>module</strong> → for each <strong>Video</strong> lesson, use the <strong>Upload video</strong> button.
+      </p>
       <div className="flex flex-col gap-4">
         <div className="rounded border p-4 max-w-md">
           <h2 className="font-semibold mb-1">Schools</h2>

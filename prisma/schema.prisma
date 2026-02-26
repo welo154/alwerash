@@ -64,6 +64,19 @@ enum SubmissionStatus {
   NEEDS_CHANGES
 }
 
+enum VideoUploadStatus {
+  CREATED
+  ASSET_CREATED
+  READY
+  ERRORED
+}
+
+enum VideoEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -230,10 +243,11 @@ model Lesson {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
-  module      Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  video       LessonVideo?
-  assignments Assignment[]
-  progress    LessonProgress[]
+  module        Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  video         LessonVideo?
+  videoUploads  VideoUpload[]
+  assignments   Assignment[]
+  progress      LessonProgress[]
 
   @@index([moduleId])
   @@map("lessons")
@@ -248,6 +262,35 @@ model LessonVideo {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@map("lesson_video")
+}
+
+model VideoUpload {
+  id           String            @id @default(cuid())
+  lessonId     String            @map("lesson_id")
+  muxUploadId  String            @unique @map("mux_upload_id")
+  passthrough  String?           @map("passthrough")
+  assetId      String?           @map("asset_id")
+  status       VideoUploadStatus @default(CREATED)
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, createdAt])
+  @@map("video_uploads")
+}
+
+model VideoEvent {
+  id          String           @id @default(cuid())
+  muxEventId  String           @unique @map("mux_event_id")
+  type        String
+  receivedAt  DateTime         @default(now()) @map("received_at")
+  processedAt DateTime?        @map("processed_at")
+  status      VideoEventStatus @default(RECEIVED)
+  payload     Json?
+
+  @@index([type, status])
+  @@map("video_events")
 }
 
 model Assignment {

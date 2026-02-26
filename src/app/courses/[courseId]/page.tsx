@@ -9,6 +9,24 @@ import {
 } from "@/server/content/public.service";
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
+import { prisma } from "@/server/db/prisma";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const { courseId } = await params;
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { title: true, summary: true },
+  });
+  if (!course) return { title: "Course" };
+  return {
+    title: course.title,
+    description: course.summary ?? undefined,
+  };
+}
 
 export default async function CoursePage({
   params,
@@ -114,9 +132,17 @@ export default async function CoursePage({
                   <span>{lessonCount} lessons</span>
                 </div>
                 {hasAccess ? (
-                  <p className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
-                    ✓ You have access to this course
-                  </p>
+                  <div className="mt-4 space-y-3">
+                    <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800">
+                      ✓ You have access to this course
+                    </p>
+                    <Link
+                      href={`/learn/${courseId}`}
+                      className="block w-full rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      Watch lessons →
+                    </Link>
+                  </div>
                 ) : (
                   <div className="mt-4 space-y-2">
                     <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
@@ -221,6 +247,16 @@ export default async function CoursePage({
                     </details>
                   ))}
                 </div>
+              )}
+              {hasAccess && lessonCount > 0 && (
+                <p className="mt-4">
+                  <Link
+                    href={`/learn/${courseId}`}
+                    className="text-blue-600 font-medium hover:underline"
+                  >
+                    Watch all lessons →
+                  </Link>
+                </p>
               )}
             </section>
           </main>

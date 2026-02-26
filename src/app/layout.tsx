@@ -5,6 +5,20 @@ import { ToastFromUrl } from "@/components/ToastFromUrl";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import "./globals.css";
 
+export const metadata = {
+  title: {
+    default: "Alwerash — Subscription education for design & creative",
+    template: "%s | Alwerash",
+  },
+  description:
+    "Learn from industry experts. Subscribe once, access all courses in design, motion, and creative skills.",
+  openGraph: {
+    title: "Alwerash — Subscription education for design & creative",
+    description: "Learn from industry experts. Subscribe once, access all courses.",
+    type: "website",
+  },
+};
+
 export default function RootLayout({
   children,
 }: {

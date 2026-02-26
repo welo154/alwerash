@@ -177,16 +177,25 @@ export type ModuleWithLessons = Prisma.ModuleGetPayload<{
   include: { course: true; lessons: true };
 }>;
 
-export async function adminGetModule(id: string): Promise<ModuleWithLessons> {
+/** Lesson with optional video (and optionally latest videoUpload for status). */
+export type LessonWithVideoUpload = ModuleWithLessons["lessons"][number] & {
+  video?: { id: string; muxPlaybackId: string } | null;
+  videoUploads?: { status: string }[];
+};
+
+export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons, "lessons"> & { lessons: LessonWithVideoUpload[] }> {
   const m = await prisma.module.findUnique({
     where: { id },
     include: {
       course: true,
-      lessons: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
+      lessons: {
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+        include: { video: { select: { id: true, muxPlaybackId: true } } },
+      },
     },
   });
   if (!m) throw new AppError("NOT_FOUND", 404, "Module not found");
-  return m;
+  return m as Omit<ModuleWithLessons, "lessons"> & { lessons: LessonWithVideoUpload[] };
 }
 
 export async function adminCreateModule(input: unknown) {

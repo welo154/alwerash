@@ -1,10 +1,10 @@
 // file: src/app/api/admin/lessons/[lessonId]/route.ts
 import { NextResponse } from "next/server";
-import { handleRouteWithParams } from "@/server/lib/route";
+import { handleRoute } from "@/server/lib/route";
 import { requireRole } from "@/server/auth/require";
 import { adminDeleteLesson, adminUpdateLesson } from "@/server/content/admin.service";
 
-export const PATCH = handleRouteWithParams(async (req, ctx) => {
+export const PATCH = handleRoute(async (req, ctx) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const lessonId = params.lessonId;
@@ -14,7 +14,7 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   return NextResponse.json({ lesson });
 });
 
-export const DELETE = handleRouteWithParams(async (_req, ctx) => {
+export const DELETE = handleRoute(async (_req, ctx) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const lessonId = params.lessonId;

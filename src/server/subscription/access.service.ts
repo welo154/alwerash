@@ -8,26 +8,24 @@ import { prisma } from "@/server/db/prisma";
 export async function hasActiveSubscription(userId: string): Promise<boolean> {
   const now = new Date();
 
-  // Check Subscription - active status and currentPeriodEnd in future
-  const activeSub = await prisma.subscription.findFirst({
-    where: {
-      userId,
-      status: "ACTIVE",
-      currentPeriodEnd: { gt: now },
-    },
-  });
-  if (activeSub) return true;
+  // Run both checks in parallel so we only wait for the slower of the two
+  const [activeSub, activeEntitlement] = await Promise.all([
+    prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: "ACTIVE",
+        currentPeriodEnd: { gt: now },
+      },
+    }),
+    prisma.entitlement.findFirst({
+      where: {
+        userId,
+        product: "ALL_ACCESS",
+        status: "ACTIVE",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
+    }),
+  ]);
 
-  // Check Entitlement - ALL_ACCESS, ACTIVE, not expired
-  const activeEntitlement = await prisma.entitlement.findFirst({
-    where: {
-      userId,
-      product: "ALL_ACCESS",
-      status: "ACTIVE",
-      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    },
-  });
-  if (activeEntitlement) return true;
-
-  return false;
+  return Boolean(activeSub ?? activeEntitlement);
 }

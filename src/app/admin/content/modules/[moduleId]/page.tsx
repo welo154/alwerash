@@ -6,7 +6,9 @@ import {
   adminCreateLesson,
   adminGetModule,
   adminUpdateModule,
+  adminUpdateLesson,
 } from "@/server/content/admin.service";
+import { MuxUploadButton } from "@/app/admin/content/components/MuxUploadButton";
 
 export default async function AdminModuleDetail({
   params,
@@ -44,6 +46,24 @@ export default async function AdminModuleDetail({
       published: formData.get("published") === "on",
     });
     revalidatePath(`/admin/content/modules/${id}`);
+    revalidatePath(`/learn/${courseModule.courseId}`);
+    revalidatePath(`/courses/${courseModule.courseId}`);
+  }
+
+  async function updateLesson(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const lessonId = String(formData.get("lessonId") ?? "");
+    const courseId = String(formData.get("courseId") ?? "");
+    if (!lessonId) return;
+    await adminUpdateLesson(lessonId, {
+      published: formData.get("published") === "on",
+    });
+    revalidatePath(`/admin/content/modules/${moduleId}`);
+    if (courseId) {
+      revalidatePath(`/learn/${courseId}`);
+      revalidatePath(`/courses/${courseId}`);
+    }
   }
 
   return (
@@ -101,9 +121,9 @@ export default async function AdminModuleDetail({
               <label className="block text-xs text-zinc-500 mb-0.5">Order (for sorting)</label>
               <input name="order" type="number" defaultValue={0} min={0} className="w-20 rounded border p-2" />
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input name="published" type="checkbox" />
-              Published
+            <label className="flex items-center gap-2 text-sm" title="Uncheck to save as draft (hidden from learners)">
+              <input name="published" type="checkbox" defaultChecked />
+              Published (visible to learners)
             </label>
           </div>
           <button type="submit" className="rounded bg-black px-4 py-2 text-white">
@@ -111,17 +131,50 @@ export default async function AdminModuleDetail({
           </button>
         </form>
 
+        <p className="text-sm text-zinc-500">
+          Only <strong>published</strong> lessons appear for learners. Use the checkbox below to publish or unpublish each lesson.
+        </p>
         <ul className="space-y-2">
           {courseModule.lessons.map((l) => (
             <li
               key={l.id}
-              className="rounded border p-3 flex items-center justify-between"
+              className="rounded border p-3 flex flex-wrap items-center justify-between gap-2"
             >
               <div>
                 <div className="font-semibold">{l.title}</div>
                 <div className="text-sm opacity-70">
-                  {l.type} • {l.published ? "published" : "draft"}
+                  {l.type} • {l.published ? "published" : "draft (hidden from learners)"}
+                  {l.type === "VIDEO" && l.video?.muxPlaybackId && (
+                    <span className="ml-1 text-green-600">• video ready</span>
+                  )}
+                  {l.type === "VIDEO" && !l.video?.muxPlaybackId && l.videoUploads?.[0] && (
+                    <span className="ml-1 text-amber-600">• upload {l.videoUploads[0].status.toLowerCase()}</span>
+                  )}
                 </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <form action={updateLesson} className="flex items-center gap-2">
+                  <input type="hidden" name="lessonId" value={l.id} />
+                  <input type="hidden" name="courseId" value={courseModule.courseId} />
+                  <label className="flex items-center gap-1.5 text-sm">
+                    <input
+                      name="published"
+                      type="checkbox"
+                      defaultChecked={l.published}
+                    />
+                    Published
+                  </label>
+                  <button type="submit" className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50">
+                    Update
+                  </button>
+                </form>
+                {l.type === "VIDEO" && (
+                  <MuxUploadButton
+                    lessonId={l.id}
+                    lessonTitle={l.title}
+                    disabled={Boolean(l.video?.muxPlaybackId)}
+                  />
+                )}
               </div>
             </li>
           ))}

@@ -60,3 +60,42 @@ export async function getCourseForLearning(courseId: string) {
 
   return course;
 }
+
+/**
+ * Get a single lesson for the learn flow. Verifies lesson belongs to course and is published.
+ */
+export async function getLessonForLearning(lessonId: string, courseId: string) {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId, published: true },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      order: true,
+      moduleId: true,
+      video: { select: { muxPlaybackId: true } },
+      module: {
+        select: {
+          id: true,
+          title: true,
+          order: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              title: true,
+              published: true,
+              track: { select: { published: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!lesson || lesson.module.courseId !== courseId) throw new AppError("NOT_FOUND", 404, "Lesson not found");
+  if (!lesson.module.course.published) throw new AppError("NOT_FOUND", 404, "Course not found");
+  if (lesson.module.course.track && !lesson.module.course.track.published) throw new AppError("NOT_FOUND", 404, "Course not found");
+
+  return lesson;
+}

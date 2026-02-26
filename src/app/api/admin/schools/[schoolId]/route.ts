@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { handleRouteWithParams } from "@/server/lib/route";
+import { handleRoute } from "@/server/lib/route";
 import { requireRole } from "@/server/auth/require";
 import {
   adminDeleteSchool,
@@ -7,7 +7,7 @@ import {
   adminUpdateSchool,
 } from "@/server/content/admin.service";
 
-export const GET = handleRouteWithParams(async (_req, ctx) => {
+export const GET = handleRoute(async (_req, ctx) => {
   await requireRole(["ADMIN"]);
   const { schoolId } = await ctx.params;
   if (!schoolId) return NextResponse.json({ error: "BAD_REQUEST", message: "schoolId required" }, { status: 400 });
@@ -15,7 +15,7 @@ export const GET = handleRouteWithParams(async (_req, ctx) => {
   return NextResponse.json({ school });
 });
 
-export const PATCH = handleRouteWithParams(async (req, ctx) => {
+export const PATCH = handleRoute(async (req, ctx) => {
   await requireRole(["ADMIN"]);
   const { schoolId } = await ctx.params;
   if (!schoolId) return NextResponse.json({ error: "BAD_REQUEST", message: "schoolId required" }, { status: 400 });
@@ -24,7 +24,7 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   return NextResponse.json({ school });
 });
 
-export const DELETE = handleRouteWithParams(async (_req, ctx) => {
+export const DELETE = handleRoute(async (_req, ctx) => {
   await requireRole(["ADMIN"]);
   const { schoolId } = await ctx.params;
   if (!schoolId) return NextResponse.json({ error: "BAD_REQUEST", message: "schoolId required" }, { status: 400 });

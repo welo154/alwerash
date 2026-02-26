@@ -1,10 +1,10 @@
 // file: src/app/api/admin/modules/[moduleId]/route.ts
 import { NextResponse } from "next/server";
-import { handleRouteWithParams } from "@/server/lib/route";
+import { handleRoute } from "@/server/lib/route";
 import { requireRole } from "@/server/auth/require";
 import { adminDeleteModule, adminUpdateModule } from "@/server/content/admin.service";
 
-export const PATCH = handleRouteWithParams(async (req, ctx) => {
+export const PATCH = handleRoute(async (req, ctx) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const moduleId = params.moduleId;
@@ -14,7 +14,7 @@ export const PATCH = handleRouteWithParams(async (req, ctx) => {
   return NextResponse.json({ module: updated });
 });
 
-export const DELETE = handleRouteWithParams(async (_req, ctx) => {
+export const DELETE = handleRoute(async (_req, ctx) => {
   await requireRole(["ADMIN"]);
   const params = await ctx.params;
   const moduleId = params.moduleId;

@@ -49,57 +49,48 @@ export default async function LearnCoursePage({
           {course.modules.length} modules · {lessonCount} lessons
         </p>
 
-        {/* Curriculum with lessons and video area */}
-        <div className="mt-8 space-y-8">
+        {/* Curriculum: list of lessons — click to open lesson page with video */}
+        <div className="mt-8 space-y-6">
           {course.modules.map((module, mIndex) => (
             <section key={module.id}>
               <h2 className="text-lg font-semibold text-slate-900">
                 {mIndex + 1}. {module.title}
               </h2>
-              <ul className="mt-4 space-y-4">
-                {module.lessons.map((lesson, lIndex) => (
-                  <li
-                    key={lesson.id}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-medium text-slate-900">
-                          {mIndex + 1}.{lIndex + 1} {lesson.title}
-                        </h3>
-                        <span className="mt-1 inline-block text-xs text-slate-500">
-                          {lesson.type === "VIDEO" ? "Video" : lesson.type}
-                        </span>
-                      </div>
-                    </div>
-                    {lesson.type === "VIDEO" && lesson.video?.muxPlaybackId && (
-                      <div className="mt-4">
-                        <div className="aspect-video max-w-3xl overflow-hidden rounded-lg bg-black">
-                          <video
-                            className="h-full w-full"
-                            controls
-                            playsInline
-                            preload="metadata"
-                            src={`https://stream.mux.com/${lesson.video.muxPlaybackId}.m3u8`}
-                            poster={`https://image.mux.com/${lesson.video.muxPlaybackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`}
-                          >
-                            Your browser does not support the video tag. Playback
-                            ID: {lesson.video.muxPlaybackId}
-                          </video>
+              <ul className="mt-3 space-y-2">
+                {module.lessons.map((lesson, lIndex) => {
+                  const hasVideo = lesson.type === "VIDEO" && lesson.video?.muxPlaybackId;
+                  const href = hasVideo
+                    ? `/learn/${courseId}/lesson/${lesson.id}`
+                    : undefined;
+                  return (
+                    <li key={lesson.id}>
+                      {href ? (
+                        <Link
+                          href={href}
+                          className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-blue-300 hover:bg-slate-50"
+                        >
+                          <span className="font-medium text-slate-900">
+                            {mIndex + 1}.{lIndex + 1} {lesson.title}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            {lesson.type === "VIDEO" ? "Video" : lesson.type}
+                          </span>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600">
+                          <span>
+                            {mIndex + 1}.{lIndex + 1} {lesson.title}
+                          </span>
+                          <span className="text-xs">
+                            {lesson.type === "VIDEO"
+                              ? "Video not ready"
+                              : lesson.type}
+                          </span>
                         </div>
-                        <p className="mt-2 text-xs text-slate-500">
-                          HLS stream (Safari: native; others: may need a
-                          player).
-                        </p>
-                      </div>
-                    )}
-                    {lesson.type === "VIDEO" && !lesson.video?.muxPlaybackId && (
-                      <p className="mt-3 text-sm text-slate-500">
-                        Video not yet available for this lesson.
-                      </p>
-                    )}
-                  </li>
-                ))}
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ))}
