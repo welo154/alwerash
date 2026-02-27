@@ -2,6 +2,17 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+
+function formatFileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return "—";
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const units = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const value = bytes / Math.pow(k, i);
+  return `${value % 1 === 0 ? value : value.toFixed(1)} ${units[i]}`;
+}
 
 type Props = {
   lessonId: string;
@@ -20,7 +31,9 @@ export function MuxUploadButton({
   const [status, setStatus] = useState<
     "idle" | "getting-url" | "uploading" | "syncing" | "done" | "done-pending" | "error"
   >("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fileSizeLabel, setFileSizeLabel] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const SYNC_POLL_INTERVAL_MS = 3000;
@@ -47,6 +60,7 @@ export function MuxUploadButton({
     if (!file) return;
 
     setErrorMessage(null);
+    setFileSizeLabel(formatFileSize(file.size));
     setStatus("getting-url");
 
     try {
@@ -75,22 +89,32 @@ export function MuxUploadButton({
         return;
       }
       setStatus("uploading");
+      setUploadProgress(0);
 
-      const putRes = await fetch(url, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type,
-        },
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url);
+
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            setUploadProgress(percent);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error("Upload failed. Try again."));
+        });
+        xhr.addEventListener("error", () => reject(new Error("Upload failed. Try again.")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload cancelled.")));
+
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
       });
 
-      if (!putRes.ok) {
-        setErrorMessage("Upload failed. Try again.");
-        setStatus("error");
-        return;
-      }
-
       setStatus("syncing");
+      setUploadProgress(100);
       await pollSyncUntilLinked();
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Upload failed");
@@ -114,7 +138,7 @@ export function MuxUploadButton({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <input
         ref={inputRef}
         type="file"
@@ -123,6 +147,22 @@ export function MuxUploadButton({
         onChange={handleFile}
         disabled={disabled || status === "getting-url" || status === "uploading" || status === "syncing"}
       />
+      {status === "uploading" && (
+        <ProgressBar
+          percent={uploadProgress}
+          label="Uploading video"
+          statusText={fileSizeLabel ? `${uploadProgress}% · ${fileSizeLabel}` : `${uploadProgress}%`}
+          aria-label={`Upload progress: ${uploadProgress}%`}
+        />
+      )}
+      {status === "syncing" && (
+        <ProgressBar
+          percent={100}
+          label="Processing"
+          statusText={fileSizeLabel ? `Linking video… (${fileSizeLabel})` : "Linking video…"}
+          aria-label="Processing upload"
+        />
+      )}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -130,13 +170,16 @@ export function MuxUploadButton({
         className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
       >
         {status === "getting-url"
-          ? "Preparing…"
+          ? `Preparing…${fileSizeLabel ? ` (${fileSizeLabel})` : ""}`
           : status === "uploading"
             ? "Uploading…"
             : status === "syncing"
               ? "Processing…"
               : "Upload video"}
       </button>
+      {fileSizeLabel && (status === "getting-url" || status === "uploading" || status === "syncing") && (
+        <p className="text-xs text-slate-500">File size: {fileSizeLabel}</p>
+      )}
       {errorMessage && (
         <p className="mt-1.5 max-w-sm rounded-lg bg-red-50 px-2.5 py-2 text-xs text-red-700">
           {errorMessage}

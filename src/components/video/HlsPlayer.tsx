@@ -8,6 +8,10 @@ export type HlsPlayerProps = {
   poster?: string;
   className?: string;
   showQualitySelector?: boolean;
+  /** Resume playback at this position (seconds). */
+  initialTime?: number;
+  /** Called on timeupdate (e.g. for progress tracking). Debounce in the consumer. */
+  onProgress?: (currentTime: number, duration: number) => void;
 };
 
 type LevelInfo = { height: number; width: number; index: number };
@@ -35,6 +39,8 @@ export function HlsPlayer({
   poster,
   className = "w-full rounded-2xl bg-black",
   showQualitySelector = true,
+  initialTime,
+  onProgress,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -89,6 +95,26 @@ export function HlsPlayer({
     }
   }, [src]);
 
+  // Seek to initialTime when metadata is ready (resume playback)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || initialTime == null || initialTime <= 0) return;
+
+    const seekToInitial = () => {
+      if (Number.isFinite(initialTime) && initialTime > 0) {
+        video.currentTime = initialTime;
+        setCurrentTime(initialTime);
+      }
+    };
+
+    if (video.readyState >= 1) {
+      seekToInitial();
+    } else {
+      video.addEventListener("loadedmetadata", seekToInitial, { once: true });
+      return () => video.removeEventListener("loadedmetadata", seekToInitial);
+    }
+  }, [src, initialTime]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -110,12 +136,19 @@ export function HlsPlayer({
     setCurrentLevel(level);
   }, []);
 
-  // Sync video state (time, duration, play, volume)
+  // Sync video state (time, duration, play, volume) and optional onProgress
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const onTimeUpdate = () => setCurrentTime(video.currentTime);
+    const onTimeUpdate = () => {
+      const t = video.currentTime;
+      const d = video.duration;
+      setCurrentTime(t);
+      if (typeof onProgress === "function" && Number.isFinite(t) && Number.isFinite(d)) {
+        onProgress(t, d);
+      }
+    };
     const onDurationChange = () => setDuration(video.duration);
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
@@ -137,7 +170,7 @@ export function HlsPlayer({
       video.removeEventListener("pause", onPause);
       video.removeEventListener("volumechange", onVolumeChange);
     };
-  }, [src]);
+  }, [src, onProgress]);
 
   // Click outside to close settings menu
   useEffect(() => {

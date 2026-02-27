@@ -27,6 +27,8 @@ type Module = {
 type Props = {
   courseId: string;
   modules: Module[];
+  unlockedLessonIds: string[];
+  completedLessonIds: string[];
 };
 
 function estimateTotalMinutes(modules: Module[]): number {
@@ -83,7 +85,9 @@ function LessonIcon({ type, hasVideo }: { type: string; hasVideo: boolean }) {
   );
 }
 
-export function CourseCurriculum({ courseId, modules }: Props) {
+export function CourseCurriculum({ courseId, modules, unlockedLessonIds, completedLessonIds }: Props) {
+  const unlockedSet = new Set(unlockedLessonIds);
+  const completedSet = new Set(completedLessonIds);
   const [openModuleId, setOpenModuleId] = useState<string | null>(
     modules[0]?.id ?? null
   );
@@ -110,11 +114,15 @@ export function CourseCurriculum({ courseId, modules }: Props) {
             (sum, l) => sum + (ESTIMATED_MINUTES[l.type] ?? 5),
             0
           );
+          const moduleLessonIds = module.lessons.map((l) => l.id);
+          const isModuleLocked = moduleLessonIds.length > 0 && !moduleLessonIds.some((id) => unlockedSet.has(id));
 
           return (
             <div
               key={module.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md ${
+                isModuleLocked ? "border-amber-200 bg-amber-50/30" : "border-slate-200"
+              }`}
             >
               <button
                 type="button"
@@ -128,14 +136,27 @@ export function CourseCurriculum({ courseId, modules }: Props) {
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700"
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                      isModuleLocked ? "bg-amber-200 text-amber-800" : "bg-indigo-100 text-indigo-700"
+                    }`}
                     aria-hidden
                   >
-                    {mIndex + 1}
+                    {isModuleLocked ? (
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm2-2a3 3 0 116 0v2H7V7z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      mIndex + 1
+                    )}
                   </span>
                   <div className="min-w-0">
                     <h2 className="font-semibold text-slate-900 truncate">
                       {module.title}
+                      {isModuleLocked && (
+                        <span className="ml-2 text-xs font-normal text-amber-700">
+                          Complete previous module first
+                        </span>
+                      )}
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">
                       {lessonCount} lesson{lessonCount !== 1 ? "s" : ""}
@@ -164,7 +185,9 @@ export function CourseCurriculum({ courseId, modules }: Props) {
                     {module.lessons.map((lesson, lIndex) => {
                       const hasVideo =
                         lesson.type === "VIDEO" && lesson.video?.muxPlaybackId;
-                      const href = hasVideo
+                      const unlocked = unlockedSet.has(lesson.id);
+                      const completed = completedSet.has(lesson.id);
+                      const href = hasVideo && unlocked
                         ? `/learn/${courseId}/lesson/${lesson.id}`
                         : undefined;
                       const label = `${mIndex + 1}.${lIndex + 1} ${lesson.title}`;
@@ -183,6 +206,9 @@ export function CourseCurriculum({ courseId, modules }: Props) {
                               <span className="flex-1 font-medium text-slate-800 truncate">
                                 {label}
                               </span>
+                              {completed && (
+                                <span className="text-xs font-medium text-green-600 shrink-0">✓ Done</span>
+                              )}
                               <span className="text-xs text-slate-500 shrink-0">
                                 {lesson.type === "VIDEO"
                                   ? "Video"
@@ -194,7 +220,7 @@ export function CourseCurriculum({ courseId, modules }: Props) {
                                 </svg>
                               </span>
                             </Link>
-                          ) : (
+                          ) : unlocked ? (
                             <div className="flex items-center gap-3 px-5 py-3 text-slate-500 border-b border-slate-100 last:border-b-0">
                               <LessonIcon
                                 type={lesson.type}
@@ -206,6 +232,16 @@ export function CourseCurriculum({ courseId, modules }: Props) {
                                   ? "Video not ready"
                                   : lesson.type}
                               </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-3 px-5 py-3 text-slate-400 border-b border-slate-100 last:border-b-0 bg-slate-100/50">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-500" aria-hidden>
+                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm2-2a3 3 0 116 0v2H7V7z" clipRule="evenodd" />
+                                </svg>
+                              </span>
+                              <span className="flex-1 truncate">{label}</span>
+                              <span className="text-xs shrink-0 text-amber-600">Complete previous lesson first</span>
                             </div>
                           )}
                         </li>

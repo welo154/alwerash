@@ -53,12 +53,13 @@ export default async function CoursePage({
     ? await publicGetSimilarCourses(courseId, course.track.slug)
     : [];
 
-  const lessonCount = course.modules.reduce(
-    (acc, m) => acc + m.lessons.length,
+  const modules = course.modules ?? [];
+  const lessonCount = modules.reduce(
+    (acc, m) => acc + (m.lessons?.length ?? 0),
     0
   );
-  const whatYouLearn = course.modules.flatMap((m) =>
-    m.lessons.map((l) => l.title)
+  const whatYouLearn = modules.flatMap((m) =>
+    (m.lessons ?? []).map((l) => l.title)
   );
 
   const introPlaybackId = (course as { introVideoMuxPlaybackId?: string | null }).introVideoMuxPlaybackId;
@@ -144,7 +145,7 @@ export default async function CoursePage({
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
-                  <span>{course.modules.length} modules</span>
+                  <span>{modules.length} modules</span>
                   <span>•</span>
                   <span>{lessonCount} lessons</span>
                 </div>
@@ -237,11 +238,11 @@ export default async function CoursePage({
               <h2 className="text-lg font-semibold text-slate-900">
                 Curriculum
               </h2>
-              {course.modules.length === 0 ? (
+              {modules.length === 0 ? (
                 <p className="mt-3 text-slate-500">No modules yet.</p>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {course.modules.map((m, i) => (
+                  {modules.map((m, i) => (
                     <details
                       key={m.id}
                       className="group rounded-lg border border-slate-200 bg-white"
@@ -251,11 +252,11 @@ export default async function CoursePage({
                           {i + 1}. {m.title}
                         </span>
                         <span className="text-sm font-normal text-slate-500">
-                          {m.lessons.length} lessons
+                          {(m.lessons?.length ?? 0)} lessons
                         </span>
                       </summary>
                       <ul className="border-t border-slate-200 px-4 py-2">
-                        {m.lessons.map((l, j) => (
+                        {(m.lessons ?? []).map((l, j) => (
                           <li
                             key={l.id}
                             className="flex items-center gap-3 py-2 text-sm text-slate-600"
@@ -268,7 +269,7 @@ export default async function CoursePage({
                             </span>
                           </li>
                         ))}
-                        {m.lessons.length === 0 && (
+                        {(m.lessons?.length ?? 0) === 0 && (
                           <li className="py-2 text-sm text-slate-500">
                             No published lessons yet.
                           </li>

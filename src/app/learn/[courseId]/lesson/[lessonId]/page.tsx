@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireSubscription } from "@/server/subscription/require-subscription";
 import { getLessonForLearning, getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
-import { HlsPlayer } from "@/components/video/HlsPlayer";
+import { getOrderedLessonIds, getCompletedLessonIdsForCourse, isLessonUnlocked } from "@/server/progress/course-progress.service";
+import { getCourseProgress, getLessonProgress } from "@/server/learning/progress.service";
 import { CourseCurriculumSidebar } from "../../CourseCurriculumSidebar";
+import { completeLesson } from "./actions";
+import { LessonPlayerWithActions } from "./LessonPlayerWithActions";
 
 export async function generateMetadata({
   params,
@@ -25,7 +28,8 @@ export default async function LearnLessonPage({
 }: {
   params: Promise<{ courseId: string; lessonId: string }>;
 }) {
-  await requireSubscription();
+  const session = await requireSubscription();
+  const userId = session.user.id;
   const { courseId, lessonId } = await params;
 
   let lesson;
@@ -39,6 +43,26 @@ export default async function LearnLessonPage({
     if (e instanceof AppError && e.status === 404) notFound();
     throw e;
   }
+
+  const orderedLessonIds = getOrderedLessonIds(course);
+  const completedLessonIds = await getCompletedLessonIdsForCourse(userId, orderedLessonIds);
+  const { unlocked } = isLessonUnlocked(orderedLessonIds, completedLessonIds, lessonId);
+  if (!unlocked) {
+    redirect(`/learn/${courseId}?message=complete_previous`);
+  }
+
+  const [courseProgressRecord, lessonProgressRecord] = await Promise.all([
+    getCourseProgress(userId, courseId),
+    getLessonProgress(userId, lessonId),
+  ]);
+  const courseProgress = courseProgressRecord
+    ? {
+        progressPercent: courseProgressRecord.progressPercent,
+        completedCount: courseProgressRecord.completedCount,
+        totalCount: courseProgressRecord.totalCount,
+      }
+    : { progressPercent: 0, completedCount: 0, totalCount: 0 };
+  const initialLastPositionSeconds = lessonProgressRecord?.lastPositionSeconds ?? 0;
 
   const courseTitle = lesson.module.course.title;
   const playbackId = lesson.video?.muxPlaybackId;
@@ -80,14 +104,17 @@ export default async function LearnLessonPage({
 
             {streamUrl ? (
               <div className="mt-6 opacity-0 animate-scale-in animation-delay-150">
-                <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 ring-1 ring-slate-200/50 transition-shadow duration-300 hover:shadow-xl hover:shadow-slate-200/60">
-                  <HlsPlayer
-                    src={streamUrl}
-                    poster={posterUrl}
-                    className="rounded-2xl"
-                    showQualitySelector
-                  />
-                </div>
+                <LessonPlayerWithActions
+                  courseId={courseId}
+                  lessonId={lessonId}
+                  streamUrl={streamUrl}
+                  posterUrl={posterUrl}
+                  completeLesson={completeLesson}
+                  courseProgress={courseProgress}
+                  initialLastPositionSeconds={
+                    initialLastPositionSeconds > 0 ? initialLastPositionSeconds : undefined
+                  }
+                />
                 <p className="mt-3 text-xs text-slate-500">
                   Use the <strong>⋮</strong> (three dots) in the bottom-right of the video to change playback speed and quality.
                 </p>
@@ -97,15 +124,6 @@ export default async function LearnLessonPage({
                 <p className="text-slate-600">Video not yet available for this lesson.</p>
               </div>
             )}
-
-            <div className="mt-8 flex flex-wrap gap-3 opacity-0 animate-fade-in-up animation-delay-225">
-              <Link
-                href={`/learn/${courseId}`}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow"
-              >
-                ← Back to course
-              </Link>
-            </div>
           </main>
 
           <div className="opacity-0 animate-fade-in-up animation-delay-225">

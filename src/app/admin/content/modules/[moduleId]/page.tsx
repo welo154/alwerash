@@ -7,9 +7,13 @@ import {
   adminGetModule,
   adminUpdateModule,
   adminUpdateLesson,
+  adminDeleteLesson,
+  adminRemoveLessonVideo,
 } from "@/server/content/admin.service";
 import { MuxUploadButton } from "@/app/admin/content/components/MuxUploadButton";
 import { AdminVideoPreview } from "@/app/admin/content/components/AdminVideoPreview";
+import { DeleteLessonButton } from "@/app/admin/content/components/DeleteLessonButton";
+import { ReplaceVideoButton } from "@/app/admin/content/components/ReplaceVideoButton";
 import { isMuxApiConfigured } from "@/server/mux/config";
 
 export default async function AdminModuleDetail({
@@ -59,7 +63,13 @@ export default async function AdminModuleDetail({
     const lessonId = String(formData.get("lessonId") ?? "");
     const courseId = String(formData.get("courseId") ?? "");
     if (!lessonId) return;
+    const typeRaw = formData.get("type");
+    const type =
+      typeRaw === "ARTICLE" || typeRaw === "RESOURCE" ? typeRaw : "VIDEO";
     await adminUpdateLesson(lessonId, {
+      title: String(formData.get("title") ?? "").trim() || undefined,
+      type,
+      order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
     revalidatePath(`/admin/content/modules/${moduleId}`);
@@ -67,6 +77,26 @@ export default async function AdminModuleDetail({
       revalidatePath(`/learn/${courseId}`);
       revalidatePath(`/courses/${courseId}`);
     }
+  }
+
+  async function deleteLesson(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const lessonId = String(formData.get("lessonId") ?? "");
+    if (!lessonId) return;
+    await adminDeleteLesson(lessonId);
+    revalidatePath(`/admin/content/modules/${moduleId}`);
+    revalidatePath(`/admin/content/courses/${courseModule.courseId}`);
+  }
+
+  async function removeLessonVideo(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const lessonId = String(formData.get("lessonId") ?? "");
+    if (!lessonId) return;
+    await adminRemoveLessonVideo(lessonId);
+    revalidatePath(`/admin/content/modules/${moduleId}`);
+    revalidatePath(`/admin/content/courses/${courseModule.courseId}`);
   }
 
   return (
@@ -200,23 +230,52 @@ export default async function AdminModuleDetail({
               key={l.id}
               className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <div>
-                  <div className="font-semibold text-slate-900">{l.title}</div>
-                  <div className="mt-1 text-sm text-slate-600">
-                    {l.type} · {l.published ? "Published" : "Draft (hidden from learners)"}
-                    {l.type === "VIDEO" && l.video?.muxPlaybackId && (
-                      <span className="ml-1 text-emerald-600">· Video ready</span>
-                    )}
-                    {l.type === "VIDEO" && !l.video?.muxPlaybackId && l.videoUploads?.[0] && (
-                      <span className="ml-1 text-amber-600">· Upload {l.videoUploads[0].status.toLowerCase()}</span>
-                    )}
+              <form action={updateLesson} className="space-y-4">
+                <input type="hidden" name="lessonId" value={l.id} />
+                <input type="hidden" name="courseId" value={courseModule.courseId} />
+                <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">Lesson title</label>
+                      <input
+                        name="title"
+                        defaultValue={l.title}
+                        required
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                      {l.type === "VIDEO" && l.video?.muxPlaybackId && (
+                        <span className="text-emerald-600">Video ready</span>
+                      )}
+                      {l.type === "VIDEO" && !l.video?.muxPlaybackId && l.videoUploads?.[0] && (
+                        <span className="text-amber-600">Upload {l.videoUploads[0].status.toLowerCase()}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <form action={updateLesson} className="flex items-center gap-2">
-                    <input type="hidden" name="lessonId" value={l.id} />
-                    <input type="hidden" name="courseId" value={courseModule.courseId} />
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">Type</label>
+                      <select
+                        name="type"
+                        defaultValue={l.type}
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="VIDEO">Video</option>
+                        <option value="ARTICLE">Article</option>
+                        <option value="RESOURCE">Resource</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">Order</label>
+                      <input
+                        name="order"
+                        type="number"
+                        defaultValue={l.order}
+                        min={0}
+                        className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
                     <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
                       <input
                         name="published"
@@ -228,23 +287,43 @@ export default async function AdminModuleDetail({
                     </label>
                     <button
                       type="submit"
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
                     >
-                      Update
+                      Save lesson
                     </button>
-                  </form>
-                  {l.type === "VIDEO" && (
+                  </div>
+                </div>
+              </form>
+              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+                {l.type === "VIDEO" && (
+                  <>
                     <MuxUploadButton
                       lessonId={l.id}
                       lessonTitle={l.title}
                       disabled={Boolean(l.video?.muxPlaybackId)}
                     />
-                  )}
-                </div>
+                    {l.video?.muxPlaybackId && (
+                      <ReplaceVideoButton
+                        lessonId={l.id}
+                        lessonTitle={l.title}
+                        removeLessonVideo={removeLessonVideo}
+                      />
+                    )}
+                  </>
+                )}
+                <DeleteLessonButton
+                  lessonId={l.id}
+                  lessonTitle={l.title}
+                  deleteLesson={deleteLesson}
+                />
               </div>
               {l.type === "VIDEO" && l.video?.muxPlaybackId && (
                 <div className="mt-4 border-t border-slate-100 pt-4">
-                  <AdminVideoPreview lessonId={l.id} lessonTitle={l.title} />
+                  <AdminVideoPreview
+                    lessonId={l.id}
+                    lessonTitle={l.title}
+                    playbackId={l.video.muxPlaybackId}
+                  />
                 </div>
               )}
             </li>

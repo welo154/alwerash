@@ -200,7 +200,7 @@ export type ModuleWithLessons = Prisma.ModuleGetPayload<{
 /** Lesson with optional video (and optionally latest videoUpload for status). */
 export type LessonWithVideoUpload = ModuleWithLessons["lessons"][number] & {
   video?: { id: string; muxPlaybackId: string } | null;
-  videoUploads?: { status: string }[];
+  videoUploads?: { id: string; status: string }[];
 };
 
 export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons, "lessons"> & { lessons: LessonWithVideoUpload[] }> {
@@ -212,6 +212,7 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         include: {
           video: { select: { id: true, muxPlaybackId: true } },
+          videoUploads: { take: 1, orderBy: { createdAt: "desc" }, select: { id: true, status: true } },
         },
       },
     },
@@ -278,6 +279,16 @@ export async function adminUpdateLesson(lessonId: string, input: unknown) {
 export async function adminDeleteLesson(lessonId: string) {
   try {
     await prisma.lesson.delete({ where: { id: lessonId } });
+  } catch (e) {
+    handlePrismaError(e);
+  }
+  return { ok: true as const };
+}
+
+/** Remove the video link from a lesson so a new video can be uploaded. */
+export async function adminRemoveLessonVideo(lessonId: string) {
+  try {
+    await prisma.lessonVideo.deleteMany({ where: { lessonId } });
   } catch (e) {
     handlePrismaError(e);
   }

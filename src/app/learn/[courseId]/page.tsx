@@ -1,17 +1,28 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireSubscription } from "@/server/subscription/require-subscription";
-import { getCourseForLearning } from "@/server/content/learn.service";
+import { getCourseForLearning, isCourseUnlockedForUser } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
+import {
+  getOrderedLessonIds,
+  getCompletedLessonIdsForCourse,
+  getUnlockedLessonIds,
+} from "@/server/progress/course-progress.service";
 import { CourseCurriculum } from "./CourseCurriculum";
+import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
 
 export default async function LearnCoursePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ courseId: string }>;
+  searchParams: Promise<{ message?: string }>;
 }) {
-  await requireSubscription();
+  const session = await requireSubscription();
+  const userId = session.user.id;
   const { courseId } = await params;
+  const { message } = await searchParams;
+  const showCompletePreviousMessage = message === "complete_previous";
 
   let course;
   try {
@@ -21,16 +32,35 @@ export default async function LearnCoursePage({
     throw e;
   }
 
-  const lessonCount = course.modules.reduce(
-    (acc, m) => acc + m.lessons.length,
-    0
+  const courseUnlocked = await isCourseUnlockedForUser(userId, courseId);
+  if (!courseUnlocked) {
+    redirect("/learn?message=complete_previous_course");
+  }
+
+  const modules = course.modules ?? [];
+  const orderedLessonIds = getOrderedLessonIds(course);
+  const completedLessonIds = await getCompletedLessonIdsForCourse(
+    userId,
+    orderedLessonIds
+  );
+  const unlockedLessonIds = getUnlockedLessonIds(
+    orderedLessonIds,
+    completedLessonIds
   );
 
+  const lessonCount = modules.reduce(
+    (acc, m) => acc + (m.lessons?.length ?? 0),
+    0
+  );
+  const completedCount = completedLessonIds.size;
+  const progressPercent =
+    lessonCount > 0 ? (completedCount / lessonCount) * 100 : 0;
+
   const ESTIMATED_MINUTES: Record<string, number> = { VIDEO: 10, ARTICLE: 5, RESOURCE: 5 };
-  const totalMinutes = course.modules.reduce(
+  const totalMinutes = modules.reduce(
     (total, m) =>
       total +
-      m.lessons.reduce((sum, l) => sum + (ESTIMATED_MINUTES[l.type] ?? 5), 0),
+      (m.lessons ?? []).reduce((sum, l) => sum + (ESTIMATED_MINUTES[l.type] ?? 5), 0),
     0
   );
   const durationLabel =
@@ -78,7 +108,7 @@ export default async function LearnCoursePage({
                 <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                {course.modules.length} module{course.modules.length !== 1 ? "s" : ""}
+                {modules.length} module{modules.length !== 1 ? "s" : ""}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,6 +123,16 @@ export default async function LearnCoursePage({
                 {durationLabel} total
               </span>
             </div>
+            {lessonCount > 0 && (
+              <div className="mt-6">
+                <CourseProgressBar
+                  progressPercent={progressPercent}
+                  completedCount={completedCount}
+                  totalCount={lessonCount}
+                  label="Course progress"
+                />
+              </div>
+            )}
           </div>
         </header>
 
@@ -101,10 +141,20 @@ export default async function LearnCoursePage({
           <h2 id="curriculum-heading" className="sr-only">
             Course curriculum
           </h2>
+          {showCompletePreviousMessage && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Complete the previous lesson before starting the next one.
+            </div>
+          )}
           <p className="text-sm font-medium text-slate-700 mb-4">
             Expand a module to see lessons and start watching.
           </p>
-          <CourseCurriculum courseId={courseId} modules={course.modules} />
+          <CourseCurriculum
+            courseId={courseId}
+            modules={modules}
+            unlockedLessonIds={Array.from(unlockedLessonIds)}
+            completedLessonIds={Array.from(completedLessonIds)}
+          />
         </section>
 
         <div className="mt-10 pt-6 border-t border-slate-200">
