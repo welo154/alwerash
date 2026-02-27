@@ -6,8 +6,13 @@ import { mux, playbackTTL, playbackUrl, uploadCorsOrigin } from "./mux";
 
 function parseLessonIdFromPassthrough(passthrough?: string | null): string | null {
   if (!passthrough) return null;
-  // Format: lesson:<lessonId>:upload:<uploadId>
   const m = passthrough.match(/^lesson:([^:]+):upload:/);
+  return m?.[1] ?? null;
+}
+
+function parseCourseIdFromPassthrough(passthrough?: string | null): string | null {
+  if (!passthrough) return null;
+  const m = passthrough.match(/^course:(.+)$/);
   return m?.[1] ?? null;
 }
 
@@ -131,6 +136,10 @@ export async function handleMuxWebhook(event: {
           where: { muxUploadId: uploadId },
           data: { assetId, status: "ASSET_CREATED" },
         });
+        await prisma.courseIntroVideoUpload.updateMany({
+          where: { muxUploadId: uploadId },
+          data: { assetId, status: "ASSET_CREATED" },
+        });
       }
     }
 
@@ -146,32 +155,45 @@ export async function handleMuxWebhook(event: {
       }
       if (!playbackId) throw new AppError("BAD_REQUEST", 400, "Missing playback id");
 
-      let lessonId = parseLessonIdFromPassthrough(passthrough);
-
-      // Fallback: find by asset id in VideoUpload
-      if (!lessonId) {
-        const up = await prisma.videoUpload.findFirst({
-          where: { assetId },
-          select: { lessonId: true },
-          orderBy: { createdAt: "desc" },
+      // Course intro video: passthrough "course:courseId"
+      const courseId = parseCourseIdFromPassthrough(passthrough);
+      if (courseId) {
+        await prisma.$transaction(async (tx) => {
+          await tx.course.update({
+            where: { id: courseId },
+            data: { introVideoMuxPlaybackId: playbackId },
+          });
+          await tx.courseIntroVideoUpload.updateMany({
+            where: { courseId, assetId },
+            data: { status: "READY" },
+          });
         });
-        lessonId = up?.lessonId ?? null;
+      } else {
+        // Lesson video
+        let lessonId = parseLessonIdFromPassthrough(passthrough);
+        if (!lessonId) {
+          const up = await prisma.videoUpload.findFirst({
+            where: { assetId },
+            select: { lessonId: true },
+            orderBy: { createdAt: "desc" },
+          });
+          lessonId = up?.lessonId ?? null;
+        }
+        if (!lessonId) throw new AppError("BAD_REQUEST", 400, "Could not map asset to lesson");
+
+        await prisma.$transaction(async (tx) => {
+          await tx.lessonVideo.upsert({
+            where: { lessonId: lessonId! },
+            update: { muxAssetId: assetId, muxPlaybackId: playbackId },
+            create: { lessonId: lessonId!, muxAssetId: assetId, muxPlaybackId: playbackId },
+          });
+
+          await tx.videoUpload.updateMany({
+            where: { lessonId: lessonId!, assetId },
+            data: { status: "READY" },
+          });
+        });
       }
-
-      if (!lessonId) throw new AppError("BAD_REQUEST", 400, "Could not map asset to lesson");
-
-      await prisma.$transaction(async (tx) => {
-        await tx.lessonVideo.upsert({
-          where: { lessonId: lessonId! },
-          update: { muxAssetId: assetId, muxPlaybackId: playbackId },
-          create: { lessonId: lessonId!, muxAssetId: assetId, muxPlaybackId: playbackId },
-        });
-
-        await tx.videoUpload.updateMany({
-          where: { lessonId: lessonId!, assetId },
-          data: { status: "READY" },
-        });
-      });
     }
 
     if (type === "video.asset.errored") {

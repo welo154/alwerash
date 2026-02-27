@@ -33,13 +33,25 @@ export async function publicGetTrackBySlug(slug: string) {
       courses: {
         where: { published: true },
         orderBy: { createdAt: "asc" },
-        select: { id: true, title: true, summary: true, coverImage: true },
+        select: {
+          id: true,
+          title: true,
+          summary: true,
+          coverImage: true,
+          modules: { select: { _count: { select: { lessons: true } } } },
+        },
       },
     },
   });
 
   if (!track || !track.published) throw new AppError("NOT_FOUND", 404, "Track not found");
-  return track;
+  return {
+    ...track,
+    courses: track.courses.map(({ modules, ...c }) => ({
+      ...c,
+      lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
+    })),
+  };
 }
 
 export async function publicGetCourseById(courseId: string) {
@@ -50,6 +62,9 @@ export async function publicGetCourseById(courseId: string) {
       title: true,
       summary: true,
       coverImage: true,
+      instructorName: true,
+      instructorImage: true,
+      introVideoMuxPlaybackId: true,
       published: true,
       track: { select: { published: true, slug: true, title: true } },
       modules: {
@@ -75,7 +90,7 @@ export async function publicGetCourseById(courseId: string) {
 }
 
 export async function publicListFeaturedCourses(limit = 8) {
-  return prisma.course.findMany({
+  const courses = await prisma.course.findMany({
     where: { published: true },
     take: limit,
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
@@ -85,12 +100,17 @@ export async function publicListFeaturedCourses(limit = 8) {
       summary: true,
       coverImage: true,
       track: { select: { title: true, slug: true } },
+      modules: { select: { _count: { select: { lessons: true } } } },
     },
   });
+  return courses.map(({ modules, ...c }) => ({
+    ...c,
+    lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
+  }));
 }
 
 export async function publicGetSimilarCourses(courseId: string, trackSlug: string, limit = 4) {
-  return prisma.course.findMany({
+  const courses = await prisma.course.findMany({
     where: {
       published: true,
       id: { not: courseId },
@@ -103,8 +123,14 @@ export async function publicGetSimilarCourses(courseId: string, trackSlug: strin
       title: true,
       summary: true,
       coverImage: true,
+      track: { select: { title: true, slug: true } },
+      modules: { select: { _count: { select: { lessons: true } } } },
     },
   });
+  return courses.map(({ modules, ...c }) => ({
+    ...c,
+    lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
+  }));
 }
 
 /** Search published tracks and courses by query (title). */

@@ -1,9 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
+import { auth } from "@/auth";
 import { publicListTracks } from "@/server/content/public.service";
+import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
 
 export default async function TracksPage() {
-  const tracks = await publicListTracks();
+  const [tracks, session] = await Promise.all([
+    publicListTracks(),
+    auth(),
+  ]);
+  const subscription = session?.user?.id
+    ? await getSubscriptionStatus(session.user.id)
+    : { active: false };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -71,19 +79,20 @@ export default async function TracksPage() {
           </div>
         )}
 
-        {/* Subscription CTA */}
-        <div className="mt-12 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="font-semibold text-slate-900">Get full access</h2>
-          <p className="mt-1 text-slate-600">
-            Subscribe to unlock all courses across all tracks.
-          </p>
-          <Link
-            href="/subscription"
-            className="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-          >
-            View subscription plans
-          </Link>
-        </div>
+        {!subscription.active && (
+          <div className="mt-12 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h2 className="font-semibold text-slate-900">Get full access</h2>
+            <p className="mt-1 text-slate-600">
+              Subscribe to unlock all courses across all tracks.
+            </p>
+            <Link
+              href="/subscription"
+              className="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              View subscription plans
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

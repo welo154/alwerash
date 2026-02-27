@@ -120,20 +120,40 @@ export async function adminListCourses(trackId?: string) {
   return prisma.course.findMany({
     where: trackId !== undefined ? (trackId ? { trackId } : { trackId: null }) : undefined,
     orderBy: [{ createdAt: "asc" }],
-    include: { track: { select: { id: true, title: true, slug: true } } },
+    select: {
+      id: true,
+      trackId: true,
+      title: true,
+      summary: true,
+      coverImage: true,
+      order: true,
+      published: true,
+      createdAt: true,
+      updatedAt: true,
+      track: { select: { id: true, title: true, slug: true } },
+    },
   });
 }
 
 export async function adminGetCourse(id: string) {
   const c = await prisma.course.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      trackId: true,
+      title: true,
+      summary: true,
+      coverImage: true,
+      order: true,
+      published: true,
+      createdAt: true,
+      updatedAt: true,
       track: true,
       modules: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
     },
   });
   if (!c) throw new AppError("NOT_FOUND", 404, "Course not found");
-  return c;
+  return c as typeof c & { instructorName?: string | null; instructorImage?: string | null; introVideoMuxPlaybackId?: string | null };
 }
 
 export async function adminCreateCourse(input: unknown) {
@@ -190,7 +210,9 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
       course: true,
       lessons: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-        include: { video: { select: { id: true, muxPlaybackId: true } } },
+        include: {
+          video: { select: { id: true, muxPlaybackId: true } },
+        },
       },
     },
   });

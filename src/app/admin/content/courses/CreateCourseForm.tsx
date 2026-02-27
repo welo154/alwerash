@@ -20,6 +20,8 @@ export async function CreateCourseForm() {
       title,
       summary: String(formData.get("summary") ?? "").trim() || undefined,
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
+      instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
+      instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
@@ -55,6 +57,23 @@ export async function CreateCourseForm() {
         <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
         <input
           name="coverImage"
+          type="url"
+          placeholder="https://..."
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name</label>
+        <input
+          name="instructorName"
+          placeholder="e.g. Ahmed Radwan"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Instructor photo URL</label>
+        <input
+          name="instructorImage"
           type="url"
           placeholder="https://..."
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

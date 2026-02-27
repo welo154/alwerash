@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
@@ -67,7 +68,9 @@ export default function RegisterPage() {
               Enter your details to get started
             </p>
           </div>
-          <RegisterForm action={action} />
+          <Suspense fallback={<div className="mt-6 h-10 animate-pulse rounded bg-slate-100" />}>
+            <RegisterForm action={action} />
+          </Suspense>
           <p className="mt-6 text-center text-sm text-slate-600">
             Already have an account?{" "}
             <Link href="/login" className="font-medium text-blue-600 hover:underline">

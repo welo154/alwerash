@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 /**
- * Design tokens - swap this file or edit variables to change the design.
- * Blue theme by default.
+ * Design tokens - premium, dynamic feel. No grid color patterns.
  */
 :root {
   --color-primary: rgb(37 99 235);
@@ -13,6 +12,12 @@
   --color-border: rgb(226 232 240);
   --color-bg: rgb(255 255 255);
   --color-bg-muted: rgb(248 250 252);
+  /* Depth and motion */
+  --shadow-card: 0 2px 8px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.05);
+  --shadow-card-hover: 0 8px 24px rgb(0 0 0 / 0.08), 0 16px 40px rgb(0 0 0 / 0.06);
+  --shadow-btn: 0 2px 8px rgb(37 99 235 / 0.25);
+  --shadow-btn-hover: 0 4px 14px rgb(37 99 235 / 0.35);
+  --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Pointer cursor for all clickable elements */
@@ -42,12 +47,36 @@ label:has(input[type="radio"]) {
   animation: toast-in 0.25s ease-out;
 }
 
-/* Card hover - lift up with smooth transition */
+/* Card hover - lift, depth, no layout shift (transform + shadow only) */
 .card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.35s var(--ease-out-smooth), box-shadow 0.35s var(--ease-out-smooth), border-color 0.25s ease;
+  box-shadow: var(--shadow-card);
 }
 .card-hover:hover {
   transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Primary button - depth and hover feedback */
+.btn-primary {
+  box-shadow: var(--shadow-btn);
+  transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.25s ease, background-color 0.2s ease;
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-btn-hover);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Nav / secondary link hover - subtle highlight */
+.nav-link {
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-radius: 0.5rem;
+}
+.nav-link:hover {
+  background-color: rgb(241 245 249);
+  color: rgb(15 23 42);
 }
 
 /* Fade-in animation for sections */
@@ -76,3 +105,23 @@ label:has(input[type="radio"]) {
 .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
 .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
 .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* Video lesson page - subtle scale-in for player */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-scale-in {
+  animation: scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Staggered delay utilities for lesson page */
+.animation-delay-75 { animation-delay: 75ms; }
+.animation-delay-150 { animation-delay: 150ms; }
+.animation-delay-225 { animation-delay: 225ms; }

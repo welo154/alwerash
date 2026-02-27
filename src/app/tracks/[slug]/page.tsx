@@ -2,7 +2,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { publicGetTrackBySlug } from "@/server/content/public.service";
+import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
 import { AppError } from "@/server/lib/errors";
 
 export default async function TrackPage({
@@ -18,6 +20,11 @@ export default async function TrackPage({
     if (e instanceof AppError && e.status === 404) notFound();
     throw e;
   }
+
+  const session = await auth();
+  const subscription = session?.user?.id
+    ? await getSubscriptionStatus(session.user.id)
+    : { active: false };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -68,17 +75,19 @@ export default async function TrackPage({
           {track.description && (
             <p className="mt-4 max-w-2xl text-slate-200">{track.description}</p>
           )}
-          <div className="mt-6 flex flex-wrap gap-4">
-            <Link
-              href="/subscription"
-              className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              Subscribe for full access
-            </Link>
-            <p className="self-center text-sm text-slate-300">
-              Access all courses in this track and more
-            </p>
-          </div>
+          {!subscription.active && (
+            <div className="mt-6 flex flex-wrap gap-4">
+              <Link
+                href="/subscription"
+                className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Subscribe for full access
+              </Link>
+              <p className="self-center text-sm text-slate-300">
+                Access all courses in this track and more
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -88,12 +97,13 @@ export default async function TrackPage({
         {track.courses.length === 0 ? (
           <p className="mt-4 text-slate-500">No courses in this track yet.</p>
         ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-gsap-stagger-group>
             {track.courses.map((c) => (
               <Link
                 key={c.id}
                 href={`/courses/${c.id}`}
-                className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-lg"
+                className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
+                data-gsap-hover
               >
                 <div className="aspect-video relative overflow-hidden bg-slate-100">
                   {c.coverImage ? (
@@ -129,21 +139,22 @@ export default async function TrackPage({
           </div>
         )}
 
-        {/* Subscription CTA */}
-        <div className="mt-12 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h3 className="font-semibold text-slate-900">
-            Get full access to all courses
-          </h3>
-          <p className="mt-2 text-slate-600">
-            Subscribe once and unlock all tracks and courses. Cancel anytime.
-          </p>
-          <Link
-            href="/subscription"
-            className="mt-4 inline-flex rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-          >
-            View plans
-          </Link>
-        </div>
+        {!subscription.active && (
+          <div className="mt-12 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h3 className="font-semibold text-slate-900">
+              Get full access to all courses
+            </h3>
+            <p className="mt-2 text-slate-600">
+              Subscribe once and unlock all tracks and courses. Cancel anytime.
+            </p>
+            <Link
+              href="/subscription"
+              className="mt-4 inline-flex rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              View plans
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

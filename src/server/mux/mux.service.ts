@@ -100,6 +100,89 @@ export async function markVideoUploadReady(
 }
 
 /**
+ * Create a direct upload URL for a course intro video.
+ * Passthrough format: "course:courseId" so the webhook can update Course.introVideoMuxPlaybackId.
+ */
+export async function createDirectUploadForCourseIntro(courseId: string): Promise<CreateDirectUploadResult> {
+  const mux = getMux();
+  const config = getMuxConfigFresh();
+  const passthrough = `course:${courseId}`;
+
+  const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } });
+  if (!course) throw new Error("Course not found");
+
+  const upload = await mux.video.uploads.create({
+    cors_origin: config.uploadCorsOrigin,
+    new_asset_settings: {
+      playback_policy: ["public"],
+      passthrough,
+    },
+  });
+
+  if (!upload?.id || !upload?.url) {
+    throw new Error("Mux upload create failed: missing id or url");
+  }
+
+  await prisma.courseIntroVideoUpload.create({
+    data: {
+      courseId,
+      muxUploadId: upload.id,
+      passthrough,
+      status: "CREATED",
+    },
+  });
+
+  return {
+    uploadId: upload.id,
+    url: upload.url,
+  };
+}
+
+/**
+ * Sync course intro video from Mux (for when webhook is not reachable, e.g. localhost).
+ */
+export async function syncCourseIntroVideoFromMux(courseId: string): Promise<{
+  linked: boolean;
+  status: string;
+  playbackId?: string;
+}> {
+  const mux = getMux();
+
+  const upload = await prisma.courseIntroVideoUpload.findFirst({
+    where: { courseId },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!upload) {
+    return { linked: false, status: "no_upload" };
+  }
+
+  const muxUpload = await mux.video.uploads.retrieve(upload.muxUploadId);
+  const raw = muxUpload as { status?: string; asset_id?: string; assetId?: string };
+  const status = raw?.status ?? "unknown";
+  const assetId = raw?.asset_id ?? raw?.assetId ?? null;
+
+  if (!assetId || (status !== "asset_created" && status !== "ready")) {
+    return { linked: false, status: status === "waiting" ? "processing" : status };
+  }
+
+  const playbackId = await getPlaybackIdForAsset(assetId);
+  if (!playbackId) {
+    return { linked: false, status: "asset_not_ready" };
+  }
+
+  await prisma.course.update({
+    where: { id: courseId },
+    data: { introVideoMuxPlaybackId: playbackId },
+  });
+  await prisma.courseIntroVideoUpload.updateMany({
+    where: { id: upload.id },
+    data: { assetId, status: "READY" },
+  });
+
+  return { linked: true, status: "ready", playbackId };
+}
+
+/**
  * Sync video for a lesson from Mux (for when webhook is not reachable, e.g. localhost).
  * Finds the latest upload for the lesson, checks Mux upload status; when asset is ready,
  * links LessonVideo and returns { linked: true }.

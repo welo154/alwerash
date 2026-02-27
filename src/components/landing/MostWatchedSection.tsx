@@ -8,20 +8,21 @@ export async function MostWatchedSection() {
   if (courses.length === 0) return null;
 
   return (
-    <section className="border-b border-slate-200 bg-white px-4 py-16 sm:px-6">
+    <section className="border-b border-slate-200/80 bg-white px-4 py-16 sm:px-6" data-gsap-reveal>
       <div className="mx-auto max-w-7xl">
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Trending courses
         </h2>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2.5 text-slate-600 leading-relaxed">
           Popular courses this month
         </p>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-gsap-stagger-group>
           {courses.map((course) => (
             <Link
               key={course.id}
               href={`/courses/${course.id}`}
-              className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm hover:border-blue-300 hover:shadow-lg"
+              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/80 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
+              data-gsap-hover
             >
               <div className="aspect-video relative overflow-hidden bg-slate-100">
                 {course.coverImage ? (

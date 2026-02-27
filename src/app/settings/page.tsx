@@ -11,14 +11,14 @@ export default async function SettingsPage() {
       <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-slate-600">
-          Account and notification settings will be available here.
+          Edit your name, country, and profile picture on your Profile page.
         </p>
         <div className="mt-6 flex gap-3">
           <Link
             href="/profile"
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            Profile
+            Edit profile
           </Link>
           <Link
             href="/"

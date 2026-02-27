@@ -55,9 +55,19 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as { id: string; roles: string[] }).id = token.sub ?? "";
+      if (session.user && token.sub) {
+        (session.user as { id: string; roles: string[] }).id = token.sub;
         (session.user as { id: string; roles: string[] }).roles = ((token.roles as string[] | undefined) ?? []) as import("@prisma/client").Role[];
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { name: true, image: true, email: true, country: true },
+        });
+        if (dbUser) {
+          session.user.name = dbUser.name ?? session.user.name ?? null;
+          session.user.email = dbUser.email;
+          (session.user as { image?: string | null }).image = dbUser.image ?? null;
+          (session.user as { country?: string | null }).country = dbUser.country ?? null;
+        }
       }
       return session;
     },

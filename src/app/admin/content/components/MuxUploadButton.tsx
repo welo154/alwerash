@@ -127,7 +127,7 @@ export function MuxUploadButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={disabled || status === "getting-url" || status === "uploading" || status === "syncing"}
-        className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
       >
         {status === "getting-url"
           ? "Preparing…"
@@ -138,7 +138,9 @@ export function MuxUploadButton({
               : "Upload video"}
       </button>
       {errorMessage && (
-        <p className="text-xs text-red-600">{errorMessage}</p>
+        <p className="mt-1.5 max-w-sm rounded-lg bg-red-50 px-2.5 py-2 text-xs text-red-700">
+          {errorMessage}
+        </p>
       )}
     </div>
   );

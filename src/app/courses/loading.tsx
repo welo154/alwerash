@@ -1,8 +1,10 @@
 export default function CourseLoading() {
   return (
-    <div className="p-6 flex items-center gap-2 text-zinc-500">
-      <span className="inline-block w-4 h-4 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-      Loading course…
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center gap-2 text-zinc-500">
+        <span className="inline-block h-4 w-4 rounded-full border-2 border-zinc-300 border-t-zinc-600 animate-spin" />
+        Loading course…
+      </div>
     </div>
   );
 }

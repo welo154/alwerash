@@ -200,19 +200,23 @@ model Track {
 }
 
 model Course {
-  id         String   @id @default(cuid())
-  trackId    String?  @map("track_id")
-  title      String
-  summary    String?
-  coverImage String?  @map("cover_image")
-  order      Int      @default(0)
-  published  Boolean  @default(false)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                     String   @id @default(cuid())
+  trackId                String?  @map("track_id")
+  title                  String
+  summary                String?
+  coverImage             String?  @map("cover_image")
+  instructorName         String?  @map("instructor_name")
+  instructorImage        String?  @map("instructor_image")
+  introVideoMuxPlaybackId String?  @map("intro_video_mux_playback_id")
+  order                  Int      @default(0)
+  published              Boolean  @default(false)
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
-  track   Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
-  modules Module[]
-  threads Thread[]
+  track                  Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  modules                Module[]
+  threads                Thread[]
+  introVideoUploads      CourseIntroVideoUpload[]
 
   @@index([trackId, order])
   @@map("courses")
@@ -278,6 +282,22 @@ model VideoUpload {
 
   @@index([lessonId, createdAt])
   @@map("video_uploads")
+}
+
+model CourseIntroVideoUpload {
+  id           String            @id @default(cuid())
+  courseId     String            @map("course_id")
+  muxUploadId  String            @unique @map("mux_upload_id")
+  passthrough  String?           @map("passthrough")
+  assetId      String?           @map("asset_id")
+  status       VideoUploadStatus @default(CREATED)
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@map("course_intro_video_uploads")
 }
 
 model VideoEvent {

@@ -13,6 +13,9 @@
 # production
 /build
 
+# user uploads (profile photos)
+/public/avatars
+
 # misc
 .DS_Store
 *.pem

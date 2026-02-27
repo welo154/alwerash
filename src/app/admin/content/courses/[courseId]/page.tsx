@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
+import { CourseIntroUploadButton } from "@/app/admin/content/components/CourseIntroUploadButton";
 import {
   adminCreateModule,
   adminDeleteCourse,
@@ -37,6 +38,8 @@ export default async function AdminCourseDetail({
       title: String(formData.get("title") ?? ""),
       summary: String(formData.get("summary") ?? "").trim() || undefined,
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
+      instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
+      instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       trackId: trackIdVal || "",
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
@@ -158,6 +161,25 @@ export default async function AdminCourseDetail({
             />
           </div>
           <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name</label>
+            <input
+              name="instructorName"
+              defaultValue={course.instructorName ?? ""}
+              placeholder="e.g. Ahmed Radwan"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Instructor photo URL</label>
+            <input
+              name="instructorImage"
+              type="url"
+              defaultValue={course.instructorImage ?? ""}
+              placeholder="https://..."
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Summary</label>
             <textarea
               name="summary"
@@ -202,6 +224,20 @@ export default async function AdminCourseDetail({
             confirmMessage="Delete this course and all its modules and lessons? This cannot be undone."
           />
         </form>
+      </section>
+
+      {/* Intro Video Section */}
+      <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Intro video</h2>
+        <p className="mb-4 text-sm text-slate-600">
+          This video appears on the course page for everyone (no login required). It acts as a preview or intro to the course.
+        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <CourseIntroUploadButton courseId={courseId} courseTitle={course.title} />
+          {(course as { introVideoMuxPlaybackId?: string | null }).introVideoMuxPlaybackId && (
+            <p className="text-sm text-green-600">Intro video is set. View it on the course page. Upload again to replace.</p>
+          )}
+        </div>
       </section>
 
       {/* Modules Section */}

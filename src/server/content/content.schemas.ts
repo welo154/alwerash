@@ -72,6 +72,8 @@ export const CourseCreateSchema = z.object({
   title: z.string().min(2, "Title too short").max(200),
   summary: z.string().max(2000).optional(),
   coverImage: OptionalUrl,
+  instructorName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
+  instructorImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
 });

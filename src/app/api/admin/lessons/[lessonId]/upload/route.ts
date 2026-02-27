@@ -27,8 +27,8 @@ export async function POST(
       {
         error: "Mux not configured",
         message: missing.length
-          ? `Add to .env in project root: ${missing.join(", ")}. Then restart the dev server.`
-          : "Set MUX_TOKEN_ID and MUX_TOKEN_SECRET in .env and restart the dev server.",
+          ? `Video upload needs Mux. Add ${missing.join(" and ")} to your .env file (copy from .env.example). Get values from Mux dashboard → Settings → Access Tokens. Then restart the dev server.`
+          : "Add MUX_TOKEN_ID and MUX_TOKEN_SECRET to .env (see .env.example) and restart the dev server.",
       },
       { status: 503 }
     );

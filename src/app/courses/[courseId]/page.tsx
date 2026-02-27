@@ -10,6 +10,7 @@ import {
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { prisma } from "@/server/db/prisma";
+import { HlsPlayer } from "@/components/video/HlsPlayer";
 
 export async function generateMetadata({
   params,
@@ -60,6 +61,10 @@ export default async function CoursePage({
     m.lessons.map((l) => l.title)
   );
 
+  const introPlaybackId = (course as { introVideoMuxPlaybackId?: string | null }).introVideoMuxPlaybackId;
+  const instructorName = (course as { instructorName?: string | null }).instructorName;
+  const instructorImage = (course as { instructorImage?: string | null }).instructorImage;
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Breadcrumb */}
@@ -94,25 +99,37 @@ export default async function CoursePage({
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-12">
           <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
-            {/* Cover image - Yanfaa style */}
+            {/* Intro video or cover image - visible to everyone */}
             <div className="flex-1">
-              <div className="aspect-video relative w-full overflow-hidden rounded-xl bg-slate-200 shadow-lg">
-                {course.coverImage ? (
-                  <Image
-                    src={course.coverImage}
-                    alt={course.title}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 66vw"
-                    priority
+              {introPlaybackId ? (
+                <div className="overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-200/50">
+                  <HlsPlayer
+                    src={`https://stream.mux.com/${introPlaybackId}.m3u8`}
+                    poster={`https://image.mux.com/${introPlaybackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`}
+                    className="rounded-xl"
+                    showQualitySelector={false}
                   />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-slate-400">
-                    Course preview
-                  </div>
-                )}
-              </div>
+                  <p className="mt-1.5 text-xs text-slate-500">Course intro — free to watch</p>
+                </div>
+              ) : (
+                <div className="aspect-video relative w-full overflow-hidden rounded-xl bg-slate-200 shadow-lg">
+                  {course.coverImage ? (
+                    <Image
+                      src={course.coverImage}
+                      alt={course.title}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 66vw"
+                      priority
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-slate-400">
+                      Course preview
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Sidebar - Price & CTA */}
@@ -170,15 +187,28 @@ export default async function CoursePage({
                 )}
               </div>
 
-              {/* Instructor placeholder */}
+              {/* Instructor - from admin */}
               <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="font-semibold text-slate-900">Instructor</h3>
                 <div className="mt-3 flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-slate-200" />
+                  {instructorImage ? (
+                    <Image
+                      src={instructorImage}
+                      alt={instructorName ?? "Instructor"}
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 rounded-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-slate-200" />
+                  )}
                   <div>
-                    <p className="font-medium text-slate-900">Expert Instructor</p>
+                    <p className="font-medium text-slate-900">
+                      {instructorName ?? "Expert Instructor"}
+                    </p>
                     <p className="text-sm text-slate-600">
-                      Industry professional
+                      {instructorName ? "Course instructor" : "Industry professional"}
                     </p>
                   </div>
                 </div>
@@ -304,7 +334,7 @@ export default async function CoursePage({
                 <Link
                   key={c.id}
                   href={`/courses/${c.id}`}
-                  className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-lg"
+                  className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[var(--shadow-card)] transition-shadow hover:border-blue-300 hover:shadow-[var(--shadow-card-hover)]"
                 >
                   <div className="aspect-video relative overflow-hidden bg-slate-100">
                     {c.coverImage ? (

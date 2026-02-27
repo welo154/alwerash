@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { createDirectUploadForCourseIntro } from "@/server/mux/mux.service";
+import { isMuxApiConfigured, getMissingMuxApiVars } from "@/server/mux/config";
+import { prisma } from "@/server/db/prisma";
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ courseId: string }> }
+) {
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  });
+  if (!token?.sub) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const roles = (token.roles as string[] | undefined) ?? [];
+  if (!roles.includes("ADMIN")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (!isMuxApiConfigured()) {
+    const missing = getMissingMuxApiVars();
+    return NextResponse.json(
+      {
+        error: "Mux not configured",
+        message: missing.length
+          ? `Video upload needs Mux. Add ${missing.join(" and ")} to your .env file.`
+          : "Add MUX_TOKEN_ID and MUX_TOKEN_SECRET to .env and restart.",
+      },
+      { status: 503 }
+    );
+  }
+
+  const { courseId } = await params;
+
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true },
+  });
+  if (!course) {
+    return NextResponse.json({ error: "Course not found" }, { status: 404 });
+  }
+
+  try {
+    const { uploadId, url } = await createDirectUploadForCourseIntro(courseId);
+    return NextResponse.json({ uploadId, url });
+  } catch (err) {
+    console.error("Course intro upload URL creation failed:", err);
+    const message = err instanceof Error ? err.message : "Failed to create upload URL";
+    return NextResponse.json({ error: "INTERNAL", message }, { status: 500 });
+  }
+}

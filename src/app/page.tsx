@@ -6,6 +6,7 @@ import {
   FeaturedCoursesSection,
   MostWatchedSection,
 } from "@/components/landing";
+import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
 
 /**
  * Landing page - home.
@@ -20,6 +21,7 @@ export default function LandingPage() {
       <WhatToExpectSection />
       <FeaturedCoursesSection />
       <MostWatchedSection />
+      <GsapAnimationLayer />
     </div>
   );
 }
