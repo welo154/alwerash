@@ -47,7 +47,7 @@ export default function RegisterPage() {
     } catch (e) {
       return { success: false, error: getErrorMessage(e) };
     }
-    redirect("/login?registered=1&toast=Account+created");
+    redirect(`/register/check-email?email=${encodeURIComponent(parsed.data.email)}`);
   }
 
   return (

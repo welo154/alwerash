@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { requireSubscription } from "@/server/subscription/require-subscription";
 import { getLessonForLearning, getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
-import { getOrderedLessonIds, getCompletedLessonIdsForCourse, isLessonUnlocked } from "@/server/progress/course-progress.service";
 import { getCourseProgress, getLessonProgress } from "@/server/learning/progress.service";
 import { CourseCurriculumSidebar } from "../../CourseCurriculumSidebar";
 import { completeLesson } from "./actions";
@@ -42,13 +41,6 @@ export default async function LearnLessonPage({
   } catch (e) {
     if (e instanceof AppError && e.status === 404) notFound();
     throw e;
-  }
-
-  const orderedLessonIds = getOrderedLessonIds(course);
-  const completedLessonIds = await getCompletedLessonIdsForCourse(userId, orderedLessonIds);
-  const { unlocked } = isLessonUnlocked(orderedLessonIds, completedLessonIds, lessonId);
-  if (!unlocked) {
-    redirect(`/learn/${courseId}?message=complete_previous`);
   }
 
   const [courseProgressRecord, lessonProgressRecord] = await Promise.all([

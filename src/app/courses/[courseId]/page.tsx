@@ -11,6 +11,8 @@ import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { prisma } from "@/server/db/prisma";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
+import { getCourseProgress } from "@/server/learning/progress.service";
+import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
 
 export async function generateMetadata({
   params,
@@ -65,6 +67,15 @@ export default async function CoursePage({
   const introPlaybackId = (course as { introVideoMuxPlaybackId?: string | null }).introVideoMuxPlaybackId;
   const instructorName = (course as { instructorName?: string | null }).instructorName;
   const instructorImage = (course as { instructorImage?: string | null }).instructorImage;
+
+  const userId = session?.user?.id;
+  const courseProgress =
+    hasAccess && userId && lessonCount > 0
+      ? await getCourseProgress(userId, courseId)
+      : null;
+  const progressPercent = courseProgress?.progressPercent ?? 0;
+  const completedCount = courseProgress?.completedCount ?? 0;
+  const totalCount = courseProgress?.totalCount ?? lessonCount;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -151,6 +162,14 @@ export default async function CoursePage({
                 </div>
                 {hasAccess ? (
                   <div className="mt-4 space-y-3">
+                    {lessonCount > 0 && (
+                      <CourseProgressBar
+                        progressPercent={progressPercent}
+                        completedCount={completedCount}
+                        totalCount={totalCount}
+                        label="Your progress"
+                      />
+                    )}
                     <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800">
                       ✓ You have access to this course
                     </p>

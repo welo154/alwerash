@@ -32,11 +32,13 @@ async function main() {
     update: {
       name,
       passwordHash,
+      emailVerified: new Date(),
     },
     create: {
       email,
       name,
       passwordHash,
+      emailVerified: new Date(),
       roles: {
         create: { role: Role.ADMIN },
       },

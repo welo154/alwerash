@@ -39,6 +39,8 @@ export const authOptions: NextAuthOptions = {
         const ok = await verifyPassword(password, user.passwordHash);
         if (!ok) return null;
 
+        if (!user.emailVerified) return null;
+
         return { id: user.id, email: user.email, name: user.name ?? undefined };
       },
     }),

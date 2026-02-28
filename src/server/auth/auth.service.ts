@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import { hashPassword } from "./password";
+import { createAndSendVerificationToken } from "@/server/email/verification.service";
 
 export const RegisterInput = z.object({
   email: z.string().email().transform((v) => v.toLowerCase().trim()),
@@ -30,10 +31,16 @@ export async function registerUser(input: RegisterInput) {
         name: input.name,
         country: input.country,
         passwordHash,
+        emailVerified: null,
         roles: { create: { role: Role.LEARNER } },
       },
       select: { id: true, email: true, name: true, country: true, createdAt: true },
     });
+
+    const { sent, error: sendError } = await createAndSendVerificationToken(user.id, user.email);
+    if (!sent && sendError) {
+      console.error("[auth] Failed to send verification email:", sendError);
+    }
 
     return user;
   } catch (e) {

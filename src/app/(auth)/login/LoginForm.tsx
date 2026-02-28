@@ -10,6 +10,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const registered = searchParams.get("registered") === "1";
+  const verified = searchParams.get("verified") === "1";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -63,7 +64,12 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-      {registered && (
+      {verified && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          Email verified. You can sign in now.
+        </div>
+      )}
+      {registered && !verified && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
           Registration successful. Please sign in.
         </div>

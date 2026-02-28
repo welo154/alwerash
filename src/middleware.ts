@@ -9,7 +9,7 @@ const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/register/") || pathname === "/verify-email";
   const isLearnPath = pathname === "/learn" || pathname.startsWith("/learn/");
   const isLessonsPath = pathname.startsWith("/lessons/");
   const isSubscriptionPath = pathname === "/subscription" || pathname.startsWith("/subscription");

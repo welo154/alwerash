@@ -6,23 +6,18 @@ import { AppError } from "@/server/lib/errors";
 import {
   getOrderedLessonIds,
   getCompletedLessonIdsForCourse,
-  getUnlockedLessonIds,
 } from "@/server/progress/course-progress.service";
 import { CourseCurriculum } from "./CourseCurriculum";
 import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
 
 export default async function LearnCoursePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ courseId: string }>;
-  searchParams: Promise<{ message?: string }>;
 }) {
   const session = await requireSubscription();
   const userId = session.user.id;
   const { courseId } = await params;
-  const { message } = await searchParams;
-  const showCompletePreviousMessage = message === "complete_previous";
 
   let course;
   try {
@@ -43,10 +38,8 @@ export default async function LearnCoursePage({
     userId,
     orderedLessonIds
   );
-  const unlockedLessonIds = getUnlockedLessonIds(
-    orderedLessonIds,
-    completedLessonIds
-  );
+  // All lessons are enterable (no sequential lock); progress tracking still applies.
+  const unlockedLessonIds = orderedLessonIds;
 
   const lessonCount = modules.reduce(
     (acc, m) => acc + (m.lessons?.length ?? 0),
@@ -141,11 +134,6 @@ export default async function LearnCoursePage({
           <h2 id="curriculum-heading" className="sr-only">
             Course curriculum
           </h2>
-          {showCompletePreviousMessage && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              Complete the previous lesson before starting the next one.
-            </div>
-          )}
           <p className="text-sm font-medium text-slate-700 mb-4">
             Expand a module to see lessons and start watching.
           </p>
