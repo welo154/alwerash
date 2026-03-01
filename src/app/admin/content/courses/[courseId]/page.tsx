@@ -13,6 +13,32 @@ import {
   adminUpdateCourse,
 } from "@/server/content/admin.service";
 
+function FeaturedInBadges({
+  featuredNewOrder,
+  featuredMostPlayedOrder,
+}: {
+  featuredNewOrder?: number | null;
+  featuredMostPlayedOrder?: number | null;
+}) {
+  const inNew = featuredNewOrder != null;
+  const inMostPlayed = featuredMostPlayedOrder != null;
+  if (!inNew && !inMostPlayed) return null;
+  return (
+    <>
+      {inNew && (
+        <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+          In &quot;New&quot; (order {String(featuredNewOrder)})
+        </span>
+      )}
+      {inMostPlayed && (
+        <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+          In &quot;Most played&quot; (order {String(featuredMostPlayedOrder)})
+        </span>
+      )}
+    </>
+  );
+}
+
 export default async function AdminCourseDetail({
   params,
 }: {
@@ -58,7 +84,11 @@ export default async function AdminCourseDetail({
         totalDur === "" || totalDur == null ? null : Number(totalDur),
       rating: ratingVal === "" || ratingVal == null ? null : Number(ratingVal),
     });
-    redirect(`/admin/content/courses/${id}?toast=Course+updated`);
+    const parts = ["Course updated"];
+    if (featuredNew !== "" && featuredNew != null) parts.push(`In "New" (order ${featuredNew})`);
+    if (featuredMostPlayed !== "" && featuredMostPlayed != null) parts.push(`In "Most played" (order ${featuredMostPlayed})`);
+    const toast = parts.join(". ");
+    redirect(`/admin/content/courses/${id}?toast=${encodeURIComponent(toast)}`);
   }
 
   async function createModule(formData: FormData) {
@@ -125,13 +155,19 @@ export default async function AdminCourseDetail({
           {course.summary && (
             <p className="mt-2 text-sm text-slate-600">{course.summary}</p>
           )}
-          <span
-            className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              course.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-            }`}
-          >
-            {course.published ? "Published" : "Draft"}
-          </span>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                course.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {course.published ? "Published" : "Draft"}
+            </span>
+            <FeaturedInBadges
+              featuredNewOrder={(course as { featuredNewOrder?: number | null }).featuredNewOrder}
+              featuredMostPlayedOrder={(course as { featuredMostPlayedOrder?: number | null }).featuredMostPlayedOrder}
+            />
+          </div>
         </div>
       </div>
 
@@ -260,6 +296,10 @@ export default async function AdminCourseDetail({
                 <p className="mt-0.5 text-xs text-slate-500">Display rating on cards. Empty = 4.5.</p>
               </div>
             </div>
+            <p className="mt-3 text-xs text-slate-500">
+              If courses don&apos;t show in <strong>New</strong> or <strong>Most played</strong> on the home page, run{" "}
+              <code className="rounded bg-slate-200 px-1 py-0.5">npm run db:deploy</code> so the database has the required columns.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <div>

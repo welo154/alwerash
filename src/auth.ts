@@ -48,11 +48,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token }) {
       if (token.sub && !token.roles) {
-        const roles = await prisma.userRole.findMany({
-          where: { userId: token.sub },
-          select: { role: true },
-        });
-        (token as { roles?: string[] }).roles = roles.map((r) => r.role);
+        try {
+          const roles = await prisma.userRole.findMany({
+            where: { userId: token.sub },
+            select: { role: true },
+          });
+          (token as { roles?: string[] }).roles = roles.map((r) => r.role);
+        } catch {
+          (token as { roles?: string[] }).roles = [];
+        }
       }
       return token;
     },
@@ -60,15 +64,19 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.sub) {
         (session.user as { id: string; roles: string[] }).id = token.sub;
         (session.user as { id: string; roles: string[] }).roles = ((token.roles as string[] | undefined) ?? []) as import("@prisma/client").Role[];
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { name: true, image: true, email: true, country: true },
-        });
-        if (dbUser) {
-          session.user.name = dbUser.name ?? session.user.name ?? null;
-          session.user.email = dbUser.email;
-          (session.user as { image?: string | null }).image = dbUser.image ?? null;
-          (session.user as { country?: string | null }).country = dbUser.country ?? null;
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { name: true, image: true, email: true, country: true },
+          });
+          if (dbUser) {
+            session.user.name = dbUser.name ?? session.user.name ?? null;
+            session.user.email = dbUser.email;
+            (session.user as { image?: string | null }).image = dbUser.image ?? null;
+            (session.user as { country?: string | null }).country = dbUser.country ?? null;
+          }
+        } catch {
+          // DB may be missing columns (migration not applied); keep session from token
         }
       }
       return session;

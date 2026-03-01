@@ -12,12 +12,14 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:apply-featured": "prisma db execute --file prisma/migrations/20260301000000_add_course_featured_and_card_stats/migration.sql",
     "db:setup": "prisma migrate deploy && prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "scripts:remove-admin": "tsx scripts/remove-admin-role.ts",
-    "scripts:delete-user": "tsx scripts/delete-user.ts"
+    "scripts:delete-user": "tsx scripts/delete-user.ts",
+    "scripts:add-featured-courses": "tsx scripts/add-featured-courses.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2",

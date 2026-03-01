@@ -25,6 +25,157 @@ const FIELDS_FALLBACK = [
   "Productivity",
 ];
 
+/** Static fallback cards when API returns no courses (New section). */
+const STATIC_NEW_CARDS: CourseForCard[] = [
+  {
+    id: "static-new-1",
+    title: "Figma Fundamentals",
+    summary: "Master the basics of Figma for UI design. Covers frames, components, and prototyping.",
+    coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80",
+    instructorName: "Design Team",
+    instructorImage: null,
+    track: { title: "UI/UX Design", slug: "ui-ux-design" },
+    lessonCount: 12,
+    totalDurationMinutes: 180,
+    rating: 4.5,
+    studentCount: 1240,
+  },
+  {
+    id: "static-new-2",
+    title: "Motion Design in After Effects",
+    summary: "Create smooth animations and motion graphics. From keyframes to expressions.",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80",
+    instructorName: "Motion Studio",
+    instructorImage: null,
+    track: { title: "Motion Design", slug: "motion-design" },
+    lessonCount: 18,
+    totalDurationMinutes: 320,
+    rating: 4.8,
+    studentCount: 890,
+  },
+  {
+    id: "static-new-3",
+    title: "Logo & Brand Identity",
+    summary: "Design memorable logos and build cohesive brand systems.",
+    coverImage: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+    instructorName: "Brand Lab",
+    instructorImage: null,
+    track: { title: "Graphic Design", slug: "graphic-design" },
+    lessonCount: 10,
+    totalDurationMinutes: 145,
+    rating: 4.6,
+    studentCount: 2100,
+  },
+];
+
+/** Static fallback cards when API returns no courses (Most played section). */
+const STATIC_MOST_PLAYED_CARDS: CourseForCard[] = [
+  {
+    id: "static-mp-1",
+    title: "Figma Fundamentals",
+    summary: "Master the basics of Figma for UI design.",
+    coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80",
+    instructorName: "Design Team",
+    instructorImage: null,
+    track: { title: "UI/UX Design", slug: "ui-ux-design" },
+    lessonCount: 12,
+    totalDurationMinutes: 180,
+    rating: 4.5,
+    studentCount: 1240,
+  },
+  {
+    id: "static-mp-2",
+    title: "Prototyping in Figma",
+    summary: "Create interactive prototypes and hand off to dev.",
+    coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
+    instructorName: "Design Team",
+    instructorImage: null,
+    track: { title: "UI/UX Design", slug: "ui-ux-design" },
+    lessonCount: 8,
+    totalDurationMinutes: 120,
+    rating: 4.7,
+    studentCount: 980,
+  },
+  {
+    id: "static-mp-3",
+    title: "Logo Design Masterclass",
+    summary: "Design memorable logos and brand identities.",
+    coverImage: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+    instructorName: "Brand Lab",
+    instructorImage: null,
+    track: { title: "Graphic Design", slug: "graphic-design" },
+    lessonCount: 10,
+    totalDurationMinutes: 145,
+    rating: 4.6,
+    studentCount: 2100,
+  },
+  {
+    id: "static-mp-4",
+    title: "After Effects Basics",
+    summary: "Get started with motion design and animation.",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80",
+    instructorName: "Motion Studio",
+    instructorImage: null,
+    track: { title: "Motion Design", slug: "motion-design" },
+    lessonCount: 14,
+    totalDurationMinutes: 220,
+    rating: 4.5,
+    studentCount: 756,
+  },
+  {
+    id: "static-mp-5",
+    title: "Typography Fundamentals",
+    summary: "Typography principles and best practices for design.",
+    coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80",
+    instructorName: "Brand Lab",
+    instructorImage: null,
+    track: { title: "Graphic Design", slug: "graphic-design" },
+    lessonCount: 9,
+    totalDurationMinutes: 135,
+    rating: 4.6,
+    studentCount: 1680,
+  },
+  {
+    id: "static-mp-6",
+    title: "Lottie Animations",
+    summary: "Create lightweight JSON animations for web and app.",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80",
+    instructorName: "Motion Studio",
+    instructorImage: null,
+    track: { title: "Motion Design", slug: "motion-design" },
+    lessonCount: 6,
+    totalDurationMinutes: 95,
+    rating: 4.8,
+    studentCount: 520,
+  },
+  {
+    id: "static-mp-7",
+    title: "Design Systems in Figma",
+    summary: "Build scalable design systems and component libraries.",
+    coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80",
+    instructorName: "Design Team",
+    instructorImage: null,
+    track: { title: "UI/UX Design", slug: "ui-ux-design" },
+    lessonCount: 16,
+    totalDurationMinutes: 280,
+    rating: 4.7,
+    studentCount: 1100,
+  },
+  {
+    id: "static-mp-8",
+    title: "Creative Illustration",
+    summary: "From sketch to digital illustration and storytelling.",
+    coverImage: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+    instructorName: "Art Studio",
+    instructorImage: null,
+    track: { title: "Graphic Design", slug: "graphic-design" },
+    lessonCount: 11,
+    totalDurationMinutes: 195,
+    rating: 4.5,
+    studentCount: 890,
+  },
+];
+
 function formatDuration(totalMinutes: number | null, lessonCount: number): string {
   const mins = totalMinutes ?? lessonCount * 15;
   if (mins <= 0) return "0m";
@@ -201,8 +352,10 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
   const [modalCourse, setModalCourse] = useState<CourseForCard | null>(null);
   const [mostPlayedPage, setMostPlayedPage] = useState(1);
   const fieldList = fields.length > 0 ? fields : FIELDS_FALLBACK;
-  const mostPlayedTotalPages = Math.max(1, Math.ceil(mostPlayedCourses.length / MOST_PLAYED_PAGE_SIZE));
-  const mostPlayedPaginated = mostPlayedCourses.slice(
+  const newDisplay = newCourses.length > 0 ? newCourses : STATIC_NEW_CARDS;
+  const mostPlayedDisplay = mostPlayedCourses.length > 0 ? mostPlayedCourses : STATIC_MOST_PLAYED_CARDS;
+  const mostPlayedTotalPages = Math.max(1, Math.ceil(mostPlayedDisplay.length / MOST_PLAYED_PAGE_SIZE));
+  const mostPlayedPaginated = mostPlayedDisplay.slice(
     (mostPlayedPage - 1) * MOST_PLAYED_PAGE_SIZE,
     mostPlayedPage * MOST_PLAYED_PAGE_SIZE
   );
@@ -256,19 +409,13 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                   </h2>
                 </div>
                 <div className="flex flex-1 items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
-                  {newCourses.length === 0 ? (
-                    <div className="flex h-40 min-w-[300px] items-center justify-center rounded-lg border-2 border-dashed border-black/20 text-slate-600">
-                      No courses yet
-                    </div>
-                  ) : (
-                    newCourses.map((course) => (
-                      <NewSectionCard
-                        key={course.id}
-                        course={course}
-                        onClick={() => setModalCourse(course)}
-                      />
-                    ))
-                  )}
+                  {newDisplay.map((course) => (
+                    <NewSectionCard
+                      key={course.id}
+                      course={course}
+                      onClick={() => setModalCourse(course)}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -277,7 +424,7 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                 <h3 className="mb-4 text-lg font-bold uppercase tracking-tight text-slate-900">
                   MOST PLAYED
                 </h3>
-                {mostPlayedCourses.length === 0 ? (
+                {mostPlayedDisplay.length === 0 ? (
                   <div className="flex h-40 w-72 items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-slate-400">
                     No courses yet
                   </div>

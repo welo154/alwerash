@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Ensure Tailwind v4 scans app and components (fixes unstyled admin/dynamic routes) */
+@source "./**/*.{js,ts,jsx,tsx}";
+@source "../components/**/*.{js,ts,jsx,tsx}";
+
 @theme {
   /* Design font: DM Sans, applied site-wide */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";

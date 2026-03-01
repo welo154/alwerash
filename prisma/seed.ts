@@ -143,6 +143,38 @@ async function main() {
     });
     console.log("Seeded course:", course.title);
   }
+
+  // Add some courses to "New" and "Most played" (requires featured_* columns from migration)
+  const published = await prisma.course.findMany({
+    where: { published: true },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, title: true },
+    take: 6,
+  });
+  const featuredNew = published.slice(0, 3);
+  const featuredMostPlayed = published.slice(0, 4);
+  for (let i = 0; i < featuredNew.length; i++) {
+    try {
+      await prisma.course.update({
+        where: { id: featuredNew[i].id },
+        data: { featuredNewOrder: i + 1 },
+      });
+      console.log("Added to New:", featuredNew[i].title, "(order", i + 1 + ")");
+    } catch {
+      // Columns may not exist yet (run db:deploy)
+    }
+  }
+  for (let i = 0; i < featuredMostPlayed.length; i++) {
+    try {
+      await prisma.course.update({
+        where: { id: featuredMostPlayed[i].id },
+        data: { featuredMostPlayedOrder: i + 1 },
+      });
+      console.log("Added to Most played:", featuredMostPlayed[i].title, "(order", i + 1 + ")");
+    } catch {
+      // Columns may not exist yet
+    }
+  }
 }
 
 main()

@@ -113,7 +113,7 @@ export function StatsSection() {
   return (
     <section ref={sectionRef} className="px-4 py-10 sm:px-6" data-gsap-reveal>
       <div
-        className="mx-auto max-w-7xl rounded-2xl rounded-[40px] py-16 px-4 shadow-lg sm:px-6"
+        className="mx-auto max-w-7xl rounded-[40px] py-16 px-4 shadow-lg sm:px-6"
         style={{ backgroundColor: "var(--color-stats-bar)" }}
       >
         <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 sm:justify-between">

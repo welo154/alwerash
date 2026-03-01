@@ -166,8 +166,6 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
-        totalDurationMinutes: true,
-        rating: true,
         modules: { select: { _count: { select: { lessons: true } } } },
       },
     });
@@ -175,7 +173,7 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
     const studentCounts = await getStudentCountsByCourseId(courseIds);
     return courses.map((c) =>
       mapCourseToCard(
-        { ...c, totalDurationMinutes: c.totalDurationMinutes ?? undefined, rating: c.rating ?? undefined },
+        { ...c, totalDurationMinutes: undefined, rating: undefined },
         studentCounts.get(c.id) ?? 0
       )
     );
@@ -200,8 +198,6 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
-        totalDurationMinutes: true,
-        rating: true,
         modules: { select: { _count: { select: { lessons: true } } } },
       },
     });
@@ -209,7 +205,7 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
     const studentCounts = await getStudentCountsByCourseId(courseIds);
     return courses.map((c) =>
       mapCourseToCard(
-        { ...c, totalDurationMinutes: c.totalDurationMinutes ?? undefined, rating: c.rating ?? undefined },
+        { ...c, totalDurationMinutes: undefined, rating: undefined },
         studentCounts.get(c.id) ?? 0
       )
     );
