@@ -138,7 +138,7 @@ export default async function AdminModuleDetail({
                 name="title"
                 defaultValue={courseModule.title}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <div>
@@ -148,7 +148,7 @@ export default async function AdminModuleDetail({
                 type="number"
                 defaultValue={courseModule.order}
                 min={0}
-                className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -177,14 +177,14 @@ export default async function AdminModuleDetail({
                   name="title"
                   placeholder="e.g. Drawing the lines"
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
                 <select
                   name="type"
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 >
                   <option value="VIDEO">Video</option>
                   <option value="ARTICLE">Article</option>
@@ -198,7 +198,7 @@ export default async function AdminModuleDetail({
                   type="number"
                   defaultValue={0}
                   min={0}
-                  className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
               </div>
               <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
@@ -206,7 +206,7 @@ export default async function AdminModuleDetail({
                   name="published"
                   type="checkbox"
                   defaultChecked
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                 />
                 Published (visible to learners)
               </label>
@@ -241,7 +241,7 @@ export default async function AdminModuleDetail({
                         name="title"
                         defaultValue={l.title}
                         required
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
@@ -259,7 +259,7 @@ export default async function AdminModuleDetail({
                       <select
                         name="type"
                         defaultValue={l.type}
-                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       >
                         <option value="VIDEO">Video</option>
                         <option value="ARTICLE">Article</option>
@@ -273,7 +273,7 @@ export default async function AdminModuleDetail({
                         type="number"
                         defaultValue={l.order}
                         min={0}
-                        className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
                     <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
@@ -281,7 +281,7 @@ export default async function AdminModuleDetail({
                         name="published"
                         type="checkbox"
                         defaultChecked={l.published}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                       />
                       Published
                     </label>

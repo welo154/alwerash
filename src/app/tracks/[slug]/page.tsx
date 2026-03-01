@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { publicGetTrackBySlug } from "@/server/content/public.service";
 import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
 import { AppError } from "@/server/lib/errors";
+import { CourseCard } from "@/components/landing/CourseCard";
 
 export default async function TrackPage({
   params,
@@ -37,7 +38,7 @@ export default async function TrackPage({
             </Link>
             <span>/</span>
             <Link href="/tracks" className="hover:text-blue-600">
-              Learning paths
+              Projects
             </Link>
             <span>/</span>
             <span className="text-slate-900">{track.title}</span>
@@ -99,42 +100,15 @@ export default async function TrackPage({
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-gsap-stagger-group>
             {track.courses.map((c) => (
-              <Link
+              <CourseCard
                 key={c.id}
-                href={`/courses/${c.id}`}
-                className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
-                data-gsap-hover
-              >
-                <div className="aspect-video relative overflow-hidden bg-slate-100">
-                  {c.coverImage ? (
-                    <Image
-                      src={c.coverImage}
-                      alt={c.title}
-                      fill
-                      unoptimized
-                      className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-slate-400">
-                      Course
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">
-                    {c.title}
-                  </h3>
-                  {c.summary && (
-                    <p className="mt-2 line-clamp-2 flex-1 text-sm text-slate-600">
-                      {c.summary}
-                    </p>
-                  )}
-                  <span className="mt-4 inline-flex items-center text-sm font-medium text-blue-600">
-                    View course →
-                  </span>
-                </div>
-              </Link>
+                id={c.id}
+                title={c.title}
+                summary={c.summary}
+                coverImage={c.coverImage}
+                track={{ title: track.title, slug: track.slug }}
+                lessonCount={c.lessonCount}
+              />
             ))}
           </div>
         )}

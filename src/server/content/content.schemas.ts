@@ -76,6 +76,10 @@ export const CourseCreateSchema = z.object({
   instructorImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
+  featuredNewOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  featuredMostPlayedOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  totalDurationMinutes: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  rating: z.number().min(0).max(5).nullable().optional(),
 });
 
 export const CourseUpdateSchema = CourseCreateSchema.partial().extend({

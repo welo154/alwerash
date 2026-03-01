@@ -19,45 +19,53 @@ export default async function AdminTracksPage({
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Tracks</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-black">Tracks</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {tracks.map((t) => (
           <Link
             key={t.id}
             href={`/admin/content/tracks/${t.id}`}
-            className="group card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md"
+            className="group flex h-[340px] max-w-[300px] flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 font-sans text-left shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
           >
-            {t.coverImage ? (
-              <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-slate-100">
+            <div className="relative mb-3 h-[140px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
+              {t.coverImage ? (
                 <Image
                   src={t.coverImage}
                   alt=""
                   fill
                   unoptimized
-                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                  className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                  sizes="320px"
                 />
-              </div>
-            ) : (
-              <div className="aspect-video w-full shrink-0 bg-slate-100" />
-            )}
-            <div className="flex flex-1 flex-col p-4">
-              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">{t.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">
-                {t.school?.title ?? t.schoolId} • {t.slug}
-              </p>
-              <div className="mt-auto pt-3">
-                <span
-                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                    t.published
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {t.published ? "Published" : "Draft"}
-                </span>
-              </div>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
+                  {t.title.charAt(0)}
+                </div>
+              )}
+            </div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">
+                {t.title}
+              </h3>
+            </div>
+            <div className="mb-4">
+              <span className="inline-block rounded-full bg-gray-400 px-3 py-1 text-sm font-medium italic text-white">
+                {t.school?.title ?? t.schoolId ?? "No school"}
+              </span>
+            </div>
+            <p className="mb-2 text-[11px] font-medium leading-[1.3] text-black">
+              {t.slug}
+            </p>
+            <div className="mt-auto flex items-center justify-between">
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                  t.published ? "bg-gray-400 text-white" : "bg-slate-300 text-slate-600"
+                }`}
+              >
+                {t.published ? "Published" : "Draft"}
+              </span>
+              <span className="text-sm font-bold text-black group-hover:text-[var(--color-primary)]">Manage →</span>
             </div>
           </Link>
         ))}

@@ -213,12 +213,22 @@ model Course {
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
+  // Featured sections (admin): set order to show in "New" / "Most Played" (null = not featured)
+  featuredNewOrder       Int?     @map("featured_new_order")
+  featuredMostPlayedOrder Int?    @map("featured_most_played_order")
+
+  // Card stats (admin-editable or derived): total duration in minutes, display rating
+  totalDurationMinutes   Int?     @map("total_duration_minutes")
+  rating                 Float?   // e.g. 4.5
+
   track                  Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
   modules                Module[]
   threads                Thread[]
   introVideoUploads      CourseIntroVideoUpload[]
 
   @@index([trackId, order])
+  @@index([featuredNewOrder])
+  @@index([featuredMostPlayedOrder])
   @@map("courses")
 }
 

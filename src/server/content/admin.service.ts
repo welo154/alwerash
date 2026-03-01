@@ -181,10 +181,11 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   const updates: string[] = [];
   const values: unknown[] = [];
   let idx = 0;
+  // Quote column names so reserved keywords (e.g. "order") are valid identifiers in PostgreSQL
   const set = (col: string, v: unknown) => {
     if (v === undefined) return;
     idx += 1;
-    updates.push(`${col} = $${idx}`);
+    updates.push(`"${col}" = $${idx}`);
     values.push(v);
   };
   set("track_id", data.trackId);
@@ -195,14 +196,41 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   set("instructor_image", data.instructorImage);
   set("order", Number(data.order));
   set("published", Boolean(data.published));
-  if (updates.length === 0) return prisma.course.findUnique({ where: { id: courseId } });
+  if (updates.length === 0) {
+    return courseFindRawSafe(courseId);
+  }
   idx += 1;
   values.push(courseId);
   await prisma.$executeRawUnsafe(
-    `UPDATE courses SET ${updates.join(", ")}, updated_at = now() WHERE id = $${idx}`,
+    `UPDATE courses SET ${updates.join(", ")}, "updated_at" = now() WHERE id = $${idx}`,
     ...values
   );
-  return prisma.course.findUnique({ where: { id: courseId } });
+  return courseFindRawSafe(courseId);
+}
+
+/** Fetch course by id using only columns that exist before featured_* migration (avoids Prisma selecting missing columns). */
+async function courseFindRawSafe(courseId: string) {
+  const rows = await prisma.$queryRawUnsafe<
+    { id: string; track_id: string | null; title: string; summary: string | null; cover_image: string | null; instructor_name: string | null; instructor_image: string | null; order: number; published: boolean; created_at: Date; updated_at: Date }[]
+  >(
+    `SELECT id, track_id, title, summary, cover_image, instructor_name, instructor_image, "order", published, created_at, updated_at FROM courses WHERE id = $1`,
+    courseId
+  );
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    trackId: row.track_id,
+    title: row.title,
+    summary: row.summary,
+    coverImage: row.cover_image,
+    instructorName: row.instructor_name,
+    instructorImage: row.instructor_image,
+    order: row.order,
+    published: row.published,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 export async function adminUpdateCourse(courseId: string, input: unknown) {
@@ -210,7 +238,10 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
   try {
     return await prisma.course.update({ where: { id: courseId }, data });
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.message?.includes("does not exist")) {
+    const isMissingColumn =
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      (e.message?.includes("does not exist") ?? (e.meta as { message?: string } | undefined)?.message?.includes("does not exist"));
+    if (isMissingColumn) {
       return courseUpdateRawSafe(courseId, data);
     }
     handlePrismaError(e);

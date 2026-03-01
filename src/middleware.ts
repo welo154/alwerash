@@ -12,7 +12,6 @@ export async function middleware(req: NextRequest) {
   const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/register/") || pathname === "/verify-email";
   const isLearnPath = pathname === "/learn" || pathname.startsWith("/learn/");
   const isLessonsPath = pathname.startsWith("/lessons/");
-  const isSubscriptionPath = pathname === "/subscription" || pathname.startsWith("/subscription");
   const isAdminPath = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
   const isPlaybackApi = pathname.startsWith("/api/video/playback/");
@@ -36,9 +35,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const isProtectedPage = isLearnPath || isLessonsPath || isSubscriptionPath;
+  const isProtectedPage = isLearnPath || isLessonsPath;
 
-  // Protect learn, lessons, subscription: require login
+  // Protect learn, lessons: require login (subscription page is public; only subscribe action requires login)
   if (isProtectedPage) {
     if (!token?.sub) {
       const url = req.nextUrl.clone();

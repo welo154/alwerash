@@ -28,6 +28,9 @@ Open **http://localhost:3000**.
 | `npm run lint` | ESLint |
 | `npm run build` | Production build |
 | `npx prisma db seed` | Seed admin user (set `ADMIN_EMAIL`, `ADMIN_PASSWORD` in `.env`) |
+| `npm run db:deploy` | Apply pending migrations (DB must be reachable) |
+| `npm run db:generate` | Regenerate Prisma client (stop dev server if you get EPERM) |
+| `npm run db:setup` | Run `db:deploy` then `db:generate` (when DB is up and nothing is locking Prisma) |
 
 ## Env
 

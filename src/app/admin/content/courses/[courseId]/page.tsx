@@ -26,7 +26,6 @@ export default async function AdminCourseDetail({
     adminListTracks(),
   ]);
 
-  const courseWithOrder = course as typeof course & { order?: number };
 
   async function update(formData: FormData) {
     "use server";
@@ -34,6 +33,10 @@ export default async function AdminCourseDetail({
     const id = String(formData.get("courseId") ?? "");
     if (!id) return;
     const trackIdVal = String(formData.get("trackId") ?? "").trim();
+    const featuredNew = formData.get("featuredNewOrder");
+    const featuredMostPlayed = formData.get("featuredMostPlayedOrder");
+    const totalDur = formData.get("totalDurationMinutes");
+    const ratingVal = formData.get("rating");
     await adminUpdateCourse(id, {
       title: String(formData.get("title") ?? ""),
       summary: String(formData.get("summary") ?? "").trim() || undefined,
@@ -43,6 +46,17 @@ export default async function AdminCourseDetail({
       trackId: trackIdVal || "",
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
+      featuredNewOrder:
+        featuredNew === "" || featuredNew == null
+          ? null
+          : Number(featuredNew),
+      featuredMostPlayedOrder:
+        featuredMostPlayed === "" || featuredMostPlayed == null
+          ? null
+          : Number(featuredMostPlayed),
+      totalDurationMinutes:
+        totalDur === "" || totalDur == null ? null : Number(totalDur),
+      rating: ratingVal === "" || ratingVal == null ? null : Number(ratingVal),
     });
     redirect(`/admin/content/courses/${id}?toast=Course+updated`);
   }
@@ -131,7 +145,7 @@ export default async function AdminCourseDetail({
             <select
               name="trackId"
               defaultValue={course.trackId ?? ""}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             >
               <option value="">None (no track)</option>
               {tracks.map((t) => (
@@ -147,7 +161,7 @@ export default async function AdminCourseDetail({
               name="title"
               defaultValue={course.title}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
@@ -157,7 +171,7 @@ export default async function AdminCourseDetail({
               type="url"
               defaultValue={course.coverImage ?? ""}
               placeholder="https://..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
@@ -166,7 +180,7 @@ export default async function AdminCourseDetail({
               name="instructorName"
               defaultValue={course.instructorName ?? ""}
               placeholder="e.g. Ahmed Radwan"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
@@ -176,7 +190,7 @@ export default async function AdminCourseDetail({
               type="url"
               defaultValue={course.instructorImage ?? ""}
               placeholder="https://..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
@@ -185,8 +199,67 @@ export default async function AdminCourseDetail({
               name="summary"
               defaultValue={course.summary ?? ""}
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800">Homepage sections & card stats</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Featured in &quot;New&quot; (order)
+                </label>
+                <input
+                  name="featuredNewOrder"
+                  type="number"
+                  min={0}
+                  placeholder="Leave empty to hide"
+                  defaultValue={(course as { featuredNewOrder?: number | null }).featuredNewOrder ?? ""}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Set 1, 2, 3… to show in New section (lower = first).</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Featured in &quot;Most Played&quot; (order)
+                </label>
+                <input
+                  name="featuredMostPlayedOrder"
+                  type="number"
+                  min={0}
+                  placeholder="Leave empty to hide"
+                  defaultValue={(course as { featuredMostPlayedOrder?: number | null }).featuredMostPlayedOrder ?? ""}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Set 1, 2, 3… to show in Most Played (lower = first).</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Total duration (minutes)</label>
+                <input
+                  name="totalDurationMinutes"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 458"
+                  defaultValue={(course as { totalDurationMinutes?: number | null }).totalDurationMinutes ?? ""}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Shown on cards (e.g. 7h 38m). Empty = from lesson count.</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Rating (0–5)</label>
+                <input
+                  name="rating"
+                  type="number"
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  placeholder="e.g. 4.5"
+                  defaultValue={(course as { rating?: number | null }).rating ?? ""}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Display rating on cards. Empty = 4.5.</p>
+              </div>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <div>
@@ -194,7 +267,7 @@ export default async function AdminCourseDetail({
               <input
                 name="order"
                 type="number"
-                defaultValue={courseWithOrder.order ?? 0}
+                defaultValue={course.order ?? 0}
                 min={0}
                 className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
@@ -204,13 +277,13 @@ export default async function AdminCourseDetail({
                 name="published"
                 type="checkbox"
                 defaultChecked={course.published}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
               Published
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
             >
               Save
             </button>
@@ -254,7 +327,7 @@ export default async function AdminCourseDetail({
                 name="title"
                 placeholder="e.g. Course brief, What is geometric ornamentation"
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <div>
@@ -270,7 +343,7 @@ export default async function AdminCourseDetail({
             <div className="flex items-end">
               <button
                 type="submit"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
               >
                 Add Module
               </button>
@@ -285,8 +358,8 @@ export default async function AdminCourseDetail({
               href={`/admin/content/modules/${m.id}`}
               className="group card-hover flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
             >
-              <div className="font-semibold text-slate-900 group-hover:text-blue-600">{m.title}</div>
-              <span className="text-sm text-blue-600 group-hover:underline">Manage lessons →</span>
+              <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">{m.title}</div>
+              <span className="text-sm text-[var(--color-primary)] group-hover:underline">Manage lessons →</span>
             </Link>
           ))}
           {course.modules.length === 0 && (

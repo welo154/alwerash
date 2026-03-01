@@ -1,6 +1,5 @@
-import Link from "next/link";
-import Image from "next/image";
 import { publicListFeaturedCourses } from "@/server/content/public.service";
+import { CourseCard } from "./CourseCard";
 
 export async function MostWatchedSection() {
   const courses = await publicListFeaturedCourses(4);
@@ -13,44 +12,22 @@ export async function MostWatchedSection() {
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Trending courses
         </h2>
-        <p className="mt-2.5 text-slate-600 leading-relaxed">
+        <p className="mt-2.5 leading-relaxed text-slate-600">
           Popular courses this month
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-gsap-stagger-group>
           {courses.map((course) => (
-            <Link
+            <CourseCard
               key={course.id}
-              href={`/courses/${course.id}`}
-              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/80 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-card-hover)]"
-              data-gsap-hover
-            >
-              <div className="aspect-video relative overflow-hidden bg-slate-100">
-                {course.coverImage ? (
-                  <Image
-                    src={course.coverImage}
-                    alt={course.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-slate-400">
-                    Course
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">
-                  {course.title}
-                </h3>
-                {course.track && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {course.track.title}
-                  </p>
-                )}
-              </div>
-            </Link>
+              variant="mostPlayed"
+              id={course.id}
+              title={course.title}
+              summary={course.summary}
+              coverImage={course.coverImage}
+              track={course.track}
+              lessonCount={course.lessonCount}
+              instructorName={course.instructorName}
+            />
           ))}
         </div>
       </div>

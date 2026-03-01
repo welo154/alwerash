@@ -16,29 +16,38 @@ export default async function AdminSchoolsPage({
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Schools</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-black">Schools</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {schools.map((s) => (
           <Link
             key={s.id}
             href={`/admin/content/schools/${s.id}`}
-            className="group card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md"
+            className="group flex h-[340px] max-w-[300px] flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 font-sans text-left shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
           >
-            <div className="flex flex-1 flex-col p-4">
-              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">{s.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{s.slug}</p>
-              <div className="mt-auto pt-3">
-                <span
-                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                    s.published
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {s.published ? "Published" : "Draft"}
-                </span>
-              </div>
+            <div className="relative mb-3 flex h-[140px] w-full shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-slate-200">
+              <span className="text-5xl font-black text-slate-400">{s.title.charAt(0)}</span>
+            </div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-lg font-black leading-tight tracking-tight text-black uppercase">
+                {s.title}
+              </h3>
+            </div>
+            <div className="mb-4">
+              <span className="inline-block rounded-full bg-gray-400 px-3 py-1 text-sm font-medium italic text-white">
+                {s.slug}
+              </span>
+            </div>
+            <div className="min-h-0 flex-1" />
+            <div className="mt-auto flex items-center justify-between">
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                  s.published ? "bg-gray-400 text-white" : "bg-slate-300 text-slate-600"
+                }`}
+              >
+                {s.published ? "Published" : "Draft"}
+              </span>
+              <span className="text-sm font-bold text-black group-hover:text-[var(--color-primary)]">Manage →</span>
             </div>
           </Link>
         ))}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Search, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
 
@@ -13,17 +13,17 @@ export function SiteHeader() {
   const { data: session, status } = useSession();
 
   return (
-    <nav className="relative z-50 flex w-full items-center justify-between bg-black px-6 py-3 font-sans text-white">
-      {/* Left: Logo + Nav */}
-      <div className="flex items-center gap-10">
+    <nav className="relative z-50 flex w-full flex-nowrap items-center justify-between gap-4 bg-black px-6 py-3 font-sans text-white">
+      {/* Logo + Nav + Search + Plans in one row */}
+      <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-6 sm:gap-8">
         <Link
           href="/"
-          className="font-logo flex items-baseline gap-0.5 text-2xl font-black italic tracking-tighter text-white transition-colors hover:text-gray-300 focus:outline-none"
+          className="font-logo flex shrink-0 items-center gap-0.5 text-2xl font-black italic tracking-tighter text-white transition-colors hover:text-gray-300 focus:outline-none"
         >
           <span>alwerash</span>
           <span className="text-yellow-400">.</span>
         </Link>
-        <div className="hidden sm:flex gap-8" aria-label="Main navigation">
+        <div className="hidden sm:flex shrink-0 items-center gap-8" aria-label="Main navigation">
           <Link href="/learn" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
             Courses
           </Link>
@@ -31,22 +31,20 @@ export function SiteHeader() {
             Projects
           </Link>
         </div>
-      </div>
-
-      {/* Center: Search */}
-      <div className="flex flex-1 max-w-xl px-10">
-        <SearchBar />
-      </div>
-
-      {/* Right: Plans, My courses, Auth */}
-      <div className="flex items-center gap-8">
+        <div className="hidden sm:block w-full max-w-[280px] min-w-0">
+          <SearchBar />
+        </div>
         <Link
           href="/subscription"
-          className="hidden sm:flex items-center gap-2 text-[15px] font-bold text-white transition-colors hover:text-gray-300"
+          className="hidden sm:flex shrink-0 items-center gap-2 text-[15px] font-bold text-white transition-colors hover:text-gray-300"
         >
           <ShoppingCart size={20} strokeWidth={2.5} />
           Plans
         </Link>
+      </div>
+
+      {/* Right: My courses, Auth */}
+      <div className="flex shrink-0 flex-nowrap items-center gap-8">
         {status === "loading" ? (
           <div className="h-10 w-10 animate-pulse rounded-full border-2 border-yellow-400/50 bg-white/10" />
         ) : session?.user ? (

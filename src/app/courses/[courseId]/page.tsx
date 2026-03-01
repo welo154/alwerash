@@ -1,4 +1,6 @@
 // file: src/app/courses/[courseId]/page.tsx
+// Course page is public: anyone can view course info, intro video, and curriculum.
+// Lesson videos are only available to subscribed users via /learn/[courseId]/lesson/[lessonId].
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -13,6 +15,7 @@ import { prisma } from "@/server/db/prisma";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
 import { getCourseProgress } from "@/server/learning/progress.service";
 import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
+import { CourseCard } from "@/components/landing/CourseCard";
 
 export async function generateMetadata({
   params,
@@ -88,7 +91,7 @@ export default async function CoursePage({
             </Link>
             <span>/</span>
             <Link href="/tracks" className="hover:text-blue-600">
-              Learning paths
+              Projects
             </Link>
             {course.track ? (
               <>
@@ -351,32 +354,18 @@ export default async function CoursePage({
             </h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {similarCourses.map((c) => (
-                <Link
+                <CourseCard
                   key={c.id}
-                  href={`/courses/${c.id}`}
-                  className="group card-hover overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[var(--shadow-card)] transition-shadow hover:border-blue-300 hover:shadow-[var(--shadow-card-hover)]"
-                >
-                  <div className="aspect-video relative overflow-hidden bg-slate-100">
-                    {c.coverImage ? (
-                      <Image
-                        src={c.coverImage}
-                        alt={c.title}
-                        fill
-                        unoptimized
-                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
-                    ) : (
-                      <div className="h-full w-full" />
-                    )}
-                  </div>
-                  <h3 className="p-4 pt-3 font-medium text-slate-900">{c.title}</h3>
-                  {c.summary && (
-                    <p className="px-4 pb-4 line-clamp-2 text-sm text-slate-600">
-                      {c.summary}
-                    </p>
-                  )}
-                </Link>
+                  id={c.id}
+                  title={c.title}
+                  summary={c.summary}
+                  coverImage={c.coverImage}
+                  track={c.track}
+                  lessonCount={c.lessonCount}
+                  totalDurationMinutes={c.totalDurationMinutes}
+                  rating={c.rating}
+                  studentCount={c.studentCount}
+                />
               ))}
             </div>
           </section>

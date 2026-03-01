@@ -34,7 +34,7 @@ export async function CreateCourseForm() {
         <label className="mb-1 block text-sm font-medium text-slate-700">Track (optional)</label>
         <select
           name="trackId"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         >
           <option value="">None (no track)</option>
           {tracks.map((t: TrackItem) => (
@@ -50,7 +50,7 @@ export async function CreateCourseForm() {
           name="title"
           placeholder="Course title"
           required
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -59,7 +59,7 @@ export async function CreateCourseForm() {
           name="coverImage"
           type="url"
           placeholder="https://..."
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -67,7 +67,7 @@ export async function CreateCourseForm() {
         <input
           name="instructorName"
           placeholder="e.g. Ahmed Radwan"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -76,7 +76,7 @@ export async function CreateCourseForm() {
           name="instructorImage"
           type="url"
           placeholder="https://..."
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -85,7 +85,7 @@ export async function CreateCourseForm() {
           name="summary"
           placeholder="Brief description"
           rows={3}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div className="flex flex-wrap items-center gap-4">
@@ -113,7 +113,7 @@ export async function CreateCourseForm() {
         </Link>
         <button
           type="submit"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
         >
           Create Course
         </button>

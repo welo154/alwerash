@@ -65,22 +65,22 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
       {verified && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+        <div className="rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary-light)] p-3 text-sm text-black">
           Email verified. You can sign in now.
         </div>
       )}
       {registered && !verified && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+        <div className="rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary-light)] p-3 text-sm text-black">
           Registration successful. Please sign in.
         </div>
       )}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
           {error}
         </div>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="email" className="block text-sm font-medium text-black">
           Email
         </label>
         <input
@@ -89,12 +89,12 @@ export default function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           required
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="password" className="block text-sm font-medium text-black">
           Password
         </label>
         <input
@@ -103,14 +103,14 @@ export default function LoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           required
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-xl bg-black px-4 py-3 font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>

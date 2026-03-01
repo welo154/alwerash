@@ -26,8 +26,14 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
 
   const track = (await prisma.track.findUnique({
     where: { id: trackId },
-    include: { courses: { orderBy: { createdAt: "asc" } }, school: true },
-  } as { where: { id: string }; include: { courses: { orderBy: { createdAt: "asc" } }; school: true } })) as TrackWithRelations | null;
+    include: {
+      school: true,
+      courses: {
+        select: { id: true, title: true, published: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  })) as TrackWithRelations | null;
 
   if (!track)
     return (
@@ -142,7 +148,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 name="title"
                 defaultValue={track.title}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <div>
@@ -151,7 +157,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 name="slug"
                 defaultValue={track.slug}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -162,7 +168,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
               type="url"
               defaultValue={track.coverImage ?? ""}
               placeholder="https://..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
@@ -171,7 +177,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
               name="description"
               defaultValue={track.description ?? ""}
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div className="flex flex-wrap items-center gap-4">
@@ -190,13 +196,13 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 name="published"
                 type="checkbox"
                 defaultChecked={track.published}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
               Published
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
             >
               Save
             </button>
@@ -227,7 +233,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                   name="title"
                   placeholder="e.g. Geometric Ornamentation"
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
               </div>
               <div>
@@ -247,20 +253,20 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 name="summary"
                 placeholder="Brief description"
                 rows={2}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
               <input
                 name="published"
                 type="checkbox"
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
               Published
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
             >
               Add Course
             </button>
@@ -275,7 +281,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
               className="group card-hover flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
             >
               <div>
-                <div className="font-semibold text-slate-900 group-hover:text-blue-600">{c.title}</div>
+                <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">{c.title}</div>
                 <span
                   className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                     c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
@@ -284,7 +290,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                   {c.published ? "Published" : "Draft"}
                 </span>
               </div>
-              <span className="text-sm text-blue-600 group-hover:underline">Manage →</span>
+              <span className="text-sm text-[var(--color-primary)] group-hover:underline">Manage →</span>
             </Link>
           ))}
           {track.courses.length === 0 && (

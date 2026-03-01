@@ -10,14 +10,14 @@ export function AddCard({ label, onClick }: AddCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="card-hover flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-500 hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className="flex h-[340px] max-w-[300px] w-full flex-col items-center justify-center gap-3 rounded-[24px] border-2 border-dashed border-gray-300 bg-gray-200/60 text-slate-500 transition-transform duration-200 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/50 hover:shadow-lg hover:text-black focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200/80">
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-300/80">
+        <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
       </span>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-base font-medium">{label}</span>
     </button>
   );
 }

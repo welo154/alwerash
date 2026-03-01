@@ -85,7 +85,7 @@ export default async function AdminSchoolDetail({
                 name="title"
                 defaultValue={school.title}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <div>
@@ -94,7 +94,7 @@ export default async function AdminSchoolDetail({
                 name="slug"
                 defaultValue={school.slug}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -104,7 +104,7 @@ export default async function AdminSchoolDetail({
               name="description"
               defaultValue={school.description ?? ""}
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div className="flex flex-wrap items-center gap-4">
@@ -122,13 +122,13 @@ export default async function AdminSchoolDetail({
                 name="published"
                 type="checkbox"
                 defaultChecked={school.published}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
               Published
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
             >
               Save
             </button>
@@ -152,7 +152,7 @@ export default async function AdminSchoolDetail({
                   name="title"
                   placeholder="e.g. Ornaments"
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
               </div>
               <div>
@@ -161,7 +161,7 @@ export default async function AdminSchoolDetail({
                   name="slug"
                   placeholder="e.g. ornaments"
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
               </div>
             </div>
@@ -171,7 +171,7 @@ export default async function AdminSchoolDetail({
                 name="description"
                 placeholder="Optional description"
                 rows={2}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
             <div className="flex flex-wrap items-center gap-4">
@@ -188,13 +188,13 @@ export default async function AdminSchoolDetail({
                 <input
                   name="published"
                   type="checkbox"
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                 />
                 Published
               </label>
               <button
                 type="submit"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
               >
                 Add Track
               </button>
@@ -211,7 +211,7 @@ export default async function AdminSchoolDetail({
               className="group card-hover flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
             >
               <div>
-                <div className="font-semibold text-slate-900 group-hover:text-blue-600">{t.title}</div>
+                <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">{t.title}</div>
                 <div className="text-sm text-slate-500">{t.slug}</div>
                 <span
                   className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -221,7 +221,7 @@ export default async function AdminSchoolDetail({
                   {t.published ? "Published" : "Draft"}
                 </span>
               </div>
-              <span className="text-sm text-blue-600 group-hover:underline">Manage →</span>
+              <span className="text-sm text-[var(--color-primary)] group-hover:underline">Manage →</span>
             </Link>
           ))}
           {school.tracks.length === 0 && (

@@ -79,12 +79,12 @@ export default function RegisterForm({
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
           {error}
         </div>
       )}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="name" className="block text-sm font-medium text-black">
           Name (optional)
         </label>
         <input
@@ -93,11 +93,11 @@ export default function RegisterForm({
           type="text"
           autoComplete="name"
           placeholder="Your name"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="email" className="block text-sm font-medium text-black">
           Email
         </label>
         <input
@@ -106,12 +106,12 @@ export default function RegisterForm({
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           required
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="password" className="block text-sm font-medium text-black">
           Password
         </label>
         <input
@@ -120,15 +120,15 @@ export default function RegisterForm({
           type="password"
           autoComplete="new-password"
           placeholder="Min 10 chars, upper, lower, number"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           required
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
           At least 10 characters, one uppercase, one lowercase, one number
         </p>
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
           Confirm password
         </label>
         <input
@@ -137,12 +137,12 @@ export default function RegisterForm({
           type="password"
           autoComplete="new-password"
           placeholder="Re-enter your password"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
           required
         />
       </div>
       <div>
-        <label htmlFor="country" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="country" className="block text-sm font-medium text-black">
           Country (optional)
         </label>
         <input
@@ -152,13 +152,13 @@ export default function RegisterForm({
           autoComplete="country-code"
           placeholder="EG, SA, AE..."
           maxLength={2}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 uppercase outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-black uppercase outline-none transition-colors placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-xl bg-black px-4 py-3 font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
       >
         {loading ? "Creating account..." : "Create account"}
       </button>

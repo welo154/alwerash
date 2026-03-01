@@ -35,14 +35,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-dvh bg-slate-50">
+    <div className="flex h-dvh bg-white font-sans">
       {/* Left sidebar: full viewport height, logout pinned to bottom */}
       <aside className="flex h-dvh w-56 shrink-0 flex-col border-r border-slate-200 bg-white">
         <Link
           href="/admin/content/tracks"
-          className="shrink-0 border-b border-slate-200 px-6 py-4 text-lg font-semibold text-blue-600 hover:text-blue-700"
+          className="shrink-0 border-b border-slate-200 px-6 py-4 font-logo text-xl font-semibold italic text-black transition-colors hover:text-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-inset"
         >
-          Admin
+          alwerash<span className="text-[var(--color-primary)]">.</span>
         </Link>
         <nav className="min-h-0 flex-1 space-y-0.5 overflow-auto p-3">
             {navItems.map((item) => {
@@ -53,8 +53,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-gray-200 text-black"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-black"
                   }`}
                 >
                   {item.label}
@@ -66,9 +66,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setLogoutOpen(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-white"
           >
-            <svg className="h-4 w-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-4 w-4 shrink-0 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Logout
@@ -77,7 +77,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Right: main content with overflow scroll */}
-      <main className="min-h-0 flex-1 overflow-auto">{children}</main>
+      <main className="min-h-0 flex-1 overflow-auto bg-slate-50/50">{children}</main>
 
       {/* Logout confirmation modal */}
       {logoutOpen && (
@@ -111,7 +111,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="flex-1 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800"
+                  className="flex-1 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800"
                 >
                   Sign out
                 </button>

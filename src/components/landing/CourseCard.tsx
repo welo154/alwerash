@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Star, Clock, Users, Bookmark } from "lucide-react";
 
 export type CourseCardProps = {
   id: string;
@@ -8,42 +9,32 @@ export type CourseCardProps = {
   coverImage?: string | null;
   track?: { title: string; slug: string } | null;
   lessonCount?: number;
-  /** Optional badge in top-right (e.g. "Featured" or "ينفع") */
   badge?: string | null;
-  /** Optional instructor name; falls back to track title */
   instructorName?: string | null;
-  /** Optional instructor image URL for avatar */
   instructorImage?: string | null;
-  /** Card container class (e.g. for grid layout) */
+  /** Total duration in minutes (overrides lessonCount-based estimate when set) */
+  totalDurationMinutes?: number | null;
+  /** Display rating e.g. 4.5 */
+  rating?: number | null;
+  /** Number of learners (e.g. with progress in this course) */
+  studentCount?: number | null;
   className?: string;
-  /** Use card-hover and data-gsap-hover for landing sections */
   interactive?: boolean;
+  /** "mostPlayed" = same as default style, for Trending/Most played section */
+  variant?: "default" | "mostPlayed";
 };
 
-function ClockIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
+/**
+ * Course card: default and mostPlayed share the same layout (white card, 180px image, instructor pill, footer).
+ */
+function formatDuration(totalMinutes: number | null | undefined, lessonCount: number): string {
+  const mins = totalMinutes ?? lessonCount * 15;
+  if (mins <= 0) return "0m";
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-/**
- * Course card matching the reference: top image + lime-to-teal gradient overlay
- * with pill-highlighted title and subtitle; bottom section with title, duration, instructor.
- */
 export function CourseCard({
   id,
   title,
@@ -51,101 +42,100 @@ export function CourseCard({
   coverImage,
   track,
   lessonCount = 0,
-  badge,
   instructorName,
-  instructorImage,
+  totalDurationMinutes,
+  rating,
+  studentCount,
   className = "",
   interactive = true,
+  variant = "default",
 }: CourseCardProps) {
-  const subtitle = instructorName ?? track?.title ?? "Course";
-  const durationLabel =
-    lessonCount > 0 ? `${lessonCount} lesson${lessonCount === 1 ? "" : "s"}` : "—";
+  const instructor = instructorName ?? track?.title ?? "Mohamed Yassin";
+  const durationLabel = formatDuration(totalDurationMinutes, lessonCount);
+  const displayRating = rating ?? 4.5;
+  const displayStudents = studentCount ?? 0;
 
-  const linkClass = interactive
-    ? "group card-hover block overflow-hidden rounded-2xl border border-slate-200/90 bg-white hover:border-emerald-400/80"
-    : "block overflow-hidden rounded-2xl border border-slate-200/90 bg-white";
-
-  return (
-    <Link
-      href={`/courses/${id}`}
-      className={`${linkClass} ${className}`}
-      {...(interactive ? { "data-gsap-hover": true } : {})}
-    >
-      {/* Top section: image + gradient overlay + title/subtitle with pill highlights (~60%) */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+  const cardContent = (
+    <>
+      {/* Course Image */}
+      <div className="relative mb-4 h-[180px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
         {coverImage ? (
           <Image
             src={coverImage}
             alt={title}
             fill
             unoptimized
-            className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover object-center transition-transform duration-300 hover:scale-105"
+            sizes={variant === "mostPlayed" ? "320px" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-500">
-            Course
+          <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
+            {title.charAt(0)}
           </div>
         )}
-        {/* Gradient overlay: lime left → teal right */}
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-lime-500/85 via-emerald-600/85 to-teal-600/90"
-          aria-hidden
-        />
-        {/* Content overlay: bottom-left */}
-        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
-          <h3 className="text-lg font-bold leading-tight text-white drop-shadow-sm sm:text-xl">
-            <span className="inline rounded-md bg-emerald-500/95 px-1.5 py-0.5">
-              {title}
-            </span>
-          </h3>
-          <p className="mt-1.5 text-sm font-bold text-white/95 sm:text-base">
-            <span className="inline rounded-md bg-emerald-600/95 px-1.5 py-0.5">
-              {subtitle}
-            </span>
-          </p>
-        </div>
-        {/* Optional badge: top-right */}
-        {badge ? (
-          <div
-            className="absolute right-3 top-3 text-sm font-medium text-white/95"
-            style={{ fontFamily: "system-ui, sans-serif" }}
-            aria-hidden
-          >
-            {badge}
-          </div>
-        ) : null}
       </div>
 
-      {/* Bottom section: white, title + meta row with clock and instructor (~40%) */}
-      <div className="bg-white p-4 sm:p-5">
-        <h3 className="font-bold text-emerald-700 sm:text-lg">{title}</h3>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-slate-500">
-          <span className="inline-flex items-center gap-1.5">
-            <ClockIcon className="h-4 w-4 shrink-0 text-slate-400" />
-            {durationLabel}
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span>{subtitle}</span>
-            {instructorImage ? (
-              <span className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full bg-slate-200">
-                <Image
-                  src={instructorImage}
-                  alt=""
-                  fill
-                  unoptimized
-                  className="object-cover"
-                  sizes="24px"
-                />
-              </span>
-            ) : (
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-xs font-medium text-emerald-700">
-                {subtitle.charAt(0)}
-              </span>
-            )}
-          </span>
+      {/* Header Section */}
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">
+          {title}
+        </h2>
+        <div className="flex items-center gap-1">
+          <Star className="h-5 w-5 fill-black stroke-black" />
+          <span className="text-[18px] font-bold">{displayRating}</span>
         </div>
       </div>
+
+      {/* Instructor Tag */}
+      <div className="mb-4">
+        <span className="inline-block rounded-full bg-gray-400 px-4 py-1 text-[18px] font-medium italic text-white">
+          {instructor}
+        </span>
+      </div>
+
+      {/* Description */}
+      {summary ? (
+        <p className="mb-8 line-clamp-3 min-h-0 flex-1 text-[11px] font-medium leading-[1.3] text-black">
+          {summary}
+        </p>
+      ) : (
+        <div className="min-h-0 flex-1" />
+      )}
+
+      {/* Footer Info */}
+      <div className="mt-auto flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-1">
+            <div className="h-3 w-3 rounded-full bg-black" />
+            <div className="h-3 w-3 rounded-full bg-black" />
+            <div className="h-3 w-3 rounded-full border-2 border-black" />
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="h-5 w-5" strokeWidth={2.5} />
+            <span className="text-[16px] font-bold tracking-tight">{durationLabel}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="h-5 w-5" strokeWidth={2.5} />
+            <span className="text-[16px] font-bold">{displayStudents}</span>
+          </div>
+        </div>
+        <Bookmark className="h-6 w-6 shrink-0" strokeWidth={1.5} />
+      </div>
+    </>
+  );
+
+  const cardClassName =
+    variant === "mostPlayed"
+      ? `block h-[420px] w-full max-w-[320px] mx-auto flex flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 font-sans text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg ${className}`
+      : `flex h-[420px] max-w-[320px] flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 font-sans text-left shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg ${className}`;
+
+  return (
+    <Link
+      href={`/courses/${id}`}
+      className={cardClassName}
+      {...(interactive ? { "data-gsap-hover": true } : {})}
+    >
+      {cardContent}
     </Link>
   );
 }

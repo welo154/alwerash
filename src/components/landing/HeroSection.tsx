@@ -139,11 +139,11 @@ export function HeroSection({ tracks }: { tracks: HeroTrack[] }) {
         <div
           className={
             session
-              ? "block"
+              ? "flex flex-col items-center text-center"
               : "flex flex-col gap-8 sm:flex-row sm:flex-nowrap sm:items-start sm:gap-12"
           }
         >
-          <div className="min-w-0 flex-1">
+          <div className={session ? "w-full" : "min-w-0 flex-1"}>
             <h1
               className="text-4xl font-bold tracking-tight text-black sm:text-5xl lg:text-6xl"
               data-gsap-hero
@@ -152,7 +152,7 @@ export function HeroSection({ tracks }: { tracks: HeroTrack[] }) {
             </h1>
             {/* Track tags: oval pills, thin black border, white bg, one highlighted yellow */}
             <div
-              className="mt-6 flex flex-wrap gap-2 lg:mt-8"
+              className={`mt-6 flex flex-wrap gap-2 lg:mt-8 ${session ? "justify-center" : ""}`}
               data-gsap-stagger-group
             >
               {safeTracks.length === 0 ? null : (
@@ -179,7 +179,7 @@ export function HeroSection({ tracks }: { tracks: HeroTrack[] }) {
           {/* LOG-IN panel: same row as headline + tracks, disappears when user is logged in */}
           {!session && (
             <div
-              className="w-full max-w-[420px] shrink-0 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:w-auto lg:sticky lg:top-24"
+              className="w-full max-w-[520px] shrink-0 rounded-lg bg-white p-6 shadow-sm sm:w-auto lg:sticky lg:top-24"
               data-gsap-btn
             >
               <h2 className="text-lg font-bold uppercase tracking-tight text-black">
@@ -212,30 +212,29 @@ export function HeroSection({ tracks }: { tracks: HeroTrack[] }) {
           )}
         </div>
 
-        {/* Blue stats banner: #0061FF, rounded-[40px], extra bold value, semibold label */}
-        <div className="mt-12 w-full px-4 py-12">
+        {/* Stats banner: blue, rounded, bold value + label */}
+        <div className="mt-12 w-full px-4">
           <div
             ref={statsBarRef}
-            className="mx-auto flex max-w-7xl flex-row items-center justify-between rounded-[40px] py-16 px-4 text-white shadow-lg"
-            style={{ backgroundColor: "#0061FF" }}
+            className="mx-auto flex max-w-6xl flex-wrap items-center justify-between rounded-[18px] bg-[#0066FF] py-10 px-8 text-white shadow-lg md:flex-nowrap md:px-16"
             data-gsap-reveal
           >
             {STAT_LABELS.map(({ key, label }, i) => (
               <div
                 key={label}
-                className="flex flex-1 flex-col items-center justify-center text-center"
+                className="flex min-w-[150px] flex-1 flex-col items-center py-4 text-center md:py-0"
               >
-                <h2
+                <span
                   ref={(el) => {
                     valueRefs.current[i] = el;
                   }}
-                  className="mb-3 text-5xl font-black leading-none tracking-tight tabular-nums md:text-6xl lg:text-7xl"
+                  className="text-[44px] font-bold leading-none tracking-tight tabular-nums md:text-[56px]"
                 >
                   {formatStatValue(key, displayStats[key] ?? 0)}
-                </h2>
-                <p className="text-2xl font-semibold tracking-wide md:text-3xl lg:text-4xl">
+                </span>
+                <span className="mt-2 text-[18px] font-medium opacity-100 md:text-[24px]">
                   {label}
-                </p>
+                </span>
               </div>
             ))}
           </div>

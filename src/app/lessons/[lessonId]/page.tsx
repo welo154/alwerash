@@ -1,5 +1,5 @@
 // file: src/app/lessons/[lessonId]/page.tsx
-import { requireAuth } from "@/server/auth/require";
+import { requireSubscription } from "@/server/subscription/require-subscription";
 import { getSignedPlaybackForLesson } from "@/server/video/video.service";
 import { getLessonProgress } from "@/server/learning/progress.service";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
@@ -13,7 +13,7 @@ export default async function LessonWatchPage({
 }: {
   params: Promise<{ lessonId: string }>;
 }) {
-  const session = await requireAuth();
+  const session = await requireSubscription();
   const { lessonId } = await params;
 
   const [playback, progress] = await Promise.all([

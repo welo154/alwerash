@@ -25,7 +25,7 @@ export function CreateSchoolForm() {
           name="title"
           placeholder="e.g. Arts"
           required
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -34,7 +34,7 @@ export function CreateSchoolForm() {
           name="slug"
           placeholder="e.g. arts"
           required
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div>
@@ -43,7 +43,7 @@ export function CreateSchoolForm() {
           name="description"
           placeholder="Optional description"
           rows={3}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
       <div className="flex flex-wrap items-center gap-4">
@@ -71,7 +71,7 @@ export function CreateSchoolForm() {
         </Link>
         <button
           type="submit"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
         >
           Create School
         </button>
