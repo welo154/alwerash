@@ -144,6 +144,9 @@ export async function adminGetCourse(id: string) {
       title: true,
       summary: true,
       coverImage: true,
+      instructorName: true,
+      instructorImage: true,
+      introVideoMuxPlaybackId: true,
       order: true,
       published: true,
       createdAt: true,
@@ -153,7 +156,13 @@ export async function adminGetCourse(id: string) {
     },
   });
   if (!c) throw new AppError("NOT_FOUND", 404, "Course not found");
-  return c as typeof c & { instructorName?: string | null; instructorImage?: string | null; introVideoMuxPlaybackId?: string | null };
+  return {
+    ...c,
+    featuredNewOrder: null as number | null,
+    featuredMostPlayedOrder: null as number | null,
+    totalDurationMinutes: null as number | null,
+    rating: null as number | null,
+  };
 }
 
 export async function adminCreateCourse(input: unknown) {
@@ -167,11 +176,43 @@ export async function adminCreateCourse(input: unknown) {
   }
 }
 
+/** When migration (featured_new_order etc.) is not applied, update only existing columns via raw SQL. */
+async function courseUpdateRawSafe(courseId: string, data: Record<string, unknown>) {
+  const updates: string[] = [];
+  const values: unknown[] = [];
+  let idx = 0;
+  const set = (col: string, v: unknown) => {
+    if (v === undefined) return;
+    idx += 1;
+    updates.push(`${col} = $${idx}`);
+    values.push(v);
+  };
+  set("track_id", data.trackId);
+  set("title", data.title);
+  set("summary", data.summary);
+  set("cover_image", data.coverImage);
+  set("instructor_name", data.instructorName);
+  set("instructor_image", data.instructorImage);
+  set("order", Number(data.order));
+  set("published", Boolean(data.published));
+  if (updates.length === 0) return prisma.course.findUnique({ where: { id: courseId } });
+  idx += 1;
+  values.push(courseId);
+  await prisma.$executeRawUnsafe(
+    `UPDATE courses SET ${updates.join(", ")}, updated_at = now() WHERE id = $${idx}`,
+    ...values
+  );
+  return prisma.course.findUnique({ where: { id: courseId } });
+}
+
 export async function adminUpdateCourse(courseId: string, input: unknown) {
+  const data = parse(CourseUpdateSchema, input) as Record<string, unknown>;
   try {
-    const data = parse(CourseUpdateSchema, input);
     return await prisma.course.update({ where: { id: courseId }, data });
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.message?.includes("does not exist")) {
+      return courseUpdateRawSafe(courseId, data);
+    }
     handlePrismaError(e);
   }
 }
@@ -207,7 +248,22 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
   const m = await prisma.module.findUnique({
     where: { id },
     include: {
-      course: true,
+      course: {
+        select: {
+          id: true,
+          trackId: true,
+          title: true,
+          summary: true,
+          coverImage: true,
+          instructorName: true,
+          instructorImage: true,
+          introVideoMuxPlaybackId: true,
+          order: true,
+          published: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       lessons: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         include: {
