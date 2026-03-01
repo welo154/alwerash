@@ -11,22 +11,21 @@ import type { PlatformStats } from "@/app/api/stats/route";
 const REDUCED_MOTION_MEDIA = "(prefers-reduced-motion: reduce)";
 
 const STAT_LABELS: { key: keyof PlatformStats; label: string }[] = [
-  { key: "activeLearners", label: "Active learners" },
-  { key: "courses", label: "Courses" },
-  { key: "tracks", label: "Tracks" },
-  { key: "completionRate", label: "Completion rate" },
+  { key: "watchTime", label: "Watch Time" },
+  { key: "certificates", label: "Certificates" },
+  { key: "courses", label: "Course" },
+  { key: "activeLearners", label: "Learner" },
 ];
 
 function formatValue(key: keyof PlatformStats, value: number): string {
   switch (key) {
     case "activeLearners":
-      return value >= 1000 ? `${(value / 1000).toFixed(1)}K+` : `${value}+`;
+      return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : `${value}`;
     case "courses":
       return `${value}+`;
-    case "tracks":
-      return `${value}`;
-    case "completionRate":
-      return `${Math.round(value)}%`;
+    case "watchTime":
+    case "certificates":
+      return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : `${value.toLocaleString()}`;
     default:
       return `${value}`;
   }
@@ -48,6 +47,8 @@ export function StatsSection() {
           courses: 0,
           tracks: 0,
           completionRate: 0,
+          watchTime: 0,
+          certificates: 0,
         })
       );
   }, []);
@@ -77,14 +78,14 @@ export function StatsSection() {
       });
 
       STAT_LABELS.forEach(({ key }, i) => {
-        const target = stats[key];
+        const target = stats[key] ?? 0;
         const vars: gsap.TweenVars = {
           value: target,
           duration,
           ease,
-          snap: (key === "completionRate" ? 1 : { value: 1 }) as gsap.SnapVars,
+          snap: { value: 1 },
           onUpdate: () => {
-            const formatted = formatValue(key, objs[i].value);
+            const formatted = formatValue(key, Math.round(objs[i].value));
             if (valueEls[i]) valueEls[i].textContent = formatted;
           },
         };
@@ -105,30 +106,28 @@ export function StatsSection() {
     courses: 0,
     tracks: 0,
     completionRate: 0,
+    watchTime: 0,
+    certificates: 0,
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="border-b border-slate-200/80 bg-slate-50/50 px-4 py-14 sm:px-6"
-      data-gsap-reveal
-    >
-      <div className="mx-auto max-w-5xl">
-        <div
-          className="flex flex-wrap justify-center gap-x-14 gap-y-10 sm:justify-between"
-          data-gsap-stagger-group
-        >
+    <section ref={sectionRef} className="px-4 py-10 sm:px-6" data-gsap-reveal>
+      <div
+        className="mx-auto max-w-7xl rounded-2xl rounded-[40px] py-16 px-4 shadow-lg sm:px-6"
+        style={{ backgroundColor: "var(--color-stats-bar)" }}
+      >
+        <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 sm:justify-between">
           {STAT_LABELS.map(({ key, label }, i) => (
             <div key={label} className="text-center">
               <div
                 ref={(el) => {
                   valueRefs.current[i] = el;
                 }}
-                className="text-2xl font-bold tracking-tight text-blue-600 sm:text-3xl drop-shadow-sm tabular-nums"
+                className="text-2xl font-bold tracking-tight text-white sm:text-3xl tabular-nums"
               >
-                {formatValue(key, displayStats[key])}
+                {formatValue(key, displayStats[key] ?? 0)}
               </div>
-              <div className="mt-1.5 text-sm font-medium text-slate-600">{label}</div>
+              <div className="mt-1 text-sm font-medium text-white/90">{label}</div>
             </div>
           ))}
         </div>

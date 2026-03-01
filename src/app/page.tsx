@@ -1,26 +1,24 @@
 import {
   HeroSection,
-  StatsSection,
-  TracksSection,
-  WhatToExpectSection,
   FeaturedCoursesSection,
-  MostWatchedSection,
 } from "@/components/landing";
 import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
+import { publicListTracks } from "@/server/content/public.service";
 
 /**
  * Landing page - home.
- * Sections: stats, tracks, what to expect, featured courses, most watched.
+ * Hero (with tracks + stats bar), courses section (NEW + MOST PLAYED + modal).
  */
-export default function LandingPage() {
+export default async function LandingPage() {
+  const tracks = await publicListTracks();
+  const heroTracks: { id: string; title: string; slug: string }[] = Array.isArray(tracks)
+    ? tracks.map((t) => ({ id: t.id, title: t.title, slug: t.slug }))
+    : [];
+
   return (
-    <div>
-      <HeroSection />
-      <StatsSection />
-      <TracksSection />
-      <WhatToExpectSection />
+    <div className="font-sans">
+      <HeroSection tracks={heroTracks} />
       <FeaturedCoursesSection />
-      <MostWatchedSection />
       <GsapAnimationLayer />
     </div>
   );

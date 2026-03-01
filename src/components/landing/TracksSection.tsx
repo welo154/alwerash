@@ -21,7 +21,7 @@ export async function TracksSection() {
             <Link
               key={track.id}
               href={`/tracks/${track.slug}`}
-              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
+              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-card-hover)]"
               data-gsap-hover
             >
               <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
@@ -42,11 +42,11 @@ export async function TracksSection() {
               </div>
               <div className="p-6">
                 {track.school ? (
-                  <span className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
                     {track.school.title}
                   </span>
                 ) : null}
-                <h3 className="mt-2.5 text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600">
+                <h3 className="mt-2.5 text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[var(--color-primary)]">
                   {track.title}
                 </h3>
                 {track.description ? (
@@ -54,7 +54,7 @@ export async function TracksSection() {
                     {track.description}
                   </p>
                 ) : null}
-                <span className="mt-5 inline-block text-sm font-semibold text-blue-600 transition-colors group-hover:text-blue-700">
+                <span className="mt-5 inline-block text-sm font-semibold text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-hover)]">
                   View courses →
                 </span>
               </div>
@@ -64,7 +64,7 @@ export async function TracksSection() {
         <div className="mt-14 flex justify-center sm:mt-16">
           <Link
             href="/tracks"
-            className="inline-flex items-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 font-semibold text-slate-800 shadow-[var(--shadow-btn)] transition-all duration-200 hover:border-blue-300 hover:bg-slate-50 hover:shadow-[var(--shadow-btn-hover)] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]"
+            className="inline-flex items-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 font-semibold text-slate-800 shadow-[var(--shadow-btn)] transition-all duration-200 hover:border-[var(--color-primary)] hover:bg-slate-50 hover:shadow-[var(--shadow-btn-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 active:scale-[0.98]"
           >
             View all learning paths
           </Link>

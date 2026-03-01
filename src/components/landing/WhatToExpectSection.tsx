@@ -32,7 +32,7 @@ export function WhatToExpectSection() {
               key={title}
               className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)]"
             >
-              <h3 className="font-semibold text-blue-600">{title}</h3>
+              <h3 className="font-semibold text-[var(--color-primary)]">{title}</h3>
               <p className="mt-2.5 text-sm text-slate-600 leading-relaxed">{description}</p>
             </div>
           ))}

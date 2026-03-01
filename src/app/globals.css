@@ -1,22 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  /* Design font: DM Sans, applied site-wide */
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Logo: elegant serif with slight slant (Playfair Display italic) */
+.font-logo {
+  font-family: var(--font-logo), Georgia, "Times New Roman", serif;
+}
+
 /**
- * Design tokens - premium, dynamic feel. No grid color patterns.
+ * Design tokens - alwerash theme: black header, white content, yellow + blue accents.
  */
 :root {
-  --color-primary: rgb(37 99 235);
-  --color-primary-hover: rgb(29 78 216);
-  --color-primary-light: rgb(239 246 255);
+  --color-primary: rgb(234 179 8); /* yellow-500 - primary accent */
+  --color-primary-hover: rgb(202 138 4); /* yellow-600 */
+  --color-primary-light: rgb(254 249 195); /* yellow-100 */
+  --color-accent: rgb(37 99 235); /* blue-600 - stats bar, links */
+  --color-accent-hover: rgb(29 78 216);
   --color-text: rgb(15 23 42);
   --color-text-muted: rgb(100 116 139);
   --color-border: rgb(226 232 240);
   --color-bg: rgb(255 255 255);
   --color-bg-muted: rgb(248 250 252);
+  --color-header-bg: rgb(0 0 0);
+  --color-stats-bar: rgb(37 99 235);
   /* Depth and motion */
   --shadow-card: 0 2px 8px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.05);
   --shadow-card-hover: 0 8px 24px rgb(0 0 0 / 0.08), 0 16px 40px rgb(0 0 0 / 0.06);
-  --shadow-btn: 0 2px 8px rgb(37 99 235 / 0.25);
-  --shadow-btn-hover: 0 4px 14px rgb(37 99 235 / 0.35);
+  --shadow-btn: 0 2px 8px rgb(234 179 8 / 0.25);
+  --shadow-btn-hover: 0 4px 14px rgb(234 179 8 / 0.35);
   --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -75,8 +89,8 @@ label:has(input[type="radio"]) {
   border-radius: 0.5rem;
 }
 .nav-link:hover {
-  background-color: rgb(241 245 249);
-  color: rgb(15 23 42);
+  background-color: rgb(38 38 38);
+  color: rgb(255 255 255);
 }
 
 /* Fade-in animation for sections */
@@ -125,3 +139,12 @@ label:has(input[type="radio"]) {
 .animation-delay-75 { animation-delay: 75ms; }
 .animation-delay-150 { animation-delay: 150ms; }
 .animation-delay-225 { animation-delay: 225ms; }
+
+/* Hide scrollbar but keep scroll (e.g. horizontal card strip) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

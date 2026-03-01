@@ -21,7 +21,7 @@ export async function MostWatchedSection() {
             <Link
               key={course.id}
               href={`/courses/${course.id}`}
-              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/80 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
+              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/80 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-card-hover)]"
               data-gsap-hover
             >
               <div className="aspect-video relative overflow-hidden bg-slate-100">
@@ -41,7 +41,7 @@ export async function MostWatchedSection() {
                 )}
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-slate-900 group-hover:text-blue-600">
+                <h3 className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">
                   {course.title}
                 </h3>
                 {course.track && (

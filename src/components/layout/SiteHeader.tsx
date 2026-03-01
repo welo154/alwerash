@@ -2,69 +2,82 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Search, ShoppingCart } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
 
 /**
- * Main site header - Logo | Search | Sign in/Sign up OR profile menu | Tracks
+ * Main site header - black bar, logo, Courses | Projects, search, Plans, My courses, profile | sign-up | Log-in.
  */
 export function SiteHeader() {
   const { data: session, status } = useSession();
 
   return (
-    <header className="relative z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        {/* Logo */}
+    <nav className="relative z-50 flex w-full items-center justify-between bg-black px-6 py-3 font-sans text-white">
+      {/* Left: Logo + Nav */}
+      <div className="flex items-center gap-10">
         <Link
           href="/"
-          className="text-xl font-semibold text-blue-600 transition-colors hover:text-blue-700 focus:outline-none rounded-lg"
+          className="font-logo flex items-baseline gap-0.5 text-2xl font-black italic tracking-tighter text-white transition-colors hover:text-gray-300 focus:outline-none"
         >
-          Alwerash
+          <span>alwerash</span>
+          <span className="text-yellow-400">.</span>
         </Link>
-
-        {/* Search bar with accordion results */}
-        <SearchBar />
-
-        {/* Actions */}
-        <nav className="flex items-center gap-2" aria-label="Main navigation">
-          <Link
-            href="/tracks"
-            className="nav-link px-4 py-2.5 text-sm font-medium text-slate-700"
-          >
-            Tracks
+        <div className="hidden sm:flex gap-8" aria-label="Main navigation">
+          <Link href="/learn" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+            Courses
           </Link>
-          {status === "loading" ? (
-            <div className="h-9 w-9 animate-pulse rounded-full bg-slate-200" />
-          ) : session?.user ? (
-            <>
-              {(session.user as { roles?: string[] }).roles?.includes("ADMIN") && (
-                <Link
-                  href="/admin/content/tracks"
-                  className="nav-link px-4 py-2.5 text-sm font-medium text-slate-700"
-                >
-                  Admin
-                </Link>
-              )}
-              <UserMenu user={session.user} />
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="nav-link px-4 py-2.5 text-sm font-medium text-slate-700"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="btn-primary rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
-        </nav>
+          <Link href="/tracks" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+            Projects
+          </Link>
+        </div>
       </div>
-    </header>
+
+      {/* Center: Search */}
+      <div className="flex flex-1 max-w-xl px-10">
+        <SearchBar />
+      </div>
+
+      {/* Right: Plans, My courses, Auth */}
+      <div className="flex items-center gap-8">
+        <Link
+          href="/subscription"
+          className="hidden sm:flex items-center gap-2 text-[15px] font-bold text-white transition-colors hover:text-gray-300"
+        >
+          <ShoppingCart size={20} strokeWidth={2.5} />
+          Plans
+        </Link>
+        {status === "loading" ? (
+          <div className="h-10 w-10 animate-pulse rounded-full border-2 border-yellow-400/50 bg-white/10" />
+        ) : session?.user ? (
+          <>
+            <Link href="/learn" className="hidden sm:inline text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+              My courses
+            </Link>
+            {(session.user as { roles?: string[] }).roles?.includes("ADMIN") && (
+              <Link href="/admin/content/tracks" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+                Admin
+              </Link>
+            )}
+            <UserMenu user={session.user} />
+          </>
+        ) : (
+          <>
+            <Link
+              href="/register"
+              className="rounded-md border border-yellow-400 bg-transparent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
+            >
+              sign-up
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-md bg-yellow-400 px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
+            >
+              Log-in
+            </Link>
+          </>
+        )}
+      </div>
+    </nav>
   );
 }

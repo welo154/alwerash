@@ -32,7 +32,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
         aria-expanded={open}
         aria-haspopup="true"
       >
@@ -40,13 +40,13 @@ export function UserMenu({ user }: UserMenuProps) {
           <Image
             src={user.image}
             alt={user.name ?? "Profile"}
-            width={36}
-            height={36}
-            className="h-9 w-9 rounded-full object-cover"
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
             unoptimized
           />
         ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
+          <span className="flex h-full w-full items-center justify-center bg-yellow-400/20 text-sm font-medium text-slate-900">
             {user.name?.charAt(0) ?? user.email?.charAt(0) ?? "?"}
           </span>
         )}

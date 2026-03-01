@@ -93,23 +93,23 @@ export function SearchBar() {
   const showDropdown = open && query.trim() !== "";
 
   return (
-    <div ref={containerRef} className="relative mx-2 flex flex-1 max-w-md sm:mx-4">
+    <div ref={containerRef} className="relative flex w-full flex-1">
       <label htmlFor="header-search" className="sr-only">
-        Search courses and tracks
+        Search for courses
       </label>
       <div className="relative w-full">
-        <span className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400">
+        <span className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500">
           <SearchIcon className="h-full w-full" />
         </span>
         <input
           id="header-search"
           type="search"
-          placeholder="Search courses or tracks..."
+          placeholder="Search for courses"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.trim() && setOpen(true)}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2.5 pl-10 pr-10 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-400/20 sm:py-2"
-          aria-label="Search courses and tracks"
+          className="w-full rounded-full border-0 bg-white py-2 pl-11 pr-10 text-sm font-medium text-black outline-none transition-all placeholder:text-gray-500 focus:ring-2 focus:ring-yellow-400"
+          aria-label="Search for courses"
           role="combobox"
           aria-expanded={showDropdown}
           aria-controls="search-results-listbox"
@@ -118,7 +118,7 @@ export function SearchBar() {
         />
         {loading && (
           <span
-            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500"
+            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-slate-200 border-t-[var(--color-primary)]"
             aria-hidden
           />
         )}

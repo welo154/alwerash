@@ -1,64 +1,25 @@
-import Link from "next/link";
-import Image from "next/image";
 import { publicListFeaturedCourses } from "@/server/content/public.service";
+import { publicListTracks } from "@/server/content/public.service";
+import { HomeCoursesSection } from "./HomeCoursesSection";
 
 export async function FeaturedCoursesSection() {
-  const courses = await publicListFeaturedCourses(8);
+  const [courses, tracks] = await Promise.all([
+    publicListFeaturedCourses(12),
+    publicListTracks(),
+  ]);
 
-  if (courses.length === 0) return null;
+  const fields = tracks.length > 0 ? tracks.map((t) => t.title) : [];
 
-  return (
-    <section className="border-b border-slate-200/80 bg-slate-50 px-4 py-16 sm:px-6" data-gsap-reveal>
-      <div className="mx-auto max-w-7xl">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          Featured courses
-        </h2>
-        <p className="mt-2.5 text-slate-600 leading-relaxed">
-          Most popular courses chosen by learners
-        </p>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-gsap-stagger-group>
-          {courses.map((course) => (
-            <Link
-              key={course.id}
-              href={`/courses/${course.id}`}
-              className="group card-hover overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:border-blue-300/80 hover:shadow-[var(--shadow-card-hover)]"
-              data-gsap-hover
-            >
-              <div className="aspect-video relative overflow-hidden bg-slate-100">
-                {course.coverImage ? (
-                  <Image
-                    src={course.coverImage}
-                    alt={course.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-slate-400">
-                    Course
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                {course.track && (
-                  <span className="text-xs font-medium text-blue-600">
-                    {course.track.title}
-                  </span>
-                )}
-                <h3 className="mt-1 font-semibold text-slate-900 group-hover:text-blue-600">
-                  {course.title}
-                </h3>
-                {course.summary && (
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-600">
-                    {course.summary}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  const courseForCard = courses.map((c) => ({
+    id: c.id,
+    title: c.title,
+    summary: c.summary ?? null,
+    coverImage: c.coverImage ?? null,
+    instructorName: (c as { instructorName?: string | null }).instructorName ?? null,
+    instructorImage: (c as { instructorImage?: string | null }).instructorImage ?? null,
+    track: c.track ?? null,
+    lessonCount: c.lessonCount ?? 0,
+  }));
+
+  return <HomeCoursesSection courses={courseForCard} fields={fields} />;
 }

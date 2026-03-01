@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-slate-200/80 bg-slate-900 text-slate-300">
+    <footer className="border-t border-slate-200/80 bg-[var(--color-header-bg)] text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="text-lg font-semibold text-white transition-colors hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded">
-              Alwerash
+            <Link href="/" className="font-logo text-lg font-medium italic text-white transition-colors hover:text-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-black rounded">
+              alwerash<span className="text-[var(--color-primary)]">.</span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed">
               Subscription education for design & creative. Learn from industry experts.
@@ -19,17 +19,17 @@ export function SiteFooter() {
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link href="/tracks" className="text-sm transition-colors hover:text-white">
-                  Tracks
-                </Link>
-              </li>
-              <li>
                 <Link href="/subscription" className="text-sm transition-colors hover:text-white">
-                  Subscription
+                  Plans
                 </Link>
               </li>
               <li>
-                <Link href="/" className="text-sm transition-colors hover:text-white">
+                <Link href="/tracks" className="text-sm transition-colors hover:text-white">
+                  Projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/learn" className="text-sm transition-colors hover:text-white">
                   Courses
                 </Link>
               </li>

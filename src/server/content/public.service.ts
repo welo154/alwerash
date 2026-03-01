@@ -99,6 +99,8 @@ export async function publicListFeaturedCourses(limit = 8) {
       title: true,
       summary: true,
       coverImage: true,
+      instructorName: true,
+      instructorImage: true,
       track: { select: { title: true, slug: true } },
       modules: { select: { _count: { select: { lessons: true } } } },
     },
