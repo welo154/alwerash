@@ -175,6 +175,56 @@ async function main() {
       // Columns may not exist yet
     }
   }
+
+  // Mentors (male mentors for the platform)
+  const mentorData = [
+    {
+      name: "Omar Hassan",
+      certificateName: "Certified UI/UX Mentor",
+      aboutMe: "Senior product designer with 10+ years guiding teams. Passionate about design systems and accessibility.",
+      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    },
+    {
+      name: "Karim Al-Rashid",
+      certificateName: "Graphic Design Mentor",
+      aboutMe: "Brand and identity designer. I help creatives build strong visual narratives and portfolio pieces.",
+      photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+    },
+    {
+      name: "Youssef Mahmoud",
+      certificateName: "Motion Design Mentor",
+      aboutMe: "Motion designer and animator. Focus on After Effects, Lottie, and bringing interfaces to life.",
+      photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+    },
+    {
+      name: "Tariq Nasser",
+      certificateName: "Design Leadership Mentor",
+      aboutMe: "Design lead and mentor. I support designers in career growth, critique, and shipping at scale.",
+      photo: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&q=80",
+    },
+  ];
+
+  try {
+    for (const m of mentorData) {
+      const existing = await prisma.mentor.findFirst({ where: { name: m.name } });
+      if (existing) {
+        await prisma.mentor.update({
+          where: { id: existing.id },
+          data: { certificateName: m.certificateName, aboutMe: m.aboutMe, photo: m.photo },
+        });
+        console.log("Updated mentor:", m.name);
+      } else {
+        await prisma.mentor.create({ data: m });
+        console.log("Seeded mentor:", m.name);
+      }
+    }
+  } catch (e: unknown) {
+    if (e && typeof e === "object" && "code" in e && (e as { code: string }).code === "P2021") {
+      console.log("Mentors table not found — run 'npx prisma migrate deploy' then 'npx prisma db seed' again to add mentors.");
+    } else {
+      throw e;
+    }
+  }
 }
 
 main()

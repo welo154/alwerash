@@ -1,13 +1,14 @@
 import {
   HeroSection,
   FeaturedCoursesSection,
+  MentorsSection,
 } from "@/components/landing";
 import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
 import { publicListTracks } from "@/server/content/public.service";
 
 /**
  * Landing page - home.
- * Hero (with tracks + stats bar), courses section (NEW + MOST PLAYED + modal).
+ * Hero (with tracks + stats bar), courses section (NEW + MOST PLAYED + modal), mentors section.
  */
 export default async function LandingPage() {
   const tracks = await publicListTracks();
@@ -19,6 +20,7 @@ export default async function LandingPage() {
     <div className="font-sans">
       <HeroSection tracks={heroTracks} />
       <FeaturedCoursesSection />
+      <MentorsSection />
       <GsapAnimationLayer />
     </div>
   );

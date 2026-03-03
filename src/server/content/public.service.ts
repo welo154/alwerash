@@ -347,3 +347,17 @@ export async function publicSearch(query: string, limit = 10) {
 
   return { tracks, courses };
 }
+
+/** Public list of mentors for the Mentors page. */
+export async function publicListMentors() {
+  return prisma.mentor.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      photo: true,
+      certificateName: true,
+      aboutMe: true,
+    },
+  });
+}

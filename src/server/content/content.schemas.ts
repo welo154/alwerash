@@ -69,6 +69,7 @@ export const OptionalCuid = z.union([Cuid, z.literal(""), z.undefined()]).transf
 
 export const CourseCreateSchema = z.object({
   trackId: OptionalCuid,
+  mentorId: OptionalCuid,
   title: z.string().min(2, "Title too short").max(200),
   summary: z.string().max(2000).optional(),
   coverImage: OptionalUrl,
@@ -84,6 +85,7 @@ export const CourseCreateSchema = z.object({
 
 export const CourseUpdateSchema = CourseCreateSchema.partial().extend({
   trackId: z.union([Cuid, z.literal("")]).optional().transform((v) => (v === "" ? null : v)),
+  mentorId: z.union([Cuid, z.literal("")]).optional().transform((v) => (v === "" ? null : v)),
 });
 
 // --- Module ---
@@ -121,3 +123,14 @@ export const AssignmentCreateSchema = z.object({
 });
 
 export const AssignmentUpdateSchema = AssignmentCreateSchema.partial().omit({ lessonId: true });
+
+// --- Mentor ---
+
+export const MentorCreateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  photo: z.string().max(500).optional(),
+  certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
+  aboutMe: z.string().max(5000).optional().transform((v) => (v?.trim() || undefined)),
+});
+
+export const MentorUpdateSchema = MentorCreateSchema.partial();

@@ -10,6 +10,7 @@ import {
   adminDeleteCourse,
   adminGetCourse,
   adminListTracks,
+  adminListMentors,
   adminUpdateCourse,
 } from "@/server/content/admin.service";
 
@@ -47,9 +48,10 @@ export default async function AdminCourseDetail({
   await requireRole(["ADMIN"]);
   const { courseId } = await params;
 
-  const [course, tracks] = await Promise.all([
+  const [course, tracks, mentors] = await Promise.all([
     adminGetCourse(courseId),
     adminListTracks(),
+    adminListMentors(),
   ]);
 
 
@@ -63,6 +65,7 @@ export default async function AdminCourseDetail({
     const featuredMostPlayed = formData.get("featuredMostPlayedOrder");
     const totalDur = formData.get("totalDurationMinutes");
     const ratingVal = formData.get("rating");
+    const mentorIdVal = String(formData.get("mentorId") ?? "").trim();
     await adminUpdateCourse(id, {
       title: String(formData.get("title") ?? ""),
       summary: String(formData.get("summary") ?? "").trim() || undefined,
@@ -70,6 +73,7 @@ export default async function AdminCourseDetail({
       instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
       instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       trackId: trackIdVal || "",
+      mentorId: mentorIdVal || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
       featuredNewOrder:
@@ -211,11 +215,27 @@ export default async function AdminCourseDetail({
             />
           </div>
           <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Instructor (Mentor)</label>
+            <select
+              name="mentorId"
+              defaultValue={(course as { mentorId?: string | null }).mentorId ?? ""}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            >
+              <option value="">None</option>
+              {mentors.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}{m.certificateName ? ` — ${m.certificateName}` : ""}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">Assign a mentor; their name and photo will be used for this course.</p>
+          </div>
+          <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name</label>
             <input
               name="instructorName"
               defaultValue={course.instructorName ?? ""}
-              placeholder="e.g. Ahmed Radwan"
+              placeholder="e.g. Ahmed Radwan (or set by mentor above)"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
@@ -225,7 +245,7 @@ export default async function AdminCourseDetail({
               name="instructorImage"
               type="url"
               defaultValue={course.instructorImage ?? ""}
-              placeholder="https://..."
+              placeholder="https://... (or set by mentor above)"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>

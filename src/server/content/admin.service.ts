@@ -13,6 +13,8 @@ import {
   ModuleUpdateSchema,
   LessonCreateSchema,
   LessonUpdateSchema,
+  MentorCreateSchema,
+  MentorUpdateSchema,
 } from "./content.schemas";
 
 function handlePrismaError(e: unknown): never {
@@ -222,8 +224,17 @@ export async function adminGetCourse(id: string) {
       },
     });
     if (!c) throw new AppError("NOT_FOUND", 404, "Course not found");
+    // Optional: get mentorId from DB if column exists (for course–mentor link)
+    let mentorId: string | null = null;
+    try {
+      const rows = await prisma.$queryRaw<{ mentor_id: string | null }[]>`SELECT mentor_id FROM courses WHERE id = ${id}`;
+      mentorId = rows[0]?.mentor_id ?? null;
+    } catch {
+      // mentor_id column may not exist yet (run prisma migrate deploy)
+    }
     return {
       ...c,
+      mentorId,
       featuredNewOrder: null as number | null,
       featuredMostPlayedOrder: null as number | null,
       totalDurationMinutes: null as number | null,
@@ -241,10 +252,34 @@ export async function adminGetCourse(id: string) {
 
 export async function adminCreateCourse(input: unknown) {
   try {
-    const data = parse(CourseCreateSchema, input);
-    return await prisma.course.create({
-      data: { ...data, trackId: data.trackId ?? null },
+    const data = parse(CourseCreateSchema, input) as Record<string, unknown> & { mentorId?: string | null; instructorName?: string | null; instructorImage?: string | null };
+    const mentorId = data.mentorId ?? null;
+    let instructorName = data.instructorName ?? null;
+    let instructorImage = data.instructorImage ?? null;
+    if (mentorId) {
+      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, photo: true } });
+      if (mentor) {
+        instructorName = mentor.name;
+        instructorImage = mentor.photo;
+      }
+    }
+    const { mentorId: _m, ...rest } = data;
+    const course = await prisma.course.create({
+      data: {
+        ...rest,
+        trackId: data.trackId ?? null,
+        instructorName: instructorName ?? undefined,
+        instructorImage: instructorImage ?? undefined,
+      },
     });
+    if (mentorId) {
+      try {
+        await prisma.$executeRaw`UPDATE courses SET mentor_id = ${mentorId} WHERE id = ${course.id}`;
+      } catch {
+        // mentor_id column may not exist yet
+      }
+    }
+    return course;
   } catch (e) {
     handlePrismaError(e);
   }
@@ -343,6 +378,7 @@ async function adminGetCourseSafeFallback(id: string) {
   });
   return {
     ...course,
+    mentorId: null as string | null,
     track: null as { id: string; title: string; slug: string; schoolId: string | null; school: unknown } | null,
     modules,
     featuredNewOrder: null as number | null,
@@ -353,14 +389,35 @@ async function adminGetCourseSafeFallback(id: string) {
 }
 
 export async function adminUpdateCourse(courseId: string, input: unknown) {
-  const data = parse(CourseUpdateSchema, input) as Record<string, unknown>;
+  const data = parse(CourseUpdateSchema, input) as Record<string, unknown> & { mentorId?: string | null };
+  let updateData = { ...data };
+  let mentorIdToSet: string | null | undefined = data.mentorId;
+  if (data.mentorId !== undefined) {
+    const mentorId = data.mentorId || null;
+    if (mentorId) {
+      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, photo: true } });
+      if (mentor) {
+        updateData = { ...updateData, instructorName: mentor.name, instructorImage: mentor.photo };
+      }
+    }
+  }
+  // Don't pass mentorId to Prisma (client may not have it until after migrate + generate)
+  const { mentorId: _m, ...dataForPrisma } = updateData;
   try {
-    return await prisma.course.update({ where: { id: courseId }, data });
+    const updated = await prisma.course.update({ where: { id: courseId }, data: dataForPrisma });
+    if (mentorIdToSet !== undefined) {
+      try {
+        await prisma.$executeRaw`UPDATE courses SET mentor_id = ${mentorIdToSet} WHERE id = ${courseId}`;
+      } catch {
+        // mentor_id column may not exist yet
+      }
+    }
+    return updated;
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const metaMsg = e instanceof Prisma.PrismaClientKnownRequestError ? (e.meta as { message?: string })?.message : undefined;
     if (msg?.includes("does not exist") || metaMsg?.includes("does not exist")) {
-      return courseUpdateRawSafe(courseId, data);
+      return courseUpdateRawSafe(courseId, dataForPrisma);
     }
     handlePrismaError(e);
   }
@@ -494,6 +551,46 @@ export async function adminDeleteLesson(lessonId: string) {
 export async function adminRemoveLessonVideo(lessonId: string) {
   try {
     await prisma.lessonVideo.deleteMany({ where: { lessonId } });
+  } catch (e) {
+    handlePrismaError(e);
+  }
+  return { ok: true as const };
+}
+
+// --- Mentors ---
+
+export async function adminListMentors() {
+  return prisma.mentor.findMany({ orderBy: { createdAt: "asc" } });
+}
+
+export async function adminGetMentor(id: string) {
+  const m = await prisma.mentor.findUnique({ where: { id } });
+  if (!m) throw new AppError("NOT_FOUND", 404, "Mentor not found");
+  return m;
+}
+
+export async function adminCreateMentor(input: unknown) {
+  try {
+    return await prisma.mentor.create({ data: parse(MentorCreateSchema, input) });
+  } catch (e) {
+    handlePrismaError(e);
+  }
+}
+
+export async function adminUpdateMentor(mentorId: string, input: unknown) {
+  try {
+    return await prisma.mentor.update({
+      where: { id: mentorId },
+      data: parse(MentorUpdateSchema, input),
+    });
+  } catch (e) {
+    handlePrismaError(e);
+  }
+}
+
+export async function adminDeleteMentor(mentorId: string) {
+  try {
+    await prisma.mentor.delete({ where: { id: mentorId } });
   } catch (e) {
     handlePrismaError(e);
   }

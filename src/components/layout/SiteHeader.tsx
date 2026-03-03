@@ -30,6 +30,9 @@ export function SiteHeader() {
           <Link href="/tracks" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
             Projects
           </Link>
+          <Link href="/mentors" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+            Mentors
+          </Link>
         </div>
         <div className="hidden sm:block w-full max-w-[280px] min-w-0">
           <SearchBar />

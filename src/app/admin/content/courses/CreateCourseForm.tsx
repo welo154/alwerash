@@ -1,22 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
-import { adminCreateCourse, adminListTracks } from "@/server/content/admin.service";
+import { adminCreateCourse, adminListTracks, adminListMentors } from "@/server/content/admin.service";
 
 type TrackItem = Awaited<ReturnType<typeof adminListTracks>>[number];
+type MentorItem = Awaited<ReturnType<typeof adminListMentors>>[number];
 
 export async function CreateCourseForm() {
   await requireRole(["ADMIN"]);
-  const tracks = await adminListTracks();
+  const [tracks, mentors] = await Promise.all([adminListTracks(), adminListMentors()]);
 
   async function create(formData: FormData) {
     "use server";
     await requireRole(["ADMIN"]);
     const trackId = String(formData.get("trackId") ?? "").trim();
+    const mentorId = String(formData.get("mentorId") ?? "").trim();
     const title = String(formData.get("title") ?? "").trim();
     if (!title) return;
     await adminCreateCourse({
       trackId: trackId || undefined,
+      mentorId: mentorId || undefined,
       title,
       summary: String(formData.get("summary") ?? "").trim() || undefined,
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
@@ -43,6 +46,21 @@ export async function CreateCourseForm() {
             </option>
           ))}
         </select>
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Instructor (Mentor)</label>
+        <select
+          name="mentorId"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        >
+          <option value="">None (or enter name/photo below)</option>
+          {mentors.map((m: MentorItem) => (
+            <option key={m.id} value={m.id}>
+              {m.name}{m.certificateName ? ` — ${m.certificateName}` : ""}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-slate-500">Assign a mentor from the list; their name and photo will be used for this course.</p>
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
