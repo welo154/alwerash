@@ -134,6 +134,13 @@ export default async function LearnCoursePage({
           <h2 id="curriculum-heading" className="sr-only">
             Course curriculum
           </h2>
+          {lessonCount === 0 ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center">
+              <p className="text-slate-600">No lessons in this course yet.</p>
+              <p className="mt-1 text-sm text-slate-500">Content may be added soon. Check back later or browse other courses.</p>
+            </div>
+          ) : (
+            <>
           <p className="text-sm font-medium text-slate-700 mb-4">
             Expand a module to see lessons and start watching.
           </p>
@@ -143,6 +150,8 @@ export default async function LearnCoursePage({
             unlockedLessonIds={Array.from(unlockedLessonIds)}
             completedLessonIds={Array.from(completedLessonIds)}
           />
+            </>
+          )}
         </section>
 
         <div className="mt-10 pt-6 border-t border-slate-200">

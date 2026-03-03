@@ -2,6 +2,41 @@
 
 import { useState } from "react";
 import Image from "next/image";
+
+/** Shared fallback when course image fails to load (e.g. Mux 404). */
+function CourseImageOrFallback({
+  src,
+  alt,
+  title,
+  className,
+  sizes,
+}: {
+  src: string | null;
+  alt: string;
+  title: string;
+  className?: string;
+  sizes?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
+        {title.charAt(0)}
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      unoptimized
+      className={className}
+      sizes={sizes}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 import Link from "next/link";
 import { Star, Clock, Users, Bookmark } from "lucide-react";
 import { CourseModal } from "./CourseModal";
@@ -165,20 +200,13 @@ function NewSectionCard({
       className="flex h-[420px] min-w-[300px] max-w-[320px] shrink-0 flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 text-left font-sans shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative mb-4 h-[180px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
-        {course.coverImage ? (
-          <Image
-            src={course.coverImage}
-            alt={course.title}
-            fill
-            unoptimized
-            className="object-cover object-center transition-transform duration-300 hover:scale-105"
-            sizes="320px"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
-            {course.title.charAt(0)}
-          </div>
-        )}
+        <CourseImageOrFallback
+          src={course.coverImage}
+          alt={course.title}
+          title={course.title}
+          className="object-cover object-center transition-transform duration-300 hover:scale-105"
+          sizes="320px"
+        />
       </div>
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">
@@ -243,20 +271,13 @@ function CourseCardBlock({
       className="flex h-[420px] w-full max-w-[320px] flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 text-left font-sans shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative mb-4 h-[180px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
-        {course.coverImage ? (
-          <Image
-            src={course.coverImage}
-            alt={course.title}
-            fill
-            unoptimized
-            className="object-cover object-center transition-transform duration-300 hover:scale-105"
-            sizes="320px"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
-            {course.title.charAt(0)}
-          </div>
-        )}
+        <CourseImageOrFallback
+          src={course.coverImage}
+          alt={course.title}
+          title={course.title}
+          className="object-cover object-center transition-transform duration-300 hover:scale-105"
+          sizes="320px"
+        />
       </div>
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">

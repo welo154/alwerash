@@ -2,6 +2,23 @@
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 
+function muxThumbnailUrl(playbackId: string): string {
+  return `https://image.mux.com/${playbackId}/thumbnail.jpg?width=800&height=450&fit_mode=smartcrop`;
+}
+
+/** Fallback when course has no cover image and no intro video. */
+const DEFAULT_COURSE_IMAGE =
+  "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80";
+
+function effectiveCoverImage(
+  coverImage: string | null,
+  introVideoMuxPlaybackId: string | null | undefined
+): string | null {
+  if (coverImage?.trim()) return coverImage;
+  if (introVideoMuxPlaybackId?.trim()) return muxThumbnailUrl(introVideoMuxPlaybackId);
+  return DEFAULT_COURSE_IMAGE;
+}
+
 export async function publicListTracks() {
   return prisma.track.findMany({
     where: { published: true },
@@ -38,6 +55,7 @@ export async function publicGetTrackBySlug(slug: string) {
           title: true,
           summary: true,
           coverImage: true,
+          introVideoMuxPlaybackId: true,
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       },
@@ -47,8 +65,9 @@ export async function publicGetTrackBySlug(slug: string) {
   if (!track || !track.published) throw new AppError("NOT_FOUND", 404, "Track not found");
   return {
     ...track,
-    courses: track.courses.map(({ modules, ...c }) => ({
+    courses: track.courses.map(({ modules, introVideoMuxPlaybackId, coverImage, ...c }) => ({
       ...c,
+      coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId),
       lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
     })),
   };
@@ -127,6 +146,7 @@ function mapCourseToCard(
     title: string;
     summary: string | null;
     coverImage: string | null;
+    introVideoMuxPlaybackId?: string | null;
     instructorName: string | null;
     instructorImage: string | null;
     track: { title: string; slug: string } | null;
@@ -141,7 +161,7 @@ function mapCourseToCard(
     id: c.id,
     title: c.title,
     summary: c.summary,
-    coverImage: c.coverImage,
+    coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId),
     instructorName: c.instructorName,
     instructorImage: c.instructorImage,
     track: c.track,
@@ -152,7 +172,7 @@ function mapCourseToCard(
   };
 }
 
-/** "New" section: courses with featuredNewOrder set, ordered by it. Falls back to first 3 from featured list if query fails (e.g. migration not applied). */
+/** "New" section: courses with featuredNewOrder set, ordered by it. Falls back to first 3 from featured list if none set. */
 export async function publicListNewCourses(): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
@@ -163,27 +183,30 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
         title: true,
         summary: true,
         coverImage: true,
+        introVideoMuxPlaybackId: true,
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         modules: { select: { _count: { select: { lessons: true } } } },
       },
     });
-    const courseIds = courses.map((c) => c.id);
-    const studentCounts = await getStudentCountsByCourseId(courseIds);
-    return courses.map((c) =>
-      mapCourseToCard(
-        { ...c, totalDurationMinutes: undefined, rating: undefined },
-        studentCounts.get(c.id) ?? 0
-      )
-    );
+    if (courses.length > 0) {
+      const courseIds = courses.map((c) => c.id);
+      const studentCounts = await getStudentCountsByCourseId(courseIds);
+      return courses.map((c) =>
+        mapCourseToCard(
+          { ...c, totalDurationMinutes: undefined, rating: undefined },
+          studentCounts.get(c.id) ?? 0
+        )
+      );
+    }
   } catch {
-    const fallback = await publicListFeaturedCourses(3);
-    return fallback;
+    // featured_new_order column may not exist yet
   }
+  return publicListFeaturedCourses(3);
 }
 
-/** "Most Played" section: courses with featuredMostPlayedOrder set, ordered by it. Falls back to featured list if query fails. */
+/** "Most Played" section: courses with featuredMostPlayedOrder set, ordered by it. Falls back to featured list if none set. */
 export async function publicListMostPlayedCourses(limit = 12): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
@@ -195,23 +218,27 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
         title: true,
         summary: true,
         coverImage: true,
+        introVideoMuxPlaybackId: true,
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         modules: { select: { _count: { select: { lessons: true } } } },
       },
     });
-    const courseIds = courses.map((c) => c.id);
-    const studentCounts = await getStudentCountsByCourseId(courseIds);
-    return courses.map((c) =>
-      mapCourseToCard(
-        { ...c, totalDurationMinutes: undefined, rating: undefined },
-        studentCounts.get(c.id) ?? 0
-      )
-    );
+    if (courses.length > 0) {
+      const courseIds = courses.map((c) => c.id);
+      const studentCounts = await getStudentCountsByCourseId(courseIds);
+      return courses.map((c) =>
+        mapCourseToCard(
+          { ...c, totalDurationMinutes: undefined, rating: undefined },
+          studentCounts.get(c.id) ?? 0
+        )
+      );
+    }
   } catch {
-    return publicListFeaturedCourses(limit);
+    // featured_most_played_order column may not exist yet
   }
+  return publicListFeaturedCourses(limit);
 }
 
 export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCard[]> {
@@ -225,6 +252,7 @@ export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCar
         title: true,
         summary: true,
         coverImage: true,
+        introVideoMuxPlaybackId: true,
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
@@ -265,6 +293,7 @@ export async function publicGetSimilarCourses(
         title: true,
         summary: true,
         coverImage: true,
+        introVideoMuxPlaybackId: true,
         instructorName: true,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
