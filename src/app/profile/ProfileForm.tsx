@@ -5,7 +5,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
+import { CourseCard } from "@/components/landing/CourseCard";
 import { AvatarCropModal } from "./AvatarCropModal";
+import { RenewalCountdown } from "./RenewalCountdown";
+
+type CourseForCard = {
+  id: string;
+  title: string;
+  summary: string | null;
+  coverImage: string | null;
+  instructorName: string | null;
+  track: { title: string; slug: string } | null;
+  lessonCount: number;
+  totalDurationMinutes: number | null;
+  rating: number | null;
+  studentCount: number;
+};
 
 type ProfileFormProps = {
   user: {
@@ -16,9 +31,10 @@ type ProfileFormProps = {
     country?: string | null;
   };
   subscription: { active: boolean; expiresAt?: Date | null };
+  favoritCourses: CourseForCard[];
 };
 
-export function ProfileForm({ user, subscription }: ProfileFormProps) {
+export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormProps) {
   const router = useRouter();
   const [name, setName] = useState(user.name ?? "");
   const [country, setCountry] = useState(user.country ?? "");
@@ -28,6 +44,7 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,36 +62,27 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
 
   const onCropConfirm = useCallback((file: File) => {
     setPhotoFile(file);
-    const url = URL.createObjectURL(file);
-    setPhotoPreview(url);
-    if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
-    setCropImageSrc(null);
+    setPhotoPreview(URL.createObjectURL(file));
     setCropModalOpen(false);
-  }, [cropImageSrc]);
+    setCropImageSrc(null);
+  }, []);
 
   const onCropClose = useCallback(() => {
     setCropModalOpen(false);
-    if (cropImageSrc) {
-      URL.revokeObjectURL(cropImageSrc);
-      setCropImageSrc(null);
-    }
+    if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+    setCropImageSrc(null);
   }, [cropImageSrc]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage(null);
-
     try {
       let imageUrl: string | null = photoPreview && !photoFile ? photoPreview : null;
-
       if (photoFile) {
         const formData = new FormData();
         formData.set("photo", photoFile);
-        const uploadRes = await fetch("/api/profile/photo", {
-          method: "POST",
-          body: formData,
-        });
+        const uploadRes = await fetch("/api/profile/photo", { method: "POST", body: formData });
         if (!uploadRes.ok) {
           const data = await uploadRes.json().catch(() => ({}));
           throw new Error(data.error ?? "Failed to upload photo");
@@ -82,7 +90,6 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
         const data = await uploadRes.json();
         imageUrl = data.url ?? null;
       }
-
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -92,21 +99,17 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
           ...(typeof imageUrl === "string" && { image: imageUrl }),
         }),
       });
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Failed to update profile");
       }
-
       setPhotoFile(null);
       setMessage({ type: "ok", text: "Profile updated." });
+      setEditModalOpen(false);
       await getSession();
       router.refresh();
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong.",
-      });
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong." });
     } finally {
       setSaving(false);
     }
@@ -114,51 +117,38 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
 
   const displayImage = photoPreview ?? user.image;
   const initials = (user.name?.charAt(0) ?? user.email?.charAt(0) ?? "?").toUpperCase();
+  const titleLine = country?.trim() || "Learner";
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50/30 to-slate-100">
-        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
-          {/* Header */}
-          <div className="text-center sm:text-left">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Your profile
-            </h1>
-            <p className="mt-2 text-slate-600">
-              Keep your info up to date and personalize your experience.
-            </p>
-          </div>
-
-          {/* Avatar card */}
-          <div className="mt-10 rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/50 backdrop-blur sm:p-10">
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-              <label className="group relative shrink-0 cursor-pointer">
-                <span className="flex h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-linear-to-br from-indigo-100 to-slate-100 shadow-xl ring-2 ring-slate-200/60 transition-all duration-300 group-hover:ring-4 group-hover:ring-indigo-300">
+      <div className="min-h-screen bg-white">
+        <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
+            {/* Left column: profile picture, name, title, ABOUT */}
+            <aside className="shrink-0 lg:w-[380px]">
+              <label className="relative block cursor-pointer">
+                <span className="flex h-56 w-56 overflow-hidden rounded-full border-4 border-[var(--color-primary)] bg-slate-100 shadow-md sm:h-64 sm:w-64">
                   {displayImage ? (
                     displayImage.startsWith("blob:") ? (
-                      <img
-                        src={displayImage}
-                        alt="Profile preview"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+                      <img src={displayImage} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <Image
                         src={displayImage}
-                        alt="Profile"
-                        width={128}
-                        height={128}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        alt=""
+                        width={256}
+                        height={256}
+                        className="h-full w-full object-cover"
                         unoptimized
                       />
                     )
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center text-4xl font-bold text-indigo-600">
+                    <span className="flex h-full w-full items-center justify-center text-5xl font-bold text-slate-500 sm:text-6xl">
                       {initials}
                     </span>
                   )}
                 </span>
-                <span className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg ring-2 ring-white transition-all duration-200 group-hover:scale-110 group-hover:bg-indigo-700">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                <span className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white shadow">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   </svg>
                 </span>
@@ -167,133 +157,164 @@ export function ProfileForm({ user, subscription }: ProfileFormProps) {
                   accept="image/jpeg,image/png,image/webp"
                   className="sr-only"
                   onChange={onPhotoChange}
-                  aria-label="Change profile photo"
+                  aria-label="Change photo"
                 />
               </label>
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-lg font-semibold text-slate-900">Profile photo</h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Click the camera icon to choose a photo. You’ll be able to crop and zoom so it looks just right.
+              <h1 className="mt-8 text-3xl font-bold tracking-tight text-black">
+                {name?.trim() || user.email || "Profile"}
+              </h1>
+              <p className="mt-2 text-base font-normal text-slate-600">{titleLine}</p>
+              <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
+                <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">ABOUT:</p>
+                <p className="mt-3 text-base leading-relaxed text-slate-700">
+                  {user.email && (
+                    <>
+                      {user.email}
+                      {country?.trim() && ` · ${country}`}
+                    </>
+                  )}
+                  {!user.email && !country?.trim() && "—"}
                 </p>
               </div>
-            </div>
-          </div>
+            </aside>
 
-          {/* Form card */}
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-slate-200/50 backdrop-blur sm:p-8"
-          >
-            {message && (
-              <div
-                className={`mb-6 rounded-xl px-4 py-3 text-sm font-medium ${
-                  message.type === "ok"
-                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                    : "bg-red-50 text-red-800 border border-red-200"
-                }`}
-              >
-                {message.text}
+            {/* Right column: Favorit, renewal bar, buttons */}
+            <main className="min-w-0 flex-1">
+              {/* Favorit section */}
+              <h2 className="text-2xl font-bold tracking-tight text-black">Favorit</h2>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {favoritCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    id={course.id}
+                    title={course.title}
+                    summary={course.summary}
+                    coverImage={course.coverImage}
+                    track={course.track}
+                    lessonCount={course.lessonCount}
+                    totalDurationMinutes={course.totalDurationMinutes}
+                    rating={course.rating}
+                    studentCount={course.studentCount}
+                    instructorName={course.instructorName}
+                  />
+                ))}
               </div>
-            )}
+              {favoritCourses.length > 0 && (
+                <Link
+                  href="/learn"
+                  className="mt-4 inline-block text-sm font-medium text-slate-600 hover:text-slate-900"
+                >
+                  View all courses →
+                </Link>
+              )}
 
-            <div className="space-y-6">
+              {/* Days Left For Renewal */}
+              <div className="mt-8 rounded-xl bg-[var(--color-accent)] px-6 py-4 flex items-center justify-between">
+                <span className="font-bold text-white">Days Left For Renewal</span>
+                {subscription.active && subscription.expiresAt ? (
+                  <span className="font-bold text-white">
+                    <RenewalCountdown expiresAt={new Date(subscription.expiresAt)} />
+                  </span>
+                ) : (
+                  <span className="font-bold text-white">—</span>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/subscription"
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+                >
+                  Help
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(true)}
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+                >
+                  Edit Profile
+                </button>
+                <Link
+                  href="/profile/change-password"
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+                >
+                  Change Pass
+                </Link>
+                <Link
+                  href="/profile/certificates"
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+                >
+                  Certificates
+                </Link>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Profile modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setEditModalOpen(false)} aria-hidden />
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {message && (
+                <div
+                  className={`rounded-lg px-4 py-2 text-sm ${
+                    message.type === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
+                  }`}
+                >
+                  {message.text}
+                </div>
+              )}
               <div>
-                <label htmlFor="profile-name" className="block text-sm font-semibold text-slate-700">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-slate-700">Name</label>
                 <input
-                  id="profile-name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                   placeholder="Your name"
                 />
               </div>
               <div>
-                <label htmlFor="profile-email" className="block text-sm font-semibold text-slate-700">
-                  Email
-                </label>
-                <p id="profile-email" className="mt-2 text-slate-700">
-                  {user.email}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">Email cannot be changed here.</p>
+                <label className="block text-sm font-medium text-slate-700">Email</label>
+                <p className="mt-1 text-slate-600">{user.email}</p>
               </div>
               <div>
-                <label htmlFor="profile-country" className="block text-sm font-semibold text-slate-700">
-                  Country
-                </label>
+                <label className="block text-sm font-medium text-slate-700">Country</label>
                 <input
-                  id="profile-country"
                   type="text"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                   placeholder="Country"
                 />
               </div>
-
-              {/* Subscription block */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="block text-sm font-semibold text-slate-700">Subscription</span>
-                {subscription.active ? (
-                  <p className="mt-1 text-slate-700">
-                    You are subscribed
-                    {subscription.expiresAt
-                      ? ` until ${new Date(subscription.expiresAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}`
-                      : ""}
-                    .
-                  </p>
-                ) : (
-                  <p className="mt-1 text-slate-600">No active subscription.</p>
-                )}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
               </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg disabled:opacity-60"
-              >
-                {saving ? "Saving…" : "Save changes"}
-              </button>
-              {subscription.active ? (
-                <Link
-                  href="/learn"
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-                >
-                  My courses
-                </Link>
-              ) : (
-                <Link
-                  href="/subscription"
-                  className="rounded-xl border-2 border-indigo-600 bg-white px-5 py-3 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-50"
-                >
-                  Subscribe
-                </Link>
-              )}
-              <Link
-                href="/"
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-              >
-                Back to home
-              </Link>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
-      <AvatarCropModal
-        open={cropModalOpen}
-        imageSrc={cropImageSrc}
-        onClose={onCropClose}
-        onConfirm={onCropConfirm}
-      />
+      <AvatarCropModal open={cropModalOpen} imageSrc={cropImageSrc} onClose={onCropClose} onConfirm={onCropConfirm} />
     </>
   );
 }

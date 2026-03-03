@@ -1,13 +1,17 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
+import { publicListFeaturedCourses } from "@/server/content/public.service";
 import { ProfileForm } from "./ProfileForm";
 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user) redirect("/login?next=/profile");
 
-  const subscription = await getSubscriptionStatus(session.user.id);
+  const [subscription, favoritCourses] = await Promise.all([
+    getSubscriptionStatus(session.user.id),
+    publicListFeaturedCourses(3),
+  ]);
 
   return (
     <ProfileForm
@@ -22,6 +26,7 @@ export default async function ProfilePage() {
         active: subscription.active,
         expiresAt: subscription.expiresAt ?? null,
       }}
+      favoritCourses={favoritCourses}
     />
   );
 }
