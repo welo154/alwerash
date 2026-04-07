@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
@@ -11,6 +12,10 @@ import { SearchBar } from "./SearchBar";
  */
 export function SiteHeader() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  // Landing now has its own built-in hero navbar.
+  if (pathname === "/") return null;
 
   return (
     <nav className="relative z-50 flex w-full flex-nowrap items-center justify-between gap-4 bg-black px-6 py-3 font-sans text-white">
