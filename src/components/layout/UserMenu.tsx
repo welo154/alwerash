@@ -11,9 +11,25 @@ interface UserMenuProps {
     email?: string | null;
     image?: string | null;
   };
+  /** Logged-in green header: white ring, white avatar tile, black initials */
+  theme?: "black" | "green";
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+function avatarInitials(name?: string | null, email?: string | null) {
+  if (name?.trim()) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0]!.charAt(0)}${parts[parts.length - 1]!.charAt(0)}`.toUpperCase();
+    }
+    return name.trim().slice(0, 2).toUpperCase();
+  }
+  const e = email?.trim();
+  if (e) return e.slice(0, 2).toUpperCase();
+  return "?";
+}
+
+export function UserMenu({ user, theme = "black" }: UserMenuProps) {
+  const isGreen = theme === "green";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -32,7 +48,11 @@ export function UserMenu({ user }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
+        className={
+          isGreen
+            ? "relative h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#004B3C]"
+            : "relative h-10 w-10 overflow-hidden rounded-full border-2 border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
+        }
         aria-expanded={open}
         aria-haspopup="true"
       >
@@ -46,8 +66,14 @@ export function UserMenu({ user }: UserMenuProps) {
             unoptimized
           />
         ) : (
-          <span className="flex h-full w-full items-center justify-center bg-yellow-400/20 text-sm font-medium text-slate-900">
-            {user.name?.charAt(0) ?? user.email?.charAt(0) ?? "?"}
+          <span
+            className={
+              isGreen
+                ? "flex h-full w-full items-center justify-center bg-white text-sm font-bold text-black"
+                : "flex h-full w-full items-center justify-center bg-yellow-400/20 text-sm font-medium text-slate-900"
+            }
+          >
+            {isGreen ? avatarInitials(user.name, user.email) : (user.name?.charAt(0) ?? user.email?.charAt(0) ?? "?").toUpperCase()}
           </span>
         )}
       </button>

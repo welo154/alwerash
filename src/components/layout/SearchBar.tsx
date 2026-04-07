@@ -28,7 +28,23 @@ function SearchIcon({ className }: { className?: string }) {
   );
 }
 
-export function SearchBar() {
+function ArrowRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+      <path d="M5 12h12" strokeWidth="2" strokeLinecap="round" />
+      <path d="M13 6l6 6-6 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export type SearchBarVariant = "default" | "toolbar";
+
+type SearchBarProps = {
+  /** Green logged-in header: white field + circular arrow, no magnifier */
+  variant?: SearchBarVariant;
+};
+
+export function SearchBar({ variant = "default" }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [open, setOpen] = useState(false);
@@ -92,9 +108,116 @@ export function SearchBar() {
   const hasResults = results && (results.tracks.length > 0 || results.courses.length > 0);
   const showDropdown = open && query.trim() !== "";
 
+  const inputId = variant === "toolbar" ? "header-search-toolbar" : "header-search";
+
+  if (variant === "toolbar") {
+    return (
+      <div ref={containerRef} className="relative flex min-w-0 max-w-[350px] flex-1 items-center gap-2">
+        <label htmlFor={inputId} className="sr-only">
+          Search for courses
+        </label>
+        <div className="relative min-w-0 flex-1">
+          <input
+            id={inputId}
+            type="search"
+            placeholder="Search for courses"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => query.trim() && setOpen(true)}
+            className="h-10 w-full rounded-lg border-0 bg-white px-3 py-2 text-sm font-medium text-black outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-white/40"
+            aria-label="Search for courses"
+            role="combobox"
+            aria-expanded={showDropdown}
+            aria-controls="search-results-listbox"
+            aria-haspopup="listbox"
+            autoComplete="off"
+          />
+          {loading && (
+            <span
+              className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-slate-200 border-t-white"
+              aria-hidden
+            />
+          )}
+        </div>
+        <button
+          type="button"
+          aria-label="Search"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white text-white transition-opacity hover:opacity-90"
+        >
+          <ArrowRightIcon className="h-5 w-5" />
+        </button>
+
+        {showDropdown && (
+          <div
+            id="search-results-listbox"
+            role="listbox"
+            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
+          >
+            {!results ? (
+              <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-slate-500">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
+                Searching...
+              </div>
+            ) : !hasResults ? (
+              <div className="px-4 py-8 text-center text-sm text-slate-500">
+                No tracks or courses found for &quot;{query.trim()}&quot;
+              </div>
+            ) : (
+              <div className="max-h-[min(70vh,380px)] overflow-y-auto py-1">
+                {results.tracks.length > 0 && (
+                  <div className="border-b border-slate-100">
+                    <div className="sticky top-0 z-10 bg-slate-50/95 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Projects
+                    </div>
+                    <ul className="py-1">
+                      {results.tracks.map((track) => (
+                        <li key={track.id}>
+                          <Link
+                            href={`/tracks/${track.slug}`}
+                            className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
+                            onClick={() => setOpen(false)}
+                          >
+                            {track.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {results.courses.length > 0 && (
+                  <div>
+                    <div className="sticky top-0 z-10 bg-slate-50/95 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Courses
+                    </div>
+                    <ul className="py-1">
+                      {results.courses.map((course) => (
+                        <li key={course.id}>
+                          <Link
+                            href={`/courses/${course.id}`}
+                            className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
+                            onClick={() => setOpen(false)}
+                          >
+                            <span className="font-medium">{course.title}</span>
+                            {course.track && (
+                              <span className="ml-2 text-slate-400">· {course.track.title}</span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="relative flex w-full flex-1">
-      <label htmlFor="header-search" className="sr-only">
+      <label htmlFor={inputId} className="sr-only">
         Search for courses
       </label>
       <div className="relative w-full">
@@ -102,7 +225,7 @@ export function SearchBar() {
           <SearchIcon className="h-full w-full" />
         </span>
         <input
-          id="header-search"
+          id={inputId}
           type="search"
           placeholder="Search for courses"
           value={query}

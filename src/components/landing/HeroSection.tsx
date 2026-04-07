@@ -14,7 +14,12 @@ const LOGO_H = 116;   // height of the logo image
 const R = 50;         // shared border-radius
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  // Signed-in users on home use LoggedInAppHeader only — hide marketing hero (nav + intro).
+  if (status === "authenticated" && session?.user) {
+    return null;
+  }
 
   return (
     <section className="bg-white px-4 pt-[35px] pb-8 sm:px-6 lg:px-8">
