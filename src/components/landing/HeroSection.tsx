@@ -36,7 +36,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
         {/* ── ROW: Logo (white) + Navbar ── */}
         <div className="flex items-stretch">
 
-          {/* 1. Logo — black bg, z-20 above the bg white box */}
+          {/* 1. Logo — white tile; PNG is black wordmark on white (committed asset) */}
           <div
             className="relative z-20 flex shrink-0 items-center justify-center bg-white overflow-hidden"
             style={{ width: LOGO_W, borderBottomRightRadius: R }}
