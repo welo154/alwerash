@@ -252,7 +252,7 @@ export async function adminGetCourse(id: string) {
 
 export async function adminCreateCourse(input: unknown) {
   try {
-    const data = parse(CourseCreateSchema, input) as Record<string, unknown> & { mentorId?: string | null; instructorName?: string | null; instructorImage?: string | null };
+    const data = parse(CourseCreateSchema, input);
     const mentorId = data.mentorId ?? null;
     let instructorName = data.instructorName ?? null;
     let instructorImage = data.instructorImage ?? null;
@@ -263,11 +263,11 @@ export async function adminCreateCourse(input: unknown) {
         instructorImage = mentor.photo;
       }
     }
-    const { mentorId: _m, ...rest } = data;
+    const { mentorId: _m, trackId, ...rest } = data;
     const course = await prisma.course.create({
       data: {
         ...rest,
-        trackId: data.trackId ?? null,
+        trackId: trackId ?? null,
         instructorName: instructorName ?? undefined,
         instructorImage: instructorImage ?? undefined,
       },

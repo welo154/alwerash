@@ -1,7 +1,6 @@
 import {
   HeroSection,
-  FeaturedCoursesSection,
-  MentorsSection,
+  LandingBoxesSection,
 } from "@/components/landing";
 import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
 import { publicListTracks } from "@/server/content/public.service";
@@ -19,9 +18,9 @@ export default async function LandingPage() {
   return (
     <div className="font-sans">
       <HeroSection tracks={heroTracks} />
-      <FeaturedCoursesSection />
-      <MentorsSection />
+      <LandingBoxesSection />
       <GsapAnimationLayer />
     </div>
   );
 }
+

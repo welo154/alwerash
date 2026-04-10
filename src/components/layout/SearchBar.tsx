@@ -112,7 +112,10 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
 
   if (variant === "toolbar") {
     return (
-      <div ref={containerRef} className="relative flex min-w-0 max-w-[350px] flex-1 items-center gap-2">
+      <div
+        ref={containerRef}
+        className="relative flex h-10 w-full min-w-0 items-center justify-center"
+      >
         <label htmlFor={inputId} className="sr-only">
           Search for courses
         </label>
@@ -139,14 +142,6 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
             />
           )}
         </div>
-        <button
-          type="button"
-          aria-label="Search"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white text-white transition-opacity hover:opacity-90"
-        >
-          <ArrowRightIcon className="h-5 w-5" />
-        </button>
-
         {showDropdown && (
           <div
             id="search-results-listbox"
@@ -314,3 +309,4 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
     </div>
   );
 }
+

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 /** Shared fallback when course image fails to load (e.g. Mux 404). */
 function CourseImageOrFallback({
@@ -328,19 +330,11 @@ type Props = {
   fields: string[];
 };
 
-const MOST_PLAYED_PAGE_SIZE = 4;
-
 export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Props) {
   const [modalCourse, setModalCourse] = useState<CourseForCard | null>(null);
-  const [mostPlayedPage, setMostPlayedPage] = useState(1);
   const fieldList = fields.length > 0 ? fields : FIELDS_FALLBACK;
   const newDisplay = newCourses.length > 0 ? newCourses : STATIC_NEW_CARDS;
   const mostPlayedDisplay = mostPlayedCourses.length > 0 ? mostPlayedCourses : STATIC_MOST_PLAYED_CARDS;
-  const mostPlayedTotalPages = Math.max(1, Math.ceil(mostPlayedDisplay.length / MOST_PLAYED_PAGE_SIZE));
-  const mostPlayedPaginated = mostPlayedDisplay.slice(
-    (mostPlayedPage - 1) * MOST_PLAYED_PAGE_SIZE,
-    mostPlayedPage * MOST_PLAYED_PAGE_SIZE
-  );
 
   return (
     <>
@@ -411,61 +405,23 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                     No courses yet
                   </div>
                 ) : (
-                  <>
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                      {mostPlayedPaginated.map((course) => (
-                        <CourseCardBlock
-                          key={course.id}
-                          course={course}
-                          onClick={() => setModalCourse(course)}
-                        />
+                  <div className="relative w-full overflow-hidden">
+                    <Swiper
+                      slidesPerView="auto"
+                      spaceBetween={30}
+                      grabCursor
+                      className="overflow-visible!"
+                    >
+                      {mostPlayedDisplay.map((course) => (
+                        <SwiperSlide key={course.id} className="w-[320px]!">
+                          <CourseCardBlock
+                            course={course}
+                            onClick={() => setModalCourse(course)}
+                          />
+                        </SwiperSlide>
                       ))}
-                    </div>
-                    {mostPlayedTotalPages > 1 && (
-                      <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setMostPlayedPage((p) => Math.max(1, p - 1))}
-                          disabled={mostPlayedPage <= 1}
-                          aria-label="Previous page"
-                          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50"
-                        >
-                          Previous
-                        </button>
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: mostPlayedTotalPages }, (_, i) => i + 1).map(
-                            (page) => (
-                              <button
-                                key={page}
-                                type="button"
-                                onClick={() => setMostPlayedPage(page)}
-                                aria-label={`Page ${page}`}
-                                aria-current={mostPlayedPage === page ? "page" : undefined}
-                                className={`min-w-[2.25rem] rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                                  mostPlayedPage === page
-                                    ? "bg-slate-900 text-white"
-                                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                                }`}
-                              >
-                                {page}
-                              </button>
-                            )
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setMostPlayedPage((p) => Math.min(mostPlayedTotalPages, p + 1))
-                          }
-                          disabled={mostPlayedPage >= mostPlayedTotalPages}
-                          aria-label="Next page"
-                          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    )}
-                  </>
+                    </Swiper>
+                  </div>
                 )}
               </div>
             </div>

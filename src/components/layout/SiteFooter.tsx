@@ -191,11 +191,11 @@ export function SiteFooter() {
 
         {/* Large wordmark — native <a>+<img> matches SSR/CSR exactly; multiply drops baked-in white */}
         <div className="bg-transparent  -mb-9 -mt-5">
-          <a
+          <Link
             href="/"
             className="-ml-[31px] inline-block max-w-[calc(100%+31px)] bg-transparent max-sm:max-w-full"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; blend matches SSR/CSR */}
             <img
               src="/brand/alwerash-logo.png"
               alt="Alwerash"
@@ -203,7 +203,7 @@ export function SiteFooter() {
               height={116}
               className="block h-auto w-[677px] max-w-full bg-transparent object-contain object-left opacity-100 mix-blend-multiply"
             />
-          </a>
+          </Link>
         </div>
 
         {/* Legal — Pangea 18 / 400 / 120% / center; no border-top */}
