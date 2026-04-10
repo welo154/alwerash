@@ -51,6 +51,18 @@ export default function AdminContentHome() {
             Manage Courses
           </Link>
         </div>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 max-w-md shadow-sm">
+          <h2 className="font-semibold text-black mb-1">Instructors</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mb-2">
+            Create instructor accounts (no self-signup) and assign them to courses.
+          </p>
+          <Link
+            href="/admin/content/instructors"
+            className="inline-block rounded-xl border border-black px-4 py-2 text-sm font-medium text-black no-underline hover:bg-slate-50 transition-colors"
+          >
+            Manage instructors
+          </Link>
+        </div>
       </div>
       <Link className="text-sm text-[var(--color-text-muted)] hover:text-black underline" href="/dashboard">← Back to Dashboard</Link>
     </div>

@@ -15,22 +15,35 @@ export async function middleware(req: NextRequest) {
   const isLessonsPath = pathname.startsWith("/lessons/");
   const isAdminPath = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
+  const isInstructorPath = pathname.startsWith("/instructor");
+  const isInstructorApi = pathname.startsWith("/api/instructor");
   const isPlaybackApi = pathname.startsWith("/api/video/playback/");
 
   const token = await getToken({ req, secret });
   const roles = (token?.roles as string[] | undefined) ?? [];
   const isAdmin = roles.includes("ADMIN");
+  const isInstructor = roles.includes("INSTRUCTOR");
 
   // Logged-in users must not access login/register — redirect away
   if (isAuthPage && token?.sub) {
     const url = req.nextUrl.clone();
-    url.pathname = isAdmin ? "/admin" : "/learn";
+    if (isAdmin) url.pathname = "/admin";
+    else if (isInstructor) url.pathname = "/instructor";
+    else url.pathname = "/learn";
     return NextResponse.redirect(url);
   }
 
-  // Admins may only access admin dashboard and admin API; redirect other pages (not API) to /admin
+  // Admins may only access admin/instructor dashboards and their APIs; redirect other pages (not API) to /admin
   const isPageRequest = !pathname.startsWith("/api/");
-  if (token?.sub && isAdmin && isPageRequest && !isAdminPath && !isAdminApi) {
+  if (
+    token?.sub &&
+    isAdmin &&
+    isPageRequest &&
+    !isAdminPath &&
+    !isAdminApi &&
+    !isInstructorPath &&
+    !isInstructorApi
+  ) {
     const url = req.nextUrl.clone();
     url.pathname = "/admin";
     return NextResponse.redirect(url);
@@ -53,6 +66,24 @@ export async function middleware(req: NextRequest) {
   if (isPlaybackApi) {
     if (!token?.sub) {
       return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
+  // Instructor portal + APIs: INSTRUCTOR or ADMIN
+  if (isInstructorPath || isInstructorApi) {
+    if (!token?.sub) {
+      if (isInstructorApi) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    if (!isInstructor && !isAdmin) {
+      if (isInstructorApi) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      const url = req.nextUrl.clone();
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }

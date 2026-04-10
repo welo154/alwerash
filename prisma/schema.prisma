@@ -98,6 +98,7 @@ model User {
   subscriptions   Subscription[]
   entitlements    Entitlement[]
   lessonProgress  LessonProgress[]
+  instructorCourses CourseInstructor[] @relation("InstructorCourseAssignments")
 
   @@map("users")
 }
@@ -227,12 +228,26 @@ model Course {
   modules                Module[]
   threads                Thread[]
   introVideoUploads      CourseIntroVideoUpload[]
+  instructors            CourseInstructor[]
 
   @@index([trackId, order])
   @@index([mentorId])
   @@index([featuredNewOrder])
   @@index([featuredMostPlayedOrder])
   @@map("courses")
+}
+
+model CourseInstructor {
+  courseId     String   @map("course_id")
+  instructorId String   @map("instructor_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  course     Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  instructor User   @relation("InstructorCourseAssignments", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, instructorId])
+  @@index([instructorId])
+  @@map("course_instructors")
 }
 
 model Module {
