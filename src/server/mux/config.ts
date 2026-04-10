@@ -9,7 +9,7 @@ function getMuxConfig() {
   const signingKeyId = process.env.MUX_SIGNING_KEY_ID;
   const privateKey = process.env.MUX_PRIVATE_KEY;
   const playbackTokenTtl = process.env.MUX_PLAYBACK_TOKEN_TTL ?? "2h";
-  const uploadCorsOrigin = process.env.MUX_UPLOAD_CORS_ORIGIN ?? "http://localhost:3001";
+  const uploadCorsOrigin = process.env.MUX_UPLOAD_CORS_ORIGIN ?? "http://localhost:3002";
 
   return {
     tokenId: tokenId || undefined,

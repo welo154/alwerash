@@ -43,22 +43,29 @@ export default function LoginForm() {
     });
     setLoading(false);
 
-    if (result?.error) {
-      setError("Invalid email or password");
+    // NextAuth often returns { ok: true, url: null } with redirect: false — do not require url
+    if (!result?.ok) {
+      setError(
+        "Invalid email or password. If you registered recently, confirm your email from the link we sent, then try again."
+      );
       return;
     }
-    if (result?.ok && result?.url) {
-      const toast = "toast=Signed+in";
-      const res = await fetch("/api/auth/session");
-      const session = (await res.json()) as { user?: { roles?: string[] } };
-      const isAdmin = session?.user?.roles?.includes("ADMIN");
-      if (nextParam && nextParam.startsWith("/")) {
-        window.location.href = nextParam.includes("?") ? `${nextParam}&${toast}` : `${nextParam}?${toast}`;
-      } else if (isAdmin) {
-        window.location.href = `/admin/content/tracks?${toast}`;
-      } else {
-        window.location.href = `/?${toast}`;
-      }
+
+    const toast = "toast=Signed+in";
+    const res = await fetch("/api/auth/session");
+    const session = (await res.json()) as { user?: { roles?: string[] } };
+    const roles = session?.user?.roles ?? [];
+    const isAdmin = roles.includes("ADMIN");
+    const isInstructor = roles.includes("INSTRUCTOR");
+
+    if (nextParam && nextParam.startsWith("/")) {
+      window.location.href = nextParam.includes("?") ? `${nextParam}&${toast}` : `${nextParam}?${toast}`;
+    } else if (isAdmin) {
+      window.location.href = `/admin/content/tracks?${toast}`;
+    } else if (isInstructor) {
+      window.location.href = `/instructor?${toast}`;
+    } else {
+      window.location.href = `/?${toast}`;
     }
   }
 
