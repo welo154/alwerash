@@ -61,7 +61,7 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
         </svg>
 
         <Link
-          href="/"
+          href="/home"
           className="absolute top-[8px] left-0 z-10 block bg-transparent"
           aria-label="Go to home"
         >

@@ -8,9 +8,9 @@ import { LoggedInAppHeader } from "./LoggedInAppHeader";
 /**
  * Chooses header by route + session.
  *
- * Home (/):
- * - Guest: no global header (landing Hero includes its own green nav).
- * - Signed in: LoggedInAppHeader (#004B3C); Hero is hidden so there is only one header.
+ * Guest marketing (`/`): no global header (Hero includes its own green shell + nav).
+ *
+ * Signed-in home (`/home`): LoggedInAppHeader only (separate route from `/`).
  *
  * Other routes: GuestSiteHeader (black) vs LoggedInAppHeader when signed in.
  */
@@ -21,6 +21,19 @@ export function SiteHeader() {
 
   if (pathname === "/") {
     if (status === "loading") return null;
+    return null;
+  }
+
+  if (pathname === "/home") {
+    if (status === "loading") {
+      return (
+        <div
+          className="sticky top-0 z-50 h-[112px] w-full animate-pulse bg-neutral-100"
+          aria-busy
+          aria-label="Loading header"
+        />
+      );
+    }
     if (session?.user) {
       return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} />;
     }

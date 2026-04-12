@@ -1,9 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import { CatalogShowcaseCard } from "@/components/cards";
 import "swiper/css";
+
+/** Same artwork as next; horizontal flip so the chevron points left. */
+function CardsPrevIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="43"
+      height="43"
+      viewBox="0 0 43 43"
+      fill="none"
+      aria-hidden
+      className="scale-x-[-1]"
+    >
+      <path
+        d="M21.25 41.75C32.5718 41.75 41.75 32.5718 41.75 21.25C41.75 9.92816 32.5718 0.75 21.25 0.75C9.92816 0.75 0.75 9.92816 0.75 21.25C0.75 32.5718 9.92816 41.75 21.25 41.75Z"
+        fill="white"
+      />
+      <path d="M21.25 29.45L29.45 21.25L21.25 13.05" fill="white" />
+      <path
+        d="M21.25 29.45L29.45 21.25M29.45 21.25L21.25 13.05M29.45 21.25L13.05 21.25M41.75 21.25C41.75 32.5718 32.5718 41.75 21.25 41.75C9.92816 41.75 0.75 32.5718 0.75 21.25C0.75 9.92816 9.92816 0.75 21.25 0.75C32.5718 0.75 41.75 9.92816 41.75 21.25Z"
+        stroke="#1E1E1E"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CardsNextIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="43" height="43" viewBox="0 0 43 43" fill="none" aria-hidden>
+      <path
+        d="M21.25 41.75C32.5718 41.75 41.75 32.5718 41.75 21.25C41.75 9.92816 32.5718 0.75 21.25 0.75C9.92816 0.75 0.75 9.92816 0.75 21.25C0.75 32.5718 9.92816 41.75 21.25 41.75Z"
+        fill="white"
+      />
+      <path d="M21.25 29.45L29.45 21.25L21.25 13.05" fill="white" />
+      <path
+        d="M21.25 29.45L29.45 21.25M29.45 21.25L21.25 13.05M29.45 21.25L13.05 21.25M41.75 21.25C41.75 32.5718 32.5718 41.75 21.25 41.75C9.92816 41.75 0.75 32.5718 0.75 21.25C0.75 9.92816 9.92816 0.75 21.25 0.75C32.5718 0.75 41.75 9.92816 41.75 21.25Z"
+        stroke="#1E1E1E"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 const TAGS = [
   "FEATURED",
@@ -18,6 +68,8 @@ const TAGS = [
   "TYPOGRAPHY",
   "PRODUCTIVITY",
 ];
+
+const CARDS_SLIDE_MS = 450;
 
 const TAGS_ROW_2 = [
   "PHOTOGRAPHY",
@@ -36,6 +88,16 @@ const TAGS_ROW_2 = [
 export function LandingBoxesSection() {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [activeTagRow2, setActiveTagRow2] = useState<string | null>(null);
+  const cardsSwiperRef = useRef<SwiperType | null>(null);
+  const [cardsAtEnd, setCardsAtEnd] = useState(false);
+  const [cardsAtBeginning, setCardsAtBeginning] = useState(true);
+
+  /** Sync nav disabled state only — never call `swiper.update()` here (it fires `onSlidesUpdated` → recursion). */
+  const syncCardsNav = (swiper: SwiperType) => {
+    cardsSwiperRef.current = swiper;
+    setCardsAtEnd(swiper.isEnd);
+    setCardsAtBeginning(swiper.isBeginning);
+  };
 
   return (
     <section className="mt-[107px] w-full overflow-x-hidden px-4 sm:px-6 lg:px-8">
@@ -43,11 +105,10 @@ export function LandingBoxesSection() {
         <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
           <Swiper
             modules={[Autoplay]}
-            loop
             slidesPerView="auto"
             spaceBetween={25}
             grabCursor
-            autoplay={{ delay: 2400, disableOnInteraction: false }}
+            autoplay={{ delay: 2400, disableOnInteraction: false, stopOnLastSlide: true }}
             className="overflow-visible!"
           >
             {TAGS.map((tag, i) => (
@@ -75,11 +136,10 @@ export function LandingBoxesSection() {
         <div className="relative left-1/2 mt-[11px] w-screen -translate-x-1/2 overflow-hidden">
           <Swiper
             modules={[Autoplay]}
-            loop
             slidesPerView="auto"
             spaceBetween={25}
             grabCursor
-            autoplay={{ delay: 2600, disableOnInteraction: false }}
+            autoplay={{ delay: 2600, disableOnInteraction: false, stopOnLastSlide: true }}
             className="overflow-visible!"
           >
             {TAGS_ROW_2.map((tag) => (
@@ -104,104 +164,97 @@ export function LandingBoxesSection() {
           </Swiper>
         </div>
 
-        <div className="relative left-1/2 mt-[64px] w-screen -translate-x-1/2 overflow-hidden">
+        <div className="relative left-1/2 mt-[64px] w-screen -translate-x-1/2 overflow-hidden pl-[116px] pr-[88px]">
           <Swiper
-            loop
+            dir="ltr"
             slidesPerView="auto"
             spaceBetween={30}
+            slidesPerGroup={1}
+            speed={CARDS_SLIDE_MS}
             grabCursor
             allowTouchMove
             simulateTouch
+            observer
+            observeParents
+            watchOverflow
             className="overflow-visible!"
+            onSwiper={(swiper) => {
+              cardsSwiperRef.current = swiper;
+              setCardsAtEnd(swiper.isEnd);
+              setCardsAtBeginning(swiper.isBeginning);
+              requestAnimationFrame(() => {
+                setCardsAtEnd(swiper.isEnd);
+                setCardsAtBeginning(swiper.isBeginning);
+              });
+            }}
+            onSlideChange={syncCardsNav}
+            onSlidesUpdated={syncCardsNav}
+            onResize={syncCardsNav}
           >
             {Array.from({ length: 8 }).map((_, i) => (
               <SwiperSlide key={i} className="w-[347px]!">
-                <div className="relative h-[585px] w-[347px] overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]">
-                  <div className="absolute inset-x-0 top-0 flex items-center justify-between pl-[38px] pr-[30px] pt-[28px]">
-                    <span className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black bg-white px-4 text-[20px] leading-none text-black">
-                      Beginner
-                    </span>
-                    <span
-                      className="text-[18px] font-normal leading-normal text-black opacity-60"
-                      style={{
-                        fontFamily:
-                          '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
-                      }}
-                    >
-                      12hrs
-                    </span>
-                  </div>
-
-                  <div
-                    className="absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black"
-                    style={{
-                      fontFamily:
-                        '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
-                    }}
-                  >
-                    DIGITAL
-                    <br />
-                    ILLUSTRATION
-                    <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 23 23"
-                        fill="none"
-                        className="h-[20px] w-[20px]"
-                        aria-hidden
-                      >
-                        <path
-                          d="M1.25 1.25L21.25 21.25M21.25 21.25V1.25M21.25 21.25H1.25"
-                          stroke="#1E1E1E"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-
-                  <div className="absolute right-0 bottom-0 left-0 h-[339px] rounded-[50px] bg-white shadow-[inset_0_1px_0_0_#000]" />
-
-                  <button
-                    type="button"
-                    className="absolute bottom-[26px] left-[38px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-white"
-                    style={{
-                      fontFamily:
-                        '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      lineHeight: "19.6px",
-                    }}
-                  >
-                    VIEW MORE
-                    <span className="absolute top-[20.5px] right-[7px] inline-flex  -translate-y-1/2 translate-x-1/2 items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 43 43"
-                        fill="none"
-                        className="h-[43.5px] w-[43px]"
-                        aria-hidden
-                      >
-                        <path
-                          d="M21.25 41.75C32.5718 41.75 41.75 32.5718 41.75 21.25C41.75 9.92816 32.5718 0.75 21.25 0.75C9.92816 0.75 0.75 9.92816 0.75 21.25C0.75 32.5718 9.92816 41.75 21.25 41.75Z"
-                          fill="white"
-                        />
-                        <path d="M21.25 29.45L29.45 21.25L21.25 13.05" fill="white" />
-                        <path
-                          d="M21.25 29.45L29.45 21.25M29.45 21.25L21.25 13.05M29.45 21.25L13.05 21.25M41.75 21.25C41.75 32.5718 32.5718 41.75 21.25 41.75C9.92816 41.75 0.75 32.5718 0.75 21.25C0.75 9.92816 9.92816 0.75 21.25 0.75C32.5718 0.75 41.75 9.92816 41.75 21.25Z"
-                          stroke="#1E1E1E"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
+                <CatalogShowcaseCard titlePrimary="DIGITAL" titleSecondary="ILLUSTRATION" viewMoreHref="/learn" />
               </SwiperSlide>
             ))}
           </Swiper>
+
+          <button
+            type="button"
+            className="absolute top-1/2 left-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            aria-label="Previous courses"
+            disabled={cardsAtBeginning}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const swiper = cardsSwiperRef.current;
+              if (!swiper) return;
+              swiper.slidePrev(CARDS_SLIDE_MS);
+            }}
+          >
+            <CardsPrevIcon />
+          </button>
+
+          <button
+            type="button"
+            className="absolute top-1/2 right-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            aria-label="Next courses"
+            disabled={cardsAtEnd}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const swiper = cardsSwiperRef.current;
+              if (!swiper) return;
+              swiper.slideNext(CARDS_SLIDE_MS);
+            }}
+          >
+            <CardsNextIcon />
+          </button>
+        </div>
+
+        <div className="relative left-1/2 mt-[65px] w-screen -translate-x-1/2">
+          <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6 pl-[116px] pr-[96px]">
+            <p
+              className="w-[612px] max-w-full text-[24px] font-normal not-italic leading-[127%] text-black"
+              style={{
+                fontFamily:
+                  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+              }}
+            >
+              Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
+              industry professionals.
+            </p>
+            <Link
+              href="/learn"
+              className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal not-italic leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+              style={{
+                fontFamily:
+                  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+                backgroundColor: "var(--Blue, #64E1FF)",
+              }}
+            >
+              Discover
+            </Link>
+          </div>
         </div>
       </div>
     </section>

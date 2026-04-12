@@ -65,7 +65,7 @@ export default function LoginForm() {
     } else if (isInstructor) {
       window.location.href = `/instructor?${toast}`;
     } else {
-      window.location.href = `/?${toast}`;
+      window.location.href = `/home?${toast}`;
     }
   }
 

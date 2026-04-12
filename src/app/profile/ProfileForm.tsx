@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
-import { CourseCard } from "@/components/landing/CourseCard";
+import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
 import { AvatarCropModal } from "./AvatarCropModal";
 import { RenewalCountdown } from "./RenewalCountdown";
 
@@ -184,18 +184,9 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
               <h2 className="text-2xl font-bold tracking-tight text-black">Favorit</h2>
               <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {favoritCourses.map((course) => (
-                  <CourseCard
+                  <CatalogShowcaseCard
                     key={course.id}
-                    id={course.id}
-                    title={course.title}
-                    summary={course.summary}
-                    coverImage={course.coverImage}
-                    track={course.track}
-                    lessonCount={course.lessonCount}
-                    totalDurationMinutes={course.totalDurationMinutes}
-                    rating={course.rating}
-                    studentCount={course.studentCount}
-                    instructorName={course.instructorName}
+                    {...catalogShowcasePropsFromCourse(course)}
                   />
                 ))}
               </div>

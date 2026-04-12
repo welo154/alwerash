@@ -1,46 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 
-/** Shared fallback when course image fails to load (e.g. Mux 404). */
-function CourseImageOrFallback({
-  src,
-  alt,
-  title,
-  className,
-  sizes,
-}: {
-  src: string | null;
-  alt: string;
-  title: string;
-  className?: string;
-  sizes?: string;
-}) {
-  const [failed, setFailed] = useState(false);
-  if (!src || failed) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl font-black text-slate-400">
-        {title.charAt(0)}
-      </div>
-    );
-  }
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      unoptimized
-      className={className}
-      sizes={sizes}
-      onError={() => setFailed(true)}
-    />
-  );
-}
 import Link from "next/link";
-import { Star, Clock, Users, Bookmark } from "lucide-react";
+import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
 import { CourseModal } from "./CourseModal";
 import type { CourseForCard } from "@/server/content/public.service";
 
@@ -174,156 +139,6 @@ const STATIC_MOST_PLAYED_CARDS: CourseForCard[] = [
   },
 ];
 
-function formatDuration(totalMinutes: number | null, lessonCount: number): string {
-  const mins = totalMinutes ?? lessonCount * 15;
-  if (mins <= 0) return "0m";
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-
-/** Card for the yellow "New" section – same styling as CourseCard. */
-function NewSectionCard({
-  course,
-  onClick,
-}: {
-  course: CourseForCard;
-  onClick: () => void;
-}) {
-  const durationLabel = formatDuration(course.totalDurationMinutes, course.lessonCount);
-  const instructor = course.instructorName ?? course.track?.title ?? "Mohamed Yassin";
-  const rating = course.rating ?? 4.5;
-  const studentCount = course.studentCount ?? 0;
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[420px] min-w-[300px] max-w-[320px] shrink-0 flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 text-left font-sans shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-    >
-      <div className="relative mb-4 h-[180px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
-        <CourseImageOrFallback
-          src={course.coverImage}
-          alt={course.title}
-          title={course.title}
-          className="object-cover object-center transition-transform duration-300 hover:scale-105"
-          sizes="320px"
-        />
-      </div>
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">
-          {course.title}
-        </h2>
-        <div className="flex items-center gap-1">
-          <Star className="h-5 w-5 fill-black stroke-black" />
-          <span className="text-[18px] font-bold">{rating}</span>
-        </div>
-      </div>
-      <div className="mb-4">
-        <span className="inline-block rounded-full bg-gray-400 px-4 py-1 text-[18px] font-medium italic text-white">
-          {instructor}
-        </span>
-      </div>
-      {course.summary ? (
-        <p className="mb-8 line-clamp-3 min-h-0 flex-1 text-[11px] font-medium leading-[1.3] text-black">
-          {course.summary}
-        </p>
-      ) : (
-        <div className="min-h-0 flex-1" />
-      )}
-      <div className="mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <div className="h-3 w-3 rounded-full bg-black" />
-            <div className="h-3 w-3 rounded-full bg-black" />
-            <div className="h-3 w-3 rounded-full border-2 border-black" />
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-5 w-5" strokeWidth={2.5} />
-            <span className="text-[16px] font-bold tracking-tight">{durationLabel}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="h-5 w-5" strokeWidth={2.5} />
-            <span className="text-[16px] font-bold">{studentCount}</span>
-          </div>
-        </div>
-        <Bookmark className="h-6 w-6 shrink-0" strokeWidth={1.5} />
-      </div>
-    </button>
-  );
-}
-
-/** Most Played card – same styling as CourseCard. */
-function CourseCardBlock({
-  course,
-  onClick,
-}: {
-  course: CourseForCard;
-  onClick: () => void;
-}) {
-  const durationLabel = formatDuration(course.totalDurationMinutes, course.lessonCount);
-  const instructor = course.instructorName ?? course.track?.title ?? "Mohamed Yassin";
-  const rating = course.rating ?? 4.5;
-  const studentCount = course.studentCount ?? 0;
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[420px] w-full max-w-[320px] flex-col rounded-[24px] border border-gray-100 bg-gray-200 p-4 text-left font-sans shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-    >
-      <div className="relative mb-4 h-[180px] w-full shrink-0 overflow-hidden rounded-[16px] bg-slate-200">
-        <CourseImageOrFallback
-          src={course.coverImage}
-          alt={course.title}
-          title={course.title}
-          className="object-cover object-center transition-transform duration-300 hover:scale-105"
-          sizes="320px"
-        />
-      </div>
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[22px] font-black leading-tight tracking-tight text-black uppercase">
-          {course.title}
-        </h2>
-        <div className="flex items-center gap-1">
-          <Star className="h-5 w-5 fill-black stroke-black" />
-          <span className="text-[18px] font-bold">{rating}</span>
-        </div>
-      </div>
-      <div className="mb-4">
-        <span className="inline-block rounded-full bg-gray-400 px-4 py-1 text-[18px] font-medium italic text-white">
-          {instructor}
-        </span>
-      </div>
-      {course.summary ? (
-        <p className="mb-8 line-clamp-3 min-h-0 flex-1 text-[11px] font-medium leading-[1.3] text-black">
-          {course.summary}
-        </p>
-      ) : (
-        <div className="min-h-0 flex-1" />
-      )}
-      <div className="mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <div className="h-3 w-3 rounded-full bg-black" />
-            <div className="h-3 w-3 rounded-full bg-black" />
-            <div className="h-3 w-3 rounded-full border-2 border-black" />
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-5 w-5" strokeWidth={2.5} />
-            <span className="text-[16px] font-bold tracking-tight">{durationLabel}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="h-5 w-5" strokeWidth={2.5} />
-            <span className="text-[16px] font-bold">{studentCount}</span>
-          </div>
-        </div>
-        <Bookmark className="h-6 w-6 shrink-0" strokeWidth={1.5} />
-      </div>
-    </button>
-  );
-}
-
 type Props = {
   newCourses: CourseForCard[];
   mostPlayedCourses: CourseForCard[];
@@ -386,10 +201,13 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                 </div>
                 <div className="flex flex-1 items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
                   {newDisplay.map((course) => (
-                    <NewSectionCard
+                    <CatalogShowcaseCard
                       key={course.id}
-                      course={course}
-                      onClick={() => setModalCourse(course)}
+                      {...catalogShowcasePropsFromCourse(course, {
+                        levelLabel: "New",
+                        onOpenModal: () => setModalCourse(course),
+                      })}
+                      className="shrink-0"
                     />
                   ))}
                 </div>
@@ -413,10 +231,11 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                       className="overflow-visible!"
                     >
                       {mostPlayedDisplay.map((course) => (
-                        <SwiperSlide key={course.id} className="w-[320px]!">
-                          <CourseCardBlock
-                            course={course}
-                            onClick={() => setModalCourse(course)}
+                        <SwiperSlide key={course.id} className="w-[347px]!">
+                          <CatalogShowcaseCard
+                            {...catalogShowcasePropsFromCourse(course, {
+                              onOpenModal: () => setModalCourse(course),
+                            })}
                           />
                         </SwiperSlide>
                       ))}

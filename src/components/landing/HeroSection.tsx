@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 
 export type HeroTrack = { id: string; title: string; slug: string };
 
@@ -41,13 +40,6 @@ const SOFTWARE_COURSES = [
 ];
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
-  const { data: session, status } = useSession();
-
-  // Signed-in users on home use LoggedInAppHeader only — hide marketing hero (nav + intro).
-  if (status === "authenticated" && session?.user) {
-    return null;
-  }
-
   return (
     <section className="bg-white px-4 pt-[35px] pb-8 sm:px-6 lg:px-8">
       {/* ── Guest shell from Figma (node 17:1467) ── */}
@@ -177,39 +169,27 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 
                 <div className="w-[100px]" />
 
-                {!session ? (
-                  <>
-                    <Link
-                      href="/login"
-                      className="inline-flex h-[36px] w-[81px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-white px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
-                      style={{ fontFamily: pangeaFont }}
-                    >
-                      Log in
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="inline-flex h-[36px] w-[85px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-[#EA83F0] px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
-                      style={{ fontFamily: pangeaFont }}
-                    >
-                      Sign up
-                    </Link>
-                    <div
-                      className="flex h-[40px] w-[40px] items-center justify-center rounded-full border border-black text-[20px] font-normal leading-[100%] tracking-[0] text-black"
-                      style={{ fontFamily: "Inter, var(--font-dm-sans), sans-serif" }}
-                      aria-hidden
-                    >
-                      ع
-                    </div>
-                  </>
-                ) : (
-                  <Link
-                    href="/learn"
-                    className="inline-flex h-[36px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-white px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
-                    style={{ fontFamily: pangeaFont }}
-                  >
-                    My courses
-                  </Link>
-                )}
+                <Link
+                  href="/login"
+                  className="inline-flex h-[36px] w-[81px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-white px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
+                  style={{ fontFamily: pangeaFont }}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex h-[36px] w-[85px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-[#EA83F0] px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
+                  style={{ fontFamily: pangeaFont }}
+                >
+                  Sign up
+                </Link>
+                <div
+                  className="flex h-[40px] w-[40px] items-center justify-center rounded-full border border-black text-[20px] font-normal leading-[100%] tracking-[0] text-black"
+                  style={{ fontFamily: "Inter, var(--font-dm-sans), sans-serif" }}
+                  aria-hidden
+                >
+                  ع
+                </div>
               </div>
             </div>
           </div>

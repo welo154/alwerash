@@ -1,26 +1,19 @@
-import {
-  HeroSection,
-  LandingBoxesSection,
-} from "@/components/landing";
-import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
-import { publicListTracks } from "@/server/content/public.service";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { GuestLanding } from "@/components/landing/GuestLanding";
 
 /**
- * Landing page - home.
- * Hero (with tracks + stats bar), courses section (NEW + MOST PLAYED + modal), mentors section.
+ * Guest marketing home (`/`). Signed-in members use `/home` instead.
  */
-export default async function LandingPage() {
-  const tracks = await publicListTracks();
-  const heroTracks: { id: string; title: string; slug: string }[] = Array.isArray(tracks)
-    ? tracks.map((t) => ({ id: t.id, title: t.title, slug: t.slug }))
-    : [];
+export default async function GuestLandingPage() {
+  const session = await auth();
+  if (session?.user) {
+    const roles = (session.user.roles as string[]) ?? [];
+    if (roles.includes("ADMIN")) redirect("/admin");
+    if (roles.includes("INSTRUCTOR")) redirect("/instructor");
+    redirect("/home");
+  }
 
-  return (
-    <div className="font-sans">
-      <HeroSection tracks={heroTracks} />
-      <LandingBoxesSection />
-      <GsapAnimationLayer />
-    </div>
-  );
+  return <GuestLanding />;
 }
 

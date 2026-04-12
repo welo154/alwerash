@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { publicGetTrackBySlug } from "@/server/content/public.service";
 import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
 import { AppError } from "@/server/lib/errors";
-import { CourseCard } from "@/components/landing/CourseCard";
+import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
 
 export default async function TrackPage({
   params,
@@ -98,16 +98,14 @@ export default async function TrackPage({
         {track.courses.length === 0 ? (
           <p className="mt-4 text-slate-500">No courses in this track yet.</p>
         ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-gsap-stagger-group>
+          <div className="mt-6 grid gap-6 sm:grid-cols-1 lg:grid-cols-2" data-gsap-stagger-group>
             {track.courses.map((c) => (
-              <CourseCard
+              <CatalogShowcaseCard
                 key={c.id}
-                id={c.id}
-                title={c.title}
-                summary={c.summary}
-                coverImage={c.coverImage}
-                track={{ title: track.title, slug: track.slug }}
-                lessonCount={c.lessonCount}
+                {...catalogShowcasePropsFromCourse({
+                  ...c,
+                  track: { title: track.title, slug: track.slug },
+                })}
               />
             ))}
           </div>

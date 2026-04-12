@@ -15,7 +15,7 @@ import { prisma } from "@/server/db/prisma";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
 import { getCourseProgress } from "@/server/learning/progress.service";
 import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
-import { CourseCard } from "@/components/landing/CourseCard";
+import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
 
 export async function generateMetadata({
   params,
@@ -352,20 +352,9 @@ export default async function CoursePage({
             <h2 className="text-lg font-semibold text-slate-900">
               Similar courses
             </h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
               {similarCourses.map((c) => (
-                <CourseCard
-                  key={c.id}
-                  id={c.id}
-                  title={c.title}
-                  summary={c.summary}
-                  coverImage={c.coverImage}
-                  track={c.track}
-                  lessonCount={c.lessonCount}
-                  totalDurationMinutes={c.totalDurationMinutes}
-                  rating={c.rating}
-                  studentCount={c.studentCount}
-                />
+                <CatalogShowcaseCard key={c.id} {...catalogShowcasePropsFromCourse(c)} />
               ))}
             </div>
           </section>

@@ -24,12 +24,34 @@ export async function middleware(req: NextRequest) {
   const isAdmin = roles.includes("ADMIN");
   const isInstructor = roles.includes("INSTRUCTOR");
 
+  // Marketing `/` is for guests only — signed-in learners go to `/home`
+  if (pathname === "/" && token?.sub && !isAdmin) {
+    const url = req.nextUrl.clone();
+    url.pathname = isInstructor ? "/instructor" : "/home";
+    return NextResponse.redirect(url);
+  }
+
+  // Signed-in member home: guests and admins are sent elsewhere
+  if (pathname === "/home") {
+    if (!token?.sub) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", "/home");
+      return NextResponse.redirect(url);
+    }
+    if (isAdmin) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Logged-in users must not access login/register — redirect away
   if (isAuthPage && token?.sub) {
     const url = req.nextUrl.clone();
     if (isAdmin) url.pathname = "/admin";
     else if (isInstructor) url.pathname = "/instructor";
-    else url.pathname = "/learn";
+    else url.pathname = "/home";
     return NextResponse.redirect(url);
   }
 
