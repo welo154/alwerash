@@ -40,7 +40,7 @@ const SOFTWARE_COURSES = [
 ];
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
-  return (
+      return (
     <section className="bg-white px-4 pt-[35px] pb-8 sm:px-6 lg:px-8">
       {/* ── Guest shell from Figma (node 17:1467) ── */}
       <div className="relative mx-auto max-w-[1600px] overflow-hidden flex flex-col">

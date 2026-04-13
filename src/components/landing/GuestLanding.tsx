@@ -2,6 +2,9 @@ import { HeroSection } from "./HeroSection";
 import { LandingBoxesSection } from "./LandingBoxesSection";
 import { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
 import { LandingEverythingInOneSection } from "./LandingEverythingInOneSection";
+import { LandingWhyStudentsLoveSection } from "./LandingWhyStudentsLoveSection";
+import { LandingFaqSection } from "./LandingFaqSection";
+import { LandingGetStartedCtaSection } from "./LandingGetStartedCtaSection";
 import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
 import { publicListTracks } from "@/server/content/public.service";
 
@@ -20,6 +23,9 @@ export async function GuestLanding() {
       <LandingBoxesSection />
       <LandingEverythingInOneSection />
       <LandingCurrentMostsSection />
+      <LandingWhyStudentsLoveSection />
+      <LandingFaqSection />
+      <LandingGetStartedCtaSection />
       <GsapAnimationLayer />
     </div>
   );

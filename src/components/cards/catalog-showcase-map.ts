@@ -1,4 +1,6 @@
 export type CatalogShowcaseCardProps = {
+  /** URL-safe id for this tile (`data-showcase-slug`, optional `showcase=` on links). */
+  showcaseSlug?: string;
   levelLabel?: string;
   durationLabel?: string;
   titlePrimary: string;
@@ -8,6 +10,21 @@ export type CatalogShowcaseCardProps = {
   onViewMore?: () => void;
   className?: string;
 };
+
+/** Appends or sets `showcase=<slug>` on a relative href (preserves hash). */
+export function appendShowcaseToHref(href: string, showcaseSlug: string): string {
+  const hashIdx = href.indexOf("#");
+  const pathPart = hashIdx === -1 ? href : href.slice(0, hashIdx);
+  const hashPart = hashIdx === -1 ? "" : href.slice(hashIdx);
+
+  const qIdx = pathPart.indexOf("?");
+  const base = qIdx === -1 ? pathPart : pathPart.slice(0, qIdx);
+  const existing = qIdx === -1 ? "" : pathPart.slice(qIdx + 1);
+  const params = new URLSearchParams(existing);
+  params.set("showcase", showcaseSlug);
+  const q = params.toString();
+  return `${base}?${q}${hashPart}`;
+}
 
 export type CatalogShowcaseCourseSource = {
   id: string;

@@ -5,7 +5,7 @@ import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { CatalogShowcaseCard } from "@/components/cards";
+import { CatalogShowcaseCard, LANDING_SHOWCASE_CAROUSEL_CARDS } from "@/components/cards";
 import "swiper/css";
 
 /** Same artwork as next; horizontal flip so the chevron points left. */
@@ -191,9 +191,14 @@ export function LandingBoxesSection() {
             onSlidesUpdated={syncCardsNav}
             onResize={syncCardsNav}
           >
-            {Array.from({ length: 8 }).map((_, i) => (
-              <SwiperSlide key={i} className="w-[347px]!">
-                <CatalogShowcaseCard titlePrimary="DIGITAL" titleSecondary="ILLUSTRATION" viewMoreHref="/learn" />
+            {LANDING_SHOWCASE_CAROUSEL_CARDS.map((card) => (
+              <SwiperSlide key={card.slug} className="w-[347px]!">
+                <CatalogShowcaseCard
+                  showcaseSlug={card.slug}
+                  titlePrimary={card.titlePrimary}
+                  titleSecondary={card.titleSecondary}
+                  viewMoreHref="/learn"
+                />
               </SwiperSlide>
             ))}
           </Swiper>

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
+import { appendShowcaseToHref } from "./catalog-showcase-map";
 
 export type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
 
@@ -144,7 +145,7 @@ function CatalogShowcaseHoverCard({
   return createPortal(
     <div
       data-slot="catalog-showcase-hover-card"
-      className="fixed cursor-default overflow-visible shadow-2xl"
+      className="fixed cursor-default overflow-hidden rounded-[50px] shadow-2xl"
       style={{
         zIndex: HOVER_PORTAL_Z,
         left: position.left,
@@ -227,6 +228,7 @@ function CatalogShowcaseHoverCard({
 
 /** Tall catalog tile (landing hero strip, learn page, grids). */
 export function CatalogShowcaseCard({
+  showcaseSlug,
   levelLabel = "Beginner",
   durationLabel = "12hrs",
   titlePrimary,
@@ -290,6 +292,9 @@ export function CatalogShowcaseCard({
 
   useEffect(() => () => cancelHideHover(), [cancelHideHover]);
 
+  const resolvedViewMoreHref =
+    viewMoreHref && showcaseSlug ? appendShowcaseToHref(viewMoreHref, showcaseSlug) : viewMoreHref;
+
   const shellClass = `relative w-[347px] overflow-visible rounded-[50px] ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
 
   const ctaHoverHandlers = {
@@ -318,7 +323,12 @@ export function CatalogShowcaseCard({
 
   return (
     <>
-      <div ref={cardShellRef} className={shellClass} style={{ height: SHOWCASE_CARD_H }}>
+      <div
+        ref={cardShellRef}
+        className={shellClass}
+        style={{ height: SHOWCASE_CARD_H }}
+        {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}
+      >
         <div
           className="absolute inset-x-0 top-0 z-1 rounded-[50px] border border-black bg-[#E9E9E9]"
           style={{ height: SHOWCASE_TOP_H }}
@@ -360,9 +370,9 @@ export function CatalogShowcaseCard({
             </span>
           </div>
 
-          {viewMoreHref ? (
+          {resolvedViewMoreHref ? (
             <Link
-              href={viewMoreHref}
+              href={resolvedViewMoreHref}
               className={ctaClassName}
               style={ctaStyle}
               aria-label={viewMoreLabel}
