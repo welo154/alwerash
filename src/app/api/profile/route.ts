@@ -4,14 +4,14 @@ import { prisma } from "@/server/db/prisma";
 
 export const dynamic = "force-dynamic";
 
-/** PATCH /api/profile — update name, country, image (no email). */
+/** PATCH /api/profile — update name, profession, country, image (no email). */
 export async function PATCH(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { name?: string; country?: string; image?: string | null };
+  let body: { name?: string; profession?: string; country?: string; image?: string | null };
   try {
     body = await request.json();
   } catch {
@@ -19,15 +19,28 @@ export async function PATCH(request: NextRequest) {
   }
 
   const name = typeof body.name === "string" ? body.name.trim() || null : undefined;
+  const profession =
+    typeof body.profession === "string" ? body.profession.trim() || null : undefined;
   const country = typeof body.country === "string" ? body.country.trim() || null : undefined;
   const image = body.image !== undefined ? (typeof body.image === "string" ? body.image.trim() || null : null) : undefined;
 
-  if (name === undefined && country === undefined && image === undefined) {
+  if (
+    name === undefined &&
+    profession === undefined &&
+    country === undefined &&
+    image === undefined
+  ) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const data: { name?: string | null; country?: string | null; image?: string | null } = {};
+  const data: {
+    name?: string | null;
+    profession?: string | null;
+    country?: string | null;
+    image?: string | null;
+  } = {};
   if (name !== undefined) data.name = name;
+  if (profession !== undefined) data.profession = profession;
   if (country !== undefined) data.country = country;
   if (image !== undefined) data.image = image;
 

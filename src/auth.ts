@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
+import { readUserProfessionFromDb } from "@/server/user/readProfession";
 import { verifyPassword } from "@/server/auth/password";
 
 const CredentialsSchema = z.object({
@@ -74,6 +75,8 @@ export const authOptions: NextAuthOptions = {
             session.user.email = dbUser.email;
             (session.user as { image?: string | null }).image = dbUser.image ?? null;
             (session.user as { country?: string | null }).country = dbUser.country ?? null;
+            const profession = await readUserProfessionFromDb(token.sub);
+            (session.user as { profession?: string | null }).profession = profession;
           }
         } catch {
           // DB may be missing columns (migration not applied); keep session from token

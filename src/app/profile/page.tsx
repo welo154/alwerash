@@ -21,6 +21,7 @@ export default async function ProfilePage() {
         email: session.user.email ?? null,
         image: (session.user as { image?: string | null }).image ?? null,
         country: (session.user as { country?: string | null }).country ?? null,
+        profession: (session.user as { profession?: string | null }).profession ?? null,
       }}
       subscription={{
         active: subscription.active,

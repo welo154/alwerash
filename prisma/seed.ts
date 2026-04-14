@@ -9,7 +9,13 @@
  * - If no user exists with that email, creates the user with ADMIN role.
  * - If the user exists, updates name and password hash, and ensures ADMIN role exists.
  */
-import { PrismaClient, Role } from "@prisma/client";
+import {
+  PrismaClient,
+  Role,
+  LessonType,
+  EntitlementProduct,
+  EntitlementStatus,
+} from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
 
 const prisma = new PrismaClient();
@@ -224,6 +230,153 @@ async function main() {
     } else {
       throw e;
     }
+  }
+
+  /**
+   * Optional dev learner (e.g. Mazen): set MAZEN_SEED_PASSWORD to upsert the account,
+   * grant ALL_ACCESS, add two lessons per course on the first 3 published courses (if missing),
+   * and seed lesson progress so /home shows three "Continue learning" cards.
+   * Example: MAZEN_SEED_PASSWORD=your-secret npx prisma db seed
+   */
+  const mazenEmail = (process.env.MAZEN_SEED_EMAIL ?? "mazenhesham172@gmail.com")
+    .toLowerCase()
+    .trim();
+  const mazenPassword = process.env.MAZEN_SEED_PASSWORD?.trim();
+  if (mazenPassword) {
+    const mazenHash = await hashPassword(mazenPassword);
+    const mazen = await prisma.user.upsert({
+      where: { email: mazenEmail },
+      update: {
+        name: "Mazen Hesham",
+        passwordHash: mazenHash,
+        emailVerified: new Date(),
+      },
+      create: {
+        email: mazenEmail,
+        name: "Mazen Hesham",
+        passwordHash: mazenHash,
+        emailVerified: new Date(),
+        roles: { create: { role: Role.LEARNER } },
+      },
+      select: { id: true },
+    });
+    await prisma.userRole.upsert({
+      where: { userId_role: { userId: mazen.id, role: Role.LEARNER } },
+      update: {},
+      create: { userId: mazen.id, role: Role.LEARNER },
+    });
+    await prisma.entitlement.upsert({
+      where: {
+        userId_product: {
+          userId: mazen.id,
+          product: EntitlementProduct.ALL_ACCESS,
+        },
+      },
+      update: { status: EntitlementStatus.ACTIVE, expiresAt: null },
+      create: {
+        userId: mazen.id,
+        product: EntitlementProduct.ALL_ACCESS,
+        status: EntitlementStatus.ACTIVE,
+        expiresAt: null,
+      },
+    });
+
+    const instructorNames = [
+      "Ahmad Khaled Hussein",
+      "Sara El-Masry",
+      "Omar Fathy",
+    ];
+    const seedCourses = await prisma.course.findMany({
+      where: { published: true },
+      orderBy: [{ track: { order: "asc" } }, { order: "asc" }, { createdAt: "asc" }],
+      take: 3,
+      select: { id: true, title: true },
+    });
+
+    for (let i = 0; i < seedCourses.length; i++) {
+      const c = seedCourses[i]!;
+      await prisma.course.update({
+        where: { id: c.id },
+        data: { instructorName: instructorNames[i % instructorNames.length] },
+      });
+
+      let mod = await prisma.module.findFirst({
+        where: { courseId: c.id },
+        orderBy: { order: "asc" },
+      });
+      if (!mod) {
+        mod = await prisma.module.create({
+          data: { courseId: c.id, title: "Foundation", order: 0 },
+        });
+      }
+      const publishedCount = await prisma.lesson.count({
+        where: { moduleId: mod.id, published: true },
+      });
+      if (publishedCount < 2) {
+        const maxOrder = await prisma.lesson.aggregate({
+          where: { moduleId: mod.id },
+          _max: { order: true },
+        });
+        let nextOrder = (maxOrder._max.order ?? -1) + 1;
+        if (publishedCount === 0) {
+          await prisma.lesson.create({
+            data: {
+              moduleId: mod.id,
+              title: "Orientation",
+              type: LessonType.ARTICLE,
+              order: nextOrder++,
+              published: true,
+            },
+          });
+        }
+        if (publishedCount <= 1) {
+          await prisma.lesson.create({
+            data: {
+              moduleId: mod.id,
+              title: "Core practice",
+              type: LessonType.ARTICLE,
+              order: nextOrder,
+              published: true,
+            },
+          });
+        }
+      }
+
+      const lessons = await prisma.lesson.findMany({
+        where: { module: { courseId: c.id }, published: true },
+        orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
+        take: 2,
+        select: { id: true },
+      });
+      const [firstLesson, secondLesson] = lessons;
+      if (firstLesson && secondLesson) {
+        const now = new Date();
+        await prisma.lessonProgress.upsert({
+          where: {
+            userId_lessonId: { userId: mazen.id, lessonId: firstLesson.id },
+          },
+          create: {
+            userId: mazen.id,
+            lessonId: firstLesson.id,
+            completedAt: now,
+            lastPositionSeconds: 0,
+          },
+          update: { completedAt: now },
+        });
+        await prisma.lessonProgress.upsert({
+          where: {
+            userId_lessonId: { userId: mazen.id, lessonId: secondLesson.id },
+          },
+          create: {
+            userId: mazen.id,
+            lessonId: secondLesson.id,
+            lastPositionSeconds: 120,
+          },
+          update: { lastPositionSeconds: 120, completedAt: null },
+        });
+      }
+    }
+    console.log("Seeded Mazen learner + continue-learning fixtures:", mazenEmail);
   }
 }
 

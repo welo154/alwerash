@@ -29,6 +29,7 @@ type ProfileFormProps = {
     email?: string | null;
     image?: string | null;
     country?: string | null;
+    profession?: string | null;
   };
   subscription: { active: boolean; expiresAt?: Date | null };
   favoritCourses: CourseForCard[];
@@ -37,6 +38,7 @@ type ProfileFormProps = {
 export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormProps) {
   const router = useRouter();
   const [name, setName] = useState(user.name ?? "");
+  const [profession, setProfession] = useState(user.profession ?? "");
   const [country, setCountry] = useState(user.country ?? "");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(user.image ?? null);
@@ -95,6 +97,7 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim() || null,
+          profession: profession.trim() || null,
           country: country.trim() || null,
           ...(typeof imageUrl === "string" && { image: imageUrl }),
         }),
@@ -117,7 +120,7 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
 
   const displayImage = photoPreview ?? user.image;
   const initials = (user.name?.charAt(0) ?? user.email?.charAt(0) ?? "?").toUpperCase();
-  const titleLine = country?.trim() || "Learner";
+  const titleLine = profession?.trim() || country?.trim() || "Learner";
 
   return (
     <>
@@ -170,10 +173,11 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
                   {user.email && (
                     <>
                       {user.email}
-                      {country?.trim() && ` · ${country}`}
+                      {profession?.trim() && ` · ${profession.trim()}`}
+                      {country?.trim() && ` · ${country.trim()}`}
                     </>
                   )}
-                  {!user.email && !country?.trim() && "—"}
+                  {!user.email && !country?.trim() && !profession?.trim() && "—"}
                 </p>
               </div>
             </aside>
@@ -273,6 +277,18 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
               <div>
                 <label className="block text-sm font-medium text-slate-700">Email</label>
                 <p className="mt-1 text-slate-600">{user.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Track / focus
+                </label>
+                <input
+                  type="text"
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                  placeholder="e.g. Frontend developer"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700">Country</label>

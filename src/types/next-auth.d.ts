@@ -9,6 +9,7 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       country?: string | null;
+      profession?: string | null;
       roles: Role[];
     };
   }
