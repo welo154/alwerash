@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { LoggedInLearnNextSection } from "@/components/home/LoggedInLearnNextSection";
+import { LandingCurrentMostsSection } from "@/components/landing";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 
 const pangeaFont =
@@ -32,6 +34,23 @@ const courseCardTopicTitle: CSSProperties = {
   lineHeight: "normal",
   fontVariationSettings: '"wght" 400',
 };
+
+const TOPICS_ROW_1 = [
+  "SOUND DESIGN",
+  "DRAWING & PAINTING",
+  "ANIMATION",
+  "CRAFTS",
+  "UI/UX DESIGN",
+  "CREATIVE WRITING",
+] as const;
+
+const TOPICS_ROW_2 = [
+  "DIGITAL ILLUSTRATION",
+  "FILM & VIDEO",
+  "ANALOG ILLUSTRATIONS",
+  "GRAPHIC DESIGN",
+  "TYPOGRAPHY",
+] as const;
 
 type CourseStackCardProps = {
   /** Use `\n` for a line break before the instructor name. */
@@ -113,6 +132,33 @@ function ViewAllCoursesLink() {
         />
       </svg>
     </Link>
+  );
+}
+
+function TrackActivityIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 62 62"
+      fill="none"
+      width={60}
+      height={60}
+      className="shrink-0"
+      aria-hidden
+    >
+      <path
+        d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z"
+        fill="var(--White, #FFF)"
+      />
+      <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
+      <path
+        d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
+        stroke="var(--Black, #000)"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -242,7 +288,7 @@ export function LoggedInHome({
   const firstName = userName.split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen overflow-x-hidden bg-white font-sans">
       <section
         className="bg-white px-6 sm:px-10 md:px-[80px]"
         style={{ paddingTop: "58px", fontFamily: pangeaFont }}
@@ -390,6 +436,406 @@ export function LoggedInHome({
             </div>
           </>
         ) : null}
+
+        <section
+          className={`mx-auto w-full max-w-[1339px] ${
+            continueLearningCourses.length > 0 ? "mt-[88px]" : "mt-[48px]"
+          }`}
+          aria-label="Activity tracking"
+        >
+          <div className="flex items-center gap-[28px]">
+            <h2
+              className="uppercase"
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+                fontVariationSettings: '"wght" 400',
+              }}
+            >
+              TRACK YOUR ACTIVITY
+            </h2>
+            <TrackActivityIcon />
+          </div>
+
+          <div className="mt-[56px] flex w-full flex-wrap gap-[30px]">
+            <div
+              className="relative h-[401px] w-full max-w-[509px] overflow-hidden rounded-[50px] border border-[var(--Black,#000)]"
+              style={{ background: "var(--White, #FFF)" }}
+              aria-label="Activity summary card"
+            >
+              <div className="pt-[31px] pl-[45px]">
+                <p
+                  className="m-0 uppercase"
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: "36px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  ACTIVITY
+                </p>
+                <p
+                  className="m-0 mt-[6px]"
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: "18px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "normal",
+                    opacity: 0.6,
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  Learnt this week
+                </p>
+                <p
+                  className="m-0 mt-[6px]"
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: "36px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  60h53m
+                </p>
+              </div>
+
+              <div aria-hidden className="absolute inset-0">
+                <div className="absolute left-[40px] top-[256px] h-[94px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+                <div className="absolute left-[102px] top-[298px] h-[52px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+                <div className="absolute left-[165px] top-[235px] h-[115px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+                <div className="absolute left-[227px] top-[188px] h-[162px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+                <div className="absolute left-[290px] top-[218px] h-[132px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+                <div className="absolute left-[352px] top-[148px] h-[202px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-[#8AF396]" />
+                <div className="absolute left-[345px] top-[97px] flex h-[44px] w-[70px] items-center justify-center rounded-[50px] border border-[var(--Black,#000)] bg-[#8AF396]">
+                  <p
+                    className="m-0"
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFont,
+                      fontSize: "18px",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "normal",
+                      opacity: 0.6,
+                      fontVariationSettings: '"wght" 400',
+                    }}
+                  >
+                    4h35m
+                  </p>
+                </div>
+                <div className="absolute left-[415px] top-[201px] h-[149px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
+              </div>
+
+              <div className="pointer-events-none absolute inset-0">
+                <p className="absolute left-[51px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  SUN
+                </p>
+                <p className="absolute left-[110px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  MON
+                </p>
+                <p className="absolute left-[177px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  TUE
+                </p>
+                <p className="absolute left-[235px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  WED
+                </p>
+                <p className="absolute left-[301px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  THU
+                </p>
+                <p className="absolute left-[369px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  FRI
+                </p>
+                <p className="absolute left-[428px] top-[361px] m-0" style={courseCardMetaMuted}>
+                  SAT
+                </p>
+              </div>
+            </div>
+            <div
+              className="relative h-[401px] w-full max-w-[794px] flex-1 overflow-hidden rounded-[50px] border border-[var(--Black,#000)]"
+              style={{ background: "var(--White, #FFF)" }}
+              aria-label="Activity details card"
+            >
+              <div className="absolute left-[66px] top-[33px] flex h-[36px] w-[68px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]">
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: "18px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "19.6px",
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  MAY
+                </span>
+              </div>
+
+              <h3
+                className="absolute left-[309px] top-[26px] m-0"
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "36px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                  fontVariationSettings: '"wght" 400',
+                }}
+              >
+                JUNE 2026
+              </h3>
+
+              <div className="absolute left-[658px] top-[33px] flex h-[36px] w-[73px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]">
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: "18px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "19.6px",
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  JULY
+                </span>
+              </div>
+
+              <div className="absolute left-[156px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  SUN
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  15
+                </p>
+              </div>
+              <div className="absolute left-[235px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  MON
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  16
+                </p>
+              </div>
+              <div className="absolute left-[319px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  TUE
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  17
+                </p>
+              </div>
+              <div className="absolute left-[395px] top-[93px] text-center text-[18px] leading-normal text-black">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  WED
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  18
+                </p>
+              </div>
+              <div className="absolute left-[479px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  THU
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  19
+                </p>
+              </div>
+              <div className="absolute left-[557px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  FRI
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  20
+                </p>
+              </div>
+
+              <p
+                className="absolute left-[60px] top-[185px] m-0"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "18px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                  fontVariationSettings: '"wght" 400',
+                }}
+              >
+                8:00 am
+              </p>
+              <p
+                className="absolute left-[60px] top-[235px] m-0"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "18px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                  fontVariationSettings: '"wght" 400',
+                }}
+              >
+                9:00 am
+              </p>
+              <p
+                className="absolute left-[61px] top-[285px] m-0"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "18px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                  fontVariationSettings: '"wght" 400',
+                }}
+              >
+                10:00 am
+              </p>
+              <p
+                className="absolute left-[60px] top-[335px] m-0"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "18px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                  fontVariationSettings: '"wght" 400',
+                }}
+              >
+                11:00 am
+              </p>
+
+              <div
+                className="absolute left-[164px] top-[237px] inline-flex h-[74px] w-fit flex-col items-start justify-center rounded-[24px] border border-[var(--Black,#000)] px-[16px]"
+                style={{ background: "var(--Purple, #FF8CFF)" }}
+              >
+                <div className="flex items-center justify-start gap-[8px]">
+                  <p
+                    className="m-0"
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFont,
+                      fontSize: "24px",
+                      fontStyle: "normal",
+                      fontWeight: 500,
+                      lineHeight: "23px",
+                      fontVariationSettings: '"wght" 500',
+                    }}
+                  >
+                    WHAT'S FIGMA?
+                  </p>
+                  <p
+                    className="m-0"
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFont,
+                      fontSize: "18px",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "23px",
+                      opacity: 0.6,
+                      fontVariationSettings: '"wght" 400',
+                    }}
+                  >
+                    40mins
+                  </p>
+                </div>
+                <p
+                  className="m-0 text-left"
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: "18px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "23px",
+                    opacity: 0.6,
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  UI/UX Design Class with Mohamed Tarek Mostafa
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="relative left-1/2 mt-[120px] w-screen -translate-x-1/2 bg-white px-[64px]"
+          aria-label="Topics recommended for you"
+        >
+          <div className="w-full">
+            <h2
+              className="m-0 uppercase"
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+                fontVariationSettings: '"wght" 400',
+              }}
+            >
+              TOPICS RECOMMENDED FOR{" "}
+              <span style={{ fontWeight: 600, fontVariationSettings: '"wght" 600' }}>
+                YOU
+              </span>
+            </h2>
+
+            <div className="mt-[30px] flex flex-wrap gap-x-[16px] gap-y-[13px]">
+              {TOPICS_ROW_1.map((topic) => (
+                <span
+                  key={topic}
+                  className="inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black"
+                  style={{
+                    fontFamily: pangeaFont,
+                    lineHeight: "19.6px",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-[13px] flex flex-wrap gap-x-[16px] gap-y-[13px] pr-[68px]">
+              {TOPICS_ROW_2.map((topic) => (
+                <span
+                  key={topic}
+                  className="inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black"
+                  style={{
+                    fontFamily: pangeaFont,
+                    lineHeight: "19.6px",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <LoggedInLearnNextSection />
+        <LandingCurrentMostsSection />
       </section>
     </div>
   );

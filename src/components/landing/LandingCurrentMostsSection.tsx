@@ -46,41 +46,23 @@ const MENTORS = [
 export function LandingCurrentMostsSection() {
   return (
     <section
-      className="mb-[90px] w-full overflow-x-hidden px-4 pt-[166px] sm:px-6 md:px-0 md:pl-[120px] md:pr-[112px]"
+      className="relative left-1/2 mb-[90px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-hidden pl-[85px] pr-[64px] pt-[97px]"
       data-gsap-reveal
       aria-labelledby="landing-current-mosts-heading"
     >
-      <div className="mx-auto max-w-[1600px]">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
-          <h2
-            id="landing-current-mosts-heading"
-            className="text-[48px] uppercase leading-[120%] text-black"
-            style={{ fontFamily: pangeaFont }}
-          >
-            <span className="font-normal not-italic">THE CURRENT </span>
-            <span className="font-bold italic">MOSTS</span>
-          </h2>
-          <p
-            className="shrink-0 self-end text-left lg:ml-auto"
-            style={{
-              fontFamily: pangeaFont,
-              color: "#000",
-              fontSize: "22px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "127%",
-              width: "361px",
-              maxWidth: "100%",
-              height: "60px",
-            }}
-          >
-            Explore our most popular and most watched mentors and instructors.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <h2
+          id="landing-current-mosts-heading"
+          className="m-0 text-[48px] uppercase leading-[120%] text-black"
+          style={{ fontFamily: pangeaFont }}
+        >
+          <span className="font-normal not-italic">THE CURRENT </span>
+          <span className="font-bold italic">MOSTS</span>
+        </h2>
       </div>
 
-      <div className="relative left-1/2 mt-[112px] w-screen max-w-[100vw] -translate-x-1/2 px-4 sm:px-6 md:px-0">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-1 justify-items-center gap-x-8 gap-y-10 md:grid-cols-2 md:pl-[77px] md:pr-[76px] lg:grid-cols-3">
+      <div className="relative left-1/2 mt-[82px] w-screen max-w-[100vw] -translate-x-1/2 px-4 sm:px-6 md:px-0">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-1 justify-center gap-x-[30px] gap-y-[50px] md:grid-cols-[repeat(2,409px)] md:pl-[77px] md:pr-[76px] lg:grid-cols-[repeat(3,409px)]">
           {MENTORS.map((m) => (
             <LandingMentorCard
               key={m.name}

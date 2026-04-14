@@ -26,7 +26,7 @@ export function LandingMentorCard({ variant, name, profession }: LandingMentorCa
 
   return (
     <article
-      className="relative mx-auto aspect-[409/425] w-full max-w-[409px] shrink-0 overflow-visible"
+      className="relative mx-auto h-[424.999px] w-[409px] shrink-0 overflow-visible"
       aria-label={`${name}, ${profession}. ${badge}`}
     >
       <svg
