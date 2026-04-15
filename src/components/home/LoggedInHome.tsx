@@ -5,6 +5,10 @@ import Link from "next/link";
 import { LoggedInLearnNextSection } from "@/components/home/LoggedInLearnNextSection";
 import { LandingCurrentMostsSection } from "@/components/landing";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
+import type { WeeklyActivitySummary } from "@/server/home/learning-activity.service";
+import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
+import type { LandingMostsMentorCardDto } from "@/server/content/public.service";
+import { WeeklyActivityBarCard } from "@/components/home/WeeklyActivityBarCard";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -271,6 +275,13 @@ export type LoggedInHomeProps = {
   subtitleLeftOfEdit: string | null;
   /** In-progress courses with a next lesson; empty hides the Continue learning block. */
   continueLearningCourses: ContinueLearningCardDto[];
+  /** Admin mentors for “THE CURRENT MOSTS” strip (same as guest landing). */
+  landingMostsMentors: LandingMostsMentorCardDto[];
+  /** Published tracks → catalog tiles for “What to learn next” (same data as guest landing boxes). */
+  trackShowcaseSlides: LandingShowcaseSlide[];
+  weeklyActivity: WeeklyActivitySummary;
+  /** 0 = Sunday … 6 = Saturday (UTC). */
+  activityHighlightDayIndex: number;
 };
 
 export function LoggedInHome({
@@ -278,6 +289,10 @@ export function LoggedInHome({
   userImage,
   subtitleLeftOfEdit,
   continueLearningCourses,
+  landingMostsMentors,
+  trackShowcaseSlides,
+  weeklyActivity,
+  activityHighlightDayIndex,
 }: LoggedInHomeProps) {
   const initials = userName
     .split(" ")
@@ -462,108 +477,10 @@ export function LoggedInHome({
           </div>
 
           <div className="mt-[56px] flex w-full flex-wrap gap-[30px]">
-            <div
-              className="relative h-[401px] w-full max-w-[509px] overflow-hidden rounded-[50px] border border-[var(--Black,#000)]"
-              style={{ background: "var(--White, #FFF)" }}
-              aria-label="Activity summary card"
-            >
-              <div className="pt-[31px] pl-[45px]">
-                <p
-                  className="m-0 uppercase"
-                  style={{
-                    color: "#000",
-                    fontFamily: pangeaFont,
-                    fontSize: "36px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "120%",
-                    fontVariationSettings: '"wght" 400',
-                  }}
-                >
-                  ACTIVITY
-                </p>
-                <p
-                  className="m-0 mt-[6px]"
-                  style={{
-                    color: "#000",
-                    fontFamily: pangeaFont,
-                    fontSize: "18px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "normal",
-                    opacity: 0.6,
-                    fontVariationSettings: '"wght" 400',
-                  }}
-                >
-                  Learnt this week
-                </p>
-                <p
-                  className="m-0 mt-[6px]"
-                  style={{
-                    color: "var(--Black, #000)",
-                    fontFamily: pangeaFont,
-                    fontSize: "36px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "120%",
-                    fontVariationSettings: '"wght" 400',
-                  }}
-                >
-                  60h53m
-                </p>
-              </div>
-
-              <div aria-hidden className="absolute inset-0">
-                <div className="absolute left-[40px] top-[256px] h-[94px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-                <div className="absolute left-[102px] top-[298px] h-[52px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-                <div className="absolute left-[165px] top-[235px] h-[115px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-                <div className="absolute left-[227px] top-[188px] h-[162px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-                <div className="absolute left-[290px] top-[218px] h-[132px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-                <div className="absolute left-[352px] top-[148px] h-[202px] w-[56px] rounded-[50px] border border-[var(--Black,#000)] bg-[#8AF396]" />
-                <div className="absolute left-[345px] top-[97px] flex h-[44px] w-[70px] items-center justify-center rounded-[50px] border border-[var(--Black,#000)] bg-[#8AF396]">
-                  <p
-                    className="m-0"
-                    style={{
-                      color: "#000",
-                      fontFamily: pangeaFont,
-                      fontSize: "18px",
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      lineHeight: "normal",
-                      opacity: 0.6,
-                      fontVariationSettings: '"wght" 400',
-                    }}
-                  >
-                    4h35m
-                  </p>
-                </div>
-                <div className="absolute left-[415px] top-[201px] h-[149px] w-[55px] rounded-[50px] border border-[var(--Black,#000)] bg-white" />
-              </div>
-
-              <div className="pointer-events-none absolute inset-0">
-                <p className="absolute left-[51px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  SUN
-                </p>
-                <p className="absolute left-[110px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  MON
-                </p>
-                <p className="absolute left-[177px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  TUE
-                </p>
-                <p className="absolute left-[235px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  WED
-                </p>
-                <p className="absolute left-[301px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  THU
-                </p>
-                <p className="absolute left-[369px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  FRI
-                </p>
-                <p className="absolute left-[428px] top-[361px] m-0" style={courseCardMetaMuted}>
-                  SAT
-                </p>
-              </div>
-            </div>
+            <WeeklyActivityBarCard
+              summary={weeklyActivity}
+              highlightDayIndex={activityHighlightDayIndex}
+            />
             <div
               className="relative h-[401px] w-full max-w-[794px] flex-1 overflow-hidden rounded-[50px] border border-[var(--Black,#000)]"
               style={{ background: "var(--White, #FFF)" }}
@@ -834,8 +751,8 @@ export function LoggedInHome({
           </div>
         </section>
 
-        <LoggedInLearnNextSection />
-        <LandingCurrentMostsSection />
+        <LoggedInLearnNextSection showcaseSlides={trackShowcaseSlides} />
+        <LandingCurrentMostsSection mentors={landingMostsMentors} />
       </section>
     </div>
   );

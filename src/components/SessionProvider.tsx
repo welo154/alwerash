@@ -1,7 +1,25 @@
 "use client";
 
+import type { Session } from "next-auth";
 import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
 
-export function SessionProvider({ children }: { children: React.ReactNode }) {
-  return <NextAuthSessionProvider>{children}</NextAuthSessionProvider>;
+/**
+ * Pass `session` from the server (`await auth()`) so the client does not need an
+ * immediate `fetch("/api/auth/session")` on mount — that call often surfaces as
+ * CLIENT_FETCH_ERROR / "Failed to fetch" when the origin is wrong or the dev server
+ * is briefly unreachable; the server already has the cookie.
+ */
+export function SessionProvider({
+  children,
+  session,
+}: {
+  children: React.ReactNode;
+  /** From `await auth()` in the root layout; use `null` when logged out (not `undefined`). */
+  session: Session | null;
+}) {
+  return (
+    <NextAuthSessionProvider session={session}>
+      {children}
+    </NextAuthSessionProvider>
+  );
 }

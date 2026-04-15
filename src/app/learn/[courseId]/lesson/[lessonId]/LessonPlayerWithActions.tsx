@@ -21,6 +21,7 @@ type Props = {
     totalCount: number;
   };
   initialLastPositionSeconds?: number;
+  initialWatchSeconds?: number;
 };
 
 export function LessonPlayerWithActions({
@@ -31,6 +32,7 @@ export function LessonPlayerWithActions({
   completeLesson,
   courseProgress,
   initialLastPositionSeconds,
+  initialWatchSeconds,
 }: Props) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -56,6 +58,7 @@ export function LessonPlayerWithActions({
         <ProgressTracker
           lessonId={lessonId}
           initialLastPositionSeconds={initialLastPositionSeconds}
+          initialWatchSeconds={initialWatchSeconds}
           onProgress={onProgress}
         >
           <HlsPlayer

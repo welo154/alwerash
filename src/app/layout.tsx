@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { DM_Sans, Playfair_Display } from "next/font/google";
+import { auth } from "@/auth";
 import { SessionProvider } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/Toast";
 import { ToastFromUrl } from "@/components/ToastFromUrl";
@@ -35,11 +36,13 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${playfair.variable}`}>
       <body suppressHydrationWarning className="font-sans antialiased">
@@ -47,7 +50,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <ToastFromUrl />
           </Suspense>
-          <SessionProvider>
+          <SessionProvider session={session}>
             <ConditionalLayout>{children}</ConditionalLayout>
           </SessionProvider>
         </ToastProvider>

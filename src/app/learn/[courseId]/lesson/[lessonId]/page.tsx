@@ -55,6 +55,7 @@ export default async function LearnLessonPage({
       }
     : { progressPercent: 0, completedCount: 0, totalCount: 0 };
   const initialLastPositionSeconds = lessonProgressRecord?.lastPositionSeconds ?? 0;
+  const initialWatchSeconds = lessonProgressRecord?.watchSeconds ?? 0;
 
   const courseTitle = lesson.module.course.title;
   const playbackId = lesson.video?.muxPlaybackId;
@@ -106,6 +107,7 @@ export default async function LearnLessonPage({
                   initialLastPositionSeconds={
                     initialLastPositionSeconds > 0 ? initialLastPositionSeconds : undefined
                   }
+                  initialWatchSeconds={initialWatchSeconds > 0 ? initialWatchSeconds : undefined}
                 />
                 <p className="mt-3 text-xs text-slate-500">
                   Use the <strong>⋮</strong> (three dots) in the bottom-right of the video to change playback speed and quality.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId } from "react";
 
 const pangeaFont =
@@ -17,17 +18,20 @@ export type LandingMentorCardProps = {
   variant: "popular" | "watched";
   name: string;
   profession: string;
+  /** When set, the whole card links to the public mentor profile. */
+  href?: string;
 };
 
-export function LandingMentorCard({ variant, name, profession }: LandingMentorCardProps) {
+export function LandingMentorCard({ variant, name, profession, href }: LandingMentorCardProps) {
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
 
-  return (
+  const card = (
     <article
       className="relative mx-auto h-[424.999px] w-[409px] shrink-0 overflow-visible"
-      aria-label={`${name}, ${profession}. ${badge}`}
+      aria-hidden={href ? true : undefined}
+      aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
     >
       <svg
         className="absolute inset-0 h-full w-full overflow-visible"
@@ -132,4 +136,18 @@ export function LandingMentorCard({ variant, name, profession }: LandingMentorCa
       </span>
     </article>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        aria-label={`${name}, ${profession}. ${badge}`}
+        className="mx-auto block h-[424.999px] w-[409px] max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
+      >
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

@@ -5,7 +5,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 
-import { CatalogShowcaseCard, LANDING_SHOWCASE_CAROUSEL_CARDS } from "@/components/cards";
+import { CatalogShowcaseCard } from "@/components/cards";
+import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -77,11 +78,7 @@ function HeaderArrowIcon() {
   );
 }
 
-const recommendedDurationBySlug: Partial<Record<(typeof LANDING_SHOWCASE_CAROUSEL_CARDS)[number]["slug"], string>> = {
-  "digital-illustration": "56h34m",
-};
-
-export function LoggedInLearnNextSection() {
+export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: LandingShowcaseSlide[] }) {
   const cardsSwiperRef = useRef<SwiperType | null>(null);
   const [cardsAtEnd, setCardsAtEnd] = useState(false);
   const [cardsAtBeginning, setCardsAtBeginning] = useState(true);
@@ -155,16 +152,9 @@ export function LoggedInLearnNextSection() {
           onSlidesUpdated={syncCardsNav}
           onResize={syncCardsNav}
         >
-          {LANDING_SHOWCASE_CAROUSEL_CARDS.map((card) => (
-            <SwiperSlide key={card.slug} className="w-[347px]!">
-              <CatalogShowcaseCard
-                showcaseSlug={card.slug}
-                titlePrimary={card.titlePrimary}
-                titleSecondary={card.titleSecondary}
-                levelLabel="Beginner"
-                durationLabel={recommendedDurationBySlug[card.slug] ?? "12hrs"}
-                viewMoreHref="/learn"
-              />
+          {showcaseSlides.map(({ slug, cardProps }) => (
+            <SwiperSlide key={slug} className="w-[347px]!">
+              <CatalogShowcaseCard {...cardProps} showcaseSlug={slug} />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -172,8 +162,9 @@ export function LoggedInLearnNextSection() {
         <button
           type="button"
           className="absolute top-1/2 left-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-          aria-label="Previous courses"
+          aria-label="Previous tracks"
           disabled={cardsAtBeginning}
+          suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -188,8 +179,9 @@ export function LoggedInLearnNextSection() {
         <button
           type="button"
           className="absolute top-1/2 right-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-          aria-label="Next courses"
+          aria-label="Next tracks"
           disabled={cardsAtEnd}
+          suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

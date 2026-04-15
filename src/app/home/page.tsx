@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
+import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
+import { publicGetGuestLandingTrackBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 
 export const metadata = {
@@ -26,7 +28,14 @@ export default async function LoggedInHomePage() {
   /** Track / focus only — country is not shown here (avoids “EG” etc. on the welcome line). */
   const subtitleLeftOfEdit = profession || "Frontend Developer";
 
-  const continueLearningCourses = await getContinueLearningCardsForUser(userId, 3);
+  const now = new Date();
+  const [continueLearningCourses, landingMostsMentors, trackBundle, weeklyActivity] =
+    await Promise.all([
+      getContinueLearningCardsForUser(userId, 3),
+      publicListLandingMostsMentors(),
+      publicGetGuestLandingTrackBundle(),
+      getWeeklyActivitySummary(userId, now),
+    ]);
 
   return (
     <LoggedInHome
@@ -34,6 +43,10 @@ export default async function LoggedInHomePage() {
       userImage={userImage}
       subtitleLeftOfEdit={subtitleLeftOfEdit}
       continueLearningCourses={continueLearningCourses}
+      landingMostsMentors={landingMostsMentors}
+      trackShowcaseSlides={trackBundle.showcaseSlides}
+      weeklyActivity={weeklyActivity}
+      activityHighlightDayIndex={now.getUTCDay()}
     />
   );
 }

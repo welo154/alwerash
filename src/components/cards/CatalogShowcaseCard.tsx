@@ -186,6 +186,7 @@ function CatalogShowcaseHoverCard({
             type="button"
             className="inline-flex shrink-0 items-center justify-center border-0 bg-transparent p-0 text-inherit outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/35"
             aria-label="Save"
+            suppressHydrationWarning
           >
             <HoverHeartGlyph className="h-[28px] w-[31px] shrink-0" />
           </button>
@@ -386,6 +387,7 @@ export function CatalogShowcaseCard({
               className={`${ctaClassName} cursor-pointer`}
               style={ctaStyle}
               onClick={onViewMore}
+              suppressHydrationWarning
               {...ctaHoverHandlers}
             >
               {ctaInner}

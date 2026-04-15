@@ -1,12 +1,15 @@
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 import { requireRole } from "@/server/auth/require";
 import {
   adminCreateTrack,
+  adminDeleteSchool,
   adminGetSchool,
   adminUpdateSchool,
 } from "@/server/content/admin.service";
+import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
 
 export default async function AdminSchoolDetail({
   params,
@@ -46,6 +49,17 @@ export default async function AdminSchoolDetail({
       published: formData.get("published") === "on",
     });
     redirect(`/admin/content/schools/${id}?toast=Track+added`);
+  }
+
+  async function deleteSchool(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const id = String(formData.get("schoolId") ?? "");
+    if (!id) return;
+    await adminDeleteSchool(id);
+    revalidatePublicCatalogPaths();
+    revalidatePath("/admin/content/schools");
+    redirect("/admin/content/schools?toast=School+deleted");
   }
 
   return (
@@ -133,6 +147,14 @@ export default async function AdminSchoolDetail({
               Save
             </button>
           </div>
+        </form>
+
+        <form action={deleteSchool} className="mt-6 border-t border-slate-200 pt-6">
+          <input type="hidden" name="schoolId" value={schoolId} />
+          <ConfirmDeleteButton
+            label="Delete school"
+            confirmMessage={`Delete “${school.title}” and all tracks under it? Tracks are removed; courses that belonged to those tracks keep existing content but lose their track link. This cannot be undone.`}
+          />
         </form>
       </section>
 

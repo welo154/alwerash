@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 import { requireRole } from "@/server/auth/require";
-import { adminGetMentor, adminUpdateMentor } from "@/server/content/admin.service";
+import { adminDeleteMentor, adminGetMentor, adminUpdateMentor } from "@/server/content/admin.service";
+import { revalidatePublicMentorPaths } from "@/server/content/revalidate-public-paths";
 import { MentorPhotoUpload } from "../../components/MentorPhotoUpload";
 
 export default async function AdminMentorEditPage({
@@ -25,7 +27,19 @@ export default async function AdminMentorEditPage({
       aboutMe: String(formData.get("aboutMe") ?? "").trim() || undefined,
     });
     revalidatePath(`/admin/content/mentors/${mentorId}`);
+    revalidatePublicMentorPaths();
     redirect(`/admin/content/mentors/${mentorId}?toast=Mentor+updated`);
+  }
+
+  async function deleteMentor(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const mentorId = String(formData.get("mentorId") ?? "");
+    if (!mentorId) return;
+    await adminDeleteMentor(mentorId);
+    revalidatePublicMentorPaths();
+    revalidatePath("/admin/content/mentors");
+    redirect("/admin/content/mentors?toast=Mentor+deleted");
   }
 
   return (
@@ -88,6 +102,14 @@ export default async function AdminMentorEditPage({
               Save
             </button>
           </div>
+        </form>
+
+        <form action={deleteMentor} className="mt-6 border-t border-slate-200 pt-6">
+          <input type="hidden" name="mentorId" value={mentor.id} />
+          <ConfirmDeleteButton
+            label="Delete mentor"
+            confirmMessage={`Remove “${mentor.name}” permanently? Courses that list this mentor will have the mentor cleared. This cannot be undone.`}
+          />
         </form>
       </div>
     </div>

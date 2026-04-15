@@ -101,6 +101,8 @@ model User {
   entitlements    Entitlement[]
   lessonProgress  LessonProgress[]
   instructorCourses CourseInstructor[] @relation("InstructorCourseAssignments")
+  learningDays          UserLearningDay[]
+  courseLearningDays    UserCourseLearningDay[]
 
   @@map("users")
 }
@@ -231,6 +233,7 @@ model Course {
   threads                Thread[]
   introVideoUploads      CourseIntroVideoUpload[]
   instructors            CourseInstructor[]
+  userCourseLearningDays UserCourseLearningDay[]
 
   @@index([trackId, order])
   @@index([mentorId])
@@ -527,4 +530,38 @@ model LessonProgress {
   @@id([userId, lessonId])
   @@index([lessonId])
   @@map("lesson_progress")
+}
+
+/// Aggregated watch time per learner per UTC calendar day (all courses).
+model UserLearningDay {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  day                 DateTime @db.Date
+  watchSecondsTotal   Int      @default(0) @map("watch_seconds_total")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([userId])
+  @@map("user_learning_days")
+}
+
+/// Aggregated watch time per learner per course per UTC calendar day.
+model UserCourseLearningDay {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  courseId            String   @map("course_id")
+  day                 DateTime @db.Date
+  watchSecondsTotal   Int      @default(0) @map("watch_seconds_total")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, day])
+  @@index([userId, day])
+  @@map("user_course_learning_days")
 }

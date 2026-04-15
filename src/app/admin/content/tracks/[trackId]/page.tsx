@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/server/db/prisma";
 import { requireRole } from "@/server/auth/require";
 import { adminCreateCourse, adminDeleteTrack, adminUpdateTrack } from "@/server/content/admin.service";
+import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 
 type TrackWithRelations = {
@@ -57,6 +58,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
+    revalidatePublicCatalogPaths();
     redirect(`/admin/content/tracks/${id}?toast=Track+updated`);
   }
 
@@ -82,6 +84,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     if (!id) return;
     const t = await prisma.track.findUnique({ where: { id }, select: { schoolId: true } });
     await adminDeleteTrack(id);
+    revalidatePublicCatalogPaths();
     if (t?.schoolId) redirect(`/admin/content/schools/${t.schoolId}?toast=Track+deleted`);
     else redirect("/admin/content/tracks?toast=Track+deleted");
   }
@@ -159,6 +162,9 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
+              <p className="mt-1 text-xs text-slate-500">
+                Spaces and capitals are normalized to kebab-case when you save.
+              </p>
             </div>
           </div>
           <div>

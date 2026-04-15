@@ -170,6 +170,7 @@ export function SiteFooter() {
             <button
               type="button"
               className="inline-flex h-[40px] w-[131px] shrink-0 items-center justify-center gap-[10px] rounded-[8px] border border-black bg-transparent px-[12px] text-sm font-normal text-black opacity-100"
+              suppressHydrationWarning
             >
               English
               <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />

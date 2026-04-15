@@ -6,15 +6,26 @@ import { z } from "zod";
 /** CUID format (CUID1: 25 chars, CUID2: 24 chars - starts with c, alphanumeric) */
 export const Cuid = z.string().regex(/^c[a-z0-9]{20,30}$/i, "Invalid ID format");
 
-/** Slug: lowercase, trimmed, kebab-case */
+/** Turn user input into a URL-safe kebab slug (spaces, underscores, punctuation → hyphens). */
+export function normalizeSlugInput(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Slug: normalized to lowercase kebab-case; accepts titles or messy paste, then validates length & pattern. */
 export const Slug = z
   .string()
-  .min(2, "Slug must be at least 2 characters")
-  .max(80, "Slug must be at most 80 characters")
-  .transform((s) => s.trim().toLowerCase())
-  .refine(
-    (s) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s),
-    "Slug must be lowercase letters, numbers, and hyphens only"
+  .transform((s) => normalizeSlugInput(s))
+  .pipe(
+    z
+      .string()
+      .min(2, "Slug must be at least 2 characters after normalizing (e.g. use letters or numbers).")
+      .max(80, "Slug must be at most 80 characters")
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase letters, numbers, and hyphens only")
   );
 
 /** URL or empty string (for optional coverImage, etc.). Invalid URLs are treated as undefined. */

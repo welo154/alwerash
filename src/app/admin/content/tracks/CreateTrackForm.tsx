@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
 import { adminCreateTrack, adminListSchools } from "@/server/content/admin.service";
+import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
 
 type SchoolItem = Awaited<ReturnType<typeof adminListSchools>>[number];
 
@@ -23,6 +24,7 @@ export async function CreateTrackForm() {
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
+    revalidatePublicCatalogPaths();
     redirect("/admin/content/tracks?toast=Track+added");
   }
 
@@ -57,10 +59,14 @@ export async function CreateTrackForm() {
           <label className="mb-1 block text-sm font-medium text-slate-700">Slug</label>
           <input
             name="slug"
-            placeholder="e.g. ornaments"
+            placeholder="e.g. graphic-design or Graphic Design"
             required
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
           />
+          <p className="mt-1 text-xs text-slate-500">
+            Spaces, underscores, and capitals become hyphens (example: Motion Design →{" "}
+            <code className="rounded bg-slate-100 px-1">motion-design</code>).
+          </p>
         </div>
       </div>
       <div>
@@ -92,9 +98,19 @@ export async function CreateTrackForm() {
             className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input name="published" type="checkbox" className="rounded border-slate-300" />
-          Published
+        <label className="flex flex-col gap-1 text-sm text-slate-700 sm:flex-row sm:items-center sm:gap-2">
+          <span className="inline-flex items-center gap-2">
+            <input
+              name="published"
+              type="checkbox"
+              defaultChecked
+              className="rounded border-slate-300"
+            />
+            Published
+          </span>
+          <span className="text-xs font-normal text-slate-500">
+            Uncheck to keep as draft (hidden on the marketing site, /learn, and /tracks).
+          </span>
         </label>
       </div>
       <div className="flex justify-end gap-2 pt-2">

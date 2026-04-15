@@ -10,6 +10,7 @@ const navItems = [
   { href: "/admin/content/tracks", label: "Tracks" },
   { href: "/admin/content/courses", label: "Courses" },
   { href: "/admin/content/mentors", label: "Mentors" },
+  { href: "/admin/users", label: "Learners" },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

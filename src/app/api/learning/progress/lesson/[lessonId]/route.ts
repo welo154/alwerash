@@ -22,6 +22,7 @@ export async function GET(
         {
           lessonId,
           lastPositionSeconds: 0,
+          watchSeconds: 0,
           completedAt: null,
         },
         { status: 200 }
@@ -31,6 +32,7 @@ export async function GET(
     return NextResponse.json({
       lessonId: progress.lessonId,
       lastPositionSeconds: progress.lastPositionSeconds,
+      watchSeconds: progress.watchSeconds,
       completedAt: progress.completedAt?.toISOString() ?? null,
     });
   } catch (e) {
@@ -58,17 +60,19 @@ export async function PATCH(
       );
     }
 
-    const { positionSeconds, durationSeconds } = parsed.data;
+    const { positionSeconds, durationSeconds, watchedSecondsTotal } = parsed.data;
     const progress = await saveLessonProgress(
       session.user.id,
       lessonId,
       positionSeconds,
-      durationSeconds
+      durationSeconds,
+      watchedSecondsTotal !== undefined ? { watchedSecondsTotal } : undefined
     );
 
     return NextResponse.json({
       lessonId: progress.lessonId,
       lastPositionSeconds: progress.lastPositionSeconds,
+      watchSeconds: progress.watchSeconds,
       completedAt: progress.completedAt?.toISOString() ?? null,
     });
   } catch (e) {

@@ -1,3 +1,8 @@
+import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
+import {
+  publicGetGuestLandingTrackBundle,
+  publicListLandingMostsMentors,
+} from "@/server/content/public.service";
 import { HeroSection } from "./HeroSection";
 import { LandingBoxesSection } from "./LandingBoxesSection";
 import { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
@@ -5,24 +10,25 @@ import { LandingEverythingInOneSection } from "./LandingEverythingInOneSection";
 import { LandingWhyStudentsLoveSection } from "./LandingWhyStudentsLoveSection";
 import { LandingFaqSection } from "./LandingFaqSection";
 import { LandingGetStartedCtaSection } from "./LandingGetStartedCtaSection";
-import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
-import { publicListTracks } from "@/server/content/public.service";
 
 /**
  * Public marketing landing — used only on `/` for signed-out visitors.
+ * Hero, tag strips, and catalog tiles all follow published tracks from the admin dashboard.
  */
 export async function GuestLanding() {
-  const tracks = await publicListTracks();
-  const heroTracks: { id: string; title: string; slug: string }[] = Array.isArray(tracks)
-    ? tracks.map((t) => ({ id: t.id, title: t.title, slug: t.slug }))
-    : [];
+  const [{ heroTracks, showcaseSlides, showcaseTagRow1, showcaseTagRow2 }, landingMostsMentors] =
+    await Promise.all([publicGetGuestLandingTrackBundle(), publicListLandingMostsMentors()]);
 
   return (
     <div className="font-sans">
       <HeroSection tracks={heroTracks} />
-      <LandingBoxesSection />
+      <LandingBoxesSection
+        showcaseSlides={showcaseSlides}
+        showcaseTagRow1={showcaseTagRow1}
+        showcaseTagRow2={showcaseTagRow2}
+      />
       <LandingEverythingInOneSection />
-      <LandingCurrentMostsSection />
+      <LandingCurrentMostsSection mentors={landingMostsMentors} />
       <LandingWhyStudentsLoveSection />
       <LandingFaqSection />
       <LandingGetStartedCtaSection />

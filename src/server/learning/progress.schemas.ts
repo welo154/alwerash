@@ -7,6 +7,7 @@ import { z } from "zod";
 export const updateLessonProgressBodySchema = z.object({
   positionSeconds: z.number().min(0).finite(),
   durationSeconds: z.number().min(0).finite().optional(),
+  watchedSecondsTotal: z.number().min(0).finite().optional(),
 });
 
 export type UpdateLessonProgressBody = z.infer<typeof updateLessonProgressBodySchema>;
@@ -15,6 +16,7 @@ export type UpdateLessonProgressBody = z.infer<typeof updateLessonProgressBodySc
 export const lessonProgressResponseSchema = z.object({
   lessonId: z.string(),
   lastPositionSeconds: z.number(),
+  watchSeconds: z.number().min(0),
   completedAt: z.string().datetime().nullable(),
 });
 

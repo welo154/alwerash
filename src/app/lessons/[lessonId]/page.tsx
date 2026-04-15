@@ -29,6 +29,7 @@ export default async function LessonWatchPage({
   ]);
 
   const initialLastPositionSeconds = progress?.lastPositionSeconds ?? 0;
+  const initialWatchSeconds = progress?.watchSeconds ?? 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 p-6">
@@ -38,6 +39,7 @@ export default async function LessonWatchPage({
         <ProgressTracker
           lessonId={lessonId}
           initialLastPositionSeconds={initialLastPositionSeconds > 0 ? initialLastPositionSeconds : undefined}
+          initialWatchSeconds={initialWatchSeconds > 0 ? initialWatchSeconds : undefined}
         >
           <HlsPlayer src={playback.playbackUrl} showQualitySelector />
         </ProgressTracker>

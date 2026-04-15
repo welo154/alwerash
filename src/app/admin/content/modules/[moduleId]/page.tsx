@@ -1,9 +1,12 @@
 // file: src/app/admin/content/modules/[moduleId]/page.tsx
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 import { requireRole } from "@/server/auth/require";
 import {
   adminCreateLesson,
+  adminDeleteModule,
   adminGetModule,
   adminUpdateModule,
   adminUpdateLesson,
@@ -89,6 +92,19 @@ export default async function AdminModuleDetail({
     revalidatePath(`/admin/content/courses/${courseModule.courseId}`);
   }
 
+  async function deleteModule(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const id = String(formData.get("moduleId") ?? "");
+    if (!id) return;
+    const courseId = courseModule.courseId;
+    await adminDeleteModule(id);
+    revalidatePath(`/admin/content/courses/${courseId}`);
+    revalidatePath(`/learn/${courseId}`);
+    revalidatePath(`/courses/${courseId}`);
+    redirect(`/admin/content/courses/${courseId}?toast=Module+deleted`);
+  }
+
   async function removeLessonVideo(formData: FormData) {
     "use server";
     await requireRole(["ADMIN"]);
@@ -158,6 +174,14 @@ export default async function AdminModuleDetail({
           >
             Save module
           </button>
+        </form>
+
+        <form action={deleteModule} className="mt-6 border-t border-slate-200 pt-6">
+          <input type="hidden" name="moduleId" value={moduleId} />
+          <ConfirmDeleteButton
+            label="Delete module"
+            confirmMessage={`Delete module “${courseModule.title}” and all lessons inside it? This cannot be undone.`}
+          />
         </form>
       </section>
 

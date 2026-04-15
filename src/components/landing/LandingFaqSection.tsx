@@ -112,6 +112,7 @@ export function LandingFaqSection() {
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
+                  suppressHydrationWarning
                 >
                   <span
                     className="font-bold"

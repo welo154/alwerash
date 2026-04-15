@@ -1,4 +1,10 @@
 // file: src/server/content/public.service.ts
+import {
+  catalogShowcasePropsFromTrackAggregate,
+  splitTitlesIntoTwoTagRows,
+  type CatalogShowcaseCardProps,
+  type LandingShowcaseSlide,
+} from "@/components/cards/catalog-showcase-map";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 
@@ -33,6 +39,104 @@ export async function publicListTracks() {
       school: { select: { id: true, title: true, slug: true } },
     },
   });
+}
+
+/**
+ * Published track whose slug matches a landing showcase tile (case-insensitive).
+ * Used for deep links / learn filters that still key off a showcase slug.
+ */
+export async function publicGetShowcaseTrackCardForSlug(
+  showcaseSlug: string
+): Promise<CatalogShowcaseCardProps | null> {
+  try {
+    const track = await prisma.track.findFirst({
+      where: {
+        published: true,
+        slug: { equals: showcaseSlug, mode: "insensitive" },
+      },
+      select: {
+        title: true,
+        slug: true,
+        school: { select: { title: true } },
+        courses: {
+          where: { published: true },
+          select: {
+            totalDurationMinutes: true,
+            modules: { select: { _count: { select: { lessons: true } } } },
+          },
+        },
+      },
+    });
+    if (!track) return null;
+
+    return catalogShowcasePropsFromTrackAggregate({
+      title: track.title,
+      slug: track.slug,
+      schoolTitle: track.school?.title,
+      courses: track.courses.map((c) => ({
+        totalDurationMinutes: c.totalDurationMinutes,
+        lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
+      })),
+    });
+  } catch {
+    return null;
+  }
+}
+
+export type GuestLandingTrackBundle = {
+  heroTracks: { id: string; title: string; slug: string }[];
+  showcaseSlides: LandingShowcaseSlide[];
+  showcaseTagRow1: string[];
+  showcaseTagRow2: string[];
+};
+
+/** One query: hero strip + catalog cards + tag pills all follow admin published tracks (order, titles). */
+export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTrackBundle> {
+  try {
+    const rows = await prisma.track.findMany({
+      where: { published: true },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        school: { select: { title: true } },
+        courses: {
+          where: { published: true },
+          select: {
+            totalDurationMinutes: true,
+            modules: { select: { _count: { select: { lessons: true } } } },
+          },
+        },
+      },
+    });
+
+    const titles = rows.map((r) => r.title);
+    const [showcaseTagRow1, showcaseTagRow2] = splitTitlesIntoTwoTagRows(titles);
+
+    return {
+      heroTracks: rows.map((t) => ({ id: t.id, title: t.title, slug: t.slug })),
+      showcaseSlides: rows.map((t) => ({
+        slug: t.slug,
+        cardProps: {
+          ...catalogShowcasePropsFromTrackAggregate({
+            title: t.title,
+            slug: t.slug,
+            schoolTitle: t.school?.title,
+            courses: t.courses.map((c) => ({
+              totalDurationMinutes: c.totalDurationMinutes,
+              lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
+            })),
+          }),
+          showcaseSlug: t.slug,
+        },
+      })),
+      showcaseTagRow1,
+      showcaseTagRow2,
+    };
+  } catch {
+    return { heroTracks: [], showcaseSlides: [], showcaseTagRow1: [], showcaseTagRow2: [] };
+  }
 }
 
 export async function publicGetTrackBySlug(slug: string) {
@@ -360,4 +464,40 @@ export async function publicListMentors() {
       aboutMe: true,
     },
   });
+}
+
+/** Drives “THE CURRENT MOSTS” mentor cards (text-only layout; admin `Mentor` rows). */
+export type LandingMostsMentorCardDto = {
+  id: string;
+  variant: "popular" | "watched";
+  /** Display name (uppercased for the card). */
+  name: string;
+  /** Shown under the name — from `certificateName` or a short default. */
+  profession: string;
+};
+
+const LANDING_MOSTS_MENTOR_LIMIT = 12;
+
+/**
+ * Mentors for the landing “Current Mosts” strip, same order as admin (createdAt asc).
+ * Badge alternates for visual rhythm; not stored on Mentor yet.
+ */
+export async function publicListLandingMostsMentors(
+  limit = LANDING_MOSTS_MENTOR_LIMIT
+): Promise<LandingMostsMentorCardDto[]> {
+  try {
+    const rows = await prisma.mentor.findMany({
+      orderBy: { createdAt: "asc" },
+      take: limit,
+      select: { id: true, name: true, certificateName: true },
+    });
+    return rows.map((m, i) => ({
+      id: m.id,
+      variant: i % 2 === 0 ? "popular" : "watched",
+      name: m.name.trim().replace(/\s+/g, " ").toUpperCase(),
+      profession: m.certificateName?.trim() || "Mentor",
+    }));
+  } catch {
+    return [];
+  }
 }

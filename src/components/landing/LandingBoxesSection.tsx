@@ -5,7 +5,8 @@ import { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { CatalogShowcaseCard, LANDING_SHOWCASE_CAROUSEL_CARDS } from "@/components/cards";
+import { CatalogShowcaseCard } from "@/components/cards";
+import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 import "swiper/css";
 
 /** Same artwork as next; horizontal flip so the chevron points left. */
@@ -55,37 +56,20 @@ function CardsNextIcon() {
   );
 }
 
-const TAGS = [
-  "FEATURED",
-  "DRAWING & PAINTING",
-  "ANIMATION",
-  "UI/UX DESIGN",
-  "CREATIVE WRITING",
-  "DIGITAL ILLUSTRATION",
-  "FILM & VIDEO",
-  "CRAFTS",
-  "GRAPHIC DESIGN",
-  "TYPOGRAPHY",
-  "PRODUCTIVITY",
-];
-
 const CARDS_SLIDE_MS = 450;
 
-const TAGS_ROW_2 = [
-  "PHOTOGRAPHY",
-  "ACTIVITY",
-  "MARKETING",
-  "ART & DESIGN",
-  "MOTION",
-  "BRANDING",
-  "3D & VFX",
-  "ILLUSTRATION",
-  "VIDEO EDITING",
-  "SOCIAL MEDIA",
-  "BUSINESS",
-];
-
-export function LandingBoxesSection() {
+export function LandingBoxesSection({
+  showcaseSlides = [],
+  showcaseTagRow1 = [],
+  showcaseTagRow2 = [],
+}: {
+  showcaseSlides?: LandingShowcaseSlide[];
+  /** Uppercase track titles — first row of pills (from server, admin track order). */
+  showcaseTagRow1?: string[];
+  showcaseTagRow2?: string[];
+}) {
+  const slides = showcaseSlides;
+  const hasTagRows = showcaseTagRow1.length > 0 || showcaseTagRow2.length > 0;
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [activeTagRow2, setActiveTagRow2] = useState<string | null>(null);
   const cardsSwiperRef = useRef<SwiperType | null>(null);
@@ -102,69 +86,79 @@ export function LandingBoxesSection() {
   return (
     <section className="mt-[107px] w-full overflow-x-hidden px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px]">
-        <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          <Swiper
-            modules={[Autoplay]}
-            slidesPerView="auto"
-            spaceBetween={25}
-            grabCursor
-            autoplay={{ delay: 2400, disableOnInteraction: false, stopOnLastSlide: true }}
-            className="overflow-visible!"
-          >
-            {TAGS.map((tag, i) => (
-              <SwiperSlide key={tag} className="w-auto!">
-                <button
-                  type="button"
-                  onClick={() => setActiveTag(tag)}
-                  aria-pressed={activeTag === tag}
-                  className={`inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black ${
-                    activeTag === tag ? "bg-[#59CBE8]" : "bg-white"
-                  }`}
-                  style={{
-                    fontFamily:
-                      '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
-                    lineHeight: "19.6px",
-                  }}
-                >
-                  {tag}
-                </button>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
+        {hasTagRows ? (
+          <>
+            <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+              <Swiper
+                modules={[Autoplay]}
+                slidesPerView="auto"
+                spaceBetween={25}
+                grabCursor
+                autoplay={{ delay: 2400, disableOnInteraction: false, stopOnLastSlide: true }}
+                className="overflow-visible!"
+              >
+                {showcaseTagRow1.map((tag, i) => (
+                  <SwiperSlide key={`r1-${tag}-${i}`} className="w-auto!">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTag(tag)}
+                      aria-pressed={activeTag === tag}
+                      className={`inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black ${
+                        activeTag === tag ? "bg-[#59CBE8]" : "bg-white"
+                      }`}
+                      style={{
+                        fontFamily:
+                          '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+                        lineHeight: "19.6px",
+                      }}
+                      suppressHydrationWarning
+                    >
+                      {tag}
+                    </button>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
 
-        <div className="relative left-1/2 mt-[11px] w-screen -translate-x-1/2 overflow-hidden">
-          <Swiper
-            modules={[Autoplay]}
-            slidesPerView="auto"
-            spaceBetween={25}
-            grabCursor
-            autoplay={{ delay: 2600, disableOnInteraction: false, stopOnLastSlide: true }}
-            className="overflow-visible!"
-          >
-            {TAGS_ROW_2.map((tag) => (
-              <SwiperSlide key={tag} className="w-auto!">
-                <button
-                  type="button"
-                  onClick={() => setActiveTagRow2(tag)}
-                  aria-pressed={activeTagRow2 === tag}
-                  className={`inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black ${
-                    activeTagRow2 === tag ? "bg-[#59CBE8]" : "bg-white"
-                  }`}
-                  style={{
-                    fontFamily:
-                      '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
-                    lineHeight: "19.6px",
-                  }}
-                >
-                  {tag}
-                </button>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
+            <div className="relative left-1/2 mt-[11px] w-screen -translate-x-1/2 overflow-hidden">
+              <Swiper
+                modules={[Autoplay]}
+                slidesPerView="auto"
+                spaceBetween={25}
+                grabCursor
+                autoplay={{ delay: 2600, disableOnInteraction: false, stopOnLastSlide: true }}
+                className="overflow-visible!"
+              >
+                {showcaseTagRow2.map((tag, i) => (
+                  <SwiperSlide key={`r2-${tag}-${i}`} className="w-auto!">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTagRow2(tag)}
+                      aria-pressed={activeTagRow2 === tag}
+                      className={`inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black ${
+                        activeTagRow2 === tag ? "bg-[#59CBE8]" : "bg-white"
+                      }`}
+                      style={{
+                        fontFamily:
+                          '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+                        lineHeight: "19.6px",
+                      }}
+                      suppressHydrationWarning
+                    >
+                      {tag}
+                    </button>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </>
+        ) : null}
 
-        <div className="relative left-1/2 mt-[64px] w-screen -translate-x-1/2 overflow-hidden pl-[116px] pr-[88px]">
+        <div
+          className={`relative left-1/2 w-screen -translate-x-1/2 overflow-hidden pl-[116px] pr-[88px] ${
+            hasTagRows ? "mt-[64px]" : "mt-[24px]"
+          }`}
+        >
           <Swiper
             dir="ltr"
             slidesPerView="auto"
@@ -191,14 +185,9 @@ export function LandingBoxesSection() {
             onSlidesUpdated={syncCardsNav}
             onResize={syncCardsNav}
           >
-            {LANDING_SHOWCASE_CAROUSEL_CARDS.map((card) => (
-              <SwiperSlide key={card.slug} className="w-[347px]!">
-                <CatalogShowcaseCard
-                  showcaseSlug={card.slug}
-                  titlePrimary={card.titlePrimary}
-                  titleSecondary={card.titleSecondary}
-                  viewMoreHref="/learn"
-                />
+            {slides.map(({ slug, cardProps }) => (
+              <SwiperSlide key={slug} className="w-[347px]!">
+                <CatalogShowcaseCard {...cardProps} showcaseSlug={slug} />
               </SwiperSlide>
             ))}
           </Swiper>
@@ -206,8 +195,9 @@ export function LandingBoxesSection() {
           <button
             type="button"
             className="absolute top-1/2 left-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-            aria-label="Previous courses"
+            aria-label="Previous tracks"
             disabled={cardsAtBeginning}
+            suppressHydrationWarning
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -222,8 +212,9 @@ export function LandingBoxesSection() {
           <button
             type="button"
             className="absolute top-1/2 right-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-            aria-label="Next courses"
+            aria-label="Next tracks"
             disabled={cardsAtEnd}
+            suppressHydrationWarning
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

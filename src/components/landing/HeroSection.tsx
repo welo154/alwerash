@@ -156,6 +156,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                     placeholder="Search for courses"
                     className="w-full bg-transparent text-[18px] text-[#73726C] placeholder:text-[#73726C] focus:outline-none"
                     style={{ fontFamily: pangeaFont }}
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -163,6 +164,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                   type="button"
                   aria-label="Search"
                   className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-black text-black"
+                  suppressHydrationWarning
                 >
                   <ArrowRightIcon className="h-5 w-5" />
                 </button>
