@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Full-bleed sections use w-screen (100vw); with a vertical scrollbar that can widen the layout. */
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 /* Ensure Tailwind v4 scans app and components (fixes unstyled admin/dynamic routes) */
 @source "./**/*.{js,ts,jsx,tsx}";
 @source "../components/**/*.{js,ts,jsx,tsx}";
@@ -151,4 +157,12 @@ label:has(input[type="radio"]) {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/*
+ * Learn / popular carousel: extra bottom inset so the slide card’s bottom border
+ * (1px + 50px radius) isn’t clipped by Swiper’s overflow:hidden viewport.
+ */
+.learn-popular-swiper--cards.swiper {
+  padding-bottom: 4px;
 }

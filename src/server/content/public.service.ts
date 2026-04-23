@@ -7,6 +7,7 @@ import {
 } from "@/components/cards/catalog-showcase-map";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 
 function muxThumbnailUrl(playbackId: string): string {
   return `https://image.mux.com/${playbackId}/thumbnail.jpg?width=800&height=450&fit_mode=smartcrop`;
@@ -466,15 +467,7 @@ export async function publicListMentors() {
   });
 }
 
-/** Drives “THE CURRENT MOSTS” mentor cards (text-only layout; admin `Mentor` rows). */
-export type LandingMostsMentorCardDto = {
-  id: string;
-  variant: "popular" | "watched";
-  /** Display name (uppercased for the card). */
-  name: string;
-  /** Shown under the name — from `certificateName` or a short default. */
-  profession: string;
-};
+export type { LandingMostsMentorCardDto };
 
 const LANDING_MOSTS_MENTOR_LIMIT = 12;
 

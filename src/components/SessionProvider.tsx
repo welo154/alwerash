@@ -18,7 +18,12 @@ export function SessionProvider({
   session: Session | null;
 }) {
   return (
-    <NextAuthSessionProvider session={session}>
+    <NextAuthSessionProvider
+      session={session}
+      /** Avoid background `/api/auth/session` calls that throw CLIENT_FETCH_ERROR when dev HMR/restart or focus races occur. */
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
+    >
       {children}
     </NextAuthSessionProvider>
   );

@@ -7,7 +7,7 @@ import { LandingCurrentMostsSection } from "@/components/landing";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import type { WeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
-import type { LandingMostsMentorCardDto } from "@/server/content/public.service";
+import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { WeeklyActivityBarCard } from "@/components/home/WeeklyActivityBarCard";
 
 const pangeaFont =
@@ -656,7 +656,7 @@ export function LoggedInHome({
                       fontVariationSettings: '"wght" 500',
                     }}
                   >
-                    WHAT'S FIGMA?
+                    {"WHAT'S FIGMA?"}
                   </p>
                   <p
                     className="m-0"

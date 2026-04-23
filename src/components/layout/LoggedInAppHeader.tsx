@@ -43,7 +43,7 @@ const SOFTWARE_COURSES = [
 
 export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
   return (
-    <header className="relative z-50 w-full px-[40px] pt-[35px]" aria-label="Logged in header">
+    <header className="relative z-50 mb-[50px] w-full px-[40px] pt-[35px]" aria-label="Logged in header">
       <div className="relative h-[112px] w-full">
         <svg
           className="absolute inset-0 z-30 h-full w-full"

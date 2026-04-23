@@ -22,6 +22,12 @@ export type WeeklyActivitySummary = {
   weekTotalSeconds: number;
 };
 
+export type MonthActivitySummary = {
+  year: number;
+  monthIndex: number;
+  monthTotalSeconds: number;
+};
+
 export function utcCalendarDate(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
@@ -34,6 +40,31 @@ export function startOfUtcWeek(d: Date): Date {
 
 function dateKeyUtc(d: Date): string {
   return d.toISOString().slice(0, 10);
+}
+
+/** Safe fallback when DB migrations are behind or aggregates are unavailable. */
+function emptyWeeklyActivitySummary(now: Date): WeeklyActivitySummary {
+  const start = startOfUtcWeek(now);
+  const days: WeeklyDayActivity[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setUTCDate(start.getUTCDate() + i);
+    days.push({
+      dayIndex: i,
+      label: WEEKDAY_LABELS[i],
+      dateKey: dateKeyUtc(d),
+      watchSeconds: 0,
+    });
+  }
+  return { days, weekTotalSeconds: 0 };
+}
+
+function emptyMonthActivitySummary(now: Date): MonthActivitySummary {
+  return {
+    year: now.getUTCFullYear(),
+    monthIndex: now.getUTCMonth(),
+    monthTotalSeconds: 0,
+  };
 }
 
 export function formatSecondsAsHhMm(totalSeconds: number): string {
@@ -51,43 +82,42 @@ export async function getWeeklyActivitySummary(
   const end = new Date(start);
   end.setUTCDate(start.getUTCDate() + 6);
 
-  const rows = await prisma.userLearningDay.findMany({
-    where: {
-      userId,
-      day: { gte: start, lte: end },
-    },
-    select: { day: true, watchSecondsTotal: true },
-  });
-
-  const byKey = new Map<string, number>();
-  for (const r of rows) {
-    byKey.set(dateKeyUtc(r.day), r.watchSecondsTotal);
-  }
-
-  const days: WeeklyDayActivity[] = [];
-  let weekTotalSeconds = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(start);
-    d.setUTCDate(start.getUTCDate() + i);
-    const key = dateKeyUtc(d);
-    const watchSeconds = byKey.get(key) ?? 0;
-    weekTotalSeconds += watchSeconds;
-    days.push({
-      dayIndex: i,
-      label: WEEKDAY_LABELS[i],
-      dateKey: key,
-      watchSeconds,
+  try {
+    const rows = await prisma.userLearningDay.findMany({
+      where: {
+        userId,
+        day: { gte: start, lte: end },
+      },
+      select: { day: true, watchSecondsTotal: true },
     });
+
+    const byKey = new Map<string, number>();
+    for (const r of rows) {
+      byKey.set(dateKeyUtc(r.day), r.watchSecondsTotal);
+    }
+
+    const days: WeeklyDayActivity[] = [];
+    let weekTotalSeconds = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setUTCDate(start.getUTCDate() + i);
+      const key = dateKeyUtc(d);
+      const watchSeconds = byKey.get(key) ?? 0;
+      weekTotalSeconds += watchSeconds;
+      days.push({
+        dayIndex: i,
+        label: WEEKDAY_LABELS[i],
+        dateKey: key,
+        watchSeconds,
+      });
+    }
+
+    return { days, weekTotalSeconds };
+  } catch (err) {
+    console.error("[learning-activity] getWeeklyActivitySummary failed", err);
+    return emptyWeeklyActivitySummary(now);
   }
-
-  return { days, weekTotalSeconds };
 }
-
-export type MonthActivitySummary = {
-  year: number;
-  monthIndex: number;
-  monthTotalSeconds: number;
-};
 
 export async function getMonthActivitySummary(
   userId: string,
@@ -98,16 +128,21 @@ export async function getMonthActivitySummary(
   const start = new Date(Date.UTC(y, m, 1));
   const end = new Date(Date.UTC(y, m + 1, 0));
 
-  const agg = await prisma.userLearningDay.aggregate({
-    where: { userId, day: { gte: start, lte: end } },
-    _sum: { watchSecondsTotal: true },
-  });
+  try {
+    const agg = await prisma.userLearningDay.aggregate({
+      where: { userId, day: { gte: start, lte: end } },
+      _sum: { watchSecondsTotal: true },
+    });
 
-  return {
-    year: y,
-    monthIndex: m,
-    monthTotalSeconds: agg._sum.watchSecondsTotal ?? 0,
-  };
+    return {
+      year: y,
+      monthIndex: m,
+      monthTotalSeconds: agg._sum.watchSecondsTotal ?? 0,
+    };
+  } catch (err) {
+    console.error("[learning-activity] getMonthActivitySummary failed", err);
+    return emptyMonthActivitySummary(now);
+  }
 }
 
 export async function bumpAggregatesForWatchDelta(
@@ -119,34 +154,38 @@ export async function bumpAggregatesForWatchDelta(
 
   const day = utcCalendarDate(dayUtc);
 
-  await tx.userLearningDay.upsert({
-    where: {
-      userId_day: { userId, day },
-    },
-    create: {
-      userId,
-      day,
-      watchSecondsTotal: delta,
-    },
-    update: {
-      watchSecondsTotal: { increment: delta },
-    },
-  });
+  try {
+    await tx.userLearningDay.upsert({
+      where: {
+        userId_day: { userId, day },
+      },
+      create: {
+        userId,
+        day,
+        watchSecondsTotal: delta,
+      },
+      update: {
+        watchSecondsTotal: { increment: delta },
+      },
+    });
 
-  await tx.userCourseLearningDay.upsert({
-    where: {
-      userId_courseId_day: { userId, courseId, day },
-    },
-    create: {
-      userId,
-      courseId,
-      day,
-      watchSecondsTotal: delta,
-    },
-    update: {
-      watchSecondsTotal: { increment: delta },
-    },
-  });
+    await tx.userCourseLearningDay.upsert({
+      where: {
+        userId_courseId_day: { userId, courseId, day },
+      },
+      create: {
+        userId,
+        courseId,
+        day,
+        watchSecondsTotal: delta,
+      },
+      update: {
+        watchSecondsTotal: { increment: delta },
+      },
+    });
+  } catch (err) {
+    console.error("[learning-activity] bumpAggregatesForWatchDelta failed", err);
+  }
 }
 
 export type UserCourseWatchRow = {
@@ -164,31 +203,36 @@ export async function getUserCourseWatchTotals(
   const start = new Date(end);
   start.setUTCDate(start.getUTCDate() - Math.max(0, daysBack));
 
-  const grouped = await prisma.userCourseLearningDay.groupBy({
-    by: ["courseId"],
-    where: {
-      userId,
-      day: { gte: start, lte: end },
-    },
-    _sum: { watchSecondsTotal: true },
-  });
+  try {
+    const grouped = await prisma.userCourseLearningDay.groupBy({
+      by: ["courseId"],
+      where: {
+        userId,
+        day: { gte: start, lte: end },
+      },
+      _sum: { watchSecondsTotal: true },
+    });
 
-  if (grouped.length === 0) return [];
+    if (grouped.length === 0) return [];
 
-  const courseIds = grouped.map((g) => g.courseId);
-  const courses = await prisma.course.findMany({
-    where: { id: { in: courseIds } },
-    select: { id: true, title: true },
-  });
-  const titleById = new Map(courses.map((c) => [c.id, c.title] as const));
+    const courseIds = grouped.map((g) => g.courseId);
+    const courses = await prisma.course.findMany({
+      where: { id: { in: courseIds } },
+      select: { id: true, title: true },
+    });
+    const titleById = new Map(courses.map((c) => [c.id, c.title] as const));
 
-  return grouped
-    .map((g) => ({
-      courseId: g.courseId,
-      title: titleById.get(g.courseId) ?? "Unknown course",
-      watchSeconds: g._sum.watchSecondsTotal ?? 0,
-    }))
-    .sort((a, b) => b.watchSeconds - a.watchSeconds);
+    return grouped
+      .map((g) => ({
+        courseId: g.courseId,
+        title: titleById.get(g.courseId) ?? "Unknown course",
+        watchSeconds: g._sum.watchSecondsTotal ?? 0,
+      }))
+      .sort((a, b) => b.watchSeconds - a.watchSeconds);
+  } catch (err) {
+    console.error("[learning-activity] getUserCourseWatchTotals failed", err);
+    return [];
+  }
 }
 
 export type AdminUserListRow = {

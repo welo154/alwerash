@@ -28,7 +28,7 @@ export function SiteHeader() {
     if (status === "loading") {
       return (
         <div
-          className="sticky top-0 z-50 h-[112px] w-full animate-pulse bg-neutral-100"
+          className="sticky top-0 z-50 mb-[50px] h-[112px] w-full animate-pulse bg-neutral-100"
           aria-busy
           aria-label="Loading header"
         />
@@ -43,7 +43,7 @@ export function SiteHeader() {
   if (status === "loading") {
     return (
       <div
-        className="sticky top-0 z-50 h-[80px] w-full animate-pulse bg-neutral-100"
+        className="sticky top-0 z-50 mb-[50px] h-[80px] w-full animate-pulse bg-neutral-100"
         aria-busy
         aria-label="Loading header"
       />

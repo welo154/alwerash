@@ -6,7 +6,7 @@ import { useId } from "react";
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
-/** Card silhouette — matches design SVG (409×425). */
+/** Card silhouette — viewBox 409×425, rendered at 469×424.999px (non-uniform scale). */
 const CARD_PATH =
   "M354 0C384.376 2.09384e-06 409 24.6244 409 55V370C409 400.375 384.376 425 354 425H55C24.6245 425 0.000205489 400.375 0 370V122C0 94.3858 22.3858 72 50 72H147.208C161.567 72 173.208 60.3594 173.208 46C173.208 20.5949 193.803 0 219.208 0H354Z";
 
@@ -29,13 +29,14 @@ export function LandingMentorCard({ variant, name, profession, href }: LandingMe
 
   const card = (
     <article
-      className="relative mx-auto h-[424.999px] w-[409px] shrink-0 overflow-visible"
+      className="relative mx-auto h-[424.999px] w-[469px] max-w-full shrink-0 overflow-visible"
       aria-hidden={href ? true : undefined}
       aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
     >
       <svg
         className="absolute inset-0 h-full w-full overflow-visible"
         viewBox="0 0 409 425"
+        preserveAspectRatio="none"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         overflow="visible"
@@ -50,7 +51,6 @@ export function LandingMentorCard({ variant, name, profession, href }: LandingMe
 
         <foreignObject x="24" y="10" width="131" height="52">
           <div
-            xmlns="http://www.w3.org/1999/xhtml"
             className="text-black"
             style={{
               fontFamily: pangeaFont,
@@ -74,7 +74,6 @@ export function LandingMentorCard({ variant, name, profession, href }: LandingMe
 
         <foreignObject x="27" y="0" width="382" height="425">
           <div
-            xmlns="http://www.w3.org/1999/xhtml"
             style={{
               boxSizing: "border-box",
               height: "100%",
@@ -142,7 +141,7 @@ export function LandingMentorCard({ variant, name, profession, href }: LandingMe
       <Link
         href={href}
         aria-label={`${name}, ${profession}. ${badge}`}
-        className="mx-auto block h-[424.999px] w-[409px] max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
+        className="mx-auto block h-[424.999px] w-[469px] max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
       >
         {card}
       </Link>

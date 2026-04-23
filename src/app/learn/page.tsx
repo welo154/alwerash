@@ -5,7 +5,10 @@ import {
   publicListTracks,
   publicListLandingMostsMentors,
 } from "@/server/content/public.service";
-import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
+import { catalogShowcasePropsFromCourse } from "@/components/cards/catalog-showcase-map";
+import { LearnFeaturedCoursesPanel } from "@/components/learn/LearnFeaturedCoursesPanel";
+import { LearnPopularClassesSection } from "@/components/learn/LearnPopularClassesSection";
+import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { LandingCurrentMostsSection } from "@/components/landing";
 
 export default async function LearnPage() {
@@ -22,6 +25,20 @@ export default async function LearnPage() {
   const mostPlayedList =
     mostPlayedCourses.length > 0 ? mostPlayedCourses : fallbackCourses;
   const featuredList = newList.length > 0 ? newList : mostPlayedList.slice(0, 3);
+  const popularCourses =
+    mostPlayedCourses.length > 0
+      ? mostPlayedCourses
+      : featuredList.length > 0
+        ? featuredList
+        : fallbackCourses;
+  const popularTiles: LearnPopularTile[] = popularCourses.map((c) => ({
+    id: c.id,
+    href: `/courses/${c.id}`,
+    title: c.title.trim(),
+    authorLabel: c.instructorName?.trim() || "Instructor",
+    tagPrimary: c.track?.title?.trim().toUpperCase() || "COURSE",
+    coverImageSrc: c.coverImage,
+  }));
 
   const sidebarCourseFilters = [
     "All Couses",
@@ -80,11 +97,11 @@ export default async function LearnPage() {
     '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
   return (
-    <div className="bg-white pb-16 pt-8 font-sans">
-      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-8 lg:px-10">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
-          <aside className="w-full shrink-0 lg:w-[210px]">
-            <div className="pb-4">
+    <div className="min-w-0 max-w-full overflow-x-hidden bg-white pb-16 pt-8 font-sans">
+      <div className="mx-auto w-full min-w-0 max-w-[1400px] pl-6 sm:pl-8 lg:pl-10">
+        <div className="flex min-w-0 max-w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-[55px]">
+          <aside className="w-full shrink-0 lg:w-[266px]">
+            <div>
               <h2
                 className="uppercase"
                 style={{
@@ -117,11 +134,10 @@ export default async function LearnPage() {
 
             <div
               aria-hidden
-              className="my-4 w-full"
-              style={{ outline: "1px black solid", outlineOffset: "-0.5px", height: "1px" }}
+              className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
             />
 
-            <div className="pt-1">
+            <div>
               <h3
                 className="uppercase"
                 style={{
@@ -154,11 +170,10 @@ export default async function LearnPage() {
 
             <div
               aria-hidden
-              className="my-4 w-full"
-              style={{ outline: "1px black solid", outlineOffset: "-0.5px", height: "1px" }}
+              className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
             />
 
-            <div className="pt-1">
+            <div>
               <h3
                 className="uppercase"
                 style={{
@@ -191,11 +206,10 @@ export default async function LearnPage() {
 
             <div
               aria-hidden
-              className="my-4 w-full"
-              style={{ outline: "1px black solid", outlineOffset: "-0.5px", height: "1px" }}
+              className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
             />
 
-            <div className="pt-1">
+            <div>
               <h3
                 className="uppercase"
                 style={{
@@ -229,130 +243,27 @@ export default async function LearnPage() {
 
           <main className="min-w-0 flex-1">
             <section aria-label="Featured courses">
-              <div className="relative w-full max-w-[1125px]">
-                <div className="absolute left-0 top-0 z-20 inline-flex h-[72px] items-center rounded-[44px] border border-black bg-white pl-[22px] pr-[22px]">
-                  <h1 className="uppercase leading-none">
-                    <span
-                      style={{
-                        fontFamily: pangeaFont,
-                        color: "#000",
-                        fontSize: "48px",
-                        fontStyle: "italic",
-                        fontWeight: 600,
-                        lineHeight: "57.6px",
-                      }}
-                    >
-                      FEATURED
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: pangeaFont,
-                        color: "#000",
-                        fontSize: "48px",
-                        fontWeight: 400,
-                        lineHeight: "57.6px",
-                      }}
-                    >
-                      {" "}
-                      COURSES
-                    </span>
-                  </h1>
-                </div>
-
-                <button
-                  type="button"
-                  className="absolute right-0 top-[2px] z-20 inline-flex h-[56px] w-[56px] items-center justify-center rounded-full border border-black bg-white"
-                  aria-label="Next featured courses"
-                  suppressHydrationWarning
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="44"
-                    height="44"
-                    viewBox="0 0 44 44"
-                    fill="none"
-                    aria-hidden
-                  >
-                    <path
-                      d="M22 43C33.598 43 43 33.598 43 22C43 10.402 33.598 1 22 1C10.402 1 1 10.402 1 22C1 33.598 10.402 43 22 43Z"
-                      fill="#FFF"
-                    />
-                    <path d="M22 30L30 22L22 14" fill="#FFF" />
-                    <path
-                      d="M22 30L30 22M30 22L22 14M30 22L14 22M43 22C43 33.598 33.598 43 22 43C10.402 43 1 33.598 1 22C1 10.402 10.402 1 22 1C33.598 1 43 10.402 43 22Z"
-                      stroke="#000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-
-                <div
-                  className="relative overflow-hidden rounded-[55px] px-[16px] pb-[26px] pt-[34px]"
-                  style={{ background: "var(--Bright-Green, #89F496)", marginTop: "50px" }}
-                >
-                  <div className="flex w-max gap-[18px]">
-                    {featuredList.map((course) => (
-                      <CatalogShowcaseCard
-                        key={course.id}
-                        {...catalogShowcasePropsFromCourse(course)}
-                        className="shrink-0"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="mt-12" aria-label="Popular classes">
-              <h2
-                className="uppercase"
-                style={{
-                  fontFamily: pangeaFont,
-                  lineHeight: "57.6px",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#000",
-                    fontSize: "48px",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                  }}
-                >
-                  POPULAR
-                </span>
-                <span
-                  style={{
-                    color: "#000",
-                    fontSize: "48px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                  }}
-                >
-                  {" "}
-                  CLASSES
-                </span>
-              </h2>
-              <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
-                {mostPlayedList.slice(0, 8).map((course) => (
-                  <CatalogShowcaseCard
-                    key={`popular-${course.id}`}
-                    {...catalogShowcasePropsFromCourse(course)}
-                    className="shrink-0"
-                  />
-                ))}
-              </div>
-            </section>
-
-            <div className="mt-[70px]">
-              <LandingCurrentMostsSection
-                mentors={landingMostsMentors}
-                forceTwoPerRow
-                compactVerticalSpacing
-                contained
+              <LearnFeaturedCoursesPanel
+                slides={featuredList.map((course) => ({
+                  id: course.id,
+                  cardProps: catalogShowcasePropsFromCourse(course),
+                }))}
               />
+            </section>
+
+            <div className="mt-[55px] min-w-0 lg:ml-[48px]">
+              <section aria-label="Popular classes">
+                <LearnPopularClassesSection tiles={popularTiles} />
+              </section>
+
+              <div className="mt-[70px]">
+                <LandingCurrentMostsSection
+                  mentors={landingMostsMentors}
+                  forceTwoPerRow
+                  compactVerticalSpacing
+                  contained
+                />
+              </div>
             </div>
           </main>
         </div>

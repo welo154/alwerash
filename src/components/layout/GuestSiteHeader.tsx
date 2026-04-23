@@ -10,7 +10,7 @@ import { SearchBar } from "./SearchBar";
  */
 export function GuestSiteHeader() {
   return (
-    <nav className="relative z-50 flex w-full flex-nowrap items-center justify-between gap-4 bg-black px-6 py-3 font-sans text-white">
+    <nav className="relative z-50 mb-[50px] flex w-full flex-nowrap items-center justify-between gap-4 bg-black px-6 py-3 font-sans text-white">
       <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-6 sm:gap-8">
         <Link
           href="/"
