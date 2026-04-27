@@ -169,7 +169,7 @@ export async function getContinueLearningCardsForUser(
       titleInstructorLine: titleLine,
       lectureLine: formatLectureLine(meta.type),
       topicTitle: meta.title.toUpperCase(),
-      continueHref: `/learn/${course.id}/lesson/${nextLessonId}`,
+      continueHref: `/courses/${course.id}`,
     });
   }
 

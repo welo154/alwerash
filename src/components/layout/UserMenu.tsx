@@ -46,7 +46,7 @@ function MenuRow({
     <Link
       href={href}
       onClick={onClose}
-      className="flex items-center justify-between gap-3 px-6 py-3.5 text-[15px] font-normal text-black hover:bg-neutral-50"
+      className="flex items-center justify-between gap-3 px-[30px] py-0 text-[18px] font-normal leading-normal text-black hover:bg-transparent"
       style={{ fontFamily: pangeaFont }}
     >
       <span>{children}</span>
@@ -55,8 +55,8 @@ function MenuRow({
   );
 }
 
-function MenuDivider() {
-  return <div className="h-px w-full bg-black/10" aria-hidden />;
+function MenuDivider({ className = "" }: { className?: string }) {
+  return <div className={`h-[2px] w-[277px] bg-black ${className}`.trim()} aria-hidden />;
 }
 
 export function UserMenu({ user, theme = "black" }: UserMenuProps) {
@@ -116,39 +116,49 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
 
       {open && (
         <div
-          className="absolute right-0 top-full z-2500 mt-2 w-[min(100vw-1.5rem,360px)] overflow-hidden rounded-2xl border border-black bg-white shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
+          className="absolute right-0 top-full z-2500 mt-2 h-[638px] w-[277px] overflow-hidden rounded-[50px] border-2 border-black bg-white shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
           style={{ fontFamily: pangeaFont }}
           role="menu"
         >
           {/* Profile header */}
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-black bg-white">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt=""
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-cover"
-                  unoptimized
-                />
-              ) : (
-                <span className="flex h-full w-full items-center justify-center text-sm font-bold text-black">
+          <div className="px-[30px] pt-[25px]">
+            <div className="flex items-center gap-[11px]">
+              <div className="relative h-[49px] w-[49px] shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="49" height="49" viewBox="0 0 50 50" fill="none" className="h-[49px] w-[49px]" aria-hidden>
+                  <path
+                    d="M25 49.5C38.531 49.5 49.5 38.531 49.5 25C49.5 11.469 38.531 0.5 25 0.5C11.469 0.5 0.5 11.469 0.5 25C0.5 38.531 11.469 49.5 25 49.5Z"
+                    fill="white"
+                    stroke="black"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-black">
                   {avatarInitials(user.name, user.email)}
                 </span>
-              )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="m-0 truncate"
+                  style={{ color: "var(--Black, #000)", fontFamily: pangeaFont, fontSize: "18px", fontStyle: "normal", fontWeight: 400, lineHeight: "normal" }}
+                >
+                  {displayName}
+                </p>
+                {displayEmail ? (
+                  <p
+                    className="m-0 mt-[2px] truncate"
+                    style={{ color: "var(--Black, #000)", fontFamily: pangeaFont, fontSize: "16px", fontStyle: "normal", fontWeight: 400, lineHeight: "120%" }}
+                  >
+                    {displayEmail}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[15px] font-bold uppercase leading-tight text-black">{displayName}</p>
-              {displayEmail ? (
-                <p className="mt-1 truncate text-[13px] font-normal leading-tight text-[#73726C]">{displayEmail}</p>
-              ) : null}
-            </div>
+            <div className="mt-[19px] -mx-[30px] h-px w-[277px] bg-black" aria-hidden />
           </div>
 
-          <MenuDivider />
-
-          <nav aria-label="Activity">
+          <nav aria-label="Activity" className="mt-[28px] flex flex-col gap-[20px]">
             <MenuRow href="/course" onClose={() => setOpen(false)}>
               My Learning
             </MenuRow>
@@ -169,9 +179,9 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
             </MenuRow>
           </nav>
 
-          <MenuDivider />
+          <MenuDivider className="mt-[31px] h-px" />
 
-          <nav aria-label="Account">
+          <nav aria-label="Account" className="mt-[8px] flex flex-col gap-[20px]">
             <MenuRow href="/settings" onClose={() => setOpen(false)}>
               Account Settings
             </MenuRow>
@@ -186,9 +196,9 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
             </MenuRow>
           </nav>
 
-          <MenuDivider />
+          <MenuDivider className="mt-[24px]" />
 
-          <div className="pb-3 pt-1">
+          <div className="pb-[30px] pt-[26px]">
             <MenuRow href="/settings" onClose={() => setOpen(false)}>
               Help and Support
             </MenuRow>
@@ -199,7 +209,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
                 setOpen(false);
                 signOut({ callbackUrl: "/?toast=Signed+out" });
               }}
-              className="flex w-full items-center px-6 py-3.5 text-left text-[15px] font-normal text-black hover:bg-neutral-50"
+              className="mt-[20px] flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
               style={{ fontFamily: pangeaFont }}
             >
               Log Out

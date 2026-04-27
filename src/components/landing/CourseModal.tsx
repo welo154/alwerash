@@ -98,7 +98,7 @@ export function CourseModal({ course, open, onClose }: Props) {
           </h2>
 
           <Link
-            href={course.id.startsWith("static-") ? "/course" : `/courses/${course.id}`}
+            href={`/courses/${course.id}`}
             className="w-full rounded-xl py-4 text-4xl font-black text-black shadow-sm transition-colors hover:opacity-95"
             style={{ backgroundColor: "#FFD700" }}
           >
