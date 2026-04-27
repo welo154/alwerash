@@ -149,7 +149,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
           <MenuDivider />
 
           <nav aria-label="Activity">
-            <MenuRow href="/learn" onClose={() => setOpen(false)}>
+            <MenuRow href="/course" onClose={() => setOpen(false)}>
               My Learning
             </MenuRow>
             <MenuRow href="/dashboard" onClose={() => setOpen(false)}>

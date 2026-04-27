@@ -28,8 +28,11 @@ export function LearnPopularClassesSection({
       <LearnPopularClassesHeading onNext={() => swiperRef.current?.slideNext(SLIDE_MS)} />
 
       <div
-        className="mt-8 w-[1125px] max-w-full min-w-0 shrink-0 overflow-x-hidden overflow-y-visible"
-        style={{ minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined }}
+        className="mt-8 w-[1125px] max-w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+        style={{
+          minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined,
+          clipPath: "inset(-200px -200vw -200px 0)",
+        }}
       >
         <Swiper
           dir="ltr"
@@ -50,7 +53,7 @@ export function LearnPopularClassesSection({
           {tiles.map((tile) => (
             <SwiperSlide
               key={tile.id}
-              className="h-auto! shrink-0"
+              className="h-auto! shrink-0 overflow-visible!"
               style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
             >
               <LearnPopularFigmaTile {...tile} />

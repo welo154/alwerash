@@ -75,7 +75,7 @@ export default async function LearnLessonPage({
             className="flex flex-wrap gap-2 text-sm text-slate-600 animate-fade-in-up"
             aria-label="Breadcrumb"
           >
-            <Link href="/learn" className="transition-colors hover:text-indigo-600">
+            <Link href="/course" className="transition-colors hover:text-indigo-600">
               My courses
             </Link>
             <span aria-hidden>/</span>

@@ -22,6 +22,8 @@ export function LandingCurrentMostsSection({
   rightInsetPx,
   contained = false,
   alignToRight = false,
+  mentorCardWidthPx,
+  mentorCardHeightPx,
 }: {
   mentors: LandingMostsMentorCardDto[];
   forceTwoPerRow?: boolean;
@@ -31,6 +33,8 @@ export function LandingCurrentMostsSection({
   contained?: boolean;
   /** When true, heading and mentor grid hug the right edge of the section / viewport breakout. */
   alignToRight?: boolean;
+  mentorCardWidthPx?: number;
+  mentorCardHeightPx?: number;
 }) {
   const gridJustify = alignToRight ? "justify-end" : contained ? "justify-start" : "justify-center";
   const gridMaxWidthClass = !contained && alignToRight ? "ml-auto mr-0" : "mx-auto";
@@ -98,6 +102,8 @@ export function LandingCurrentMostsSection({
               name={m.name}
               profession={m.profession}
               href={`/mentors/${m.id}`}
+              widthPx={mentorCardWidthPx}
+              heightPx={mentorCardHeightPx}
             />
           ))}
         </div>

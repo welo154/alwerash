@@ -12,34 +12,34 @@ const footerColumnLinkClassName =
   "text-[18px] font-normal leading-[161%] tracking-[0] text-black underline-offset-2 transition-opacity hover:opacity-70 whitespace-normal sm:whitespace-nowrap";
 
 const categoriesLinks: { label: string; href: string }[] = [
-  { label: "Illustration courses", href: "/learn" },
-  { label: "Craft courses", href: "/learn" },
-  { label: "Marketing & Business courses", href: "/learn" },
-  { label: "Photography & Video courses", href: "/learn" },
-  { label: "Design courses", href: "/learn" },
-  { label: "3D & Animation courses", href: "/learn" },
-  { label: "Architecture & Spaces courses", href: "/learn" },
-  { label: "Writing courses", href: "/learn" },
-  { label: "Fashion courses", href: "/learn" },
-  { label: "Web & App Design courses", href: "/learn" },
-  { label: "Calligraphy & Typography courses", href: "/learn" },
-  { label: "Music & Audio courses", href: "/learn" },
-  { label: "Culinary courses", href: "/learn" },
-  { label: "Artificial Intelligence courses", href: "/learn" },
-  { label: "Wellness courses", href: "/learn" },
-  { label: "How to become courses", href: "/learn" },
+  { label: "Illustration courses", href: "/course" },
+  { label: "Craft courses", href: "/course" },
+  { label: "Marketing & Business courses", href: "/course" },
+  { label: "Photography & Video courses", href: "/course" },
+  { label: "Design courses", href: "/course" },
+  { label: "3D & Animation courses", href: "/course" },
+  { label: "Architecture & Spaces courses", href: "/course" },
+  { label: "Writing courses", href: "/course" },
+  { label: "Fashion courses", href: "/course" },
+  { label: "Web & App Design courses", href: "/course" },
+  { label: "Calligraphy & Typography courses", href: "/course" },
+  { label: "Music & Audio courses", href: "/course" },
+  { label: "Culinary courses", href: "/course" },
+  { label: "Artificial Intelligence courses", href: "/course" },
+  { label: "Wellness courses", href: "/course" },
+  { label: "How to become courses", href: "/course" },
 ];
 
 const softwareLinks: { label: string; href: string }[] = [
-  { label: "Adobe Photoshop courses", href: "/learn" },
-  { label: "Adobe Illustrator courses", href: "/learn" },
-  { label: "Procreate courses", href: "/learn" },
-  { label: "Adobe After Effects courses", href: "/learn" },
-  { label: "Adobe Lightroom courses", href: "/learn" },
-  { label: "Cinema 4D courses", href: "/learn" },
-  { label: "Adobe InDesign courses", href: "/learn" },
-  { label: "ChatGPT courses", href: "/learn" },
-  { label: "Adobe Premiere courses", href: "/learn" },
+  { label: "Adobe Photoshop courses", href: "/course" },
+  { label: "Adobe Illustrator courses", href: "/course" },
+  { label: "Procreate courses", href: "/course" },
+  { label: "Adobe After Effects courses", href: "/course" },
+  { label: "Adobe Lightroom courses", href: "/course" },
+  { label: "Cinema 4D courses", href: "/course" },
+  { label: "Adobe InDesign courses", href: "/course" },
+  { label: "ChatGPT courses", href: "/course" },
+  { label: "Adobe Premiere courses", href: "/course" },
 ];
 
 const discoverLinks: { label: string; href: string }[] = [
@@ -50,10 +50,11 @@ const discoverLinks: { label: string; href: string }[] = [
 
 const sectionLinks: { label: string; href: string }[] = [
   { label: "About Us", href: "/" },
-  { label: "Courses", href: "/learn" },
-  { label: "Projects", href: "/tracks" },
+  { label: "Courses", href: "/course" },
+  { label: "Library", href: "/library" },
+  { label: "Events", href: "/events" },
   { label: "Creatives", href: "/mentors" },
-  { label: "Schools", href: "/tracks" },
+  { label: "Schools", href: "/library" },
   { label: "Blog", href: "/" },
 ];
 

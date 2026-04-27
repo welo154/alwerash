@@ -28,7 +28,11 @@ export async function GuestLanding() {
         showcaseTagRow2={showcaseTagRow2}
       />
       <LandingEverythingInOneSection />
-      <LandingCurrentMostsSection mentors={landingMostsMentors} />
+      <LandingCurrentMostsSection
+        mentors={landingMostsMentors}
+        mentorCardWidthPx={409}
+        mentorCardHeightPx={424.999}
+      />
       <LandingWhyStudentsLoveSection />
       <LandingFaqSection />
       <LandingGetStartedCtaSection />

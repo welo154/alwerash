@@ -84,7 +84,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
               >
                 <div className="group relative">
                   <Link
-                    href="/learn"
+                    href="/course"
                     className="inline-flex items-center gap-0 text-[18px] font-normal leading-[33px] text-black transition-opacity hover:opacity-75"
                   >
                     Courses
@@ -145,8 +145,8 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                     </div>
                   </div>
                 </div>
-                <Link href="/tracks" className="transition-opacity hover:opacity-75">Library</Link>
-                <Link href="/tracks" className="transition-opacity hover:opacity-75">Events</Link>
+                <Link href="/library" className="transition-opacity hover:opacity-75">Library</Link>
+                <Link href="/events" className="transition-opacity hover:opacity-75">Events</Link>
               </nav>
 
               <div className="flex flex-wrap items-center gap-[15px]">

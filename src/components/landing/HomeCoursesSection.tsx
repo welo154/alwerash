@@ -169,7 +169,7 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                 {fieldList.slice(0, 16).map((title) => (
                   <li key={title}>
                     <Link
-                      href="/learn"
+                      href="/course"
                       className="text-[15px] font-medium text-gray-800 transition-colors hover:text-black cursor-pointer"
                     >
                       {title}

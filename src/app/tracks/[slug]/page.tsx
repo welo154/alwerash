@@ -37,7 +37,7 @@ export default async function TrackPage({
               Home
             </Link>
             <span>/</span>
-            <Link href="/tracks" className="hover:text-blue-600">
+            <Link href="/library" className="hover:text-blue-600">
               Projects
             </Link>
             <span>/</span>

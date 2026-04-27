@@ -251,7 +251,7 @@ export default async function LearnPage() {
               />
             </section>
 
-            <div className="mt-[55px] min-w-0 lg:ml-[48px]">
+            <div className="mt-[55px] min-w-0 lg:ml-[48px] overflow-visible">
               <section aria-label="Popular classes">
                 <LearnPopularClassesSection tiles={popularTiles} />
               </section>

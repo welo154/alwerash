@@ -84,7 +84,7 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
             <nav className="hidden items-center gap-[30px] text-[18px] font-normal leading-normal text-white lg:flex">
               <div className="group relative">
                 <Link
-                  href="/learn"
+                  href="/course"
                   className="inline-flex items-center gap-0 text-[18px] font-normal leading-[33px] text-white hover:opacity-90"
                 >
                   Courses
@@ -140,10 +140,10 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
                   </div>
                 </div>
               </div>
-              <Link href="/tracks" className="text-white hover:opacity-90">
+              <Link href="/library" className="text-white hover:opacity-90">
                 Library
               </Link>
-              <Link href="/tracks" className="text-white hover:opacity-90">
+              <Link href="/events" className="text-white hover:opacity-90">
                 Events
               </Link>
             </nav>
@@ -176,13 +176,13 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
 
           <div className="flex shrink-0 items-center">
             <Link
-              href="/learn"
+              href="/course"
               className="mr-[8px] hidden whitespace-nowrap text-[18px] font-normal leading-normal text-white hover:opacity-90 md:inline"
             >
               My Learning
             </Link>
             <Link
-              href="/learn"
+              href="/course"
               className="mr-[5px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10"
               aria-label="Favorites"
             >

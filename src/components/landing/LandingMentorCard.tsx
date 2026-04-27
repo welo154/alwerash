@@ -20,16 +20,26 @@ export type LandingMentorCardProps = {
   profession: string;
   /** When set, the whole card links to the public mentor profile. */
   href?: string;
+  widthPx?: number;
+  heightPx?: number;
 };
 
-export function LandingMentorCard({ variant, name, profession, href }: LandingMentorCardProps) {
+export function LandingMentorCard({
+  variant,
+  name,
+  profession,
+  href,
+  widthPx = 469,
+  heightPx = 424.999,
+}: LandingMentorCardProps) {
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
 
   const card = (
     <article
-      className="relative mx-auto h-[424.999px] w-[469px] max-w-full shrink-0 overflow-visible"
+      className="relative mx-auto max-w-full shrink-0 overflow-visible"
+      style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
       aria-hidden={href ? true : undefined}
       aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
     >
@@ -141,7 +151,8 @@ export function LandingMentorCard({ variant, name, profession, href }: LandingMe
       <Link
         href={href}
         aria-label={`${name}, ${profession}. ${badge}`}
-        className="mx-auto block h-[424.999px] w-[469px] max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
+        className="mx-auto block max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
+        style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
       >
         {card}
       </Link>

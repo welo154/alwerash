@@ -196,7 +196,7 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
               </div>
               {favoritCourses.length > 0 && (
                 <Link
-                  href="/learn"
+                  href="/course"
                   className="mt-4 inline-block text-sm font-medium text-slate-600 hover:text-slate-900"
                 >
                   View all courses →

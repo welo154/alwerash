@@ -165,7 +165,7 @@ export function LandingWhyStudentsLoveSection() {
 
               <div className="shrink-0">
                 <Link
-                  href="/learn"
+                  href="/course"
                   className="group inline-flex items-end gap-[18px] text-white no-underline transition-opacity hover:opacity-90"
                   style={{
                     color: "#FFF",

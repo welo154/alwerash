@@ -8,7 +8,7 @@ export default function GlobalError({
   reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  reset?: () => void;
 }) {
   useEffect(() => {
     console.error("Global error:", error);
@@ -47,7 +47,13 @@ export default function GlobalError({
             <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
               <button
                 type="button"
-                onClick={() => reset()}
+                onClick={() => {
+                  if (typeof reset === "function") {
+                    reset();
+                    return;
+                  }
+                  window.location.reload();
+                }}
                 style={{
                   padding: "0.5rem 1rem",
                   fontSize: "0.875rem",

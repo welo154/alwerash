@@ -13,18 +13,18 @@ export function GuestSiteHeader() {
     <nav className="relative z-50 mb-[50px] flex w-full flex-nowrap items-center justify-between gap-4 bg-black px-6 py-3 font-sans text-white">
       <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-6 sm:gap-8">
         <Link
-          href="/"
+          href="/home"
           className="font-logo flex shrink-0 items-center gap-0.5 text-2xl font-black italic tracking-tighter text-white transition-colors hover:text-gray-300 focus:outline-none"
         >
           <span>alwerash</span>
           <span className="text-yellow-400">.</span>
         </Link>
         <div className="hidden shrink-0 items-center gap-8 sm:flex" aria-label="Main navigation">
-          <Link href="/learn" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+          <Link href="/course" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
             Courses
           </Link>
-          <Link href="/tracks" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
-            Projects
+          <Link href="/library" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
+            Library
           </Link>
           <Link href="/mentors" className="text-[15px] font-bold text-white transition-colors hover:text-gray-300">
             Mentors

@@ -97,7 +97,7 @@ function ContinueCourseChevronIcon() {
 function ViewAllCoursesLink() {
   return (
     <Link
-      href="/learn"
+      href="/course"
       className="ml-[23px] flex shrink-0 items-center gap-[24px] transition-opacity hover:opacity-80"
     >
       <span
@@ -752,7 +752,11 @@ export function LoggedInHome({
         </section>
 
         <LoggedInLearnNextSection showcaseSlides={trackShowcaseSlides} />
-        <LandingCurrentMostsSection mentors={landingMostsMentors} />
+        <LandingCurrentMostsSection
+          mentors={landingMostsMentors}
+          mentorCardWidthPx={409}
+          mentorCardHeightPx={424.999}
+        />
       </section>
     </div>
   );

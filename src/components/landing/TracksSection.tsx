@@ -63,7 +63,7 @@ export async function TracksSection() {
         </div>
         <div className="mt-14 flex justify-center sm:mt-16">
           <Link
-            href="/tracks"
+            href="/library"
             className="inline-flex items-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 font-semibold text-slate-800 shadow-[var(--shadow-btn)] transition-all duration-200 hover:border-[var(--color-primary)] hover:bg-slate-50 hover:shadow-[var(--shadow-btn-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 active:scale-[0.98]"
           >
             View all projects

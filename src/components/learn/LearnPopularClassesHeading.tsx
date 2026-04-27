@@ -37,7 +37,7 @@ export function LearnPopularClassesHeading({ onNext }: { onNext?: () => void }) 
       </div>
       <button
         type="button"
-        className="absolute left-full top-1/2 z-10 inline-flex h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0"
+        className="absolute left-full top-1/2 z-0 inline-flex h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0"
         aria-label="Next popular classes"
         suppressHydrationWarning
         onClick={() => onNext?.()}
