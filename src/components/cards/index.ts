@@ -1,4 +1,9 @@
-export { CatalogShowcaseCard, type CatalogShowcaseCardProps } from "./CatalogShowcaseCard";
+export {
+  CatalogShowcaseCard,
+  CATALOG_SHOWCASE_CARD_H,
+  CATALOG_SHOWCASE_CARD_W,
+  type CatalogShowcaseCardProps,
+} from "./CatalogShowcaseCard";
 export {
   appendShowcaseToHref,
   catalogShowcasePropsFromCourse,

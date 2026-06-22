@@ -2,8 +2,14 @@
 
 /* Full-bleed sections use w-screen (100vw); with a vertical scrollbar that can widen the layout. */
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
+  background-color: #fff;
+}
+
+body {
+  overflow-x: clip;
+  background-color: #fff;
 }
 
 /* Ensure Tailwind v4 scans app and components (fixes unstyled admin/dynamic routes) */
@@ -69,6 +75,17 @@ label:has(input[type="radio"]) {
 }
 .animate-toast-in {
   animation: toast-in 0.25s ease-out;
+}
+
+.auth-login-field-input::placeholder {
+  color: #73726c;
+  font-family: inherit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 19.6px;
+  opacity: 1;
+  text-align: left;
 }
 
 /* Card hover - lift, depth, no layout shift (transform + shadow only) */
@@ -167,6 +184,34 @@ label:has(input[type="radio"]) {
   padding-bottom: 4px;
   overflow-x: visible;
   overflow-y: visible;
+}
+
+/*
+ * Landing showcase carousel: tall cards must not be clipped by Swiper’s viewport.
+ */
+.landing-showcase-swiper--cards.swiper {
+  padding-bottom: 4px;
+  overflow: visible !important;
+  height: var(--landing-showcase-card-h, 585px) !important;
+}
+
+.landing-showcase-swiper--cards .swiper-wrapper {
+  align-items: stretch;
+}
+
+.landing-showcase-swiper--cards .swiper-slide {
+  width: var(--landing-showcase-card-w, 347px) !important;
+  height: var(--landing-showcase-card-h, 585px) !important;
+}
+
+.landing-showcase-swiper--tags.swiper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.landing-showcase-swiper--tags .swiper-slide {
+  width: auto !important;
+  height: auto !important;
 }
 
 /* Learn more modal: custom scrollbar for bottom section only */

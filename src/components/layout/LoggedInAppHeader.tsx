@@ -6,8 +6,8 @@ import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
 
 export type LoggedInAppHeaderProps = {
-  user: { name?: string | null; email?: string | null; image?: string | null };
-  isAdmin: boolean;
+  user?: { name?: string | null; email?: string | null; image?: string | null } | null;
+  isAdmin?: boolean;
 };
 
 const BAR_GREEN = "#004B3C";
@@ -42,8 +42,13 @@ const SOFTWARE_COURSES = [
 ];
 
 export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
+  const isGuest = !user;
+
   return (
-    <header className="relative z-50 mb-[50px] w-full px-[40px] pt-[35px]" aria-label="Logged in header">
+    <header
+      className="relative z-50 mb-[50px] w-full px-[40px] pt-[35px]"
+      aria-label={isGuest ? "Site header" : "Logged in header"}
+    >
       <div className="relative h-[112px] w-full">
         <svg
           className="absolute inset-0 z-30 h-full w-full"
@@ -61,9 +66,9 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
         </svg>
 
         <Link
-          href="/home"
+          href={isGuest ? "/" : "/home"}
           className="absolute top-[8px] left-0 z-10 block bg-transparent"
-          aria-label="Go to home"
+          aria-label={isGuest ? "Go to landing page" : "Go to home"}
         >
           <Image
             src="/brand/alwerash-logo.png"
@@ -175,6 +180,23 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
           </div>
 
           <div className="flex shrink-0 items-center">
+            {isGuest ? (
+              <>
+                <Link
+                  href="/login"
+                  className="mr-[15px] inline-flex h-[36px] items-center justify-center rounded-md border border-white bg-transparent px-4 text-[18px] font-bold leading-none text-white hover:opacity-90"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex h-[36px] items-center justify-center rounded-md border border-black bg-[#EA83F0] px-4 text-[18px] font-bold leading-none text-[#141413] hover:opacity-90"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <>
             <Link
               href="/course"
               className="mr-[8px] hidden whitespace-nowrap text-[18px] font-normal leading-normal text-white hover:opacity-90 md:inline"
@@ -223,7 +245,9 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
                 />
               </svg>
             </button>
-            <UserMenu user={user} theme="green" />
+            <UserMenu user={user!} theme="green" />
+              </>
+            )}
           </div>
         </div>
       </div>

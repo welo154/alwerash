@@ -37,6 +37,10 @@ const SHOWCASE_PANEL_OVERLAP = SHOWCASE_BOTTOM_H - 207;
 const SHOWCASE_WHITE_TOP = SHOWCASE_TOP_H - SHOWCASE_PANEL_OVERLAP;
 const SHOWCASE_CARD_H = SHOWCASE_WHITE_TOP + SHOWCASE_BOTTOM_H;
 
+/** Fixed catalog tile size — keep carousels in sync with CatalogShowcaseCard layout. */
+export const CATALOG_SHOWCASE_CARD_W = 347;
+export const CATALOG_SHOWCASE_CARD_H = SHOWCASE_CARD_H;
+
 export function ViewMoreCircleGlyph({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43 43" fill="none" className={className} aria-hidden>

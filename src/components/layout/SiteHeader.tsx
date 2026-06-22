@@ -12,15 +12,14 @@ import { LoggedInAppHeader } from "./LoggedInAppHeader";
  *
  * Signed-in home (`/home`): LoggedInAppHeader only (separate route from `/`).
  *
- * Other routes: GuestSiteHeader (black) vs LoggedInAppHeader when signed in.
+ * Other routes: green app header (guest Log in / Sign up, or signed-in user menu).
  */
 export function SiteHeader() {
   const { data: session, status } = useSession();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const isAdmin = Boolean((session?.user as { roles?: string[] } | undefined)?.roles?.includes("ADMIN"));
 
   if (pathname === "/") {
-    if (status === "loading") return null;
     return null;
   }
 
@@ -43,7 +42,7 @@ export function SiteHeader() {
   if (status === "loading") {
     return (
       <div
-        className="sticky top-0 z-50 mb-[50px] h-[80px] w-full animate-pulse bg-neutral-100"
+        className="sticky top-0 z-50 mb-[50px] h-[147px] w-full animate-pulse bg-neutral-100"
         aria-busy
         aria-label="Loading header"
       />
