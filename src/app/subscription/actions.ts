@@ -2,32 +2,25 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { getSubscriptionPlan, isSubscriptionPlanId } from "@/lib/subscription-plans";
 import { createFreeEntitlement } from "@/server/subscription/subscribe.service";
-import { BUNDLES } from "@/lib/subscription-plans";
 
-const VALID_BUNDLE_IDS = new Set(BUNDLES.map((b) => b.id));
-
-/**
- * Subscribe the current user to a bundle (no payment for now).
- * Redirects to login if not authenticated, then to /learn after success.
- * Called from form with field bundleId.
- */
-export async function subscribeWithBundle(formData: FormData) {
-  const bundleId = String(formData.get("bundleId") ?? "").trim();
+export async function chooseSubscriptionPlan(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/login?next=" + encodeURIComponent("/subscription"));
   }
 
-  if (!VALID_BUNDLE_IDS.has(bundleId)) {
+  const planId = String(formData.get("planId") ?? "");
+  if (!isSubscriptionPlanId(planId)) {
     redirect("/subscription?error=invalid");
   }
 
-  const bundle = BUNDLES.find((b) => b.id === bundleId);
-  if (!bundle) {
+  const plan = getSubscriptionPlan(planId);
+  if (!plan) {
     redirect("/subscription?error=invalid");
   }
 
-  await createFreeEntitlement(session.user.id, bundle.durationMonths);
-  redirect("/learn?subscribed=1&toast=Subscribed+successfully");
+  await createFreeEntitlement(session.user.id, plan.durationMonths);
+  redirect("/home?toast=Subscribed");
 }

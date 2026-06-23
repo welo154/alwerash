@@ -6,6 +6,9 @@ import { useId } from "react";
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
+/** Mentor portrait for all landing mentor cards (Figma subtract shape). */
+const MENTOR_CARD_PHOTO = "/landing/mentor-card-photo.png";
+
 /** Card silhouette — viewBox 409×425, rendered at 469×424.999px (non-uniform scale). */
 const CARD_PATH =
   "M354 0C384.376 2.09384e-06 409 24.6244 409 55V370C409 400.375 384.376 425 354 425H55C24.6245 425 0.000205489 400.375 0 370V122C0 94.3858 22.3858 72 50 72H147.208C161.567 72 173.208 60.3594 173.208 46C173.208 20.5949 193.803 0 219.208 0H354Z";
@@ -35,28 +38,54 @@ export function LandingMentorCard({
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
+  const clipId = `mentor-card-clip-${rawId}`;
 
   const card = (
     <article
-      className="relative mx-auto max-w-full shrink-0 overflow-visible"
+      className="relative mx-auto max-w-full shrink-0 overflow-hidden"
       style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
       aria-hidden={href ? true : undefined}
       aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
     >
       <svg
-        className="absolute inset-0 h-full w-full overflow-visible"
+        className="absolute inset-0 h-full w-full overflow-hidden"
         viewBox="0 0 409 425"
         preserveAspectRatio="none"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        overflow="visible"
       >
         <defs>
+          <clipPath id={clipId}>
+            <path d={CARD_PATH} />
+          </clipPath>
           <mask id={maskId} fill="white">
             <path d={CARD_PATH} fill="white" />
           </mask>
         </defs>
-        <path d={CARD_PATH} fill="var(--White, #FFF)" />
+
+        <g clipPath={`url(#${clipId})`}>
+          <foreignObject x="0" y="0" width="409" height="425">
+            <div
+              // eslint-disable-next-line react/no-unknown-property
+              xmlns="http://www.w3.org/1999/xhtml"
+              style={{ width: "100%", height: "100%", overflow: "hidden" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={MENTOR_CARD_PHOTO}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center top",
+                  display: "block",
+                }}
+              />
+            </div>
+          </foreignObject>
+        </g>
+
         <path d={CARD_STROKE_MASK_PATH} fill="#000" mask={`url(#${maskId})`} />
 
         <foreignObject x="24" y="10" width="131" height="52">
@@ -97,7 +126,7 @@ export function LandingMentorCard({
           >
             <div
               style={{
-                color: "var(--Black, #000)",
+                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -111,7 +140,7 @@ export function LandingMentorCard({
             </div>
             <div
               style={{
-                color: "var(--Black, #000)",
+                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "32px",
                 fontStyle: "normal",
@@ -126,7 +155,7 @@ export function LandingMentorCard({
             </div>
             <div
               style={{
-                color: "var(--Black, #000)",
+                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -151,7 +180,7 @@ export function LandingMentorCard({
       <Link
         href={href}
         aria-label={`${name}, ${profession}. ${badge}`}
-        className="mx-auto block max-w-full shrink-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
+        className="mx-auto block max-w-full shrink-0 overflow-hidden text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
         style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
       >
         {card}

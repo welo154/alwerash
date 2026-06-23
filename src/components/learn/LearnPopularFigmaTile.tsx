@@ -67,9 +67,59 @@ const pangeaVar = localFont({
 });
 
 const pangeaFont = `${pangeaVar.style.fontFamily}, var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif`;
-const GROUP_11_IMG = "https://www.figma.com/api/mcp/asset/762b70e8-a0f8-4813-9b3c-0c0eeebfd336";
-const GROUP_24_IMG = "https://www.figma.com/api/mcp/asset/bb2e1568-00b6-4764-951f-c2634aac8282";
-const GROUP_25_IMG = "https://www.figma.com/api/mcp/asset/e7a13ecd-06ce-4a37-93fd-84591f84b127";
+
+const LEARNER_AVATAR_COLORS = ["#FFFFFF", "#89F496", "#66E0F2"] as const;
+const LEARNER_AVATAR_INITIALS = ["AM", "RK", "YT"] as const;
+
+function LearnPopularLearnerAvatar({
+  fill,
+  initials,
+  size = 41,
+  className,
+}: {
+  fill: string;
+  initials: string;
+  size?: number;
+  className?: string;
+}) {
+  const textFill = "#000000";
+  const fontSize = Math.round(size * 0.34);
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 41 41"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M20.5 40.5C31.5457 40.5 40.5 31.5457 40.5 20.5C40.5 9.4543 31.5457 0.5 20.5 0.5C9.4543 0.5 0.5 9.4543 0.5 20.5C0.5 31.5457 9.4543 40.5 20.5 40.5Z"
+        fill={fill}
+        stroke="black"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x="20.5"
+        y="21"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill={textFill}
+        style={{
+          fontFamily: pangeaFont,
+          fontSize,
+          fontWeight: 500,
+          letterSpacing: "-0.02em",
+        }}
+      >
+        {initials}
+      </text>
+    </svg>
+  );
+}
 
 /** Figma `167:1726` — Rectangle 53: 346×377, #e9e9e9, border, rounded-[50px]. */
 const GRAY_H = 377;
@@ -91,8 +141,13 @@ const GAP_TAG_TO_START = 19;
 const TAG_PRIMARY_H = 35;
 const TAG_PILL_MAX_W = LEARN_POPULAR_FIGMA_TILE_W - 38.5;
 
+const POPULAR_CLASS_COVER_IMAGE = "/learn/popular-class-cover.png";
+/** Between center and top so faces/subjects stay in the visible band above the white panel. */
+const POPULAR_COVER_OBJECT_POSITION = "center 38%";
+
 export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: string }) {
-  const { href, title, authorLabel, tagPrimary, className = "" } = props;
+  const { href, title, authorLabel, tagPrimary, coverImageSrc, className = "" } = props;
+  const grayCoverSrc = coverImageSrc ?? POPULAR_CLASS_COVER_IMAGE;
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
   const bottomScrollRef = useRef<HTMLDivElement | null>(null);
@@ -224,9 +279,17 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
           aria-hidden
         >
           <div
-            className="absolute left-0 top-0 z-10 rounded-[50px] border border-black bg-[#E9E9E9]"
+            className="absolute left-0 top-0 z-10 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]"
             style={{ width: "608px", height: "444px" }}
-          />
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={grayCoverSrc}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ objectPosition: POPULAR_COVER_OBJECT_POSITION }}
+            />
+          </div>
           <div
             className="absolute left-0 top-[195px] z-20 rounded-[50px] border border-black bg-[#89F496]"
             style={{ width: "608px", height: "372px" }}
@@ -262,20 +325,23 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
                     style={{ fontFamily: pangeaFont }}
                   />
 
-                  <img
-                    src={GROUP_11_IMG}
-                    alt=""
-                    className="absolute left-0 top-0 h-[40px] w-[40px]"
+                  <LearnPopularLearnerAvatar
+                    fill={LEARNER_AVATAR_COLORS[0]}
+                    initials={LEARNER_AVATAR_INITIALS[0]}
+                    size={40}
+                    className="absolute left-0 top-0"
                   />
-                  <img
-                    src={GROUP_24_IMG}
-                    alt=""
-                    className="absolute left-[15px] top-0 h-[40px] w-[40px]"
+                  <LearnPopularLearnerAvatar
+                    fill={LEARNER_AVATAR_COLORS[1]}
+                    initials={LEARNER_AVATAR_INITIALS[1]}
+                    size={40}
+                    className="absolute left-[15px] top-0"
                   />
-                  <img
-                    src={GROUP_25_IMG}
-                    alt=""
-                    className="absolute left-[31px] top-0 h-[40px] w-[40px]"
+                  <LearnPopularLearnerAvatar
+                    fill={LEARNER_AVATAR_COLORS[2]}
+                    initials={LEARNER_AVATAR_INITIALS[2]}
+                    size={40}
+                    className="absolute left-[31px] top-0"
                   />
 
                   <span
@@ -457,10 +523,18 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
       ) : null}
 
       <div
-        className={`shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
+        className={`relative shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
         style={{ width: LEARN_POPULAR_FIGMA_TILE_W, height: GRAY_H }}
         aria-hidden
-      />
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={grayCoverSrc}
+          alt=""
+          className="h-full w-full object-cover"
+          style={{ objectPosition: POPULAR_COVER_OBJECT_POSITION }}
+        />
+      </div>
       <div
         className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black bg-white pl-[37px] pr-[37px]${isStartHovered ? " opacity-0" : ""}`}
         style={{
@@ -1010,9 +1084,24 @@ This course will take you from having little knowledge in digital painting and d
 
                           <div className="mt-[37px] flex items-center">
                             <div className="relative h-[54.258px] w-[86px]">
-                              <img src={GROUP_11_IMG} alt="" className="absolute left-0 top-0 h-[54.258px] w-[54.258px]" />
-                              <img src={GROUP_24_IMG} alt="" className="absolute left-[16px] top-0 h-[54.258px] w-[54.258px]" />
-                              <img src={GROUP_25_IMG} alt="" className="absolute left-[32px] top-0 h-[54.258px] w-[54.258px]" />
+                              <LearnPopularLearnerAvatar
+                                fill={LEARNER_AVATAR_COLORS[0]}
+                                initials={LEARNER_AVATAR_INITIALS[0]}
+                                size={54.258}
+                                className="absolute left-0 top-0"
+                              />
+                              <LearnPopularLearnerAvatar
+                                fill={LEARNER_AVATAR_COLORS[1]}
+                                initials={LEARNER_AVATAR_INITIALS[1]}
+                                size={54.258}
+                                className="absolute left-[16px] top-0"
+                              />
+                              <LearnPopularLearnerAvatar
+                                fill={LEARNER_AVATAR_COLORS[2]}
+                                initials={LEARNER_AVATAR_INITIALS[2]}
+                                size={54.258}
+                                className="absolute left-[32px] top-0"
+                              />
                             </div>
                             <span
                               className="ml-[35px] whitespace-nowrap"

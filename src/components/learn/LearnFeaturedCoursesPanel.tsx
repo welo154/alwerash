@@ -11,6 +11,11 @@ const SLIDE_MS = 400;
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
+const FEATURED_COURSE_IMAGES = [
+  "/learn/featured-course-top.png",
+  "/learn/featured-course-bottom.png",
+] as const;
+
 export type LearnFeaturedSlide = { id: string; cardProps: CatalogShowcaseCardProps };
 
 export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSlide[] }) {
@@ -57,9 +62,13 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
                 swiperRef.current = s;
               }}
             >
-              {slides.map(({ id, cardProps }) => (
+              {slides.map(({ id, cardProps }, index) => (
                 <SwiperSlide key={id} className="w-auto!">
-                  <CatalogShowcaseCard {...cardProps} className="shrink-0" />
+                  <CatalogShowcaseCard
+                    {...cardProps}
+                    bottomImageSrc={FEATURED_COURSE_IMAGES[index % FEATURED_COURSE_IMAGES.length]}
+                    className="shrink-0"
+                  />
                 </SwiperSlide>
               ))}
             </Swiper>

@@ -6,15 +6,16 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 
-type RelatedClassesSectionProps = {
-  fontFamily: string;
-};
-
-type CourseStackCardProps = {
+export type RelatedCourseCard = {
   titleInstructorLine: string;
   lectureLine: string;
   topicTitle: string;
   continueHref: string;
+};
+
+type RelatedClassesSectionProps = {
+  fontFamily: string;
+  cards?: RelatedCourseCard[];
 };
 
 const COURSE_CARD_STACK_OVERLAP_PX = 281 - 69;
@@ -38,7 +39,7 @@ function ContinueCourseChevronIcon() {
   );
 }
 
-function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continueHref, fontFamily }: CourseStackCardProps & { fontFamily: string }) {
+function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continueHref, fontFamily }: RelatedCourseCard & { fontFamily: string }) {
   const cardBase = "box-border w-full max-w-[347px] rounded-[50px] border border-[var(--Black,#000)]";
 
   return (
@@ -100,18 +101,12 @@ function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continu
   );
 }
 
-export function RelatedClassesSection({ fontFamily }: RelatedClassesSectionProps) {
+export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClassesSectionProps) {
   const swiperRef = useRef<SwiperType | null>(null);
   const [atBeginning, setAtBeginning] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
-  const cards: CourseStackCardProps[] = [
-    { titleInstructorLine: "Illustration Basics -\nAhmad Khaled", lectureLine: "LECTURE - 10mins", topicTitle: "BRUSH TECHNIQUES", continueHref: "/course" },
-    { titleInstructorLine: "Color in Practice -\nMona Samir", lectureLine: "LECTURE - 8mins", topicTitle: "COLOR HARMONY", continueHref: "/course" },
-    { titleInstructorLine: "Character Design -\nYoussef Adel", lectureLine: "LECTURE - 12mins", topicTitle: "SILHOUETTE FLOW", continueHref: "/course" },
-    { titleInstructorLine: "Digital Sketching -\nNouran Ali", lectureLine: "READING - 5mins", topicTitle: "LINE CONFIDENCE", continueHref: "/course" },
-    { titleInstructorLine: "Concept Art Intro -\nKarim Tarek", lectureLine: "LECTURE - 11mins", topicTitle: "MOOD BOARDS", continueHref: "/course" },
-  ];
+  if (cards.length === 0) return null;
 
   return (
     <section className="mt-[70px] w-full">
@@ -166,8 +161,8 @@ export function RelatedClassesSection({ fontFamily }: RelatedClassesSectionProps
             setAtEnd(swiper.isEnd);
           }}
         >
-          {cards.map((card, idx) => (
-            <SwiperSlide key={`related-card-${idx}`} className="w-[347px]!">
+          {cards.map((card) => (
+            <SwiperSlide key={card.continueHref} className="w-[347px]!">
               <CourseStackCard {...card} fontFamily={fontFamily} />
             </SwiperSlide>
           ))}

@@ -242,6 +242,7 @@ export function CatalogShowcaseCard({
   viewMoreHref,
   onViewMore,
   className = "",
+  bottomImageSrc,
 }: CatalogShowcaseCardProps) {
   const [viewMoreHovered, setViewMoreHovered] = useState(false);
   const [hoverOverlayPosition, setHoverOverlayPosition] = useState<{ left: number; top: number } | null>(null);
@@ -335,16 +336,21 @@ export function CatalogShowcaseCard({
         {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}
       >
         <div
-          className="absolute inset-x-0 top-0 z-1 rounded-[50px] border border-black bg-[#E9E9E9]"
+          className={`absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black ${bottomImageSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
           style={{ height: SHOWCASE_TOP_H }}
           aria-hidden
         />
 
         <div
-          className="absolute inset-x-0 z-2 rounded-[50px] border border-black bg-white"
+          className="absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black bg-white"
           style={{ top: SHOWCASE_WHITE_TOP, height: SHOWCASE_BOTTOM_H }}
           aria-hidden
-        />
+        >
+          {bottomImageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={bottomImageSrc} alt="" className="h-full w-full object-cover object-center" />
+          ) : null}
+        </div>
 
         <div className="pointer-events-none absolute inset-0 z-3">
           <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between pl-[38px] pr-[30px] pt-[28px]">

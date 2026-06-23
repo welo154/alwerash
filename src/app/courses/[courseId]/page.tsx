@@ -1,6 +1,16 @@
 import localFont from "next/font/local";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { CourseContentAccordion } from "./CourseContentAccordion";
 import { RelatedClassesSection } from "./RelatedClassesSection";
+import {
+  formatCourseDurationLabel,
+  formatCourseRatingLabel,
+  formatUpdatedMonthYear,
+  initialsFromName,
+} from "./course-page-helpers";
+import { publicGetCourseById, publicGetSimilarCourses, publicListFeaturedCourses } from "@/server/content/public.service";
+import { AppError } from "@/server/lib/errors";
 
 const pangeaVar = localFont({
   src: "../../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
@@ -9,16 +19,43 @@ const pangeaVar = localFont({
   style: "normal",
 });
 
-const GROUP_11_IMG = "https://www.figma.com/api/mcp/asset/762b70e8-a0f8-4813-9b3c-0c0eeebfd336";
-const GROUP_24_IMG = "https://www.figma.com/api/mcp/asset/bb2e1568-00b6-4764-951f-c2634aac8282";
-const GROUP_25_IMG = "https://www.figma.com/api/mcp/asset/e7a13ecd-06ce-4a37-93fd-84591f84b127";
-
 export default async function CoursePage({
-  params: _params,
+  params,
 }: {
   params: Promise<{ courseId: string }>;
 }) {
-  void _params;
+  const { courseId } = await params;
+
+  let course;
+  try {
+    course = await publicGetCourseById(courseId);
+  } catch (error) {
+    if (error instanceof AppError && error.code === "NOT_FOUND") notFound();
+    throw error;
+  }
+
+  const lessonCount = course.modules.reduce((acc, module) => acc + module.lessons.length, 0);
+  const instructorName = course.instructorName?.trim() || "Instructor";
+  const instructorRole = course.track?.title?.trim() || "Course instructor";
+  const instructorInitials = initialsFromName(instructorName);
+  const durationLabel = formatCourseDurationLabel(course.totalDurationMinutes, lessonCount);
+  const ratingLabel = formatCourseRatingLabel(course.rating);
+  const aboutText =
+    course.summary?.trim() ||
+    `Learn ${course.title} with step-by-step lessons designed to build practical skills from the ground up.`;
+
+  const relatedCourses =
+    course.track?.slug != null
+      ? await publicGetSimilarCourses(course.id, course.track.slug, 8)
+      : (await publicListFeaturedCourses(9)).filter((item) => item.id !== course.id).slice(0, 8);
+
+  const relatedCards = relatedCourses.map((related) => ({
+    titleInstructorLine: `${related.title} -\n${related.instructorName?.trim() || "Instructor"}`,
+    lectureLine: `LECTURE - ${formatCourseDurationLabel(related.totalDurationMinutes, related.lessonCount)}`,
+    topicTitle: (related.track?.title ?? "Course").toUpperCase(),
+    continueHref: `/courses/${related.id}`,
+  }));
+
   return (
     <main className="mx-auto max-w-[1600px] pb-[80px] pl-[55px] pr-[60px] pt-[20px]">
       <div className="flex items-start gap-[62px]">
@@ -35,33 +72,73 @@ export default async function CoursePage({
               lineHeight: "normal",
             }}
           >
-            ILLUSTRATION 101 - How to Master Digital and Analog Illustration Techniques
+            {course.title}
           </h1>
 
           <div
-            className="mt-[39px] flex items-center justify-center rounded-[50px] border-2 border-black bg-[#E9E9E9]"
+            className="relative mt-[39px] overflow-hidden rounded-[50px] border-2 border-black bg-[#E9E9E9]"
             style={{ width: "843px", height: "557px" }}
-            aria-label="Course intro video placeholder"
+            aria-label="Course preview"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 122 122" fill="none" aria-hidden>
-              <path
-                d="M61 121C94.1371 121 121 94.1371 121 61C121 27.8629 94.1371 1 61 1C27.8629 1 1 27.8629 1 61C1 94.1371 27.8629 121 61 121Z"
-                stroke="var(--Black, #000)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {course.coverImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={course.coverImage}
+                alt=""
+                className="h-full w-full object-cover"
+                style={{ objectPosition: "center 38%" }}
               />
-              <path
-                d="M49 37L85 61L49 85V37Z"
-                stroke="var(--Black, #000)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            ) : null}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {course.introVideoMuxPlaybackId ? (
+                <Link
+                  href={`/learn/${course.id}`}
+                  className="flex items-center justify-center transition-opacity hover:opacity-80"
+                  aria-label={`Start learning ${course.title}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 122 122" fill="none" aria-hidden>
+                    <path
+                      d="M61 121C94.1371 121 121 94.1371 121 61C121 27.8629 94.1371 1 61 1C27.8629 1 1 27.8629 1 61C1 94.1371 27.8629 121 61 121Z"
+                      stroke="var(--Black, #000)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M49 37L85 61L49 85V37Z"
+                      stroke="var(--Black, #000)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Link>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 122 122" fill="none" aria-hidden>
+                  <path
+                    d="M61 121C94.1371 121 121 94.1371 121 61C121 27.8629 94.1371 1 61 1C27.8629 1 1 27.8629 1 61C1 94.1371 27.8629 121 61 121Z"
+                    stroke="var(--Black, #000)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M49 37L85 61L49 85V37Z"
+                    stroke="var(--Black, #000)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </div>
           </div>
 
-          <CourseContentAccordion fontFamily={pangeaVar.style.fontFamily} />
+          <CourseContentAccordion
+            fontFamily={pangeaVar.style.fontFamily}
+            modules={course.modules}
+            totalDurationMinutes={course.totalDurationMinutes}
+          />
         </section>
 
         <div className="w-[413px] shrink-0">
@@ -86,15 +163,15 @@ export default async function CoursePage({
                     className="absolute inset-0 flex items-center justify-center"
                     style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 600 }}
                   >
-                    AK
+                    {instructorInitials}
                   </span>
                 </div>
                 <div>
                   <p className="m-0" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 600 }}>
-                    AHMAD KHALED
+                    {instructorName.toUpperCase()}
                   </p>
                   <p className="m-0 opacity-60" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400 }}>
-                    Illustrator
+                    {instructorRole}
                   </p>
                 </div>
               </div>
@@ -122,7 +199,7 @@ export default async function CoursePage({
                     />
                   </svg>
                   <span className="ml-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
-                    98%
+                    {ratingLabel}
                   </span>
                 </span>
               </div>
@@ -139,16 +216,54 @@ export default async function CoursePage({
                     />
                   </svg>
                   <span className="ml-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
-                    35mins
+                    {durationLabel}
                   </span>
                 </span>
               </div>
 
               <div className="mt-[30px] flex items-center">
                 <div className="relative h-[54.258px] w-[86px]">
-                  <img src={GROUP_11_IMG} alt="" className="absolute left-0 top-0 h-[54.258px] w-[54.258px]" />
-                  <img src={GROUP_24_IMG} alt="" className="absolute left-[16px] top-0 h-[54.258px] w-[54.258px]" />
-                  <img src={GROUP_25_IMG} alt="" className="absolute left-[32px] top-0 h-[54.258px] w-[54.258px]" />
+                  {(
+                    [
+                      { initials: "AM", fill: "#FFFFFF", left: 0 },
+                      { initials: "RK", fill: "#89F496", left: 16 },
+                      { initials: "YT", fill: "#66E0F2", left: 32 },
+                    ] as const
+                  ).map((avatar) => (
+                    <svg
+                      key={avatar.initials}
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={54.258}
+                      height={54.258}
+                      viewBox="0 0 41 41"
+                      fill="none"
+                      className="absolute top-0"
+                      style={{ left: avatar.left }}
+                      aria-hidden
+                    >
+                      <path
+                        d="M20.5 40.5C31.5457 40.5 40.5 31.5457 40.5 20.5C40.5 9.4543 31.5457 0.5 20.5 0.5C9.4543 0.5 0.5 9.4543 0.5 20.5C0.5 31.5457 9.4543 40.5 20.5 40.5Z"
+                        fill={avatar.fill}
+                        stroke="black"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <text
+                        x="20.5"
+                        y="21"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#000"
+                        style={{
+                          fontFamily: pangeaVar.style.fontFamily,
+                          fontSize: 14,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {avatar.initials}
+                      </text>
+                    </svg>
+                  ))}
                 </div>
                 <p className="mb-0 ml-[20px] mt-0" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400 }}>
                   Join <span style={{ fontStyle: "italic" }}>+24</span> Learners
@@ -161,10 +276,11 @@ export default async function CoursePage({
                 Skills you’ll learn
               </h4>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold">DIGITAL ILLUSTRATION</span>
-                <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold">ANALOG ILLUSTRATION</span>
-                <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold">BRUSHES</span>
-                <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold">PROCREATE</span>
+                {course.track?.title ? (
+                  <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold uppercase">
+                    {course.track.title}
+                  </span>
+                ) : null}
               </div>
               <p
                 className="mb-0 mt-[20px]"
@@ -178,7 +294,7 @@ export default async function CoursePage({
                   opacity: 0.6,
                 }}
               >
-                Last Updated 3/2026
+                {formatUpdatedMonthYear(course.updatedAt)}
               </p>
             </div>
           </aside>
@@ -211,11 +327,7 @@ export default async function CoursePage({
                 lineHeight: "normal",
               }}
             >
-              {`The Ultimate Digital Painting Course will show you how to create advanced art that will stand up as professional work. This course will enhance or give you skills in the world of Digital Painting - or your money back.
-
-The course is your track to obtaining digital drawing & painting skills like you always knew you should have! Whether for your own projects or to paint for clients.
-
-This course will take you from having little knowledge in digital painting and drawing to creating advanced art and having a deep understanding of drawing fundamentals.`}
+              {aboutText}
             </p>
             <h3
               className="m-0 mt-[30px]"
@@ -287,7 +399,7 @@ This course will take you from having little knowledge in digital painting and d
                     lineHeight: "normal",
                   }}
                 >
-                  AHMAD KHALED
+                  {instructorName.toUpperCase()}
                 </p>
                 <p
                   className="m-0 opacity-60"
@@ -300,7 +412,7 @@ This course will take you from having little knowledge in digital painting and d
                     lineHeight: "normal",
                   }}
                 >
-                  Illustrator
+                  {instructorRole}
                 </p>
 
                 <div className="mt-[16px] flex items-center">
@@ -391,7 +503,7 @@ This course will take you from having little knowledge in digital painting and d
                 lineHeight: "normal",
               }}
             >
-              {`"I'm a working professional creative in the game industry. I work as a concept artist and freelance illustrator. I've worked in-house at an animation studio but currently, work from home. As an instructor, I strive to provide the best learning experience possible for my students by creating clear content and maintaining a personable demeanor."`}
+              {aboutText}
             </p>
           </section>
         </div>
@@ -541,7 +653,7 @@ This course will take you from having little knowledge in digital painting and d
         </div>
       </div>
 
-      <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} />
+      <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />
     </main>
   );
 }

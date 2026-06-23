@@ -5,8 +5,10 @@ import {
   type CatalogShowcaseCardProps,
   type LandingShowcaseSlide,
 } from "@/components/cards/catalog-showcase-map";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import { staticCourseCoverForTitle } from "@/lib/static-course-covers";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 
 function muxThumbnailUrl(playbackId: string): string {
@@ -19,27 +21,82 @@ const DEFAULT_COURSE_IMAGE =
 
 function effectiveCoverImage(
   coverImage: string | null,
-  introVideoMuxPlaybackId: string | null | undefined
+  introVideoMuxPlaybackId: string | null | undefined,
+  title?: string
 ): string | null {
+  if (title) {
+    const staticCover = staticCourseCoverForTitle(title);
+    if (staticCover) return staticCover;
+  }
   if (coverImage?.trim()) return coverImage;
   if (introVideoMuxPlaybackId?.trim()) return muxThumbnailUrl(introVideoMuxPlaybackId);
   return DEFAULT_COURSE_IMAGE;
 }
 
-export async function publicListTracks() {
-  return prisma.track.findMany({
-    where: { published: true },
-    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      coverImage: true,
-      order: true,
-      school: { select: { id: true, title: true, slug: true } },
-    },
-  });
+function isPrismaMissingColumnError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  const metaMsg =
+    e instanceof Prisma.PrismaClientKnownRequestError
+      ? String((e.meta as { message?: string })?.message ?? "")
+      : "";
+  return msg.includes("does not exist") || metaMsg.includes("does not exist");
+}
+
+type PublicTrackListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  coverImage: string | null;
+  order: number;
+  school: { id: string; title: string; slug: string } | null;
+};
+
+async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
+  const rows = await prisma.$queryRawUnsafe<
+    {
+      id: string;
+      title: string;
+      slug: string;
+      description: string | null;
+      order: number;
+    }[]
+  >(
+    `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    description: row.description,
+    coverImage: null,
+    order: row.order,
+    school: null,
+  }));
+}
+
+export async function publicListTracks(): Promise<PublicTrackListItem[]> {
+  try {
+    return await prisma.track.findMany({
+      where: { published: true },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        coverImage: true,
+        order: true,
+        school: { select: { id: true, title: true, slug: true } },
+      },
+    });
+  } catch (e) {
+    if (isPrismaMissingColumnError(e)) {
+      return publicListTracksRawSafe();
+    }
+    throw e;
+  }
 }
 
 /**
@@ -135,7 +192,29 @@ export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTr
       showcaseTagRow1,
       showcaseTagRow2,
     };
-  } catch {
+  } catch (e) {
+    if (isPrismaMissingColumnError(e)) {
+      const rows = await publicListTracksRawSafe();
+      const titles = rows.map((r) => r.title);
+      const [showcaseTagRow1, showcaseTagRow2] = splitTitlesIntoTwoTagRows(titles);
+      return {
+        heroTracks: rows.map((t) => ({ id: t.id, title: t.title, slug: t.slug })),
+        showcaseSlides: rows.map((t) => ({
+          slug: t.slug,
+          cardProps: {
+            ...catalogShowcasePropsFromTrackAggregate({
+              title: t.title,
+              slug: t.slug,
+              schoolTitle: undefined,
+              courses: [],
+            }),
+            showcaseSlug: t.slug,
+          },
+        })),
+        showcaseTagRow1,
+        showcaseTagRow2,
+      };
+    }
     return { heroTracks: [], showcaseSlides: [], showcaseTagRow1: [], showcaseTagRow2: [] };
   }
 }
@@ -172,7 +251,7 @@ export async function publicGetTrackBySlug(slug: string) {
     ...track,
     courses: track.courses.map(({ modules, introVideoMuxPlaybackId, coverImage, ...c }) => ({
       ...c,
-      coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId),
+      coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId, c.title),
       lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
     })),
   };
@@ -189,6 +268,10 @@ export async function publicGetCourseById(courseId: string) {
       instructorName: true,
       instructorImage: true,
       introVideoMuxPlaybackId: true,
+      totalDurationMinutes: true,
+      rating: true,
+      updatedAt: true,
+      trackId: true,
       published: true,
       track: { select: { published: true, slug: true, title: true } },
       modules: {
@@ -210,7 +293,14 @@ export async function publicGetCourseById(courseId: string) {
   if (!course || !course.published) throw new AppError("NOT_FOUND", 404, "Course not found");
   if (course.track && !course.track.published) throw new AppError("NOT_FOUND", 404, "Course not found");
 
-  return course;
+  return {
+    ...course,
+    coverImage: effectiveCoverImage(
+      course.coverImage,
+      course.introVideoMuxPlaybackId,
+      course.title
+    ),
+  };
 }
 
 /** Distinct users who have progress in any lesson of the given courses. */
@@ -266,7 +356,7 @@ function mapCourseToCard(
     id: c.id,
     title: c.title,
     summary: c.summary,
-    coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId),
+    coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId, c.title),
     instructorName: c.instructorName,
     instructorImage: c.instructorImage,
     track: c.track,

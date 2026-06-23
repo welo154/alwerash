@@ -9,6 +9,8 @@ export type CatalogShowcaseCardProps = {
   viewMoreHref?: string;
   onViewMore?: () => void;
   className?: string;
+  /** Photo for the lower stacked panel only (featured course cards). */
+  bottomImageSrc?: string;
 };
 
 /** One carousel tile on the landing catalog section (built on the server, rendered in a client section). */

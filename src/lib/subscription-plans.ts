@@ -1,63 +1,47 @@
-/**
- * Subscription bundles - access to ALL courses.
- * Duration determines how long the user has access.
- * No single-course purchase - only bundles.
- */
-export type BundleDuration = "1month" | "6months" | "12months";
+export type SubscriptionPlanId = "studio" | "starter" | "pro";
 
-export interface Bundle {
-  id: string;
+export interface SubscriptionPlan {
+  id: SubscriptionPlanId;
   name: string;
-  durationMonths: number;
   price: number;
-  currency: string;
-  pricePerMonth: number;
-  features: string[];
+  durationMonths: number;
   popular?: boolean;
+  accentFeatureCount: number;
+  accentChooseButton?: boolean;
 }
 
-export const BUNDLES: Bundle[] = [
+export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
-    id: "1month",
-    name: "1 Month",
+    id: "studio",
+    name: "Studio",
+    price: 150,
     durationMonths: 1,
-    price: 299,
-    currency: "EGP",
-    pricePerMonth: 299,
-    features: [
-      "Access to all tracks",
-      "All courses included",
-      "Download resources",
-      "Community support",
-    ],
+    accentFeatureCount: 1,
   },
   {
-    id: "6months",
-    name: "6 Months",
-    durationMonths: 6,
-    price: 1_399,
-    currency: "EGP",
-    pricePerMonth: 233,
-    features: [
-      "Everything in 1 Month",
-      "Save 22%",
-      "Access for 6 months",
-      "Early access to new courses",
-    ],
+    id: "starter",
+    name: "Starter",
+    price: 200,
+    durationMonths: 1,
     popular: true,
+    accentFeatureCount: 2,
+    accentChooseButton: true,
   },
   {
-    id: "12months",
-    name: "1 Year",
-    durationMonths: 12,
-    price: 2_199,
-    currency: "EGP",
-    pricePerMonth: 183,
-    features: [
-      "Everything in 6 Months",
-      "Best value - save 39%",
-      "Access for 12 months",
-      "Priority support",
-    ],
+    id: "pro",
+    name: "Pro",
+    price: 250,
+    durationMonths: 1,
+    accentFeatureCount: 3,
   },
 ];
+
+const PLAN_IDS = new Set(SUBSCRIPTION_PLANS.map((plan) => plan.id));
+
+export function isSubscriptionPlanId(value: string): value is SubscriptionPlanId {
+  return PLAN_IDS.has(value as SubscriptionPlanId);
+}
+
+export function getSubscriptionPlan(planId: string) {
+  return SUBSCRIPTION_PLANS.find((plan) => plan.id === planId);
+}

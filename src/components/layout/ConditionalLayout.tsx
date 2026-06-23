@@ -5,12 +5,13 @@ import { SiteLayout } from "./SiteLayout";
 import { AdminLayout } from "./AdminLayout";
 import { ConditionalSiteFooter } from "./ConditionalSiteFooter";
 
-function isAuthRoute(pathname: string) {
+function isStandaloneRoute(pathname: string) {
   return (
     pathname === "/login" ||
     pathname === "/register" ||
     pathname.startsWith("/register/") ||
-    pathname === "/verify-email"
+    pathname === "/verify-email" ||
+    pathname === "/subscription"
   );
 }
 
@@ -19,13 +20,13 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const isAdmin = pathname.startsWith("/admin");
   /** Guest marketing home — HeroSection includes its own green nav shell. */
   const isGuestLanding = pathname === "/";
-  const isAuth = isAuthRoute(pathname);
+  const isStandalone = isStandaloneRoute(pathname);
 
   if (isAdmin) {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
-  if (isAuth) {
+  if (isStandalone) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col bg-white">
         <main className="min-w-0 flex-1">{children}</main>

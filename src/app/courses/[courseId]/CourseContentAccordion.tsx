@@ -1,127 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+export type CourseAccordionModule = {
+  id: string;
+  title: string;
+  lessons: { id: string; title: string; type: string }[];
+};
 
 type CourseContentAccordionProps = {
   fontFamily: string;
+  modules: CourseAccordionModule[];
+  totalDurationMinutes?: number | null;
 };
 
-export function CourseContentAccordion({ fontFamily }: CourseContentAccordionProps) {
-  const sections = [
-    {
-      id: "illustration-basics",
-      title: "What's Illustration?",
-      lessons: [
-        { name: "1. Introduction", right: "50:35" },
-        { name: "2. Brush Types", right: "43:54" },
-        { name: "3. Article 01", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "foundations",
-      title: "Illustration Foundations",
-      lessons: [
-        { name: "1. Shape Language", right: "18:22" },
-        { name: "2. Composition Rules", right: "27:40" },
-        { name: "3. Practice Sheet", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "line-work",
-      title: "Line Work Mastery",
-      lessons: [
-        { name: "1. Line Confidence", right: "21:09" },
-        { name: "2. Pressure Control", right: "16:31" },
-        { name: "3. Inking Drill", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "color-theory",
-      title: "Color Theory Essentials",
-      lessons: [
-        { name: "1. Hue and Value", right: "24:19" },
-        { name: "2. Color Harmony", right: "19:44" },
-        { name: "3. Palette Exercise", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "lighting",
-      title: "Lighting and Shadows",
-      lessons: [
-        { name: "1. Light Direction", right: "20:48" },
-        { name: "2. Cast Shadows", right: "22:10" },
-        { name: "3. Study Notes", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "textures",
-      title: "Textures and Materials",
-      lessons: [
-        { name: "1. Fabric Rendering", right: "17:56" },
-        { name: "2. Metal and Glass", right: "23:11" },
-        { name: "3. Texture Pack", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "character-design",
-      title: "Character Design",
-      lessons: [
-        { name: "1. Silhouette Pass", right: "26:27" },
-        { name: "2. Facial Features", right: "31:08" },
-        { name: "3. Design Sheet", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "environment",
-      title: "Environment Illustration",
-      lessons: [
-        { name: "1. Perspective Grids", right: "28:35" },
-        { name: "2. Atmospheric Depth", right: "22:47" },
-        { name: "3. Scene Template", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "digital-tools",
-      title: "Digital Tools Workflow",
-      lessons: [
-        { name: "1. Layer Strategy", right: "14:40" },
-        { name: "2. Custom Brushes", right: "19:02" },
-        { name: "3. Tool Presets", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "style-dev",
-      title: "Personal Style Development",
-      lessons: [
-        { name: "1. Style Exploration", right: "25:16" },
-        { name: "2. Reference Boards", right: "18:09" },
-        { name: "3. Style Checklist", right: "VIEW", isView: true },
-      ],
-    },
-    {
-      id: "final-project",
-      title: "Final Project",
-      lessons: [
-        { name: "1. Project Brief", right: "12:55" },
-        { name: "2. Final Rendering", right: "34:20" },
-        { name: "3. Submission Guide", right: "VIEW", isView: true },
-      ],
-    },
-  ] as const;
+type AccordionSection = {
+  id: string;
+  title: string;
+  lessons: { id: string; name: string; right: string; isView: boolean }[];
+};
 
-  const [openMap, setOpenMap] = useState<Record<string, boolean>>({
-    [sections[0].id]: true,
-    [sections[1].id]: false,
-    [sections[2].id]: false,
-    [sections[3].id]: false,
-    [sections[4].id]: false,
-    [sections[5].id]: false,
-    [sections[6].id]: false,
-    [sections[7].id]: false,
-    [sections[8].id]: false,
-    [sections[9].id]: false,
-    [sections[10].id]: false,
-  });
+function lessonMeta(type: string): { right: string; isView: boolean } {
+  const normalized = type.toUpperCase();
+  if (normalized === "ARTICLE" || normalized === "READING") {
+    return { right: "VIEW", isView: true };
+  }
+  if (normalized === "ASSIGNMENT") {
+    return { right: "TASK", isView: true };
+  }
+  return { right: "—", isView: false };
+}
+
+function mapModules(modules: CourseAccordionModule[]): AccordionSection[] {
+  return modules.map((module) => ({
+    id: module.id,
+    title: module.title,
+    lessons: module.lessons.map((lesson, index) => {
+      const meta = lessonMeta(lesson.type);
+      return {
+        id: lesson.id,
+        name: `${index + 1}. ${lesson.title}`,
+        right: meta.right,
+        isView: meta.isView,
+      };
+    }),
+  }));
+}
+
+export function CourseContentAccordion({
+  fontFamily,
+  modules,
+  totalDurationMinutes,
+}: CourseContentAccordionProps) {
+  const sections = useMemo(() => mapModules(modules), [modules]);
+  const lessonCount = useMemo(
+    () => sections.reduce((acc, section) => acc + section.lessons.length, 0),
+    [sections]
+  );
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const initial: Record<string, boolean> = {};
+    sections.forEach((section, index) => {
+      initial[section.id] = index === 0;
+    });
+    setOpenMap(initial);
+  }, [sections]);
+
+  const durationLabel = (() => {
+    const mins = totalDurationMinutes ?? lessonCount * 15;
+    if (mins <= 0) return "0m";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    return `${m}m`;
+  })();
+
+  if (sections.length === 0) {
+    return (
+      <p
+        className="mt-[46px] m-0 opacity-60"
+        style={{ fontFamily, fontSize: "24px", fontWeight: 400 }}
+      >
+        Course content will be available soon.
+      </p>
+    );
+  }
 
   return (
     <>
@@ -151,7 +115,7 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
               lineHeight: "normal",
             }}
           >
-            52 Lessons
+            {lessonCount} {lessonCount === 1 ? "Lesson" : "Lessons"}
           </span>
           <svg className="ml-[22px]" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 27 27" fill="none" aria-hidden>
             <path
@@ -173,7 +137,7 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
               lineHeight: "normal",
             }}
           >
-            23h34m
+            {durationLabel}
           </span>
         </div>
       </div>
@@ -191,7 +155,8 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
             opacity: 0.6,
           }}
         >
-          13 Sections - 126 Lectures
+          {sections.length} {sections.length === 1 ? "Section" : "Sections"} - {lessonCount}{" "}
+          {lessonCount === 1 ? "Lecture" : "Lectures"}
         </p>
         <button
           type="button"
@@ -225,6 +190,7 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
       <div className="mt-[20px] flex w-[843px] flex-col gap-[22px]">
         {sections.map((section) => {
           const isOpen = !!openMap[section.id];
+          const openHeight = 74 + section.lessons.length * 74;
           return (
             <div
               key={section.id}
@@ -232,7 +198,7 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
                 isOpen ? "bg-[#89F496]" : "bg-white"
               }`}
               style={{
-                height: isOpen ? "296px" : "74px",
+                height: isOpen ? `${openHeight}px` : "74px",
                 transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
               }}
             >
@@ -276,13 +242,13 @@ export function CourseContentAccordion({ fontFamily }: CourseContentAccordionPro
 
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  isOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+                  isOpen ? "opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 {section.lessons.map((lesson, lessonIndex) => (
                   <div
-                    key={`${section.id}-${lesson.name}`}
-                    className={`cursor-pointer border-t border-black bg-white transition-colors duration-200 hover:bg-[#64E1FF] ${
+                    key={lesson.id}
+                    className={`border-t border-black bg-white transition-colors duration-200 hover:bg-[#64E1FF] ${
                       lessonIndex === 0 ? "rounded-t-[30px]" : ""
                     }`}
                   >
