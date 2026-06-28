@@ -8,11 +8,13 @@ import { CourseIntroUploadButton } from "@/app/admin/content/components/CourseIn
 import {
   adminCreateModule,
   adminDeleteCourse,
+  adminDeleteModule,
   adminGetCourse,
   adminListTracks,
   adminListMentors,
   adminUpdateCourse,
 } from "@/server/content/admin.service";
+import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleButton";
 
 function FeaturedInBadges({
   featuredNewOrder,
@@ -108,6 +110,15 @@ export default async function AdminCourseDetail({
     redirect(`/admin/content/courses/${id}?toast=Module+added`);
   }
 
+  async function deleteModule(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const moduleId = String(formData.get("moduleId") ?? "");
+    if (!moduleId) return;
+    await adminDeleteModule(moduleId);
+    redirect(`/admin/content/courses/${courseId}?toast=Module+deleted`);
+  }
+
   async function deleteCourse(formData: FormData) {
     "use server";
     await requireRole(["ADMIN"]);
@@ -190,7 +201,7 @@ export default async function AdminCourseDetail({
               <option value="">None (no track)</option>
               {tracks.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.school ? `${t.school.title} → ${t.title}` : t.title}
+                  {t.title}
                 </option>
               ))}
             </select>
@@ -413,14 +424,27 @@ export default async function AdminCourseDetail({
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {course.modules.map((m) => (
-            <Link
+            <div
               key={m.id}
-              href={`/admin/content/modules/${m.id}`}
-              className="group card-hover flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
+              className="group card-hover flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md"
             >
-              <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">{m.title}</div>
-              <span className="text-sm text-[var(--color-primary)] group-hover:underline">Manage lessons →</span>
-            </Link>
+              <Link
+                href={`/admin/content/modules/${m.id}`}
+                className="min-w-0 flex-1"
+              >
+                <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">
+                  {m.title}
+                </div>
+                <span className="mt-1 block text-sm text-[var(--color-primary)] group-hover:underline">
+                  Manage lessons →
+                </span>
+              </Link>
+              <DeleteModuleButton
+                moduleId={m.id}
+                moduleTitle={m.title}
+                deleteModule={deleteModule}
+              />
+            </div>
           ))}
           {course.modules.length === 0 && (
             <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-sm text-slate-500">

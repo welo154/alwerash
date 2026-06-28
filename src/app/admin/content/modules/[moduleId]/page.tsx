@@ -12,8 +12,10 @@ import {
   adminUpdateLesson,
   adminDeleteLesson,
   adminRemoveLessonVideo,
+  adminUpsertLessonArticle,
 } from "@/server/content/admin.service";
 import { MuxUploadButton } from "@/app/admin/content/components/MuxUploadButton";
+import { ArticleEditor } from "@/app/admin/content/components/ArticleEditor";
 import { AdminVideoPreview } from "@/app/admin/content/components/AdminVideoPreview";
 import { DeleteLessonButton } from "@/app/admin/content/components/DeleteLessonButton";
 import { ReplaceVideoButton } from "@/app/admin/content/components/ReplaceVideoButton";
@@ -113,6 +115,19 @@ export default async function AdminModuleDetail({
     await adminRemoveLessonVideo(lessonId);
     revalidatePath(`/admin/content/modules/${moduleId}`);
     revalidatePath(`/admin/content/courses/${courseModule.courseId}`);
+  }
+
+  async function saveLessonArticle(formData: FormData) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    const lessonId = String(formData.get("lessonId") ?? "");
+    if (!lessonId) return;
+    await adminUpsertLessonArticle(lessonId, {
+      body: String(formData.get("body") ?? ""),
+    });
+    revalidatePath(`/admin/content/modules/${moduleId}`);
+    revalidatePath(`/learn/${courseModule.courseId}`);
+    revalidatePath(`/courses/${courseModule.courseId}`);
   }
 
   return (
@@ -275,6 +290,12 @@ export default async function AdminModuleDetail({
                       {l.type === "VIDEO" && !l.video?.muxPlaybackId && l.videoUploads?.[0] && (
                         <span className="text-amber-600">Upload {l.videoUploads[0].status.toLowerCase()}</span>
                       )}
+                      {l.type === "ARTICLE" && l.article?.body?.trim() && (
+                        <span className="text-emerald-600">Article ready</span>
+                      )}
+                      {l.type === "ARTICLE" && !l.article?.body?.trim() && (
+                        <span className="text-amber-600">Article content missing</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-end gap-3">
@@ -349,6 +370,14 @@ export default async function AdminModuleDetail({
                     playbackId={l.video.muxPlaybackId}
                   />
                 </div>
+              )}
+              {l.type === "ARTICLE" && (
+                <ArticleEditor
+                  lessonId={l.id}
+                  lessonTitle={l.title}
+                  initialBody={l.article?.body ?? ""}
+                  saveArticle={saveLessonArticle}
+                />
               )}
             </li>
           ))}

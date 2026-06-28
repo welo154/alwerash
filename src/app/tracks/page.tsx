@@ -1,18 +1,22 @@
-import type { Metadata } from "next";
+// file: src/app/tracks/page.tsx
+import { publicListTracks } from "@/server/content/public.service";
 
-export const metadata: Metadata = {
-  title: "Projects",
-  description: "Projects",
-};
+export default async function TracksPage() {
+  const tracks = await publicListTracks();
 
-export default function ProjectsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h1 className="text-2xl font-bold tracking-tight text-black">
-          Projects
-        </h1>
-      </div>
+    <div className="p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Tracks</h1>
+      <ul className="space-y-2">
+        {tracks.map((t) => (
+          <li key={t.id} className="rounded border p-3">
+            <a className="underline" href={`/tracks/${t.slug}`}>
+              {t.title}
+            </a>
+            {t.description ? <p className="text-sm mt-1">{t.description}</p> : null}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

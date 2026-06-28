@@ -7,6 +7,7 @@ import { getCourseProgress, getLessonProgress } from "@/server/learning/progress
 import { CourseCurriculumSidebar } from "../../CourseCurriculumSidebar";
 import { completeLesson } from "./actions";
 import { LessonPlayerWithActions } from "./LessonPlayerWithActions";
+import { ArticleLessonView } from "./ArticleLessonView";
 
 export async function generateMetadata({
   params,
@@ -58,17 +59,16 @@ export default async function LearnLessonPage({
   const initialWatchSeconds = lessonProgressRecord?.watchSeconds ?? 0;
 
   const courseTitle = lesson.module.course.title;
+  const lessonType = String(lesson.type);
   const playbackId = lesson.video?.muxPlaybackId;
-  const streamUrl = playbackId
-    ? `https://stream.mux.com/${playbackId}.m3u8`
-    : null;
+  const streamUrl = playbackId ? `https://stream.mux.com/${playbackId}.m3u8` : null;
   const posterUrl = playbackId
     ? `https://image.mux.com/${playbackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`
     : undefined;
+  const articleBody = lesson.article?.body ?? "";
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50/20 to-slate-100">
-      {/* Breadcrumb bar */}
       <div className="border-b border-slate-200/80 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-4 py-3.5 sm:px-6">
           <nav
@@ -95,7 +95,9 @@ export default async function LearnLessonPage({
               {lesson.title}
             </h1>
 
-            {streamUrl ? (
+            {lessonType === "ARTICLE" ? (
+              <ArticleLessonView courseId={courseId} lessonId={lessonId} body={articleBody} />
+            ) : streamUrl ? (
               <div className="mt-6 opacity-0 animate-scale-in animation-delay-150">
                 <LessonPlayerWithActions
                   courseId={courseId}

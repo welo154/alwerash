@@ -38,6 +38,7 @@ export default async function CoursePage({
   const instructorName = course.instructorName?.trim() || "Instructor";
   const instructorRole = course.track?.title?.trim() || "Course instructor";
   const instructorInitials = initialsFromName(instructorName);
+  const instructorImage = course.instructorImage?.trim() || null;
   const durationLabel = formatCourseDurationLabel(course.totalDurationMinutes, lessonCount);
   const ratingLabel = formatCourseRatingLabel(course.rating);
   const aboutText =
@@ -55,6 +56,12 @@ export default async function CoursePage({
     topicTitle: (related.track?.title ?? "Course").toUpperCase(),
     continueHref: `/courses/${related.id}`,
   }));
+
+  const firstLessonId =
+    course.modules.find((m) => m.lessons.length > 0)?.lessons[0]?.id ?? null;
+  const startLearningHref = firstLessonId
+    ? `/learn/${course.id}/lesson/${firstLessonId}`
+    : `/learn/${course.id}`;
 
   return (
     <main className="mx-auto max-w-[1600px] pb-[80px] pl-[55px] pr-[60px] pt-[20px]">
@@ -135,6 +142,7 @@ export default async function CoursePage({
           </div>
 
           <CourseContentAccordion
+            courseId={course.id}
             fontFamily={pangeaVar.style.fontFamily}
             modules={course.modules}
             totalDurationMinutes={course.totalDurationMinutes}
@@ -149,22 +157,33 @@ export default async function CoursePage({
           >
             <div className="border-b border-black/60 px-[30px] pb-[27px] pt-[35px]">
               <div className="flex items-center gap-[16px]">
-                <div className="relative h-[63px] w-[63px]">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="63" height="63" viewBox="0 0 64 64" fill="none" className="h-[63px] w-[63px]" aria-hidden>
-                    <path
-                      d="M32 63.5C49.397 63.5 63.5 49.397 63.5 32C63.5 14.603 49.397 0.5 32 0.5C14.603 0.5 0.5 14.603 0.5 32C0.5 49.397 14.603 63.5 32 63.5Z"
-                      fill="white"
-                      stroke="black"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                <div className="relative h-[63px] w-[63px] shrink-0 overflow-hidden rounded-full border border-black bg-white">
+                  {instructorImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={instructorImage}
+                      alt={instructorName}
+                      className="h-full w-full object-cover"
                     />
-                  </svg>
-                  <span
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 600 }}
-                  >
-                    {instructorInitials}
-                  </span>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="63" height="63" viewBox="0 0 64 64" fill="none" className="h-[63px] w-[63px]" aria-hidden>
+                        <path
+                          d="M32 63.5C49.397 63.5 63.5 49.397 63.5 32C63.5 14.603 49.397 0.5 32 0.5C14.603 0.5 0.5 14.603 0.5 32C0.5 49.397 14.603 63.5 32 63.5Z"
+                          fill="white"
+                          stroke="black"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 600 }}
+                      >
+                        {instructorInitials}
+                      </span>
+                    </>
+                  )}
                 </div>
                 <div>
                   <p className="m-0" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 600 }}>
@@ -375,16 +394,25 @@ export default async function CoursePage({
             </h3>
 
             <div className="mt-[43px] flex items-start">
-              <div className="h-[174px] w-[174px] shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="174" height="174" viewBox="0 0 175 175" fill="none" aria-hidden>
-                  <path
-                    d="M87.5 174.5C135.549 174.5 174.5 135.549 174.5 87.5C174.5 39.4512 135.549 0.5 87.5 0.5C39.4512 0.5 0.5 39.4512 0.5 87.5C0.5 135.549 39.4512 174.5 87.5 174.5Z"
-                    fill="#E9E9E9"
-                    stroke="black"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              <div className="relative h-[174px] w-[174px] shrink-0 overflow-hidden rounded-full border border-black bg-[#E9E9E9]">
+                {instructorImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={instructorImage}
+                    alt={instructorName}
+                    className="h-full w-full object-cover"
                   />
-                </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="174" height="174" viewBox="0 0 175 175" fill="none" className="h-full w-full" aria-hidden>
+                    <path
+                      d="M87.5 174.5C135.549 174.5 174.5 135.549 174.5 87.5C174.5 39.4512 135.549 0.5 87.5 0.5C39.4512 0.5 0.5 39.4512 0.5 87.5C0.5 135.549 39.4512 174.5 87.5 174.5Z"
+                      fill="#E9E9E9"
+                      stroke="black"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </div>
 
               <div className="ml-[30px] min-w-0">

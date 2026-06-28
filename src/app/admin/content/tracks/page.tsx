@@ -49,10 +49,22 @@ export default async function AdminTracksPage({
                 {t.title}
               </h3>
             </div>
-            <div className="mb-4">
-              <span className="inline-block rounded-full bg-gray-400 px-3 py-1 text-sm font-medium italic text-white">
-                {t.school?.title ?? t.schoolId ?? "No school"}
-              </span>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {t.featuredOrder != null && (
+                <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                  Featured #{t.featuredOrder}
+                </span>
+              )}
+              {t.topRatedOrder != null && (
+                <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                  Top rated #{t.topRatedOrder}
+                </span>
+              )}
+              {t.activityOrder != null && (
+                <span className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
+                  Activity #{t.activityOrder}
+                </span>
+              )}
             </div>
             <p className="mb-2 text-[11px] font-medium leading-[1.3] text-black">
               {t.slug}

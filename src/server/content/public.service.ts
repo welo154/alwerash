@@ -1,7 +1,6 @@
 // file: src/server/content/public.service.ts
 import {
   catalogShowcasePropsFromTrackAggregate,
-  splitTitlesIntoTwoTagRows,
   type CatalogShowcaseCardProps,
   type LandingShowcaseSlide,
 } from "@/components/cards/catalog-showcase-map";
@@ -10,6 +9,14 @@ import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import { staticCourseCoverForTitle } from "@/lib/static-course-covers";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import type {
+  HomeTrackExplorerBundle,
+  HomeTrackMetaFilter,
+  HomeTrackPill,
+} from "@/types/home-track-explorer";
+
+export type { HomeTrackExplorerBundle, HomeTrackMetaFilter, HomeTrackPill };
 
 function muxThumbnailUrl(playbackId: string): string {
   return `https://image.mux.com/${playbackId}/thumbnail.jpg?width=800&height=450&fit_mode=smartcrop`;
@@ -42,6 +49,108 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
+type TrackWithCourses = {
+  id: string;
+  title: string;
+  slug: string;
+  order: number;
+  featuredOrder: number | null;
+  topRatedOrder: number | null;
+  activityOrder: number | null;
+  courses: {
+    totalDurationMinutes: number | null;
+    modules: { _count: { lessons: number } }[];
+  }[];
+};
+
+const trackCourseSelect = {
+  where: { published: true },
+  select: {
+    totalDurationMinutes: true,
+    modules: { select: { _count: { select: { lessons: true } } } },
+  },
+} as const;
+
+function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[] {
+  return tracks.map((t) => ({
+    slug: t.slug,
+    cardProps: {
+      ...catalogShowcasePropsFromTrackAggregate({
+        title: t.title,
+        slug: t.slug,
+        courses: t.courses.map((c) => ({
+          totalDurationMinutes: c.totalDurationMinutes,
+          lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
+        })),
+      }),
+      showcaseSlug: t.slug,
+    },
+  }));
+}
+
+async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
+  return prisma.track.findMany({
+    where: { published: true },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      order: true,
+      featuredOrder: true,
+      topRatedOrder: true,
+      activityOrder: true,
+      courses: trackCourseSelect,
+    },
+  });
+}
+
+function filterTracksByMeta(tracks: TrackWithCourses[], filter: HomeTrackMetaFilter): TrackWithCourses[] {
+  const orderField =
+    filter === "featured"
+      ? "featuredOrder"
+      : filter === "topRated"
+        ? "topRatedOrder"
+        : "activityOrder";
+  const filtered = tracks
+    .filter((t) => t[orderField] != null)
+    .sort((a, b) => (a[orderField] ?? 0) - (b[orderField] ?? 0));
+  return filtered.length > 0 ? filtered : tracks;
+}
+
+/** Home track explorer: meta-filter carousels + track-name pill links. */
+export async function publicGetHomeTrackExplorerBundle(): Promise<HomeTrackExplorerBundle> {
+  try {
+    const rows = await fetchPublishedTracksWithCourses();
+    const trackPills: HomeTrackPill[] = rows.map((t) => ({
+      slug: t.slug,
+      title: t.title,
+      label: t.title.trim().toUpperCase() || "TRACK",
+    }));
+    const mid = Math.ceil(trackPills.length / 2);
+
+    return {
+      heroTracks: rows.map((t) => ({ id: t.id, title: t.title, slug: t.slug })),
+      trackPills,
+      trackPillRow1: trackPills.slice(0, mid),
+      trackPillRow2: trackPills.slice(mid),
+      slidesByFilter: {
+        featured: buildShowcaseSlides(filterTracksByMeta(rows, "featured")),
+        topRated: buildShowcaseSlides(filterTracksByMeta(rows, "topRated")),
+        activity: buildShowcaseSlides(filterTracksByMeta(rows, "activity")),
+      },
+    };
+  } catch {
+    return {
+      heroTracks: [],
+      trackPills: [],
+      trackPillRow1: [],
+      trackPillRow2: [],
+      slidesByFilter: { featured: [], topRated: [], activity: [] },
+    };
+  }
+}
+
 type PublicTrackListItem = {
   id: string;
   title: string;
@@ -49,7 +158,6 @@ type PublicTrackListItem = {
   description: string | null;
   coverImage: string | null;
   order: number;
-  school: { id: string; title: string; slug: string } | null;
 };
 
 async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
@@ -72,7 +180,6 @@ async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
     description: row.description,
     coverImage: null,
     order: row.order,
-    school: null,
   }));
 }
 
@@ -88,7 +195,6 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
         description: true,
         coverImage: true,
         order: true,
-        school: { select: { id: true, title: true, slug: true } },
       },
     });
   } catch (e) {
@@ -115,14 +221,7 @@ export async function publicGetShowcaseTrackCardForSlug(
       select: {
         title: true,
         slug: true,
-        school: { select: { title: true } },
-        courses: {
-          where: { published: true },
-          select: {
-            totalDurationMinutes: true,
-            modules: { select: { _count: { select: { lessons: true } } } },
-          },
-        },
+        courses: trackCourseSelect,
       },
     });
     if (!track) return null;
@@ -130,7 +229,6 @@ export async function publicGetShowcaseTrackCardForSlug(
     return catalogShowcasePropsFromTrackAggregate({
       title: track.title,
       slug: track.slug,
-      schoolTitle: track.school?.title,
       courses: track.courses.map((c) => ({
         totalDurationMinutes: c.totalDurationMinutes,
         lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
@@ -141,82 +239,11 @@ export async function publicGetShowcaseTrackCardForSlug(
   }
 }
 
-export type GuestLandingTrackBundle = {
-  heroTracks: { id: string; title: string; slug: string }[];
-  showcaseSlides: LandingShowcaseSlide[];
-  showcaseTagRow1: string[];
-  showcaseTagRow2: string[];
-};
+export type GuestLandingTrackBundle = HomeTrackExplorerBundle;
 
-/** One query: hero strip + catalog cards + tag pills all follow admin published tracks (order, titles). */
+/** @deprecated Use publicGetHomeTrackExplorerBundle */
 export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTrackBundle> {
-  try {
-    const rows = await prisma.track.findMany({
-      where: { published: true },
-      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        school: { select: { title: true } },
-        courses: {
-          where: { published: true },
-          select: {
-            totalDurationMinutes: true,
-            modules: { select: { _count: { select: { lessons: true } } } },
-          },
-        },
-      },
-    });
-
-    const titles = rows.map((r) => r.title);
-    const [showcaseTagRow1, showcaseTagRow2] = splitTitlesIntoTwoTagRows(titles);
-
-    return {
-      heroTracks: rows.map((t) => ({ id: t.id, title: t.title, slug: t.slug })),
-      showcaseSlides: rows.map((t) => ({
-        slug: t.slug,
-        cardProps: {
-          ...catalogShowcasePropsFromTrackAggregate({
-            title: t.title,
-            slug: t.slug,
-            schoolTitle: t.school?.title,
-            courses: t.courses.map((c) => ({
-              totalDurationMinutes: c.totalDurationMinutes,
-              lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
-            })),
-          }),
-          showcaseSlug: t.slug,
-        },
-      })),
-      showcaseTagRow1,
-      showcaseTagRow2,
-    };
-  } catch (e) {
-    if (isPrismaMissingColumnError(e)) {
-      const rows = await publicListTracksRawSafe();
-      const titles = rows.map((r) => r.title);
-      const [showcaseTagRow1, showcaseTagRow2] = splitTitlesIntoTwoTagRows(titles);
-      return {
-        heroTracks: rows.map((t) => ({ id: t.id, title: t.title, slug: t.slug })),
-        showcaseSlides: rows.map((t) => ({
-          slug: t.slug,
-          cardProps: {
-            ...catalogShowcasePropsFromTrackAggregate({
-              title: t.title,
-              slug: t.slug,
-              schoolTitle: undefined,
-              courses: [],
-            }),
-            showcaseSlug: t.slug,
-          },
-        })),
-        showcaseTagRow1,
-        showcaseTagRow2,
-      };
-    }
-    return { heroTracks: [], showcaseSlides: [], showcaseTagRow1: [], showcaseTagRow2: [] };
-  }
+  return publicGetHomeTrackExplorerBundle();
 }
 
 export async function publicGetTrackBySlug(slug: string) {
@@ -230,7 +257,6 @@ export async function publicGetTrackBySlug(slug: string) {
       coverImage: true,
       order: true,
       published: true,
-      school: { select: { id: true, title: true, slug: true } },
       courses: {
         where: { published: true },
         orderBy: { createdAt: "asc" },
@@ -240,6 +266,7 @@ export async function publicGetTrackBySlug(slug: string) {
           summary: true,
           coverImage: true,
           introVideoMuxPlaybackId: true,
+          instructorName: true,
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       },
@@ -249,12 +276,26 @@ export async function publicGetTrackBySlug(slug: string) {
   if (!track || !track.published) throw new AppError("NOT_FOUND", 404, "Track not found");
   return {
     ...track,
-    courses: track.courses.map(({ modules, introVideoMuxPlaybackId, coverImage, ...c }) => ({
+    courses: track.courses.map(({ modules, introVideoMuxPlaybackId, coverImage, instructorName, ...c }) => ({
       ...c,
+      instructorName: instructorName ?? null,
       coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId, c.title),
       lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
     })),
   };
+}
+
+/** Middle-card tiles for a track's course listing page. */
+export async function publicListTrackCoursesForTile(trackSlug: string): Promise<LearnPopularTile[]> {
+  const track = await publicGetTrackBySlug(trackSlug);
+  return track.courses.map((c) => ({
+    id: c.id,
+    href: `/courses/${c.id}`,
+    title: c.title,
+    authorLabel: c.instructorName?.trim() || "Instructor",
+    tagPrimary: track.title.toUpperCase(),
+    coverImageSrc: c.coverImage,
+  }));
 }
 
 export async function publicGetCourseById(courseId: string) {

@@ -66,48 +66,31 @@ async function main() {
   // Test learner with active entitlement (optional - use ADMIN_EMAIL + ADMIN_PASSWORD to test)
   // Admin bypasses subscription check; to test learner flow, add a learner user and entitlement
 
-  // Dummy School
-  const school = await prisma.school.upsert({
-    where: { slug: "design-creative" },
-    update: {},
-    create: {
-      title: "Design & Creative",
-      slug: "design-creative",
-      description: "Learn design and creative skills for modern workflows.",
-      order: 0,
-      published: true,
-    },
-  });
-  console.log("Seeded school:", school.title);
-
-  // Add cover_image to tracks if missing (for environments where migration didn't run)
-  try {
-    await prisma.$executeRawUnsafe(
-      'ALTER TABLE "tracks" ADD COLUMN IF NOT EXISTS "cover_image" TEXT'
-    );
-  } catch (e) {
-    // Ignore - column may already exist or pooled connection may not support DDL
-  }
-
-  // Dummy Tracks with cover images (Unsplash)
   const trackData = [
-    { title: "UI/UX Design", slug: "ui-ux-design", description: "User interface and experience design.", order: 0, coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80" },
-    { title: "Graphic Design", slug: "graphic-design", description: "Visual design and branding.", order: 1, coverImage: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800&q=80" },
-    { title: "Motion Design", slug: "motion-design", description: "Animation and motion graphics.", order: 2, coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80" },
+    { title: "UI/UX Design", slug: "ui-ux-design", description: "User interface and experience design.", order: 0, featuredOrder: 1, topRatedOrder: 2, activityOrder: 3, coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80" },
+    { title: "Graphic Design", slug: "graphic-design", description: "Visual design and branding.", order: 1, featuredOrder: 2, topRatedOrder: 1, activityOrder: 1, coverImage: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800&q=80" },
+    { title: "Motion Design", slug: "motion-design", description: "Animation and motion graphics.", order: 2, featuredOrder: 3, topRatedOrder: 3, activityOrder: 2, coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80" },
   ];
 
   const tracks = [];
   for (const t of trackData) {
     const track = await prisma.track.upsert({
       where: { slug: t.slug },
-      update: { coverImage: t.coverImage },
+      update: {
+        coverImage: t.coverImage,
+        featuredOrder: t.featuredOrder,
+        topRatedOrder: t.topRatedOrder,
+        activityOrder: t.activityOrder,
+      },
       create: {
-        schoolId: school.id,
         title: t.title,
         slug: t.slug,
         description: t.description,
         coverImage: t.coverImage,
         order: t.order,
+        featuredOrder: t.featuredOrder,
+        topRatedOrder: t.topRatedOrder,
+        activityOrder: t.activityOrder,
         published: true,
       },
     });

@@ -1,4 +1,3 @@
-// file: src/app/tracks/[slug]/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -6,7 +5,7 @@ import { auth } from "@/auth";
 import { publicGetTrackBySlug } from "@/server/content/public.service";
 import { getSubscriptionStatus } from "@/server/subscription/subscribe.service";
 import { AppError } from "@/server/lib/errors";
-import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 
 export default async function TrackPage({
   params,
@@ -27,9 +26,17 @@ export default async function TrackPage({
     ? await getSubscriptionStatus(session.user.id)
     : { active: false };
 
+  const courseTiles = track.courses.map((c) => ({
+    id: c.id,
+    href: `/courses/${c.id}`,
+    title: c.title,
+    authorLabel: c.instructorName?.trim() || "Instructor",
+    tagPrimary: track.title.toUpperCase(),
+    coverImageSrc: c.coverImage,
+  }));
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Breadcrumb */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
           <nav className="flex gap-2 text-sm text-slate-600">
@@ -37,16 +44,11 @@ export default async function TrackPage({
               Home
             </Link>
             <span>/</span>
-            <Link href="/library" className="hover:text-blue-600">
-              Projects
-            </Link>
-            <span>/</span>
             <span className="text-slate-900">{track.title}</span>
           </nav>
         </div>
       </div>
 
-      {/* Hero with cover image - Yanfaa style */}
       <div className="relative overflow-hidden border-b border-slate-200 bg-slate-900">
         {track.coverImage ? (
           <>
@@ -65,14 +67,7 @@ export default async function TrackPage({
           </>
         ) : null}
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
-          {track.school && (
-            <p className="text-sm font-medium text-blue-300">
-              {track.school.title}
-            </p>
-          )}
-          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
-            {track.title}
-          </h1>
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">{track.title}</h1>
           {track.description && (
             <p className="mt-4 max-w-2xl text-slate-200">{track.description}</p>
           )}
@@ -84,47 +79,20 @@ export default async function TrackPage({
               >
                 Subscribe for full access
               </Link>
-              <p className="self-center text-sm text-slate-300">
-                Access all courses in this track and more
-              </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Courses grid */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         <h2 className="text-xl font-semibold text-slate-900">Courses</h2>
-        {track.courses.length === 0 ? (
+        {courseTiles.length === 0 ? (
           <p className="mt-4 text-slate-500">No courses in this track yet.</p>
         ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-1 lg:grid-cols-2" data-gsap-stagger-group>
-            {track.courses.map((c) => (
-              <CatalogShowcaseCard
-                key={c.id}
-                {...catalogShowcasePropsFromCourse({
-                  ...c,
-                  track: { title: track.title, slug: track.slug },
-                })}
-              />
+          <div className="mt-6 flex flex-wrap gap-6" data-gsap-stagger-group>
+            {courseTiles.map((tile) => (
+              <LearnPopularFigmaTile key={tile.id} {...tile} />
             ))}
-          </div>
-        )}
-
-        {!subscription.active && (
-          <div className="mt-12 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h3 className="font-semibold text-slate-900">
-              Get full access to all courses
-            </h3>
-            <p className="mt-2 text-slate-600">
-              Subscribe once and unlock all tracks and courses. Cancel anytime.
-            </p>
-            <Link
-              href="/subscription"
-              className="mt-4 inline-flex rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              View plans
-            </Link>
           </div>
         )}
       </div>

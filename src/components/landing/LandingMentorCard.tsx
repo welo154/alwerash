@@ -66,8 +66,6 @@ export function LandingMentorCard({
         <g clipPath={`url(#${clipId})`}>
           <foreignObject x="0" y="0" width="409" height="425">
             <div
-              // eslint-disable-next-line react/no-unknown-property
-              xmlns="http://www.w3.org/1999/xhtml"
               style={{ width: "100%", height: "100%", overflow: "hidden" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

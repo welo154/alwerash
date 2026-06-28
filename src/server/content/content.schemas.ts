@@ -48,31 +48,23 @@ export const PaginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-// --- School ---
-
-export const SchoolCreateSchema = z.object({
-  title: z.string().min(2, "Title too short").max(200),
-  slug: Slug,
-  description: z.string().max(2000).optional(),
-  order: z.number().int().min(0).max(1_000_000).optional(),
-  published: z.boolean().optional(),
-});
-
-export const SchoolUpdateSchema = SchoolCreateSchema.partial();
-
 // --- Track ---
 
+const HomeFilterOrder = z.number().int().min(0).max(1_000_000).nullable().optional();
+
 export const TrackCreateSchema = z.object({
-  schoolId: Cuid,
   title: z.string().min(2, "Title too short").max(200),
   slug: Slug,
   description: z.string().max(2000).optional(),
   coverImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
+  featuredOrder: HomeFilterOrder,
+  topRatedOrder: HomeFilterOrder,
+  activityOrder: HomeFilterOrder,
 });
 
-export const TrackUpdateSchema = TrackCreateSchema.partial().omit({ schoolId: true });
+export const TrackUpdateSchema = TrackCreateSchema.partial();
 
 // --- Course ---
 
@@ -122,6 +114,10 @@ export const LessonCreateSchema = z.object({
 });
 
 export const LessonUpdateSchema = LessonCreateSchema.partial().omit({ moduleId: true });
+
+export const LessonArticleUpsertSchema = z.object({
+  body: z.string().max(100_000),
+});
 
 // --- Assignment ---
 

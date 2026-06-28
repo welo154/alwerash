@@ -2,11 +2,11 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { LoggedInLearnNextSection } from "@/components/home/LoggedInLearnNextSection";
+import { HomeTrackExplorerSection } from "@/components/home/HomeTrackExplorerSection";
 import { LandingCurrentMostsSection } from "@/components/landing";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import type { WeeklyActivitySummary } from "@/server/home/learning-activity.service";
-import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
+import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { WeeklyActivityBarCard } from "@/components/home/WeeklyActivityBarCard";
 
@@ -38,23 +38,6 @@ const courseCardTopicTitle: CSSProperties = {
   lineHeight: "normal",
   fontVariationSettings: '"wght" 400',
 };
-
-const TOPICS_ROW_1 = [
-  "SOUND DESIGN",
-  "DRAWING & PAINTING",
-  "ANIMATION",
-  "CRAFTS",
-  "UI/UX DESIGN",
-  "CREATIVE WRITING",
-] as const;
-
-const TOPICS_ROW_2 = [
-  "DIGITAL ILLUSTRATION",
-  "FILM & VIDEO",
-  "ANALOG ILLUSTRATIONS",
-  "GRAPHIC DESIGN",
-  "TYPOGRAPHY",
-] as const;
 
 type CourseStackCardProps = {
   /** Use `\n` for a line break before the instructor name. */
@@ -277,8 +260,8 @@ export type LoggedInHomeProps = {
   continueLearningCourses: ContinueLearningCardDto[];
   /** Admin mentors for “THE CURRENT MOSTS” strip (same as guest landing). */
   landingMostsMentors: LandingMostsMentorCardDto[];
-  /** Published tracks → catalog tiles for “What to learn next” (same data as guest landing boxes). */
-  trackShowcaseSlides: LandingShowcaseSlide[];
+  /** Home track explorer (meta filters + track pills + tall cards). */
+  trackExplorer: HomeTrackExplorerBundle;
   weeklyActivity: WeeklyActivitySummary;
   /** 0 = Sunday … 6 = Saturday (UTC). */
   activityHighlightDayIndex: number;
@@ -290,7 +273,7 @@ export function LoggedInHome({
   subtitleLeftOfEdit,
   continueLearningCourses,
   landingMostsMentors,
-  trackShowcaseSlides,
+  trackExplorer,
   weeklyActivity,
   activityHighlightDayIndex,
 }: LoggedInHomeProps) {
@@ -694,64 +677,13 @@ export function LoggedInHome({
           </div>
         </section>
 
-        <section
-          className="relative left-1/2 mt-[120px] w-screen -translate-x-1/2 bg-white px-[64px]"
-          aria-label="Topics recommended for you"
-        >
-          <div className="w-full">
-            <h2
-              className="m-0 uppercase"
-              style={{
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: "48px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "120%",
-                fontVariationSettings: '"wght" 400',
-              }}
-            >
-              TOPICS RECOMMENDED FOR{" "}
-              <span style={{ fontWeight: 600, fontVariationSettings: '"wght" 600' }}>
-                YOU
-              </span>
-            </h2>
-
-            <div className="mt-[30px] flex flex-wrap gap-x-[16px] gap-y-[13px]">
-              {TOPICS_ROW_1.map((topic) => (
-                <span
-                  key={topic}
-                  className="inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black"
-                  style={{
-                    fontFamily: pangeaFont,
-                    lineHeight: "19.6px",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  {topic}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-[13px] flex flex-wrap gap-x-[16px] gap-y-[13px] pr-[68px]">
-              {TOPICS_ROW_2.map((topic) => (
-                <span
-                  key={topic}
-                  className="inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black"
-                  style={{
-                    fontFamily: pangeaFont,
-                    lineHeight: "19.6px",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  {topic}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <LoggedInLearnNextSection showcaseSlides={trackShowcaseSlides} />
+        <HomeTrackExplorerSection
+          trackPillRow1={trackExplorer.trackPillRow1}
+          trackPillRow2={trackExplorer.trackPillRow2}
+          slidesByFilter={trackExplorer.slidesByFilter}
+          showDiscoverCta={false}
+          sectionClassName="mt-[88px]"
+        />
         <LandingCurrentMostsSection
           mentors={landingMostsMentors}
           mentorCardWidthPx={409}

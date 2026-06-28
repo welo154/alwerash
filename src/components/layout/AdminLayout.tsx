@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 
 const navItems = [
-  { href: "/admin/content/schools", label: "Schools" },
   { href: "/admin/content/tracks", label: "Tracks" },
   { href: "/admin/content/courses", label: "Courses" },
   { href: "/admin/content/mentors", label: "Mentors" },

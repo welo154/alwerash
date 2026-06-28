@@ -286,6 +286,7 @@ export async function getLessonForLearning(lessonId: string, courseId: string) {
       order: true,
       moduleId: true,
       video: { select: { muxPlaybackId: true } },
+      article: { select: { body: true } },
       module: {
         select: {
           id: true,

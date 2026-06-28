@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { lessonLearnHref } from "@/lib/lesson-learn";
 
 const ESTIMATED_MINUTES: Record<string, number> = {
   VIDEO: 10,
@@ -183,13 +184,10 @@ export function CourseCurriculum({ courseId, modules, unlockedLessonIds, complet
                 <div className="min-h-0 overflow-hidden">
                   <ul className="border-t border-slate-100 bg-slate-50/50">
                     {module.lessons.map((lesson, lIndex) => {
-                      const hasVideo =
-                        lesson.type === "VIDEO" && lesson.video?.muxPlaybackId;
                       const unlocked = unlockedSet.has(lesson.id);
                       const completed = completedSet.has(lesson.id);
-                      const href = hasVideo && unlocked
-                        ? `/learn/${courseId}/lesson/${lesson.id}`
-                        : undefined;
+                      const href =
+                        unlocked ? lessonLearnHref(courseId, lesson) : undefined;
                       const label = `${mIndex + 1}.${lIndex + 1} ${lesson.title}`;
 
                       return (
@@ -230,7 +228,9 @@ export function CourseCurriculum({ courseId, modules, unlockedLessonIds, complet
                               <span className="text-xs shrink-0">
                                 {lesson.type === "VIDEO"
                                   ? "Video not ready"
-                                  : lesson.type}
+                                  : lesson.type === "ARTICLE"
+                                    ? "Article"
+                                    : lesson.type}
                               </span>
                             </div>
                           ) : (

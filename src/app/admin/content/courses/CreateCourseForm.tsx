@@ -42,7 +42,7 @@ export async function CreateCourseForm() {
           <option value="">None (no track)</option>
           {tracks.map((t: TrackItem) => (
             <option key={t.id} value={t.id}>
-              {t.school?.title ? `${t.school.title} → ${t.title}` : t.title}
+              {t.title}
             </option>
           ))}
         </select>

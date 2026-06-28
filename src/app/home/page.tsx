@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
-import { publicGetGuestLandingTrackBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
+import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 
 export const metadata = {
@@ -33,7 +33,7 @@ export default async function LoggedInHomePage() {
     await Promise.all([
       getContinueLearningCardsForUser(userId, 3),
       publicListLandingMostsMentors(),
-      publicGetGuestLandingTrackBundle(),
+      publicGetHomeTrackExplorerBundle(),
       getWeeklyActivitySummary(userId, now),
     ]);
 
@@ -44,7 +44,7 @@ export default async function LoggedInHomePage() {
       subtitleLeftOfEdit={subtitleLeftOfEdit}
       continueLearningCourses={continueLearningCourses}
       landingMostsMentors={landingMostsMentors}
-      trackShowcaseSlides={trackBundle.showcaseSlides}
+      trackExplorer={trackBundle}
       weeklyActivity={weeklyActivity}
       activityHighlightDayIndex={now.getUTCDay()}
     />

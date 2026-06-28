@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { lessonLearnHref } from "@/lib/lesson-learn";
 
 type Lesson = {
   id: string;
@@ -151,12 +152,7 @@ export function CourseCurriculumSidebar({
                   <div className="min-h-0 overflow-hidden">
                     <ul className="bg-slate-50/70 pb-2">
                       {module.lessons.map((lesson, lIndex) => {
-                        const hasVideo =
-                          lesson.type === "VIDEO" &&
-                          lesson.video?.muxPlaybackId;
-                        const href = hasVideo
-                          ? `/learn/${courseId}/lesson/${lesson.id}`
-                          : undefined;
+                        const href = lessonLearnHref(courseId, lesson);
                         const isCurrent = lesson.id === currentLessonId;
 
                         return (
@@ -178,7 +174,11 @@ export function CourseCurriculumSidebar({
                             ) : (
                               <div
                                 className="flex items-center gap-2 px-4 py-2 pl-11 text-sm text-slate-400"
-                                title="Video not ready"
+                                title={
+                                  lesson.type === "VIDEO"
+                                    ? "Video not ready"
+                                    : "Lesson not available"
+                                }
                               >
                                 <LessonIcon type={lesson.type} />
                                 <span className="truncate">

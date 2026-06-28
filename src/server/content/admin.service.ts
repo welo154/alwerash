@@ -3,8 +3,6 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import {
-  SchoolCreateSchema,
-  SchoolUpdateSchema,
   TrackCreateSchema,
   TrackUpdateSchema,
   CourseCreateSchema,
@@ -13,6 +11,7 @@ import {
   ModuleUpdateSchema,
   LessonCreateSchema,
   LessonUpdateSchema,
+  LessonArticleUpsertSchema,
   MentorCreateSchema,
   MentorUpdateSchema,
 } from "./content.schemas";
@@ -38,87 +37,23 @@ function parse<T>(schema: { safeParse: (v: unknown) => { success: true; data: T 
   return parsed.data;
 }
 
-// --- Schools ---
-export async function adminListSchools() {
-  return prisma.school.findMany({ orderBy: [{ order: "asc" }, { createdAt: "asc" }] });
-}
-
-export async function adminGetSchool(id: string) {
-  const s = await prisma.school.findUnique({
-    where: { id },
-    include: { tracks: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] } },
-  });
-  if (!s) throw new AppError("NOT_FOUND", 404, "School not found");
-  return s;
-}
-
-export async function adminCreateSchool(input: unknown) {
-  try {
-    return await prisma.school.create({ data: parse(SchoolCreateSchema, input) });
-  } catch (e) {
-    handlePrismaError(e);
-  }
-}
-
-export async function adminUpdateSchool(schoolId: string, input: unknown) {
-  try {
-    return await prisma.school.update({ where: { id: schoolId }, data: parse(SchoolUpdateSchema, input) });
-  } catch (e) {
-    handlePrismaError(e);
-  }
-}
-
-export async function adminDeleteSchool(schoolId: string) {
-  try {
-    await prisma.school.delete({ where: { id: schoolId } });
-  } catch (e) {
-    handlePrismaError(e);
-  }
-  return { ok: true as const };
-}
-
 // --- Tracks ---
-export async function adminListTracks(schoolId?: string) {
-  try {
-    return await prisma.track.findMany({
-      ...(schoolId && { where: { schoolId } }),
-      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-      include: { school: { select: { id: true, title: true, slug: true } } },
-    });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    const metaMsg = e instanceof Prisma.PrismaClientKnownRequestError ? (e.meta as { message?: string })?.message : undefined;
-    if (msg?.includes("does not exist") || metaMsg?.includes("does not exist")) {
-      return adminListTracksRawSafe(schoolId);
-    }
-    throw e;
-  }
-}
-
-/** Tracks list when DB is missing school_id / cover_image columns. */
-async function adminListTracksRawSafe(schoolId?: string) {
-  const rows = await prisma.$queryRawUnsafe<
-    { id: string; title: string; slug: string; description: string | null; order: number; published: boolean; created_at: Date; updated_at: Date }[]
-  >(
-    `SELECT id, title, slug, description, "order", published, created_at, updated_at FROM tracks ORDER BY "order" ASC, created_at ASC`
-  );
-  return rows.map((row) => ({
-    id: row.id,
-    title: row.title,
-    slug: row.slug,
-    description: row.description,
-    order: row.order,
-    published: row.published,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    schoolId: null as unknown as string,
-    coverImage: null as string | null,
-    school: null as { id: string; title: string; slug: string } | null,
-  }));
+export async function adminListTracks() {
+  return prisma.track.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
 }
 
 export async function adminGetTrack(id: string) {
-  const t = await prisma.track.findUnique({ where: { id }, include: { school: true } });
+  const t = await prisma.track.findUnique({
+    where: { id },
+    include: {
+      courses: {
+        select: { id: true, title: true, published: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
   if (!t) throw new AppError("NOT_FOUND", 404, "Track not found");
   return t;
 }
@@ -379,7 +314,7 @@ async function adminGetCourseSafeFallback(id: string) {
   return {
     ...course,
     mentorId: null as string | null,
-    track: null as { id: string; title: string; slug: string; schoolId: string | null; school: unknown } | null,
+    track: null as { id: string; title: string; slug: string } | null,
     modules,
     featuredNewOrder: null as number | null,
     featuredMostPlayedOrder: null as number | null,
@@ -444,9 +379,10 @@ export type ModuleWithLessons = Prisma.ModuleGetPayload<{
   include: { course: true; lessons: true };
 }>;
 
-/** Lesson with optional video (and optionally latest videoUpload for status). */
+/** Lesson with optional video, article, and optionally latest videoUpload for status. */
 export type LessonWithVideoUpload = ModuleWithLessons["lessons"][number] & {
   video?: { id: string; muxPlaybackId: string } | null;
+  article?: { id: string; body: string } | null;
   videoUploads?: { id: string; status: string }[];
 };
 
@@ -474,6 +410,7 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         include: {
           video: { select: { id: true, muxPlaybackId: true } },
+          article: { select: { id: true, body: true } },
           videoUploads: { take: 1, orderBy: { createdAt: "desc" }, select: { id: true, status: true } },
         },
       },
@@ -555,6 +492,29 @@ export async function adminRemoveLessonVideo(lessonId: string) {
     handlePrismaError(e);
   }
   return { ok: true as const };
+}
+
+/** Create or update article body for an ARTICLE lesson. */
+export async function adminUpsertLessonArticle(lessonId: string, input: unknown) {
+  const data = parse(LessonArticleUpsertSchema, input);
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: { id: true, type: true },
+  });
+  if (!lesson) throw new AppError("NOT_FOUND", 404, "Lesson not found");
+  if (lesson.type !== "ARTICLE") {
+    throw new AppError("BAD_REQUEST", 400, "Only ARTICLE lessons can have article content");
+  }
+  try {
+    return await prisma.lessonArticle.upsert({
+      where: { lessonId },
+      create: { lessonId, body: data.body },
+      update: { body: data.body },
+      select: { id: true, lessonId: true, body: true },
+    });
+  } catch (e) {
+    handlePrismaError(e);
+  }
 }
 
 // --- Mentors ---

@@ -41,12 +41,7 @@ export async function TracksSection() {
                 )}
               </div>
               <div className="p-6">
-                {track.school ? (
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
-                    {track.school.title}
-                  </span>
-                ) : null}
-                <h3 className="mt-2.5 text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[var(--color-primary)]">
+                <h3 className="text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[var(--color-primary)]">
                   {track.title}
                 </h3>
                 {track.description ? (

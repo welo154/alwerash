@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export type CourseAccordionModule = {
@@ -9,6 +11,7 @@ export type CourseAccordionModule = {
 };
 
 type CourseContentAccordionProps = {
+  courseId: string;
   fontFamily: string;
   modules: CourseAccordionModule[];
   totalDurationMinutes?: number | null;
@@ -17,42 +20,54 @@ type CourseContentAccordionProps = {
 type AccordionSection = {
   id: string;
   title: string;
-  lessons: { id: string; name: string; right: string; isView: boolean }[];
+  firstLessonId: string | null;
+  lessons: { id: string; name: string; href: string; right: string; isAction: boolean }[];
 };
 
-function lessonMeta(type: string): { right: string; isView: boolean } {
-  const normalized = type.toUpperCase();
-  if (normalized === "ARTICLE" || normalized === "READING") {
-    return { right: "VIEW", isView: true };
-  }
-  if (normalized === "ASSIGNMENT") {
-    return { right: "TASK", isView: true };
-  }
-  return { right: "—", isView: false };
+function lessonHref(courseId: string, lessonId: string): string {
+  return `/learn/${encodeURIComponent(courseId)}/lesson/${encodeURIComponent(lessonId)}`;
 }
 
-function mapModules(modules: CourseAccordionModule[]): AccordionSection[] {
+function lessonMeta(type: string): { right: string; isAction: boolean } {
+  const normalized = type.toUpperCase();
+  if (normalized === "ARTICLE" || normalized === "READING") {
+    return { right: "VIEW", isAction: true };
+  }
+  if (normalized === "ASSIGNMENT") {
+    return { right: "TASK", isAction: true };
+  }
+  if (normalized === "RESOURCE") {
+    return { right: "VIEW", isAction: true };
+  }
+  return { right: "PLAY", isAction: true };
+}
+
+function mapModules(courseId: string, modules: CourseAccordionModule[]): AccordionSection[] {
   return modules.map((module) => ({
     id: module.id,
     title: module.title,
+    firstLessonId: module.lessons[0]?.id ?? null,
     lessons: module.lessons.map((lesson, index) => {
       const meta = lessonMeta(lesson.type);
       return {
         id: lesson.id,
         name: `${index + 1}. ${lesson.title}`,
+        href: lessonHref(courseId, lesson.id),
         right: meta.right,
-        isView: meta.isView,
+        isAction: meta.isAction,
       };
     }),
   }));
 }
 
 export function CourseContentAccordion({
+  courseId,
   fontFamily,
   modules,
   totalDurationMinutes,
 }: CourseContentAccordionProps) {
-  const sections = useMemo(() => mapModules(modules), [modules]);
+  const router = useRouter();
+  const sections = useMemo(() => mapModules(courseId, modules), [courseId, modules]);
   const lessonCount = useMemo(
     () => sections.reduce((acc, section) => acc + section.lessons.length, 0),
     [sections]
@@ -75,6 +90,14 @@ export function CourseContentAccordion({
     if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
     return `${m}m`;
   })();
+
+  const startSection = (section: AccordionSection) => {
+    if (section.firstLessonId) {
+      router.push(lessonHref(courseId, section.firstLessonId));
+    } else {
+      router.push(`/learn/${encodeURIComponent(courseId)}`);
+    }
+  };
 
   if (sections.length === 0) {
     return (
@@ -202,15 +225,19 @@ export function CourseContentAccordion({
                 transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
               }}
             >
-              <button
-                type="button"
-                onClick={() => setOpenMap((prev) => ({ ...prev, [section.id]: !isOpen }))}
-                className={`flex w-full items-center justify-between px-[38px] text-left transition-[height,background-color] duration-300 ease-in-out ${
+              <div
+                className={`flex w-full items-center px-[38px] transition-[height,background-color] duration-300 ease-in-out ${
                   isOpen ? "bg-[#89F496]" : "bg-white"
                 }`}
                 style={{ height: "74px" }}
               >
-                <span className="inline-flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setOpenMap((prev) => ({ ...prev, [section.id]: !isOpen }))}
+                  className="inline-flex shrink-0 items-center bg-transparent p-0"
+                  aria-expanded={isOpen}
+                  aria-label={isOpen ? `Collapse ${section.title}` : `Expand ${section.title}`}
+                >
                   <svg
                     className="transition-transform duration-300 ease-in-out"
                     style={{ transform: isOpen ? "rotate(0deg)" : "rotate(180deg)" }}
@@ -223,8 +250,15 @@ export function CourseContentAccordion({
                   >
                     <path d="M20 10L10.5 1L1 10" stroke="var(--Black, #000)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startSection(section)}
+                  className="ml-[20px] inline-flex min-w-0 flex-1 items-center bg-transparent p-0 text-left transition-opacity hover:opacity-80"
+                  aria-label={`Start ${section.title}`}
+                >
                   <span
-                    className="ml-[20px]"
+                    className="truncate"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily,
@@ -236,9 +270,8 @@ export function CourseContentAccordion({
                   >
                     {section.title}
                   </span>
-                </span>
-                <span aria-hidden />
-              </button>
+                </button>
+              </div>
 
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -246,15 +279,16 @@ export function CourseContentAccordion({
                 }`}
               >
                 {section.lessons.map((lesson, lessonIndex) => (
-                  <div
+                  <Link
                     key={lesson.id}
-                    className={`border-t border-black bg-white transition-colors duration-200 hover:bg-[#64E1FF] ${
+                    href={lesson.href}
+                    className={`block border-t border-black bg-white transition-colors duration-200 hover:bg-[#64E1FF] ${
                       lessonIndex === 0 ? "rounded-t-[30px]" : ""
                     }`}
                   >
                     <div className="flex h-[74px] items-center justify-between pl-[34px] pr-[38px]">
                       <p
-                        className="m-0"
+                        className="m-0 truncate"
                         style={{
                           color: "var(--Black, #000)",
                           fontFamily,
@@ -266,10 +300,9 @@ export function CourseContentAccordion({
                       >
                         {lesson.name}
                       </p>
-                      {lesson.isView ? (
-                        <button
-                          type="button"
-                          className="inline-flex h-[31px] items-center rounded-[8px] border border-black bg-[#FF8CFF] px-[16px]"
+                      {lesson.isAction ? (
+                        <span
+                          className="inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-[#FF8CFF] px-[16px]"
                           style={{
                             color: "var(--Black, #000)",
                             fontFamily,
@@ -280,7 +313,7 @@ export function CourseContentAccordion({
                           }}
                         >
                           {lesson.right}
-                        </button>
+                        </span>
                       ) : (
                         <p
                           className="m-0"
@@ -297,7 +330,7 @@ export function CourseContentAccordion({
                         </p>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

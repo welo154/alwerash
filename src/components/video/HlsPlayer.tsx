@@ -55,8 +55,15 @@ export function HlsPlayer({
   const [volume, setVolume] = useState(1);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<"speed" | "quality" | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Video elements are often modified by browser extensions before hydration; render after mount.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -93,10 +100,11 @@ export function HlsPlayer({
         hlsRef.current = null;
       };
     }
-  }, [src]);
+  }, [src, mounted]);
 
   // Seek to initialTime when metadata is ready (resume playback)
   useEffect(() => {
+    if (!mounted) return;
     const video = videoRef.current;
     if (!video || initialTime == null || initialTime <= 0) return;
 
@@ -113,13 +121,14 @@ export function HlsPlayer({
       video.addEventListener("loadedmetadata", seekToInitial, { once: true });
       return () => video.removeEventListener("loadedmetadata", seekToInitial);
     }
-  }, [src, initialTime]);
+  }, [src, initialTime, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
     const video = videoRef.current;
     if (!video) return;
     video.playbackRate = playbackRate;
-  }, [playbackRate]);
+  }, [playbackRate, mounted]);
 
   const handlePlaybackRateChange = useCallback((rate: number) => {
     setPlaybackRate(rate);
@@ -138,6 +147,7 @@ export function HlsPlayer({
 
   // Sync video state (time, duration, play, volume) and optional onProgress
   useEffect(() => {
+    if (!mounted) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -170,7 +180,7 @@ export function HlsPlayer({
       video.removeEventListener("pause", onPause);
       video.removeEventListener("volumechange", onVolumeChange);
     };
-  }, [src, onProgress]);
+  }, [src, onProgress, mounted]);
 
   // Click outside to close settings menu
   useEffect(() => {
@@ -216,6 +226,17 @@ export function HlsPlayer({
       document.exitFullscreen?.();
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="relative w-full">
+        <div
+          className={`aspect-video overflow-hidden rounded-lg bg-black ${className}`}
+          aria-hidden
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="relative w-full">

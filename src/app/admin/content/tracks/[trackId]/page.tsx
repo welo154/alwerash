@@ -2,41 +2,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { prisma } from "@/server/db/prisma";
-import { requireRole } from "@/server/auth/require";
-import { adminCreateCourse, adminDeleteTrack, adminUpdateTrack } from "@/server/content/admin.service";
+import { adminCreateCourse, adminDeleteTrack, adminGetTrack, adminUpdateTrack } from "@/server/content/admin.service";
 import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 
-type TrackWithRelations = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  coverImage: string | null;
-  order: number;
-  published: boolean;
-  schoolId: string;
-  school: { id: string; title: string } | null;
-  courses: { id: string; title: string; published: boolean }[];
-};
+import { requireRole } from "@/server/auth/require";
+
+function parseOptionalOrder(formData: FormData, name: string): number | null {
+  const raw = String(formData.get(name) ?? "").trim();
+  return raw === "" ? null : Number(raw);
+}
 
 export default async function AdminTrackDetail({ params }: { params: Promise<{ trackId: string }> }) {
   await requireRole(["ADMIN"]);
   const { trackId } = await params;
 
-  const track = (await prisma.track.findUnique({
-    where: { id: trackId },
-    include: {
-      school: true,
-      courses: {
-        select: { id: true, title: true, published: true },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  })) as TrackWithRelations | null;
-
-  if (!track)
+  let track;
+  try {
+    track = await adminGetTrack(trackId);
+  } catch {
     return (
       <div className="p-8">
         <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-red-800">
@@ -44,6 +28,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
         </div>
       </div>
     );
+  }
 
   async function update(formData: FormData) {
     "use server";
@@ -57,6 +42,9 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
+      featuredOrder: parseOptionalOrder(formData, "featuredOrder"),
+      topRatedOrder: parseOptionalOrder(formData, "topRatedOrder"),
+      activityOrder: parseOptionalOrder(formData, "activityOrder"),
     });
     revalidatePublicCatalogPaths();
     redirect(`/admin/content/tracks/${id}?toast=Track+updated`);
@@ -82,11 +70,9 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     await requireRole(["ADMIN"]);
     const id = String(formData.get("trackId") ?? "");
     if (!id) return;
-    const t = await prisma.track.findUnique({ where: { id }, select: { schoolId: true } });
     await adminDeleteTrack(id);
     revalidatePublicCatalogPaths();
-    if (t?.schoolId) redirect(`/admin/content/schools/${t.schoolId}?toast=Track+deleted`);
-    else redirect("/admin/content/tracks?toast=Track+deleted");
+    redirect("/admin/content/tracks?toast=Track+deleted");
   }
 
   return (
@@ -99,17 +85,6 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
         >
           ← Tracks
         </Link>
-        {track.school && (
-          <>
-            <span className="text-slate-400">/</span>
-            <Link
-              href={`/admin/content/schools/${track.school.id}`}
-              className="rounded-lg px-2 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            >
-              {track.school.title}
-            </Link>
-          </>
-        )}
       </nav>
 
       {/* Header with cover */}
@@ -185,6 +160,44 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
               rows={3}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800">Home page filters</h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Featured order</label>
+                <input
+                  name="featuredOrder"
+                  type="number"
+                  min={0}
+                  defaultValue={track.featuredOrder ?? ""}
+                  placeholder="Empty = hidden"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Top rated order</label>
+                <input
+                  name="topRatedOrder"
+                  type="number"
+                  min={0}
+                  defaultValue={track.topRatedOrder ?? ""}
+                  placeholder="Empty = hidden"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Activity order</label>
+                <input
+                  name="activityOrder"
+                  type="number"
+                  min={0}
+                  defaultValue={track.activityOrder ?? ""}
+                  placeholder="Empty = hidden"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <div>

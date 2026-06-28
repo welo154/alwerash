@@ -166,40 +166,27 @@ model VerificationToken {
 }
 
 // ===== Content =====
-// Hierarchy: School > Track > Course (track optional) > Module > Lesson
-
-model School {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String?
-  order       Int      @default(0)
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  tracks Track[]
-
-  @@index([published])
-  @@map("schools")
-}
+// Hierarchy: Track > Course > Module > Lesson
 
 model Track {
   id          String   @id @default(cuid())
-  schoolId    String   @map("school_id")
   title       String
   slug        String   @unique
   description String?
   coverImage  String?  @map("cover_image")
-  order     Int      @default(0)
-  published Boolean  @default(false)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  order       Int      @default(0)
+  published   Boolean  @default(false)
+  /// Home meta filter: FEATURED pill (null = hidden)
+  featuredOrder  Int?  @map("featured_order")
+  /// Home meta filter: TOP RATED pill (null = hidden)
+  topRatedOrder  Int?  @map("top_rated_order")
+  /// Home meta filter: ACTIVITY pill (null = hidden)
+  activityOrder  Int?  @map("activity_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  school   School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  courses  Course[]
+  courses Course[]
 
-  @@index([schoolId])
   @@index([published])
   @@map("tracks")
 }
@@ -282,6 +269,7 @@ model Lesson {
 
   module        Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   video         LessonVideo?
+  article       LessonArticle?
   videoUploads  VideoUpload[]
   assignments   Assignment[]
   progress      LessonProgress[]
@@ -299,6 +287,16 @@ model LessonVideo {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@map("lesson_video")
+}
+
+model LessonArticle {
+  id       String @id @default(cuid())
+  lessonId String @unique @map("lesson_id")
+  body     String @db.Text
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_articles")
 }
 
 model VideoUpload {

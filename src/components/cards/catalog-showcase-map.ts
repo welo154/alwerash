@@ -75,7 +75,6 @@ export type CatalogShowcaseTrackCourseSlice = {
 export function catalogShowcasePropsFromTrackAggregate(input: {
   title: string;
   slug: string;
-  schoolTitle?: string | null;
   courses: CatalogShowcaseTrackCourseSlice[];
 }): CatalogShowcaseCardProps {
   let totalMins = 0;
@@ -86,8 +85,6 @@ export function catalogShowcasePropsFromTrackAggregate(input: {
   }
 
   const { titlePrimary, titleSecondary } = catalogShowcaseTitlesFromTrackTitle(input.title);
-  const schoolTitle = input.schoolTitle?.trim();
-  const levelLabel = schoolTitle && schoolTitle.length > 0 ? schoolTitle : "Beginner";
   const durationLabel =
     totalMins > 0 || lessonCount > 0
       ? formatCatalogDurationLabel(totalMins > 0 ? totalMins : null, lessonCount)
@@ -96,7 +93,7 @@ export function catalogShowcasePropsFromTrackAggregate(input: {
   return {
     titlePrimary,
     titleSecondary,
-    levelLabel,
+    levelLabel: "Beginner",
     durationLabel,
     viewMoreHref: `/tracks/${encodeURIComponent(input.slug)}`,
   };
