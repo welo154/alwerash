@@ -123,8 +123,10 @@ function CatalogShowcaseHoverCard({
   durationLabel,
   titlePrimary,
   titleSecondary,
+  href,
   onHoverCardEnter,
   onHoverCardLeave,
+  onClose,
 }: {
   visible: boolean;
   position: { left: number; top: number } | null;
@@ -132,8 +134,11 @@ function CatalogShowcaseHoverCard({
   durationLabel: string;
   titlePrimary: string;
   titleSecondary?: string;
+  /** Course href — used to navigate from inside the expanded card */
+  href?: string;
   onHoverCardEnter: () => void;
   onHoverCardLeave: () => void;
+  onClose: () => void;
 }) {
   if (!visible || !position || typeof document === "undefined") return null;
 
@@ -157,10 +162,21 @@ function CatalogShowcaseHoverCard({
         width: HOVER_EXPAND_W,
         height: HOVER_EXPAND_CARD_H,
       }}
-      aria-hidden
       onMouseEnter={onHoverCardEnter}
       onMouseLeave={onHoverCardLeave}
+      onClick={(e) => e.stopPropagation()}
     >
+      {/* Close button — lets touch users dismiss without navigating */}
+      <button
+        type="button"
+        aria-label="Close preview"
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/25 text-white hover:bg-black/45"
+        style={{ fontSize: "20px", lineHeight: 1 }}
+      >
+        ✕
+      </button>
+
       <div
         className="absolute inset-x-0 top-0 z-1 rounded-[50px] border border-black"
         style={{ height: HOVER_EXPAND_TOP_H, backgroundColor: BRIGHT_GREEN }}
@@ -216,15 +232,29 @@ function CatalogShowcaseHoverCard({
           Last Updated 3/2026
         </p>
 
-        <div
-          className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white"
-          style={{ fontFamily: pangeaFont }}
-        >
-          VIEW MORE
-          <span className="absolute top-[20.5px] right-[7px] inline-flex -translate-y-1/2 translate-x-1/2">
-            <ViewMoreCircleGlyph className="h-[43.5px] w-[43px]" />
-          </span>
-        </div>
+        {/* VIEW MORE inside the expanded card — this one actually navigates */}
+        {href ? (
+          <Link
+            href={href}
+            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white no-underline"
+            style={{ fontFamily: pangeaFont }}
+          >
+            VIEW MORE
+            <span className="absolute top-[20.5px] right-[7px] inline-flex -translate-y-1/2 translate-x-1/2">
+              <ViewMoreCircleGlyph className="h-[43.5px] w-[43px]" />
+            </span>
+          </Link>
+        ) : (
+          <div
+            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white"
+            style={{ fontFamily: pangeaFont }}
+          >
+            VIEW MORE
+            <span className="absolute top-[20.5px] right-[7px] inline-flex -translate-y-1/2 translate-x-1/2">
+              <ViewMoreCircleGlyph className="h-[43.5px] w-[43px]" />
+            </span>
+          </div>
+        )}
       </div>
     </div>,
     document.body
@@ -387,6 +417,14 @@ export function CatalogShowcaseCard({
               className={ctaClassName}
               style={ctaStyle}
               aria-label={viewMoreLabel}
+              onClick={(e) => {
+                if (!viewMoreHovered) {
+                  // First tap: show the expanded card instead of navigating
+                  e.preventDefault();
+                  openHover();
+                }
+                // Second tap (card already open): navigate normally
+              }}
               {...ctaHoverHandlers}
             >
               {ctaInner}
@@ -413,8 +451,10 @@ export function CatalogShowcaseCard({
         durationLabel={durationLabel}
         titlePrimary={titlePrimary}
         titleSecondary={titleSecondary}
+        href={resolvedViewMoreHref}
         onHoverCardEnter={openHover}
         onHoverCardLeave={scheduleHideHover}
+        onClose={scheduleHideHover}
       />
     </>
   );

@@ -167,6 +167,44 @@ label:has(input[type="radio"]) {
 .animation-delay-150 { animation-delay: 150ms; }
 .animation-delay-225 { animation-delay: 225ms; }
 
+/*
+ * ── Animation 1: Clockwise emphasis ──────────────────────────────────────────
+ * Period = 8 000 ms  (4 boxes × 2 000 ms slot each).
+ * Transition duration = 900 ms (≈ 11.25% of 8 000 ms).
+ *
+ * Keyframe design — each box is BIG at 0 % of its own timeline:
+ *   0 % – 13.75 %  →  hold big  (1 100 ms)
+ *   13.75 % – 25 %  →  SHRINK   (900 ms, ease-in-out)
+ *   25 % – 88.75 %  →  hold small (stay out while 3 others take turns)
+ *   88.75 % – 100 % →  GROW     (900 ms, ease-in-out)
+ *
+ * The shrink of box N (13.75 %–25 %) and the grow of box N+1 (88.75 %–100 %)
+ * are offset by exactly 2 000 ms so they run simultaneously — one grows
+ * while the next shrinks at the exact same time. No "all equal" moment exists.
+ *
+ * Delays (clockwise: top-left → top-right → bottom-right → bottom-left):
+ *   box 0  →    0 ms   (big at t = 0 s)
+ *   box 1  → −6 000 ms (big at t = 2 s)
+ *   box 2  → −4 000 ms (big at t = 4 s)
+ *   box 3  → −2 000 ms (big at t = 6 s)
+ */
+@keyframes alwerash-hero-box-pulse {
+  0%     { transform: scale(1.10); }
+  13.75% { transform: scale(1.10); animation-timing-function: ease-in-out; }
+  25%    { transform: scale(0.94); }
+  88.75% { transform: scale(0.94); animation-timing-function: ease-in-out; }
+  100%   { transform: scale(1.10); }
+}
+
+/*
+ * ── Animation 2: Grid float ───────────────────────────────────────────────────
+ * The whole 2×2 grid gently floats 12 px up and back over 5 s, infinite loop.
+ */
+@keyframes alwerash-hero-grid-float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-12px); }
+}
+
 /* Hide scrollbar but keep scroll (e.g. horizontal card strip) */
 .no-scrollbar {
   -ms-overflow-style: none;

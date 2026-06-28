@@ -150,6 +150,7 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
   const grayCoverSrc = coverImageSrc ?? POPULAR_CLASS_COVER_IMAGE;
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
+  const containerRef = useRef<HTMLAnchorElement | null>(null);
   const bottomScrollRef = useRef<HTMLDivElement | null>(null);
   const [bottomScrollRatio, setBottomScrollRatio] = useState(0);
   const dragStartYRef = useRef(0);
@@ -265,6 +266,7 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
   return (
     <>
       <Link
+        ref={containerRef}
         href={href}
         aria-label={`${title}. ${authorLabel}. ${tagPrimary}. Start`}
         className={`relative flex w-[346px] shrink-0 flex-col overflow-visible no-underline ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()}
@@ -276,8 +278,22 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
           className="absolute left-0 top-1/2 z-1001 -translate-y-1/2"
           style={{ position: "absolute", width: "608px", height: "567px" }}
           onMouseEnter={() => setIsStartHovered(true)}
-          aria-hidden
+          onClick={(e) => e.stopPropagation()}
         >
+          {/* Close button — visible on touch screens so users can dismiss without navigating */}
+          <button
+            type="button"
+            aria-label="Close preview"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (containerRef.current) deactivateHover(containerRef.current);
+            }}
+            className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50"
+            style={{ fontSize: "20px", lineHeight: 1 }}
+          >
+            ✕
+          </button>
           <div
             className="absolute left-0 top-0 z-10 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]"
             style={{ width: "608px", height: "444px" }}
@@ -577,6 +593,15 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
             className="inline-flex h-[42px] w-[106px] shrink-0 items-center justify-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] text-white"
             onMouseEnter={(e: MouseEvent<HTMLSpanElement>) => activateHover(e.currentTarget)}
             onFocus={(e: FocusEvent<HTMLSpanElement>) => activateHover(e.currentTarget)}
+            onClick={(e: MouseEvent<HTMLSpanElement>) => {
+              if (!isStartHovered) {
+                // First tap: show the expanded card instead of navigating
+                e.preventDefault();
+                e.stopPropagation();
+                activateHover(e.currentTarget);
+              }
+              // Second tap (card already shown): let click reach the Link → navigate
+            }}
             style={{
               fontFamily: pangeaFont,
               fontSize: "18px",

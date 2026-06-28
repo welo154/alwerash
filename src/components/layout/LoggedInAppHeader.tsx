@@ -69,6 +69,7 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
           href={isGuest ? "/" : "/home"}
           className="absolute top-[8px] left-0 z-10 block bg-transparent"
           aria-label={isGuest ? "Go to landing page" : "Go to home"}
+          tabIndex={-1}
         >
           <Image
             src="/brand/alwerash-logo.png"
@@ -80,6 +81,13 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
             priority
           />
         </Link>
+
+        {/* Transparent click-target sitting above the z-40 nav bar, covering only the logo area */}
+        <Link
+          href={isGuest ? "/" : "/home"}
+          className="absolute top-[8px] left-0 z-50 block h-[96px] w-[220px] bg-transparent"
+          aria-label={isGuest ? "Go to landing page" : "Go to home"}
+        />
 
         <div
           className="absolute inset-0 z-40 flex min-w-0 items-center justify-between pl-[280px] pr-[55px] text-white"

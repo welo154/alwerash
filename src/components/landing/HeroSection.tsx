@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,8 +40,45 @@ const SOFTWARE_COURSES = [
   "Design courses",
 ];
 
+/**
+ * Clockwise pulse: 8 s total period (4 boxes × 2 s each).
+ * Each box uses the same @keyframes but a different negative delay so they
+ * are always out-of-phase — one grows while the other three shrink simultaneously.
+ *
+ * Delay math: box N becomes "big" at real-time N*2000 ms.
+ * Negative delay = animation-start offset into the 8000 ms cycle.
+ *   box 0 → 0 ms          (big at t = 0 s)
+ *   box 1 → −6000 ms      (big at t = 2 s)
+ *   box 2 → −4000 ms      (big at t = 4 s)
+ *   box 3 → −2000 ms      (big at t = 6 s)
+ */
+/**
+ * Delay is embedded in the animation shorthand string (second <time> value).
+ * Never use a separate `animationDelay` prop alongside `animation` shorthand —
+ * the shorthand resets animation-delay to 0ms and wins the cascade, making all
+ * boxes animate in sync. By embedding the delay here, each box starts at a
+ * different phase of the 8-second cycle so exactly one is big at any moment.
+ *
+ * Format: name duration timing-function delay iteration-count
+ *   box 0 (top-left)     →    0ms  → big at t = 0 s
+ *   box 1 (top-right)    → −6000ms → big at t = 2 s
+ *   box 2 (bottom-right) → −4000ms → big at t = 4 s
+ *   box 3 (bottom-left)  → −2000ms → big at t = 6 s
+ */
+const BOX_ANIMATIONS = [
+  "alwerash-hero-box-pulse 8000ms linear    0ms infinite",
+  "alwerash-hero-box-pulse 8000ms linear -6000ms infinite",
+  "alwerash-hero-box-pulse 8000ms linear -4000ms infinite",
+  "alwerash-hero-box-pulse 8000ms linear -2000ms infinite",
+] as const;
+
+const boxStyle = (clockwiseIndex: 0 | 1 | 2 | 3): React.CSSProperties => ({
+  animation: BOX_ANIMATIONS[clockwiseIndex],
+});
+
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
-      return (
+
+  return (
     <section className="bg-white px-4 pt-0 pb-8 sm:px-6 lg:px-8">
       {/* ── Guest shell from Figma (node 17:1467) ── */}
       <div className="relative mx-auto max-w-[1600px] overflow-hidden flex flex-col">
@@ -243,14 +281,33 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
               </div>
 
               <div className="lg:col-span-6">
-                <div className="flex gap-[20px]">
+                <div
+                  className="flex gap-[20px]"
+                  style={{ animation: "alwerash-hero-grid-float 5000ms ease-in-out infinite" }}
+                >
                   <div className="flex w-[314px] flex-col gap-[20px]">
-                    <div className="h-[423px] w-[314px] rounded-[50px] border border-black bg-white" />
-                    <div className="h-[266px] w-[314px] rounded-[50px] border border-black bg-white" />
+                    {/* box 0: top-left */}
+                    <div
+                      className="h-[423px] w-[314px] rounded-[50px] border border-black bg-white"
+                      style={boxStyle(0)}
+                    />
+                    {/* box 3: bottom-left (clockwise: last in the left col) */}
+                    <div
+                      className="h-[266px] w-[314px] rounded-[50px] border border-black bg-white"
+                      style={boxStyle(3)}
+                    />
                   </div>
                   <div className="flex w-[220px] flex-col gap-[20px]">
-                    <div className="h-[323px] w-[220px] rounded-[50px] border border-black bg-white" />
-                    <div className="h-[366px] w-[220px] rounded-[50px] border border-black bg-white" />
+                    {/* box 1: top-right */}
+                    <div
+                      className="h-[323px] w-[220px] rounded-[50px] border border-black bg-white"
+                      style={boxStyle(1)}
+                    />
+                    {/* box 2: bottom-right */}
+                    <div
+                      className="h-[366px] w-[220px] rounded-[50px] border border-black bg-white"
+                      style={boxStyle(2)}
+                    />
                   </div>
                 </div>
               </div>

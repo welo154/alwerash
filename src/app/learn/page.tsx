@@ -74,15 +74,6 @@ export default async function LearnPage() {
     "Wellness courses",
     "How to become courses",
   ];
-  const sidebarAreas = [
-    "Branding & Identity",
-    "Graphic Design",
-    "Social Media Design",
-    "Web Design",
-    "Color Theory",
-    "Design",
-    "+ See More",
-  ];
   const sidebarSoftware = [
     "Adobe Photoshop",
     "Adobe Illustrator",
@@ -97,10 +88,10 @@ export default async function LearnPage() {
     '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-hidden bg-white pb-16 pt-8 font-sans">
+    <div className="min-w-0 max-w-full overflow-x-clip bg-white pb-16 pt-8 font-sans">
       <div className="mx-auto w-full min-w-0 max-w-[1400px] pl-6 sm:pl-8 lg:pl-10">
         <div className="flex min-w-0 max-w-full flex-col gap-8 lg:flex-row lg:items-start lg:gap-[55px]">
-          <aside className="w-full shrink-0 lg:w-[266px]">
+          <aside className="w-full shrink-0 lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <div>
               <h2
                 className="uppercase"
@@ -184,42 +175,6 @@ export default async function LearnPage() {
                   lineHeight: "28.8px",
                 }}
               >
-                AREAS
-              </h3>
-              <ul className="mt-2 space-y-0.5">
-                {sidebarAreas.map((item) => (
-                  <li
-                    key={item}
-                    style={{
-                      fontFamily: pangeaFont,
-                      fontSize: "18px",
-                      fontWeight: 400,
-                      lineHeight: "28.98px",
-                      color: "#000",
-                    }}
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div
-              aria-hidden
-              className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
-            />
-
-            <div>
-              <h3
-                className="uppercase"
-                style={{
-                  fontFamily: pangeaFont,
-                  fontSize: "24px",
-                  fontStyle: "italic",
-                  fontWeight: 700,
-                  lineHeight: "28.8px",
-                }}
-              >
                 SOFTWARE
               </h3>
               <ul className="mt-2 space-y-0.5">
@@ -262,6 +217,8 @@ export default async function LearnPage() {
                   forceTwoPerRow
                   compactVerticalSpacing
                   contained
+                  mentorCardWidthPx={469}
+                  mentorCardHeightPx={487}
                 />
               </div>
             </div>
