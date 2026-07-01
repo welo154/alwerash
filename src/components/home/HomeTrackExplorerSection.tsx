@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CatalogShowcaseCard, CATALOG_SHOWCASE_CARD_H } from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 
 const FULL_BLEED = "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2";
@@ -55,10 +57,37 @@ function TrackLinkPill({ pill }: { pill: HomeTrackPill }) {
   );
 }
 
+function TrackSelectPill({
+  pill,
+  pressed,
+  onClick,
+}: {
+  pill: HomeTrackPill;
+  pressed: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      className={`inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black transition-colors ${
+        pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"
+      }`}
+      style={pillFont}
+    >
+      {pill.label}
+    </button>
+  );
+}
+
 export type HomeTrackExplorerSectionProps = {
   trackPillRow1: HomeTrackPill[];
   trackPillRow2: HomeTrackPill[];
   slidesByFilter: Record<HomeTrackMetaFilter, LandingShowcaseSlide[]>;
+  /** When true, track pills select one track and cards show that track's courses. */
+  trackPillSelectsCourses?: boolean;
+  courseTilesByTrackSlug?: Record<string, LearnPopularTile[]>;
   showDiscoverCta?: boolean;
   sectionClassName?: string;
 };
@@ -67,11 +96,54 @@ export function HomeTrackExplorerSection({
   trackPillRow1,
   trackPillRow2,
   slidesByFilter,
+  trackPillSelectsCourses = false,
+  courseTilesByTrackSlug = {},
   showDiscoverCta = true,
   sectionClassName = "mt-[107px]",
 }: HomeTrackExplorerSectionProps) {
   const [metaFilter, setMetaFilter] = useState<HomeTrackMetaFilter>("featured");
-  const slides = slidesByFilter[metaFilter] ?? [];
+  const allPills = useMemo(
+    () => [...trackPillRow1, ...trackPillRow2],
+    [trackPillRow1, trackPillRow2]
+  );
+
+  const defaultTrackSlug = allPills[0]?.slug ?? null;
+  const [selectedTrackSlug, setSelectedTrackSlug] = useState<string | null>(defaultTrackSlug);
+
+  useEffect(() => {
+    if (!trackPillSelectsCourses) return;
+    setSelectedTrackSlug(defaultTrackSlug);
+  }, [trackPillSelectsCourses, defaultTrackSlug]);
+
+  const activeTrackSlug =
+    trackPillSelectsCourses && selectedTrackSlug
+      ? selectedTrackSlug
+      : null;
+
+  const trackSlides = slidesByFilter[metaFilter] ?? [];
+  const courseTiles = trackPillSelectsCourses
+    ? activeTrackSlug
+      ? (courseTilesByTrackSlug[activeTrackSlug] ?? [])
+      : []
+    : [];
+
+  const cardGridKey = trackPillSelectsCourses
+    ? `courses-${activeTrackSlug ?? "none"}`
+    : metaFilter;
+
+  const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
+
+  const renderTrackPill = (pill: HomeTrackPill) =>
+    trackPillSelectsCourses ? (
+      <TrackSelectPill
+        key={pill.slug}
+        pill={pill}
+        pressed={pill.slug === activeTrackSlug}
+        onClick={() => setSelectedTrackSlug(pill.slug)}
+      />
+    ) : (
+      <TrackLinkPill key={pill.slug} pill={pill} />
+    );
 
   return (
     <section className={`${sectionClassName} w-full overflow-x-hidden`}>
@@ -88,29 +160,42 @@ export function HomeTrackExplorerSection({
 
       {trackPillRow1.length > 0 ? (
         <div className={`${FULL_BLEED} mt-[25px] flex flex-wrap gap-[25px] px-6 sm:px-8`}>
-          {trackPillRow1.map((pill) => (
-            <TrackLinkPill key={pill.slug} pill={pill} />
-          ))}
+          {trackPillRow1.map(renderTrackPill)}
         </div>
       ) : null}
 
       {trackPillRow2.length > 0 ? (
         <div className={`${FULL_BLEED} mt-[11px] flex flex-wrap gap-[25px] px-6 sm:px-8 pr-[68px]`}>
-          {trackPillRow2.map((pill) => (
-            <TrackLinkPill key={pill.slug} pill={pill} />
-          ))}
+          {trackPillRow2.map(renderTrackPill)}
         </div>
       ) : null}
 
       <div
         className="mx-auto mt-[64px] w-full max-w-[1600px] px-6 sm:px-8"
-        style={{ minHeight: CATALOG_SHOWCASE_CARD_H }}
+        style={trackPillSelectsCourses ? undefined : { minHeight: CATALOG_SHOWCASE_CARD_H }}
       >
-        <div key={metaFilter} className="flex flex-wrap justify-center gap-[30px]">
-          {slides.map(({ slug, cardProps }) => (
-            <CatalogShowcaseCard key={slug} {...cardProps} showcaseSlug={slug} />
-          ))}
-        </div>
+        {isEmpty ? (
+          <p
+            className="text-center text-[20px] text-black/60"
+            style={pillFont}
+          >
+            {trackPillSelectsCourses && activeTrackSlug
+              ? "No published courses in this track yet."
+              : "No tracks to show."}
+          </p>
+        ) : trackPillSelectsCourses ? (
+          <div key={cardGridKey} className="flex flex-wrap justify-center gap-6">
+            {courseTiles.map((tile) => (
+              <LearnPopularFigmaTile key={tile.id} {...tile} />
+            ))}
+          </div>
+        ) : (
+          <div key={cardGridKey} className="flex flex-wrap justify-center gap-[30px]">
+            {trackSlides.map(({ slug, cardProps }) => (
+              <CatalogShowcaseCard key={slug} {...cardProps} showcaseSlug={slug} />
+            ))}
+          </div>
+        )}
       </div>
 
       {showDiscoverCta ? (

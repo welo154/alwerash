@@ -272,6 +272,7 @@ export function CatalogShowcaseCard({
   viewMoreHref,
   onViewMore,
   className = "",
+  topImageSrc,
   bottomImageSrc,
 }: CatalogShowcaseCardProps) {
   const [viewMoreHovered, setViewMoreHovered] = useState(false);
@@ -366,10 +367,15 @@ export function CatalogShowcaseCard({
         {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}
       >
         <div
-          className={`absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black ${bottomImageSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
+          className={`absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black ${topImageSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
           style={{ height: SHOWCASE_TOP_H }}
           aria-hidden
-        />
+        >
+          {topImageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={topImageSrc} alt="" className="h-full w-full object-cover object-center" />
+          ) : null}
+        </div>
 
         <div
           className="absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black bg-white"

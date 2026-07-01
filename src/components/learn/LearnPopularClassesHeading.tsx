@@ -7,7 +7,13 @@ const pangeaFont =
  * Matches {@link LearnFeaturedCoursesPanel} heading row (pill + 60px circle arrow).
  * Wire `onNext` when a popular carousel exists.
  */
-export function LearnPopularClassesHeading({ onNext }: { onNext?: () => void }) {
+export function LearnPopularClassesHeading({
+  onNext,
+  atEnd = false,
+}: {
+  onNext?: () => void;
+  atEnd?: boolean;
+}) {
   return (
     <div className="relative inline-flex items-center pr-[30px]">
       <div className="inline-flex h-[72px] items-center rounded-[44px] bg-white pl-[22px] pr-[22px]">
@@ -37,10 +43,15 @@ export function LearnPopularClassesHeading({ onNext }: { onNext?: () => void }) 
       </div>
       <button
         type="button"
-        className="absolute left-full top-1/2 z-0 inline-flex h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0"
-        aria-label="Next popular classes"
+        className="absolute left-full top-1/2 z-0 inline-flex h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+        aria-label="Next popular class"
+        disabled={atEnd}
         suppressHydrationWarning
-        onClick={() => onNext?.()}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onNext?.();
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -25,6 +25,8 @@ export async function GuestLanding() {
         trackPillRow1={trackBundle.trackPillRow1}
         trackPillRow2={trackBundle.trackPillRow2}
         slidesByFilter={trackBundle.slidesByFilter}
+        trackPillSelectsCourses
+        courseTilesByTrackSlug={trackBundle.courseTilesByTrackSlug}
         showDiscoverCta
       />
       <LandingEverythingInOneSection />

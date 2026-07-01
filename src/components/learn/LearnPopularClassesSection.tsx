@@ -1,18 +1,21 @@
 "use client";
 
-import { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import type { Swiper as SwiperType } from "swiper";
+import { Mousewheel } from "swiper/modules";
 import "swiper/css";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
 import { LearnPopularClassesHeading } from "@/components/learn/LearnPopularClassesHeading";
+import {
+  learnCarouselMousewheel,
+  learnCarouselSwiperBehavior,
+} from "@/components/learn/learn-carousel-swiper-config";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import {
   LearnPopularFigmaTile,
   LEARN_POPULAR_FIGMA_TILE_H,
   LEARN_POPULAR_FIGMA_TILE_W,
 } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
-
-const SLIDE_MS = 400;
 
 export type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 
@@ -21,14 +24,23 @@ export function LearnPopularClassesSection({
 }: {
   tiles?: LearnPopularTile[];
 }) {
-  const swiperRef = useRef<SwiperType | null>(null);
+  const {
+    scrollAreaRef,
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
 
   return (
     <div className="min-w-0 w-full max-w-full">
-      <LearnPopularClassesHeading onNext={() => swiperRef.current?.slideNext(SLIDE_MS)} />
+      <LearnPopularClassesHeading onNext={slideNext} atEnd={atEnd} />
 
       <div
-        className="mt-8 w-[1125px] max-w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+        ref={scrollAreaRef}
+        className="relative mt-8 w-[1125px] max-w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
         style={{
           minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined,
           clipPath: "inset(-200px -200vw -200px 0)",
@@ -36,19 +48,14 @@ export function LearnPopularClassesSection({
       >
         <Swiper
           dir="ltr"
-          slidesPerView="auto"
-          spaceBetween={18}
-          slidesPerGroup={1}
-          speed={SLIDE_MS}
-          autoHeight
-          grabCursor
-          allowTouchMove
-          simulateTouch
-          watchOverflow
+          modules={[Mousewheel]}
+          {...learnCarouselSwiperBehavior}
+          mousewheel={learnCarouselMousewheel}
           className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
-          onSwiper={(s) => {
-            swiperRef.current = s;
-          }}
+          onSwiper={handleSwiper}
+          onSlideChange={handleNavSync}
+          onSlidesUpdated={handleNavSync}
+          onResize={handleNavSync}
         >
           {tiles.map((tile) => (
             <SwiperSlide
@@ -60,6 +67,15 @@ export function LearnPopularClassesSection({
             </SwiperSlide>
           ))}
         </Swiper>
+
+        <LearnCarouselEdgeNav
+          atBeginning={atBeginning}
+          atEnd={atEnd}
+          onPrev={slidePrev}
+          onNext={slideNext}
+          prevLabel="Previous popular class"
+          nextLabel="Next popular class"
+        />
       </div>
     </div>
   );

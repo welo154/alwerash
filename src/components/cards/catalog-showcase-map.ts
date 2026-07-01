@@ -9,6 +9,8 @@ export type CatalogShowcaseCardProps = {
   viewMoreHref?: string;
   onViewMore?: () => void;
   className?: string;
+  /** Photo for the upper stacked panel (track cards). */
+  topImageSrc?: string;
   /** Photo for the lower stacked panel only (featured course cards). */
   bottomImageSrc?: string;
 };

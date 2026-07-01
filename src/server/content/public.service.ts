@@ -7,7 +7,10 @@ import {
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
-import { staticCourseCoverForTitle } from "@/lib/static-course-covers";
+import {
+  resolveCourseCoverImage,
+  resolveTrackCoverImage,
+} from "@/lib/catalog-cover-images";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import type {
@@ -18,26 +21,19 @@ import type {
 
 export type { HomeTrackExplorerBundle, HomeTrackMetaFilter, HomeTrackPill };
 
-function muxThumbnailUrl(playbackId: string): string {
-  return `https://image.mux.com/${playbackId}/thumbnail.jpg?width=800&height=450&fit_mode=smartcrop`;
-}
-
-/** Fallback when course has no cover image and no intro video. */
-const DEFAULT_COURSE_IMAGE =
-  "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80";
 
 function effectiveCoverImage(
   coverImage: string | null,
   introVideoMuxPlaybackId: string | null | undefined,
-  title?: string
-): string | null {
-  if (title) {
-    const staticCover = staticCourseCoverForTitle(title);
-    if (staticCover) return staticCover;
-  }
-  if (coverImage?.trim()) return coverImage;
-  if (introVideoMuxPlaybackId?.trim()) return muxThumbnailUrl(introVideoMuxPlaybackId);
-  return DEFAULT_COURSE_IMAGE;
+  title?: string,
+  trackSlug?: string | null
+): string {
+  return resolveCourseCoverImage({
+    coverImage,
+    introVideoMuxPlaybackId,
+    title: title ?? "",
+    trackSlug,
+  });
 }
 
 function isPrismaMissingColumnError(e: unknown): boolean {
@@ -49,27 +45,68 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
+type TrackCourseRow = {
+  id: string;
+  title: string;
+  instructorName: string | null;
+  coverImage: string | null;
+  introVideoMuxPlaybackId: string | null;
+  totalDurationMinutes: number | null;
+  modules: { _count: { lessons: number } }[];
+};
+
 type TrackWithCourses = {
   id: string;
   title: string;
   slug: string;
+  coverImage: string | null;
   order: number;
   featuredOrder: number | null;
   topRatedOrder: number | null;
   activityOrder: number | null;
-  courses: {
-    totalDurationMinutes: number | null;
-    modules: { _count: { lessons: number } }[];
-  }[];
+  courses: TrackCourseRow[];
 };
 
 const trackCourseSelect = {
   where: { published: true },
+  orderBy: [{ order: "asc" as const }, { createdAt: "asc" as const }],
   select: {
+    id: true,
+    title: true,
+    instructorName: true,
+    coverImage: true,
+    introVideoMuxPlaybackId: true,
     totalDurationMinutes: true,
     modules: { select: { _count: { select: { lessons: true } } } },
   },
-} as const;
+};
+
+function buildCourseTilesForTrack(
+  track: Pick<TrackWithCourses, "title" | "slug" | "courses">
+): LearnPopularTile[] {
+  const tagPrimary = track.title.trim().toUpperCase() || "TRACK";
+  return track.courses.map((course) => ({
+    id: course.id,
+    href: `/courses/${course.id}`,
+    title: course.title,
+    authorLabel: course.instructorName?.trim() || "Instructor",
+    tagPrimary,
+    coverImageSrc: effectiveCoverImage(
+      course.coverImage,
+      course.introVideoMuxPlaybackId,
+      course.title,
+      track.slug
+    ),
+  }));
+}
+
+function buildCourseTilesByTrackSlug(tracks: TrackWithCourses[]): Record<string, LearnPopularTile[]> {
+  const out: Record<string, LearnPopularTile[]> = {};
+  for (const track of tracks) {
+    out[track.slug] = buildCourseTilesForTrack(track);
+  }
+  return out;
+}
 
 function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[] {
   return tracks.map((t) => ({
@@ -83,6 +120,7 @@ function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[]
           lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
         })),
       }),
+      bottomImageSrc: resolveTrackCoverImage(t.coverImage, t.slug),
       showcaseSlug: t.slug,
     },
   }));
@@ -96,6 +134,7 @@ async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
       id: true,
       title: true,
       slug: true,
+      coverImage: true,
       order: true,
       featuredOrder: true,
       topRatedOrder: true,
@@ -139,6 +178,7 @@ export async function publicGetHomeTrackExplorerBundle(): Promise<HomeTrackExplo
         topRated: buildShowcaseSlides(filterTracksByMeta(rows, "topRated")),
         activity: buildShowcaseSlides(filterTracksByMeta(rows, "activity")),
       },
+      courseTilesByTrackSlug: buildCourseTilesByTrackSlug(rows),
     };
   } catch {
     return {
@@ -147,7 +187,18 @@ export async function publicGetHomeTrackExplorerBundle(): Promise<HomeTrackExplo
       trackPillRow1: [],
       trackPillRow2: [],
       slidesByFilter: { featured: [], topRated: [], activity: [] },
+      courseTilesByTrackSlug: {},
     };
+  }
+}
+
+/** All published tracks as catalog showcase slides (learn page featured tracks carousel). */
+export async function publicListTrackShowcaseSlides(): Promise<LandingShowcaseSlide[]> {
+  try {
+    const rows = await fetchPublishedTracksWithCourses();
+    return buildShowcaseSlides(rows);
+  } catch {
+    return [];
   }
 }
 
@@ -276,10 +327,11 @@ export async function publicGetTrackBySlug(slug: string) {
   if (!track || !track.published) throw new AppError("NOT_FOUND", 404, "Track not found");
   return {
     ...track,
+    coverImage: resolveTrackCoverImage(track.coverImage, track.slug),
     courses: track.courses.map(({ modules, introVideoMuxPlaybackId, coverImage, instructorName, ...c }) => ({
       ...c,
       instructorName: instructorName ?? null,
-      coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId, c.title),
+      coverImage: effectiveCoverImage(coverImage, introVideoMuxPlaybackId, c.title, track.slug),
       lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
     })),
   };
@@ -339,7 +391,8 @@ export async function publicGetCourseById(courseId: string) {
     coverImage: effectiveCoverImage(
       course.coverImage,
       course.introVideoMuxPlaybackId,
-      course.title
+      course.title,
+      course.track?.slug
     ),
   };
 }
@@ -397,7 +450,7 @@ function mapCourseToCard(
     id: c.id,
     title: c.title,
     summary: c.summary,
-    coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId, c.title),
+    coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId, c.title, c.track?.slug),
     instructorName: c.instructorName,
     instructorImage: c.instructorImage,
     track: c.track,

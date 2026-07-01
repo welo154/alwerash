@@ -3,24 +3,49 @@ import {
   publicListMostPlayedCourses,
   publicListFeaturedCourses,
   publicListTracks,
+  publicListTrackShowcaseSlides,
   publicListLandingMostsMentors,
 } from "@/server/content/public.service";
-import { catalogShowcasePropsFromCourse } from "@/components/cards/catalog-showcase-map";
 import { LearnFeaturedCoursesPanel } from "@/components/learn/LearnFeaturedCoursesPanel";
 import { LearnPopularClassesSection } from "@/components/learn/LearnPopularClassesSection";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { LandingCurrentMostsSection } from "@/components/landing";
 
 export default async function LearnPage() {
-  const [newCourses, mostPlayedCourses, fallbackCourses, tracks, landingMostsMentors] = await Promise.all([
+  const [newCourses, mostPlayedCourses, fallbackCourses, tracks, trackShowcaseSlides, landingMostsMentors] =
+    await Promise.all([
     publicListNewCourses(),
     publicListMostPlayedCourses(12),
     publicListFeaturedCourses(12),
     publicListTracks(),
+    publicListTrackShowcaseSlides(),
     publicListLandingMostsMentors(),
   ]);
 
-  const fields = tracks.length > 0 ? tracks.map((t) => t.title) : [];
+  const sidebarCategories =
+    tracks.length > 0
+      ? tracks.map((t) => ({ key: `track-${t.id}`, label: t.title }))
+      : [
+          { key: "fallback-illustration", label: "Illustration courses" },
+          { key: "fallback-craft", label: "Craft courses" },
+          { key: "fallback-marketing-business", label: "Marketing & Business courses" },
+          { key: "fallback-photography-video", label: "Photography & Video courses" },
+          { key: "fallback-design", label: "Design courses" },
+          { key: "fallback-3d-animation", label: "3D & Animation courses" },
+          { key: "fallback-architecture-spaces", label: "Architecture & Spaces courses" },
+          { key: "fallback-writing", label: "Writing courses" },
+        ];
+  const sidebarCategoriesExtended = [
+    ...sidebarCategories,
+    { key: "extra-fashion", label: "Fashion courses" },
+    { key: "extra-web-app-design", label: "Web & App Design courses" },
+    { key: "extra-calligraphy-typography", label: "Calligraphy & Typography courses" },
+    { key: "extra-music-audio", label: "Music & Audio courses" },
+    { key: "extra-culinary", label: "Culinary courses" },
+    { key: "extra-ai", label: "Artificial Intelligence courses" },
+    { key: "extra-wellness", label: "Wellness courses" },
+    { key: "extra-how-to-become", label: "How to become courses" },
+  ];
   const newList = newCourses.length > 0 ? newCourses : fallbackCourses.slice(0, 3);
   const mostPlayedList =
     mostPlayedCourses.length > 0 ? mostPlayedCourses : fallbackCourses;
@@ -51,29 +76,6 @@ export default async function LearnPage() {
     "Popular Courses",
   ] as const;
 
-  const sidebarCategories = fields.length > 0
-    ? fields
-    : [
-        "Illustration courses",
-        "Craft courses",
-        "Marketing & Business courses",
-        "Photography & Video courses",
-        "Design courses",
-        "3D & Animation courses",
-        "Architecture & Spaces courses",
-        "Writing courses",
-      ];
-  const sidebarCategoriesExtended = [
-    ...sidebarCategories,
-    "Fashion courses",
-    "Web & App Design courses",
-    "Calligraphy & Typography courses",
-    "Music & Audio courses",
-    "Culinary courses",
-    "Artificial Intelligence courses",
-    "Wellness courses",
-    "How to become courses",
-  ];
   const sidebarSoftware = [
     "Adobe Photoshop",
     "Adobe Illustrator",
@@ -144,7 +146,7 @@ export default async function LearnPage() {
               <ul className="mt-2 space-y-0.5">
                 {sidebarCategoriesExtended.map((item) => (
                   <li
-                    key={item}
+                    key={item.key}
                     style={{
                       fontFamily: pangeaFont,
                       fontSize: "18px",
@@ -153,7 +155,7 @@ export default async function LearnPage() {
                       color: "#000",
                     }}
                   >
-                    {item}
+                    {item.label}
                   </li>
                 ))}
               </ul>
@@ -197,11 +199,11 @@ export default async function LearnPage() {
           </aside>
 
           <main className="min-w-0 flex-1">
-            <section aria-label="Featured courses">
+            <section aria-label="Featured tracks">
               <LearnFeaturedCoursesPanel
-                slides={featuredList.map((course) => ({
-                  id: course.id,
-                  cardProps: catalogShowcasePropsFromCourse(course),
+                slides={trackShowcaseSlides.map((slide) => ({
+                  id: slide.slug,
+                  cardProps: slide.cardProps,
                 }))}
               />
             </section>

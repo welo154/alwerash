@@ -242,6 +242,22 @@ label:has(input[type="radio"]) {
   height: var(--landing-showcase-card-h, 585px) !important;
 }
 
+.learn-featured-swiper.swiper {
+  touch-action: pan-y pinch-zoom;
+}
+
+.learn-featured-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.learn-popular-swiper.swiper {
+  touch-action: pan-y pinch-zoom;
+}
+
+.learn-popular-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
 .landing-showcase-swiper--tags.swiper {
   overflow: hidden;
   width: 100%;

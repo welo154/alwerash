@@ -1,7 +1,7 @@
 /**
  * Content for subscribed users: course list and course with lessons/videos for learning.
  */
-import { staticCourseCoverForTitle } from "@/lib/static-course-covers";
+import { resolveCourseCoverImage } from "@/lib/catalog-cover-images";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import {
@@ -124,7 +124,11 @@ export async function listCoursesForLearningWithProgress(
     id: c.id,
     title: c.title,
     summary: c.summary,
-    coverImage: staticCourseCoverForTitle(c.title) ?? c.coverImage,
+    coverImage: resolveCourseCoverImage({
+      coverImage: c.coverImage,
+      title: c.title,
+      trackSlug: c.track?.slug,
+    }),
     track: c.track,
     trackId: c.trackId,
     order: c.order,
@@ -266,7 +270,11 @@ export async function getCourseForLearning(courseId: string) {
     id: course.id,
     title: course.title,
     summary: course.summary,
-    coverImage: staticCourseCoverForTitle(course.title) ?? course.coverImage,
+    coverImage: resolveCourseCoverImage({
+      coverImage: course.coverImage,
+      title: course.title,
+      trackSlug: course.track?.slug,
+    }),
     published: course.published,
     track: course.track,
     modules,
