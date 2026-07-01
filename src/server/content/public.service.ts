@@ -13,6 +13,8 @@ import {
 } from "@/lib/catalog-cover-images";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
+import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
 import type {
   HomeTrackExplorerBundle,
   HomeTrackMetaFilter,
@@ -236,7 +238,7 @@ async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
 
 export async function publicListTracks(): Promise<PublicTrackListItem[]> {
   try {
-    return await prisma.track.findMany({
+    const rows = await prisma.track.findMany({
       where: { published: true },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
@@ -248,9 +250,17 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
         order: true,
       },
     });
+    return rows.map((row) => ({
+      ...row,
+      coverImage: resolveTrackCoverImage(row.coverImage, row.slug),
+    }));
   } catch (e) {
     if (isPrismaMissingColumnError(e)) {
-      return publicListTracksRawSafe();
+      const rows = await publicListTracksRawSafe();
+      return rows.map((row) => ({
+        ...row,
+        coverImage: resolveTrackCoverImage(null, row.slug),
+      }));
     }
     throw e;
   }
@@ -495,6 +505,15 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
   return publicListFeaturedCourses(3);
 }
 
+/** Learn page “Popular classes” carousel — courses with featuredMostPlayedOrder. */
+export const POPULAR_CLASS_TRACK_SLUGS = ["calligraphy", "3d-designs"] as const;
+
+export async function publicListPopularClassCourses(
+  limit = 40
+): Promise<CourseForCard[]> {
+  return publicListMostPlayedCourses(limit);
+}
+
 /** "Most Played" section: courses with featuredMostPlayedOrder set, ordered by it. Falls back to featured list if none set. */
 export async function publicListMostPlayedCourses(limit = 12): Promise<CourseForCard[]> {
   try {
@@ -528,6 +547,48 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
     // featured_most_played_order column may not exist yet
   }
   return publicListFeaturedCourses(limit);
+}
+
+export const MAX_TRENDING_CLASS_COURSES = 6;
+
+/** Learn page “Trending” carousel — up to 6 courses with featuredTrendingOrder. */
+export async function publicListTrendingCourses(
+  limit = MAX_TRENDING_CLASS_COURSES
+): Promise<CourseForCard[]> {
+  try {
+    const orderedIds = await sqlGetTrendingCourseIds(limit);
+    if (orderedIds.length === 0) return [];
+
+    const courses = await prisma.course.findMany({
+      where: { id: { in: orderedIds }, published: true },
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        coverImage: true,
+        introVideoMuxPlaybackId: true,
+        instructorName: true,
+        instructorImage: true,
+        track: { select: { title: true, slug: true } },
+        modules: { select: { _count: { select: { lessons: true } } } },
+      },
+    });
+    const byId = new Map(courses.map((c) => [c.id, c]));
+    const ordered = orderedIds
+      .map((id) => byId.get(id))
+      .filter((c): c is NonNullable<typeof c> => c != null);
+
+    const studentCounts = await getStudentCountsByCourseId(ordered.map((c) => c.id));
+    return ordered.map((c) =>
+      mapCourseToCard(
+        { ...c, totalDurationMinutes: undefined, rating: undefined },
+        studentCounts.get(c.id) ?? 0
+      )
+    );
+  } catch {
+    // featured_trending_order column may not exist yet
+  }
+  return [];
 }
 
 export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCard[]> {
@@ -653,11 +714,47 @@ export async function publicListMentors() {
 
 export type { LandingMostsMentorCardDto };
 
+export const LEARN_FEATURED_MENTOR_LIMIT = 8;
+
 const LANDING_MOSTS_MENTOR_LIMIT = 12;
 
+function mapMentorsToMostsDtos(
+  rows: { id: string; name: string; certificateName: string | null }[]
+): LandingMostsMentorCardDto[] {
+  return rows.map((m, i) => ({
+    id: m.id,
+    variant: i % 2 === 0 ? "popular" : "watched",
+    name: m.name.trim().replace(/\s+/g, " ").toUpperCase(),
+    profession: m.certificateName?.trim() || "Mentor",
+  }));
+}
+
+/** Featured mentors for the Learn page (max 8 — two rows of four). */
+export async function publicListFeaturedMentors(
+  limit = LEARN_FEATURED_MENTOR_LIMIT
+): Promise<LandingMostsMentorCardDto[]> {
+  try {
+    const orderedIds = await sqlGetFeaturedMentorIds(limit);
+    if (orderedIds.length === 0) return [];
+
+    const mentors = await prisma.mentor.findMany({
+      where: { id: { in: orderedIds } },
+      select: { id: true, name: true, certificateName: true },
+    });
+    const byId = new Map(mentors.map((m) => [m.id, m]));
+    const ordered = orderedIds
+      .map((id) => byId.get(id))
+      .filter((m): m is NonNullable<typeof m> => m != null);
+
+    return mapMentorsToMostsDtos(ordered);
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Mentors for the landing “Current Mosts” strip, same order as admin (createdAt asc).
- * Badge alternates for visual rhythm; not stored on Mentor yet.
+ * Mentors for the landing “Current Mosts” strip on home/guest (createdAt asc).
+ * Badge alternates for visual rhythm; not stored on Mentor.
  */
 export async function publicListLandingMostsMentors(
   limit = LANDING_MOSTS_MENTOR_LIMIT
@@ -668,12 +765,7 @@ export async function publicListLandingMostsMentors(
       take: limit,
       select: { id: true, name: true, certificateName: true },
     });
-    return rows.map((m, i) => ({
-      id: m.id,
-      variant: i % 2 === 0 ? "popular" : "watched",
-      name: m.name.trim().replace(/\s+/g, " ").toUpperCase(),
-      profession: m.certificateName?.trim() || "Mentor",
-    }));
+    return mapMentorsToMostsDtos(rows);
   } catch {
     return [];
   }

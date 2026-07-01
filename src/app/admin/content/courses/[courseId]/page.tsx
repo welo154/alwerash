@@ -19,13 +19,16 @@ import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleB
 function FeaturedInBadges({
   featuredNewOrder,
   featuredMostPlayedOrder,
+  featuredTrendingOrder,
 }: {
   featuredNewOrder?: number | null;
   featuredMostPlayedOrder?: number | null;
+  featuredTrendingOrder?: number | null;
 }) {
   const inNew = featuredNewOrder != null;
   const inMostPlayed = featuredMostPlayedOrder != null;
-  if (!inNew && !inMostPlayed) return null;
+  const inTrending = featuredTrendingOrder != null;
+  if (!inNew && !inMostPlayed && !inTrending) return null;
   return (
     <>
       {inNew && (
@@ -35,7 +38,12 @@ function FeaturedInBadges({
       )}
       {inMostPlayed && (
         <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-          In &quot;Most played&quot; (order {String(featuredMostPlayedOrder)})
+          Popular class (order {String(featuredMostPlayedOrder)})
+        </span>
+      )}
+      {inTrending && (
+        <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-800">
+          Trending class (order {String(featuredTrendingOrder)})
         </span>
       )}
     </>
@@ -65,6 +73,7 @@ export default async function AdminCourseDetail({
     const trackIdVal = String(formData.get("trackId") ?? "").trim();
     const featuredNew = formData.get("featuredNewOrder");
     const featuredMostPlayed = formData.get("featuredMostPlayedOrder");
+    const featuredTrending = formData.get("featuredTrendingOrder");
     const totalDur = formData.get("totalDurationMinutes");
     const ratingVal = formData.get("rating");
     const mentorIdVal = String(formData.get("mentorId") ?? "").trim();
@@ -86,13 +95,18 @@ export default async function AdminCourseDetail({
         featuredMostPlayed === "" || featuredMostPlayed == null
           ? null
           : Number(featuredMostPlayed),
+      featuredTrendingOrder:
+        featuredTrending === "" || featuredTrending == null
+          ? null
+          : Number(featuredTrending),
       totalDurationMinutes:
         totalDur === "" || totalDur == null ? null : Number(totalDur),
       rating: ratingVal === "" || ratingVal == null ? null : Number(ratingVal),
     });
     const parts = ["Course updated"];
     if (featuredNew !== "" && featuredNew != null) parts.push(`In "New" (order ${featuredNew})`);
-    if (featuredMostPlayed !== "" && featuredMostPlayed != null) parts.push(`In "Most played" (order ${featuredMostPlayed})`);
+    if (featuredMostPlayed !== "" && featuredMostPlayed != null) parts.push(`Popular class (order ${featuredMostPlayed})`);
+    if (featuredTrending !== "" && featuredTrending != null) parts.push(`Trending class (order ${featuredTrending})`);
     const toast = parts.join(". ");
     redirect(`/admin/content/courses/${id}?toast=${encodeURIComponent(toast)}`);
   }
@@ -181,6 +195,7 @@ export default async function AdminCourseDetail({
             <FeaturedInBadges
               featuredNewOrder={(course as { featuredNewOrder?: number | null }).featuredNewOrder}
               featuredMostPlayedOrder={(course as { featuredMostPlayedOrder?: number | null }).featuredMostPlayedOrder}
+              featuredTrendingOrder={(course as { featuredTrendingOrder?: number | null }).featuredTrendingOrder}
             />
           </div>
         </div>
@@ -288,7 +303,7 @@ export default async function AdminCourseDetail({
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Featured in &quot;Most Played&quot; (order)
+                  Popular class (order)
                 </label>
                 <input
                   name="featuredMostPlayedOrder"
@@ -298,7 +313,22 @@ export default async function AdminCourseDetail({
                   defaultValue={(course as { featuredMostPlayedOrder?: number | null }).featuredMostPlayedOrder ?? ""}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
-                <p className="mt-0.5 text-xs text-slate-500">Set 1, 2, 3… to show in Most Played (lower = first).</p>
+                <p className="mt-0.5 text-xs text-slate-500">Learn page Popular classes carousel (lower = first).</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Trending class (order)
+                </label>
+                <input
+                  name="featuredTrendingOrder"
+                  type="number"
+                  min={0}
+                  max={6}
+                  placeholder="Leave empty to hide"
+                  defaultValue={(course as { featuredTrendingOrder?: number | null }).featuredTrendingOrder ?? ""}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Learn page Trending carousel — max 6 courses (lower = first).</p>
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">Total duration (minutes)</label>

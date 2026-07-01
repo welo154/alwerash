@@ -250,6 +250,14 @@ label:has(input[type="radio"]) {
   align-items: stretch;
 }
 
+.learn-trending-swiper.swiper {
+  touch-action: pan-y pinch-zoom;
+}
+
+.learn-trending-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
 .learn-popular-swiper.swiper {
   touch-action: pan-y pinch-zoom;
 }

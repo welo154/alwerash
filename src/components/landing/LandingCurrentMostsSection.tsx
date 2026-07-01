@@ -17,6 +17,7 @@ const pangeaFont =
 export function LandingCurrentMostsSection({
   mentors,
   forceTwoPerRow = false,
+  mentorsPerRow,
   compactVerticalSpacing = false,
   leftInsetPx,
   rightInsetPx,
@@ -27,6 +28,8 @@ export function LandingCurrentMostsSection({
 }: {
   mentors: LandingMostsMentorCardDto[];
   forceTwoPerRow?: boolean;
+  /** When set (e.g. 4), grid uses this many columns and cards scale to cell width. */
+  mentorsPerRow?: 2 | 3 | 4;
   compactVerticalSpacing?: boolean;
   leftInsetPx?: number;
   rightInsetPx?: number;
@@ -36,15 +39,36 @@ export function LandingCurrentMostsSection({
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
 }) {
+  const columnCount = mentorsPerRow ?? (forceTwoPerRow ? 2 : 3);
+  const useFluidCards = mentorsPerRow != null && mentorsPerRow >= 4;
+  const gapX = columnCount >= 4 ? "gap-x-6" : "gap-x-[48px]";
+  const gapY = columnCount >= 4 ? "gap-y-8" : "gap-y-[50px]";
+
+  const gridColsClass =
+    columnCount === 4
+      ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+      : columnCount === 2
+        ? "grid-cols-1 md:grid-cols-2"
+        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+
+  const fixedColGridClass =
+    columnCount === 4
+      ? "md:grid-cols-[repeat(2,469px)] xl:grid-cols-[repeat(4,234.5px)]"
+      : columnCount === 2
+        ? "md:grid-cols-[repeat(2,469px)]"
+        : "md:grid-cols-[repeat(2,469px)] lg:grid-cols-[repeat(3,469px)]";
+
   const gridJustify = alignToRight ? "justify-end" : contained ? "justify-start" : "justify-center";
   const gridMaxWidthClass = !contained && alignToRight ? "ml-auto mr-0" : "mx-auto";
   const gridClassName = contained
-    ? forceTwoPerRow
-      ? `grid grid-cols-1 ${gridJustify} gap-x-[48px] gap-y-[50px] md:grid-cols-[repeat(2,469px)]`
-      : `grid grid-cols-1 ${gridJustify} gap-x-[48px] gap-y-[50px] md:grid-cols-[repeat(2,469px)] lg:grid-cols-[repeat(3,469px)]`
+    ? useFluidCards
+      ? `grid w-full ${gridColsClass} ${gridJustify} ${gapX} ${gapY}`
+      : forceTwoPerRow
+        ? `grid ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`
+        : `grid ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`
     : forceTwoPerRow
-      ? `${gridMaxWidthClass} grid max-w-[1600px] grid-cols-1 ${gridJustify} gap-x-[48px] gap-y-[50px] md:grid-cols-[repeat(2,469px)] md:pl-[77px] md:pr-[76px]`
-      : `${gridMaxWidthClass} grid max-w-[1600px] grid-cols-1 ${gridJustify} gap-x-[48px] gap-y-[50px] md:grid-cols-[repeat(2,469px)] md:pl-[77px] md:pr-[76px] lg:grid-cols-[repeat(3,469px)]`;
+      ? `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} md:pl-[77px] md:pr-[76px] ${fixedColGridClass}`
+      : `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} md:pl-[77px] md:pr-[76px] ${fixedColGridClass}`;
   /** Contained + right align: breakout to viewport width from a narrow main column, content flush right. */
   const sectionSpacingClass =
     contained && alignToRight
@@ -102,8 +126,19 @@ export function LandingCurrentMostsSection({
               name={m.name}
               profession={m.profession}
               href={`/mentors/${m.id}`}
-              widthPx={mentorCardWidthPx}
-              heightPx={mentorCardHeightPx}
+              fillWidth={useFluidCards}
+              widthPx={
+                useFluidCards
+                  ? undefined
+                  : mentorCardWidthPx ??
+                    (columnCount === 4 ? 234.5 : 469)
+              }
+              heightPx={
+                useFluidCards
+                  ? undefined
+                  : mentorCardHeightPx ??
+                    (columnCount === 4 ? 212.5 : 424.999)
+              }
             />
           ))}
         </div>

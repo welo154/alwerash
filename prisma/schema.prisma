@@ -209,6 +209,7 @@ model Course {
   // Featured sections (admin): set order to show in "New" / "Most Played" (null = not featured)
   featuredNewOrder       Int?     @map("featured_new_order")
   featuredMostPlayedOrder Int?    @map("featured_most_played_order")
+  featuredTrendingOrder  Int?    @map("featured_trending_order")
 
   // Card stats (admin-editable or derived): total duration in minutes, display rating
   totalDurationMinutes   Int?     @map("total_duration_minutes")
@@ -226,6 +227,7 @@ model Course {
   @@index([mentorId])
   @@index([featuredNewOrder])
   @@index([featuredMostPlayedOrder])
+  @@index([featuredTrendingOrder])
   @@map("courses")
 }
 
@@ -504,11 +506,14 @@ model Mentor {
   photo           String?  // URL path e.g. /mentor-photos/xxx.jpg
   certificateName String?  @map("certificate_name")
   aboutMe         String?  @map("about_me") @db.Text
+  /// Learn page mentor strip (null = hidden); lower order = first
+  featuredOrder   Int?     @map("featured_order")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   courses         Course[]
 
+  @@index([featuredOrder])
   @@map("mentors")
 }
 

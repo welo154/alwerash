@@ -40,7 +40,7 @@ export function LearnPopularClassesSection({
 
       <div
         ref={scrollAreaRef}
-        className="relative mt-8 w-[1125px] max-w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+        className="relative mt-8 w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
         style={{
           minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined,
           clipPath: "inset(-200px -200vw -200px 0)",

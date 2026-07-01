@@ -25,20 +25,14 @@ export async function TracksSection() {
               data-gsap-hover
             >
               <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
-                {track.coverImage ? (
-                  <Image
-                    src={track.coverImage}
-                    alt={track.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-slate-400">
-                    {track.title}
-                  </div>
-                )}
+                <Image
+                  src={track.coverImage!}
+                  alt={track.title}
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[var(--color-primary)]">

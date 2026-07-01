@@ -10,12 +10,14 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import {
+  catalogCoverNeedsRefresh,
   catalogCoverUrlForCourse,
   catalogCoverUrlForTrack,
 } from "../src/lib/catalog-cover-images";
 
 const prisma = new PrismaClient();
 const EXECUTE = process.argv.includes("--execute");
+const FORCE = process.argv.includes("--force");
 
 async function main() {
   const tracks = await prisma.track.findMany({
@@ -42,7 +44,7 @@ async function main() {
 
   for (const track of tracks) {
     const url = catalogCoverUrlForTrack(track.slug, track.title);
-    if (track.coverImage?.trim() === url) continue;
+    if (!FORCE && !catalogCoverNeedsRefresh(track.coverImage, url)) continue;
     tracksUpdated++;
     console.log(`  track  + ${track.slug}`);
     if (EXECUTE) {
@@ -55,7 +57,7 @@ async function main() {
 
   for (const course of courses) {
     const url = catalogCoverUrlForCourse(course.title, course.track?.slug);
-    if (course.coverImage?.trim() === url) continue;
+    if (!FORCE && !catalogCoverNeedsRefresh(course.coverImage, url)) continue;
     coursesUpdated++;
     console.log(`  course + ${course.title}`);
     if (EXECUTE) {

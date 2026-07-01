@@ -3,6 +3,21 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import {
+  sqlCountFeaturedMentors,
+  sqlGetFeaturedOrder,
+  sqlGetFeaturedOrderMap,
+  sqlMaxFeaturedOrder,
+  sqlSetFeaturedOrder,
+  MAX_FEATURED_MENTORS,
+} from "./featured-mentor-sql";
+import {
+  sqlCountTrendingCourses,
+  sqlGetTrendingOrder,
+  sqlGetTrendingOrderMap,
+  sqlMaxTrendingOrder,
+  sqlSetTrendingOrder,
+} from "./featured-trending-sql";
+import {
   TrackCreateSchema,
   TrackUpdateSchema,
   CourseCreateSchema,
@@ -86,7 +101,7 @@ export async function adminDeleteTrack(trackId: string) {
 // --- Courses ---
 export async function adminListCourses(trackId?: string) {
   try {
-    return await prisma.course.findMany({
+    const rows = await prisma.course.findMany({
       where: trackId !== undefined ? (trackId ? { trackId } : { trackId: null }) : undefined,
       orderBy: [{ createdAt: "asc" }],
       select: {
@@ -97,11 +112,17 @@ export async function adminListCourses(trackId?: string) {
         coverImage: true,
         order: true,
         published: true,
+        featuredMostPlayedOrder: true,
         createdAt: true,
         updatedAt: true,
         track: { select: { id: true, title: true, slug: true } },
       },
     });
+    const trendingById = await sqlGetTrendingOrderMap(rows.map((c) => c.id));
+    return rows.map((c) => ({
+      ...c,
+      featuredTrendingOrder: trendingById.get(c.id) ?? null,
+    }));
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const metaMsg = e instanceof Prisma.PrismaClientKnownRequestError ? (e.meta as { message?: string })?.message : undefined;
@@ -131,6 +152,8 @@ async function adminListCoursesRawSafe(trackId?: string) {
     coverImage: row.cover_image,
     order: 0,
     published: row.published,
+    featuredMostPlayedOrder: null as number | null,
+    featuredTrendingOrder: null as number | null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     track: null as { id: string; title: string; slug: string } | null,
@@ -152,6 +175,10 @@ export async function adminGetCourse(id: string) {
         introVideoMuxPlaybackId: true,
         order: true,
         published: true,
+        featuredNewOrder: true,
+        featuredMostPlayedOrder: true,
+        totalDurationMinutes: true,
+        rating: true,
         createdAt: true,
         updatedAt: true,
         track: true,
@@ -170,10 +197,7 @@ export async function adminGetCourse(id: string) {
     return {
       ...c,
       mentorId,
-      featuredNewOrder: null as number | null,
-      featuredMostPlayedOrder: null as number | null,
-      totalDurationMinutes: null as number | null,
-      rating: null as number | null,
+      featuredTrendingOrder: await sqlGetTrendingOrder(id),
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -260,6 +284,11 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
     featuredUpdates.push(`"featured_most_played_order" = $${featuredIdx}`);
     featuredValues.push(data.featuredMostPlayedOrder === null || data.featuredMostPlayedOrder === "" ? null : Number(data.featuredMostPlayedOrder));
   }
+  if (data.featuredTrendingOrder !== undefined) {
+    featuredIdx += 1;
+    featuredUpdates.push(`"featured_trending_order" = $${featuredIdx}`);
+    featuredValues.push(data.featuredTrendingOrder === null || data.featuredTrendingOrder === "" ? null : Number(data.featuredTrendingOrder));
+  }
 
   try {
     if (featuredUpdates.length > 0) {
@@ -318,6 +347,7 @@ async function adminGetCourseSafeFallback(id: string) {
     modules,
     featuredNewOrder: null as number | null,
     featuredMostPlayedOrder: null as number | null,
+    featuredTrendingOrder: null as number | null,
     totalDurationMinutes: null as number | null,
     rating: null as number | null,
   };
@@ -336,8 +366,12 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
       }
     }
   }
-  // Don't pass mentorId to Prisma (client may not have it until after migrate + generate)
-  const { mentorId: _m, ...dataForPrisma } = updateData;
+  // Don't pass mentorId or trending order to Prisma (client may lag behind migrations).
+  const {
+    mentorId: _m,
+    featuredTrendingOrder: trendingOrderToSet,
+    ...dataForPrisma
+  } = updateData;
   try {
     const updated = await prisma.course.update({ where: { id: courseId }, data: dataForPrisma });
     if (mentorIdToSet !== undefined) {
@@ -347,7 +381,16 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
         // mentor_id column may not exist yet
       }
     }
-    return updated;
+    if (trendingOrderToSet !== undefined) {
+      await sqlSetTrendingOrder(
+        courseId,
+        trendingOrderToSet === null || trendingOrderToSet === "" ? null : Number(trendingOrderToSet)
+      );
+    }
+    return {
+      ...updated,
+      featuredTrendingOrder: await sqlGetTrendingOrder(courseId),
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const metaMsg = e instanceof Prisma.PrismaClientKnownRequestError ? (e.meta as { message?: string })?.message : undefined;
@@ -365,6 +408,85 @@ export async function adminDeleteCourse(courseId: string) {
     handlePrismaError(e);
   }
   return { ok: true as const };
+}
+
+/** Toggle Learn page “Popular classes” visibility for a course. */
+export async function adminSetCoursePopular(courseId: string, popular: boolean) {
+  if (!popular) {
+    try {
+      return await prisma.course.update({
+        where: { id: courseId },
+        data: { featuredMostPlayedOrder: null },
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      const metaMsg =
+        e instanceof Prisma.PrismaClientKnownRequestError
+          ? (e.meta as { message?: string })?.message
+          : undefined;
+      if (msg?.includes("does not exist") || metaMsg?.includes("does not exist")) {
+        return courseUpdateRawSafe(courseId, { featuredMostPlayedOrder: null });
+      }
+      handlePrismaError(e);
+    }
+  }
+
+  const existing = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { featuredMostPlayedOrder: true },
+  });
+  if (existing?.featuredMostPlayedOrder != null) {
+    return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
+  }
+
+  const nextOrder =
+    ((await prisma.course.aggregate({ _max: { featuredMostPlayedOrder: true } }))._max
+      .featuredMostPlayedOrder ?? 0) + 1;
+
+  try {
+    return await prisma.course.update({
+      where: { id: courseId },
+      data: { featuredMostPlayedOrder: nextOrder },
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const metaMsg =
+      e instanceof Prisma.PrismaClientKnownRequestError
+        ? (e.meta as { message?: string })?.message
+        : undefined;
+    if (msg?.includes("does not exist") || metaMsg?.includes("does not exist")) {
+      return courseUpdateRawSafe(courseId, { featuredMostPlayedOrder: nextOrder });
+    }
+    handlePrismaError(e);
+  }
+}
+
+export const MAX_TRENDING_COURSES = 6;
+
+/** Toggle Learn page “Trending” carousel (max {@link MAX_TRENDING_COURSES} courses). */
+export async function adminSetCourseTrending(courseId: string, trending: boolean) {
+  if (!trending) {
+    await sqlSetTrendingOrder(courseId, null);
+    return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
+  }
+
+  const existingOrder = await sqlGetTrendingOrder(courseId);
+  if (existingOrder != null) {
+    return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
+  }
+
+  const trendingCount = await sqlCountTrendingCourses();
+  if (trendingCount >= MAX_TRENDING_COURSES) {
+    throw new AppError(
+      "BAD_REQUEST",
+      400,
+      `Trending list is full (max ${MAX_TRENDING_COURSES} courses). Remove one first.`
+    );
+  }
+
+  const nextOrder = (await sqlMaxTrendingOrder()) + 1;
+  await sqlSetTrendingOrder(courseId, nextOrder);
+  return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
 }
 
 // --- Modules ---
@@ -519,14 +641,50 @@ export async function adminUpsertLessonArticle(lessonId: string, input: unknown)
 
 // --- Mentors ---
 
+export { MAX_FEATURED_MENTORS };
+
 export async function adminListMentors() {
-  return prisma.mentor.findMany({ orderBy: { createdAt: "asc" } });
+  const rows = await prisma.mentor.findMany({ orderBy: { createdAt: "asc" } });
+  const featuredById = await sqlGetFeaturedOrderMap(rows.map((m) => m.id));
+  return rows.map((m) => ({
+    ...m,
+    featuredOrder: featuredById.get(m.id) ?? null,
+  }));
 }
 
 export async function adminGetMentor(id: string) {
   const m = await prisma.mentor.findUnique({ where: { id } });
   if (!m) throw new AppError("NOT_FOUND", 404, "Mentor not found");
-  return m;
+  return {
+    ...m,
+    featuredOrder: await sqlGetFeaturedOrder(id),
+  };
+}
+
+/** Toggle Learn page featured mentor strip (max {@link MAX_FEATURED_MENTORS}). */
+export async function adminSetMentorFeatured(mentorId: string, featured: boolean) {
+  if (!featured) {
+    await sqlSetFeaturedOrder(mentorId, null);
+    return adminGetMentor(mentorId);
+  }
+
+  const existingOrder = await sqlGetFeaturedOrder(mentorId);
+  if (existingOrder != null) {
+    return adminGetMentor(mentorId);
+  }
+
+  const featuredCount = await sqlCountFeaturedMentors();
+  if (featuredCount >= MAX_FEATURED_MENTORS) {
+    throw new AppError(
+      "BAD_REQUEST",
+      400,
+      `Featured mentor list is full (max ${MAX_FEATURED_MENTORS}). Remove one first.`
+    );
+  }
+
+  const nextOrder = (await sqlMaxFeaturedOrder()) + 1;
+  await sqlSetFeaturedOrder(mentorId, nextOrder);
+  return adminGetMentor(mentorId);
 }
 
 export async function adminCreateMentor(input: unknown) {
@@ -538,11 +696,25 @@ export async function adminCreateMentor(input: unknown) {
 }
 
 export async function adminUpdateMentor(mentorId: string, input: unknown) {
+  const data = parse(MentorUpdateSchema, input) as Record<string, unknown> & {
+    featuredOrder?: number | null;
+  };
+  const { featuredOrder: featuredOrderToSet, ...dataForPrisma } = data;
   try {
-    return await prisma.mentor.update({
+    const updated = await prisma.mentor.update({
       where: { id: mentorId },
-      data: parse(MentorUpdateSchema, input),
+      data: dataForPrisma,
     });
+    if (featuredOrderToSet !== undefined) {
+      await sqlSetFeaturedOrder(
+        mentorId,
+        featuredOrderToSet === null ? null : Number(featuredOrderToSet)
+      );
+    }
+    return {
+      ...updated,
+      featuredOrder: await sqlGetFeaturedOrder(mentorId),
+    };
   } catch (e) {
     handlePrismaError(e);
   }

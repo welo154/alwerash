@@ -147,7 +147,7 @@ const POPULAR_COVER_OBJECT_POSITION = "center 38%";
 
 export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: string }) {
   const { href, title, authorLabel, tagPrimary, coverImageSrc, className = "" } = props;
-  const grayCoverSrc = coverImageSrc ?? POPULAR_CLASS_COVER_IMAGE;
+  const grayCoverSrc = coverImageSrc?.trim() || POPULAR_CLASS_COVER_IMAGE;
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
   const containerRef = useRef<HTMLAnchorElement | null>(null);

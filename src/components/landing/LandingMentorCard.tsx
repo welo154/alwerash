@@ -25,7 +25,11 @@ export type LandingMentorCardProps = {
   href?: string;
   widthPx?: number;
   heightPx?: number;
+  /** Fill grid cell width; height follows {@link MENTOR_CARD_ASPECT}. */
+  fillWidth?: boolean;
 };
+
+const MENTOR_CARD_ASPECT = 469 / 424.999;
 
 export function LandingMentorCard({
   variant,
@@ -34,16 +38,21 @@ export function LandingMentorCard({
   href,
   widthPx = 469,
   heightPx = 424.999,
+  fillWidth = false,
 }: LandingMentorCardProps) {
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
   const clipId = `mentor-card-clip-${rawId}`;
 
+  const sizeStyle = fillWidth
+    ? ({ width: "100%", aspectRatio: `${MENTOR_CARD_ASPECT}` } as const)
+    : ({ width: `${widthPx}px`, height: `${heightPx}px` } as const);
+
   const card = (
     <article
-      className="relative mx-auto max-w-full shrink-0 overflow-hidden"
-      style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
+      className={`relative mx-auto max-w-full shrink-0 overflow-hidden${fillWidth ? " w-full" : ""}`}
+      style={sizeStyle}
       aria-hidden={href ? true : undefined}
       aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
     >
@@ -178,8 +187,8 @@ export function LandingMentorCard({
       <Link
         href={href}
         aria-label={`${name}, ${profession}. ${badge}`}
-        className="mx-auto block max-w-full shrink-0 overflow-hidden text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2"
-        style={{ width: `${widthPx}px`, height: `${heightPx}px` }}
+        className={`mx-auto block max-w-full shrink-0 overflow-hidden text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2${fillWidth ? " w-full" : ""}`}
+        style={sizeStyle}
       >
         {card}
       </Link>

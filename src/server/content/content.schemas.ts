@@ -82,6 +82,7 @@ export const CourseCreateSchema = z.object({
   published: z.boolean().optional(),
   featuredNewOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   featuredMostPlayedOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  featuredTrendingOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   totalDurationMinutes: z.number().int().min(0).max(1_000_000).nullable().optional(),
   rating: z.number().min(0).max(5).nullable().optional(),
 });
@@ -138,6 +139,7 @@ export const MentorCreateSchema = z.object({
   photo: z.string().max(500).optional(),
   certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
   aboutMe: z.string().max(5000).optional().transform((v) => (v?.trim() || undefined)),
+  featuredOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
 });
 
 export const MentorUpdateSchema = MentorCreateSchema.partial();

@@ -1,27 +1,26 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
-import {
-  CatalogShowcaseCard,
-  CATALOG_SHOWCASE_CARD_H,
-  CATALOG_SHOWCASE_CARD_W,
-  type CatalogShowcaseCardProps,
-} from "@/components/cards";
+import type { CatalogShowcaseCardProps } from "@/components/cards";
 import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
 import {
   learnCarouselMousewheel,
   learnCarouselSwiperBehavior,
 } from "@/components/learn/learn-carousel-swiper-config";
+import { ScaledCatalogShowcaseCard } from "@/components/learn/ScaledCatalogShowcaseCard";
+import { useFeaturedTracksCardSize } from "@/components/learn/useFeaturedTracksCardSize";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
-
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
 export type LearnFeaturedSlide = { id: string; cardProps: CatalogShowcaseCardProps };
 
 export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSlide[] }) {
+  const swiperRef = useRef<SwiperType | null>(null);
   const {
     scrollAreaRef,
     atBeginning,
@@ -31,17 +30,29 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
     slideNext,
     slidePrev,
   } = useLearnCarouselSwiper();
+  const { cardW, cardH } = useFeaturedTracksCardSize(scrollAreaRef);
 
+  useEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+    swiper.update();
+    handleNavSync(swiper);
+  }, [cardW, cardH, handleNavSync]);
+
+  const cardSwiperStyle = {
+    ["--landing-showcase-card-w" as string]: `${cardW}px`,
+    ["--landing-showcase-card-h" as string]: `${cardH}px`,
+  } as const;
   return (
-    <div className="relative w-[1125px] max-w-full shrink-0">
-      <div className="relative h-[743px] w-[1125px] max-w-full shrink-0 overflow-hidden">
+    <div className="relative w-full min-w-0">
+      <div className="relative h-[743px] w-full min-w-0 overflow-hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={1125}
           height={743}
           viewBox="0 0 1125 743"
           fill="none"
-          className="pointer-events-none block h-[743px] w-full max-w-full shrink-0"
+          className="pointer-events-none block h-[743px] w-full min-w-0"
           preserveAspectRatio="none"
           aria-hidden
         >
@@ -53,13 +64,14 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
           />
         </svg>
 
-        <div className="absolute inset-0 z-10 box-border flex w-full flex-col pb-[42px] pl-[24.04px] pr-[24px] pt-[116px]">
+        <div className="absolute inset-0 z-10 box-border flex w-full flex-col px-[24px] pb-[42px] pt-[116px]">
           <div
             ref={scrollAreaRef}
-            className="relative w-[1055px] max-w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+            className="relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
             style={{
-              minHeight: CATALOG_SHOWCASE_CARD_H,
-              clipPath: "inset(-200px -200vw -200px 0)",
+              minHeight: cardH,
+              clipPath: "inset(-200px 0 -200px 0)",
+              ...cardSwiperStyle,
             }}
           >
             <Swiper
@@ -68,7 +80,10 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
               {...learnCarouselSwiperBehavior}
               mousewheel={learnCarouselMousewheel}
               className="learn-featured-swiper landing-showcase-swiper landing-showcase-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
-              onSwiper={handleSwiper}
+              onSwiper={(swiper) => {
+                swiperRef.current = swiper;
+                handleSwiper(swiper);
+              }}
               onSlideChange={handleNavSync}
               onSlidesUpdated={handleNavSync}
               onResize={handleNavSync}
@@ -77,13 +92,12 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
                 <SwiperSlide
                   key={id}
                   className="shrink-0 overflow-visible!"
-                  style={{ width: CATALOG_SHOWCASE_CARD_W, height: CATALOG_SHOWCASE_CARD_H }}
+                  style={{ width: cardW, height: cardH }}
                 >
-                  <CatalogShowcaseCard {...cardProps} className="shrink-0" />
+                  <ScaledCatalogShowcaseCard cardW={cardW} cardH={cardH} {...cardProps} className="shrink-0" />
                 </SwiperSlide>
               ))}
             </Swiper>
-
             <LearnCarouselEdgeNav
               atBeginning={atBeginning}
               atEnd={atEnd}
@@ -105,23 +119,10 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
                   fontFamily: pangeaFont,
                   color: "#000",
                   fontSize: "48px",
-                  fontStyle: "italic",
-                  fontWeight: 600,
-                  lineHeight: "57.6px",
-                }}
-              >
-                FEATURED
-              </span>
-              <span
-                style={{
-                  fontFamily: pangeaFont,
-                  color: "#000",
-                  fontSize: "48px",
                   fontWeight: 400,
                   lineHeight: "57.6px",
                 }}
               >
-                {" "}
                 TRACKS
               </span>
             </h1>

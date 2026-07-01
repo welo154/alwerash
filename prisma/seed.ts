@@ -67,7 +67,7 @@ async function main() {
   // Admin bypasses subscription check; to test learner flow, add a learner user and entitlement
 
   const trackData = [
-    { title: "UI/UX Design", slug: "ui-ux-design", description: "User interface and experience design.", order: 0, featuredOrder: 1, topRatedOrder: 2, activityOrder: 3, coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80" },
+    { title: "UI/UX Design", slug: "ui-ux-design", description: "User interface and experience design.", order: 0, featuredOrder: 1, topRatedOrder: 2, activityOrder: 3, coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80" },
     { title: "Graphic Design", slug: "graphic-design", description: "Visual design and branding.", order: 1, featuredOrder: 2, topRatedOrder: 1, activityOrder: 1, coverImage: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800&q=80" },
     { title: "Motion Design", slug: "motion-design", description: "Animation and motion graphics.", order: 2, featuredOrder: 3, topRatedOrder: 3, activityOrder: 2, coverImage: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=800&q=80" },
   ];
@@ -100,7 +100,7 @@ async function main() {
 
   // Dummy Courses with cover images (Unsplash)
   const courseData = [
-    { trackIdx: 0, title: "Figma Fundamentals", summary: "Master the basics of Figma for UI design.", order: 0, coverImage: "https://images.unsplash.com/photo-1561070791-2526d38794a5?w=800&q=80" },
+    { trackIdx: 0, title: "Figma Fundamentals", summary: "Master the basics of Figma for UI design.", order: 0, coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80" },
     { trackIdx: 0, title: "Prototyping in Figma", summary: "Create interactive prototypes.", order: 1, coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80" },
     { trackIdx: 1, title: "Logo Design Masterclass", summary: "Design memorable logos and brand identities.", order: 0, coverImage: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80" },
     { trackIdx: 1, title: "Typography Fundamentals", summary: "Typography principles and best practices.", order: 1, coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80" },
