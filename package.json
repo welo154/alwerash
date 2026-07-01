@@ -22,7 +22,10 @@
     "scripts:add-featured-courses": "tsx scripts/add-featured-courses.ts",
     "scripts:setup-mentors": "tsx scripts/setup-mentors.ts",
     "scripts:assign-mentors-to-courses": "tsx scripts/assign-mentors-to-courses.ts",
-    "scripts:apply-course-mentor-and-assign": "tsx scripts/apply-course-mentor-and-assign.ts"
+    "scripts:apply-course-mentor-and-assign": "tsx scripts/apply-course-mentor-and-assign.ts",
+    "scripts:import-design-fundamentals": "tsx scripts/import-design-fundamentals.ts",
+    "scripts:import-design-softwares": "tsx scripts/import-design-softwares.ts",
+    "scripts:import-motion": "tsx scripts/import-motion.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2",
