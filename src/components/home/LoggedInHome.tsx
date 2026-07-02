@@ -684,11 +684,13 @@ export function LoggedInHome({
           showDiscoverCta={false}
           sectionClassName="mt-[88px]"
         />
-        <LandingCurrentMostsSection
-          mentors={landingMostsMentors}
-          mentorCardWidthPx={409}
-          mentorCardHeightPx={424.999}
-        />
+        {landingMostsMentors.length > 0 ? (
+          <LandingCurrentMostsSection
+            mentors={landingMostsMentors}
+            mentorCardWidthPx={409}
+            mentorCardHeightPx={424.999}
+          />
+        ) : null}
       </section>
     </div>
   );

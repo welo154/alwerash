@@ -18,6 +18,14 @@ import {
   sqlSetTrendingOrder,
 } from "./featured-trending-sql";
 import {
+  sqlCountLandingPopularMentors,
+  sqlGetLandingPopularOrder,
+  sqlGetLandingPopularOrderMap,
+  sqlMaxLandingPopularOrder,
+  sqlSetLandingPopularOrder,
+  MAX_LANDING_POPULAR_MENTORS,
+} from "./landing-popular-mentor-sql";
+import {
   TrackCreateSchema,
   TrackUpdateSchema,
   CourseCreateSchema,
@@ -641,14 +649,19 @@ export async function adminUpsertLessonArticle(lessonId: string, input: unknown)
 
 // --- Mentors ---
 
-export { MAX_FEATURED_MENTORS };
+export { MAX_FEATURED_MENTORS, MAX_LANDING_POPULAR_MENTORS };
 
 export async function adminListMentors() {
   const rows = await prisma.mentor.findMany({ orderBy: { createdAt: "asc" } });
-  const featuredById = await sqlGetFeaturedOrderMap(rows.map((m) => m.id));
+  const mentorIds = rows.map((m) => m.id);
+  const [featuredById, landingPopularById] = await Promise.all([
+    sqlGetFeaturedOrderMap(mentorIds),
+    sqlGetLandingPopularOrderMap(mentorIds),
+  ]);
   return rows.map((m) => ({
     ...m,
     featuredOrder: featuredById.get(m.id) ?? null,
+    landingPopularOrder: landingPopularById.get(m.id) ?? null,
   }));
 }
 
@@ -658,6 +671,7 @@ export async function adminGetMentor(id: string) {
   return {
     ...m,
     featuredOrder: await sqlGetFeaturedOrder(id),
+    landingPopularOrder: await sqlGetLandingPopularOrder(id),
   };
 }
 
@@ -687,6 +701,32 @@ export async function adminSetMentorFeatured(mentorId: string, featured: boolean
   return adminGetMentor(mentorId);
 }
 
+/** Toggle guest home “Current Mosts” mentor strip (max {@link MAX_LANDING_POPULAR_MENTORS}). */
+export async function adminSetMentorLandingPopular(mentorId: string, popular: boolean) {
+  if (!popular) {
+    await sqlSetLandingPopularOrder(mentorId, null);
+    return adminGetMentor(mentorId);
+  }
+
+  const existingOrder = await sqlGetLandingPopularOrder(mentorId);
+  if (existingOrder != null) {
+    return adminGetMentor(mentorId);
+  }
+
+  const popularCount = await sqlCountLandingPopularMentors();
+  if (popularCount >= MAX_LANDING_POPULAR_MENTORS) {
+    throw new AppError(
+      "BAD_REQUEST",
+      400,
+      `Popular home mentor list is full (max ${MAX_LANDING_POPULAR_MENTORS}). Remove one first.`
+    );
+  }
+
+  const nextOrder = (await sqlMaxLandingPopularOrder()) + 1;
+  await sqlSetLandingPopularOrder(mentorId, nextOrder);
+  return adminGetMentor(mentorId);
+}
+
 export async function adminCreateMentor(input: unknown) {
   try {
     return await prisma.mentor.create({ data: parse(MentorCreateSchema, input) });
@@ -698,8 +738,13 @@ export async function adminCreateMentor(input: unknown) {
 export async function adminUpdateMentor(mentorId: string, input: unknown) {
   const data = parse(MentorUpdateSchema, input) as Record<string, unknown> & {
     featuredOrder?: number | null;
+    landingPopularOrder?: number | null;
   };
-  const { featuredOrder: featuredOrderToSet, ...dataForPrisma } = data;
+  const {
+    featuredOrder: featuredOrderToSet,
+    landingPopularOrder: landingPopularOrderToSet,
+    ...dataForPrisma
+  } = data;
   try {
     const updated = await prisma.mentor.update({
       where: { id: mentorId },
@@ -711,9 +756,16 @@ export async function adminUpdateMentor(mentorId: string, input: unknown) {
         featuredOrderToSet === null ? null : Number(featuredOrderToSet)
       );
     }
+    if (landingPopularOrderToSet !== undefined) {
+      await sqlSetLandingPopularOrder(
+        mentorId,
+        landingPopularOrderToSet === null ? null : Number(landingPopularOrderToSet)
+      );
+    }
     return {
       ...updated,
       featuredOrder: await sqlGetFeaturedOrder(mentorId),
+      landingPopularOrder: await sqlGetLandingPopularOrder(mentorId),
     };
   } catch (e) {
     handlePrismaError(e);

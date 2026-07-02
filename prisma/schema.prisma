@@ -508,12 +508,15 @@ model Mentor {
   aboutMe         String?  @map("about_me") @db.Text
   /// Learn page mentor strip (null = hidden); lower order = first
   featuredOrder   Int?     @map("featured_order")
+  /// Guest home “Current Mosts” strip (null = hidden); lower order = first
+  landingPopularOrder Int? @map("landing_popular_order")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   courses         Course[]
 
   @@index([featuredOrder])
+  @@index([landingPopularOrder])
   @@map("mentors")
 }
 

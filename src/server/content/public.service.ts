@@ -11,6 +11,7 @@ import {
   resolveCourseCoverImage,
   resolveTrackCoverImage,
 } from "@/lib/catalog-cover-images";
+import { sqlGetLandingPopularMentorIds } from "./landing-popular-mentor-sql";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
@@ -54,6 +55,7 @@ type TrackCourseRow = {
   coverImage: string | null;
   introVideoMuxPlaybackId: string | null;
   totalDurationMinutes: number | null;
+  featuredMostPlayedOrder: number | null;
   modules: { _count: { lessons: number } }[];
 };
 
@@ -79,6 +81,7 @@ const trackCourseSelect = {
     coverImage: true,
     introVideoMuxPlaybackId: true,
     totalDurationMinutes: true,
+    featuredMostPlayedOrder: true,
     modules: { select: { _count: { select: { lessons: true } } } },
   },
 };
@@ -87,19 +90,24 @@ function buildCourseTilesForTrack(
   track: Pick<TrackWithCourses, "title" | "slug" | "courses">
 ): LearnPopularTile[] {
   const tagPrimary = track.title.trim().toUpperCase() || "TRACK";
-  return track.courses.map((course) => ({
-    id: course.id,
-    href: `/courses/${course.id}`,
-    title: course.title,
-    authorLabel: course.instructorName?.trim() || "Instructor",
-    tagPrimary,
-    coverImageSrc: effectiveCoverImage(
-      course.coverImage,
-      course.introVideoMuxPlaybackId,
-      course.title,
-      track.slug
-    ),
-  }));
+  return track.courses
+    .filter((course) => course.featuredMostPlayedOrder != null)
+    .sort(
+      (a, b) => (a.featuredMostPlayedOrder ?? 0) - (b.featuredMostPlayedOrder ?? 0)
+    )
+    .map((course) => ({
+      id: course.id,
+      href: `/courses/${course.id}`,
+      title: course.title,
+      authorLabel: course.instructorName?.trim() || "Instructor",
+      tagPrimary,
+      coverImageSrc: effectiveCoverImage(
+        course.coverImage,
+        course.introVideoMuxPlaybackId,
+        course.title,
+        track.slug
+      ),
+    }));
 }
 
 function buildCourseTilesByTrackSlug(tracks: TrackWithCourses[]): Record<string, LearnPopularTile[]> {
@@ -156,7 +164,7 @@ function filterTracksByMeta(tracks: TrackWithCourses[], filter: HomeTrackMetaFil
   const filtered = tracks
     .filter((t) => t[orderField] != null)
     .sort((a, b) => (a[orderField] ?? 0) - (b[orderField] ?? 0));
-  return filtered.length > 0 ? filtered : tracks;
+  return filtered;
 }
 
 /** Home track explorer: meta-filter carousels + track-name pill links. */
@@ -328,6 +336,8 @@ export async function publicGetTrackBySlug(slug: string) {
           coverImage: true,
           introVideoMuxPlaybackId: true,
           instructorName: true,
+          rating: true,
+          featuredMostPlayedOrder: true,
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       },
@@ -546,7 +556,7 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
   } catch {
     // featured_most_played_order column may not exist yet
   }
-  return publicListFeaturedCourses(limit);
+  return [];
 }
 
 export const MAX_TRENDING_CLASS_COURSES = 6;
@@ -753,19 +763,25 @@ export async function publicListFeaturedMentors(
 }
 
 /**
- * Mentors for the landing “Current Mosts” strip on home/guest (createdAt asc).
- * Badge alternates for visual rhythm; not stored on Mentor.
+ * Mentors for the landing “Current Mosts” strip on home/guest.
+ * Only mentors tagged “Popular on home page” in admin appear here.
  */
 export async function publicListLandingMostsMentors(
   limit = LANDING_MOSTS_MENTOR_LIMIT
 ): Promise<LandingMostsMentorCardDto[]> {
   try {
-    const rows = await prisma.mentor.findMany({
-      orderBy: { createdAt: "asc" },
-      take: limit,
+    const orderedIds = await sqlGetLandingPopularMentorIds(limit);
+    if (orderedIds.length === 0) return [];
+
+    const mentors = await prisma.mentor.findMany({
+      where: { id: { in: orderedIds } },
       select: { id: true, name: true, certificateName: true },
     });
-    return mapMentorsToMostsDtos(rows);
+    const byId = new Map(mentors.map((m) => [m.id, m]));
+    const ordered = orderedIds
+      .map((id) => byId.get(id))
+      .filter((m): m is NonNullable<typeof m> => m != null);
+    return mapMentorsToMostsDtos(ordered);
   } catch {
     return [];
   }

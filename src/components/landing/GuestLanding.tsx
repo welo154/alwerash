@@ -27,14 +27,17 @@ export async function GuestLanding() {
         slidesByFilter={trackBundle.slidesByFilter}
         trackPillSelectsCourses
         courseTilesByTrackSlug={trackBundle.courseTilesByTrackSlug}
+        maxVisibleCourses={4}
         showDiscoverCta
       />
       <LandingEverythingInOneSection />
-      <LandingCurrentMostsSection
-        mentors={landingMostsMentors}
-        mentorCardWidthPx={409}
-        mentorCardHeightPx={424.999}
-      />
+      {landingMostsMentors.length > 0 ? (
+        <LandingCurrentMostsSection
+          mentors={landingMostsMentors}
+          mentorCardWidthPx={409}
+          mentorCardHeightPx={424.999}
+        />
+      ) : null}
       <LandingWhyStudentsLoveSection />
       <LandingFaqSection />
       <LandingGetStartedCtaSection />

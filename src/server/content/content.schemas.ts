@@ -140,6 +140,7 @@ export const MentorCreateSchema = z.object({
   certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
   aboutMe: z.string().max(5000).optional().transform((v) => (v?.trim() || undefined)),
   featuredOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  landingPopularOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
 });
 
 export const MentorUpdateSchema = MentorCreateSchema.partial();

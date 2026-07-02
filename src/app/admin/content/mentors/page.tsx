@@ -1,7 +1,13 @@
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { requireRole } from "@/server/auth/require";
-import { adminListMentors, adminSetMentorFeatured } from "@/server/content/admin.service";
+import {
+  adminListMentors,
+  adminSetMentorFeatured,
+  adminSetMentorLandingPopular,
+  MAX_LANDING_POPULAR_MENTORS,
+} from "@/server/content/admin.service";
+import { revalidatePublicMentorPaths } from "@/server/content/revalidate-public-paths";
 import { AdminMentorCard } from "./AdminMentorCard";
 import { MentorsAddCard } from "./MentorsAddCard";
 
@@ -28,6 +34,14 @@ export default async function AdminMentorsPage() {
     revalidatePath("/learn");
   }
 
+  async function toggleMentorPopular(mentorId: string, popular: boolean) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    await adminSetMentorLandingPopular(mentorId, popular);
+    revalidatePath("/admin/content/mentors");
+    revalidatePublicMentorPaths();
+  }
+
   return (
     <div className="p-8">
       <h1 className="mb-6 text-2xl font-bold tracking-tight text-black">Mentors</h1>
@@ -41,7 +55,9 @@ export default async function AdminMentorsPage() {
       )}
 
       <p className="mb-6 max-w-2xl text-sm text-slate-600">
-        Mark up to <strong>8 mentors</strong> as featured to show in the Learn page mentor section (2 rows of 4).
+        Mark up to <strong>8 mentors</strong> as featured for the Learn page (2 rows of 4), and up to{" "}
+        <strong>{MAX_LANDING_POPULAR_MENTORS} mentors</strong> as popular for the signed-out home page
+        (“Current Mosts” section).
       </p>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -53,8 +69,10 @@ export default async function AdminMentorsPage() {
               name: m.name,
               photo: m.photo,
               featuredOrder: m.featuredOrder ?? null,
+              landingPopularOrder: m.landingPopularOrder ?? null,
             }}
             toggleFeatured={toggleMentorFeatured}
+            togglePopular={toggleMentorPopular}
           />
         ))}
         {!tableMissing && <MentorsAddCard />}

@@ -88,6 +88,8 @@ export type HomeTrackExplorerSectionProps = {
   /** When true, track pills select one track and cards show that track's courses. */
   trackPillSelectsCourses?: boolean;
   courseTilesByTrackSlug?: Record<string, LearnPopularTile[]>;
+  /** Cap course tiles when track pills select courses (guest landing). */
+  maxVisibleCourses?: number;
   showDiscoverCta?: boolean;
   sectionClassName?: string;
 };
@@ -98,6 +100,7 @@ export function HomeTrackExplorerSection({
   slidesByFilter,
   trackPillSelectsCourses = false,
   courseTilesByTrackSlug = {},
+  maxVisibleCourses,
   showDiscoverCta = true,
   sectionClassName = "mt-[107px]",
 }: HomeTrackExplorerSectionProps) {
@@ -126,6 +129,17 @@ export function HomeTrackExplorerSection({
       ? (courseTilesByTrackSlug[activeTrackSlug] ?? [])
       : []
     : [];
+
+  const visibleCourseTiles =
+    trackPillSelectsCourses && maxVisibleCourses != null
+      ? courseTiles.slice(0, maxVisibleCourses)
+      : courseTiles;
+
+  const showViewMoreCourses =
+    trackPillSelectsCourses &&
+    maxVisibleCourses != null &&
+    activeTrackSlug != null &&
+    courseTiles.length > maxVisibleCourses;
 
   const cardGridKey = trackPillSelectsCourses
     ? `courses-${activeTrackSlug ?? "none"}`
@@ -184,11 +198,24 @@ export function HomeTrackExplorerSection({
               : "No tracks to show."}
           </p>
         ) : trackPillSelectsCourses ? (
-          <div key={cardGridKey} className="flex flex-wrap justify-center gap-6">
-            {courseTiles.map((tile) => (
-              <LearnPopularFigmaTile key={tile.id} {...tile} />
-            ))}
-          </div>
+          <>
+            <div key={cardGridKey} className="flex flex-wrap justify-center gap-6">
+              {visibleCourseTiles.map((tile) => (
+                <LearnPopularFigmaTile key={tile.id} {...tile} />
+              ))}
+            </div>
+            {showViewMoreCourses ? (
+              <div className="mt-10 flex justify-center">
+                <Link
+                  href={`/tracks/${encodeURIComponent(activeTrackSlug!)}`}
+                  className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-slate-50"
+                  style={pillFont}
+                >
+                  View more
+                </Link>
+              </div>
+            ) : null}
+          </>
         ) : (
           <div key={cardGridKey} className="flex flex-wrap justify-center gap-[30px]">
             {trackSlides.map(({ slug, cardProps }) => (

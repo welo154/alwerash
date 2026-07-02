@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 import { requireRole } from "@/server/auth/require";
-import { adminDeleteMentor, adminGetMentor, adminUpdateMentor } from "@/server/content/admin.service";
+import { adminDeleteMentor, adminGetMentor, adminUpdateMentor, MAX_LANDING_POPULAR_MENTORS } from "@/server/content/admin.service";
 import { revalidatePublicMentorPaths } from "@/server/content/revalidate-public-paths";
 import { MentorPhotoUpload } from "../../components/MentorPhotoUpload";
 
@@ -22,12 +22,17 @@ export default async function AdminMentorEditPage({
     const mentorId = String(formData.get("mentorId") ?? "");
     if (!mentorId) return;
     const featuredOrder = formData.get("featuredOrder");
+    const landingPopularOrder = formData.get("landingPopularOrder");
     await adminUpdateMentor(mentorId, {
       name: String(formData.get("name") ?? ""),
       certificateName: String(formData.get("certificateName") ?? "").trim() || undefined,
       aboutMe: String(formData.get("aboutMe") ?? "").trim() || undefined,
       featuredOrder:
         featuredOrder === "" || featuredOrder == null ? null : Number(featuredOrder),
+      landingPopularOrder:
+        landingPopularOrder === "" || landingPopularOrder == null
+          ? null
+          : Number(landingPopularOrder),
     });
     revalidatePath(`/admin/content/mentors/${mentorId}`);
     revalidatePath("/learn");
@@ -62,6 +67,11 @@ export default async function AdminMentorEditPage({
       {mentor.featuredOrder != null ? (
         <p className="mb-4 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
           Featured on Learn page (order {mentor.featuredOrder})
+        </p>
+      ) : null}
+      {mentor.landingPopularOrder != null ? (
+        <p className="mb-4 ml-2 inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-900">
+          Popular on home page (order {mentor.landingPopularOrder})
         </p>
       ) : null}
 
@@ -112,6 +122,23 @@ export default async function AdminMentorEditPage({
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
             <p className="mt-0.5 text-xs text-slate-500">Max 8 featured mentors (2 rows of 4 on Learn). Lower = first.</p>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Popular on home page (order)
+            </label>
+            <input
+              name="landingPopularOrder"
+              type="number"
+              min={0}
+              max={MAX_LANDING_POPULAR_MENTORS}
+              placeholder="Leave empty to hide"
+              defaultValue={mentor.landingPopularOrder ?? ""}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            />
+            <p className="mt-0.5 text-xs text-slate-500">
+              Max {MAX_LANDING_POPULAR_MENTORS} mentors on the guest home “Current Mosts” strip. Lower = first.
+            </p>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Link

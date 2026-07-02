@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
@@ -18,7 +18,28 @@ import {
 } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 
-const TRENDING_AUTOPLAY_MS = 2000;
+const TRENDING_AUTOPLAY_MS = 1400;
+const TRENDING_SLIDE_MS = 450;
+const MIN_LOOP_SLIDES = 8;
+
+type LoopTile = LearnPopularTile & { loopKey: string };
+
+function buildLoopTiles(tiles: LearnPopularTile[]): LoopTile[] {
+  if (tiles.length === 0) return [];
+  const targetCount = Math.max(MIN_LOOP_SLIDES, tiles.length * 2);
+  const result: LoopTile[] = [];
+  let round = 0;
+
+  while (result.length < targetCount) {
+    for (const tile of tiles) {
+      result.push({ ...tile, loopKey: `${tile.id}-${round}` });
+      if (result.length >= targetCount) break;
+    }
+    round += 1;
+  }
+
+  return result;
+}
 
 export function LearnTrendingClassesSection({
   tiles = [],
@@ -28,19 +49,23 @@ export function LearnTrendingClassesSection({
   const swiperRef = useRef<SwiperType | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const wheelLockRef = useRef(false);
+  const loopTiles = useMemo(() => buildLoopTiles(tiles), [tiles]);
   const canLoop = tiles.length > 1;
 
   const handleSwiper = useCallback((swiper: SwiperType) => {
     swiperRef.current = swiper;
-    requestAnimationFrame(() => swiper.update());
-  }, []);
+    requestAnimationFrame(() => {
+      swiper.update();
+      if (canLoop) swiper.autoplay?.start();
+    });
+  }, [canLoop]);
 
   const slideNext = useCallback(() => {
-    swiperRef.current?.slideNext(400);
+    swiperRef.current?.slideNext(TRENDING_SLIDE_MS);
   }, []);
 
   const slidePrev = useCallback(() => {
-    swiperRef.current?.slidePrev(400);
+    swiperRef.current?.slidePrev(TRENDING_SLIDE_MS);
   }, []);
 
   useEffect(() => {
@@ -55,11 +80,11 @@ export function LearnTrendingClassesSection({
       e.preventDefault();
       if (wheelLockRef.current) return;
       wheelLockRef.current = true;
-      if (e.deltaX > 0) swiper.slideNext(400);
-      else swiper.slidePrev(400);
+      if (e.deltaX > 0) swiper.slideNext(TRENDING_SLIDE_MS);
+      else swiper.slidePrev(TRENDING_SLIDE_MS);
       window.setTimeout(() => {
         wheelLockRef.current = false;
-      }, 480);
+      }, TRENDING_SLIDE_MS + 80);
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
@@ -89,13 +114,17 @@ export function LearnTrendingClassesSection({
           dir="ltr"
           modules={[Mousewheel, Autoplay]}
           {...learnCarouselSwiperBehavior}
+          speed={TRENDING_SLIDE_MS}
           loop={canLoop}
+          loopAdditionalSlides={tiles.length}
+          loopPreventsSliding={false}
           autoplay={
             canLoop
               ? {
                   delay: TRENDING_AUTOPLAY_MS,
                   disableOnInteraction: false,
                   pauseOnMouseEnter: true,
+                  waitForTransition: true,
                 }
               : false
           }
@@ -103,13 +132,20 @@ export function LearnTrendingClassesSection({
           className="learn-trending-swiper learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
           onSwiper={handleSwiper}
         >
-          {tiles.map((tile) => (
+          {loopTiles.map((tile) => (
             <SwiperSlide
-              key={tile.id}
+              key={tile.loopKey}
               className="h-auto! shrink-0 overflow-visible!"
               style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
             >
-              <LearnPopularFigmaTile {...tile} />
+              <LearnPopularFigmaTile
+                id={tile.id}
+                href={tile.href}
+                title={tile.title}
+                authorLabel={tile.authorLabel}
+                tagPrimary={tile.tagPrimary}
+                coverImageSrc={tile.coverImageSrc}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
