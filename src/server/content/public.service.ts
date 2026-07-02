@@ -601,6 +601,49 @@ export async function publicListTrendingCourses(
   return [];
 }
 
+const publishedCourseCardSelect = {
+  id: true,
+  title: true,
+  summary: true,
+  coverImage: true,
+  introVideoMuxPlaybackId: true,
+  instructorName: true,
+  instructorImage: true,
+  totalDurationMinutes: true,
+  rating: true,
+  order: true,
+  createdAt: true,
+  track: { select: { title: true, slug: true } },
+  modules: { select: { _count: { select: { lessons: true } } } },
+} as const;
+
+/** All published courses for the Learn page catalog grid. */
+export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
+  try {
+    const courses = await prisma.course.findMany({
+      where: { published: true },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: publishedCourseCardSelect,
+    });
+    if (courses.length === 0) return [];
+
+    const courseIds = courses.map((c) => c.id);
+    const studentCounts = await getStudentCountsByCourseId(courseIds);
+    return courses.map((c) =>
+      mapCourseToCard(
+        {
+          ...c,
+          totalDurationMinutes: c.totalDurationMinutes ?? undefined,
+          rating: c.rating ?? undefined,
+        },
+        studentCounts.get(c.id) ?? 0
+      )
+    );
+  } catch {
+    return [];
+  }
+}
+
 export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
