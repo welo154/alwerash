@@ -332,6 +332,8 @@ export function CatalogShowcaseCard({
   const resolvedViewMoreHref =
     viewMoreHref && showcaseSlug ? appendShowcaseToHref(viewMoreHref, showcaseSlug) : viewMoreHref;
 
+  const isTrackLink = Boolean(viewMoreHref?.startsWith("/tracks/"));
+
   const shellClass = `relative w-[347px] overflow-visible rounded-[50px] ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
 
   const ctaHoverHandlers = {
@@ -401,21 +403,41 @@ export function CatalogShowcaseCard({
             </span>
           </div>
 
-          <div
-            className="pointer-events-auto absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black"
-            style={{ fontFamily: pangeaFont }}
-          >
-            {titlePrimary}
-            {titleSecondary ? (
-              <>
-                <br />
-                {titleSecondary}
-              </>
-            ) : null}
-            <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
-              <ExternalLinkGlyph className="h-[20px] w-[20px]" />
-            </span>
-          </div>
+          {resolvedViewMoreHref ? (
+            <Link
+              href={resolvedViewMoreHref}
+              className="pointer-events-auto absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black no-underline hover:opacity-90"
+              style={{ fontFamily: pangeaFont }}
+              aria-label={`Open ${titlePrimary}${titleSecondary ? ` ${titleSecondary}` : ""}`}
+            >
+              {titlePrimary}
+              {titleSecondary ? (
+                <>
+                  <br />
+                  {titleSecondary}
+                </>
+              ) : null}
+              <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
+                <ExternalLinkGlyph className="h-[20px] w-[20px]" />
+              </span>
+            </Link>
+          ) : (
+            <div
+              className="pointer-events-auto absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black"
+              style={{ fontFamily: pangeaFont }}
+            >
+              {titlePrimary}
+              {titleSecondary ? (
+                <>
+                  <br />
+                  {titleSecondary}
+                </>
+              ) : null}
+              <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
+                <ExternalLinkGlyph className="h-[20px] w-[20px]" />
+              </span>
+            </div>
+          )}
 
           {resolvedViewMoreHref ? (
             <Link
@@ -424,12 +446,11 @@ export function CatalogShowcaseCard({
               style={ctaStyle}
               aria-label={viewMoreLabel}
               onClick={(e) => {
-                if (!viewMoreHovered) {
-                  // First tap: show the expanded card instead of navigating
+                if (!viewMoreHovered && !isTrackLink) {
+                  // Course cards: first tap opens expanded preview instead of navigating
                   e.preventDefault();
                   openHover();
                 }
-                // Second tap (card already open): navigate normally
               }}
               {...ctaHoverHandlers}
             >

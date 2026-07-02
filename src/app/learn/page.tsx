@@ -75,7 +75,7 @@ export default async function LearnPage() {
             <LearnFeaturedCoursesPanel
               slides={trackShowcaseSlides.map((slide) => ({
                 id: slide.slug,
-                cardProps: slide.cardProps,
+                cardProps: { ...slide.cardProps, showcaseSlug: slide.slug },
               }))}
             />
           </section>

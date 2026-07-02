@@ -215,6 +215,13 @@ model Course {
   totalDurationMinutes   Int?     @map("total_duration_minutes")
   rating                 Float?   // e.g. 4.5
 
+  // Learn catalog filter tags (admin checkboxes)
+  tagGuided              Boolean  @default(false) @map("tag_guided")
+  tagDeepDive            Boolean  @default(false) @map("tag_deep_dive")
+  tagBasics              Boolean  @default(false) @map("tag_basics")
+  tagNew                 Boolean  @default(false) @map("tag_new")
+  tagTopRated            Boolean  @default(false) @map("tag_top_rated")
+
   track                  Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
   mentor                 Mentor?  @relation(fields: [mentorId], references: [id], onDelete: SetNull)
   modules                Module[]
@@ -228,6 +235,11 @@ model Course {
   @@index([featuredNewOrder])
   @@index([featuredMostPlayedOrder])
   @@index([featuredTrendingOrder])
+  @@index([tagGuided])
+  @@index([tagDeepDive])
+  @@index([tagBasics])
+  @@index([tagNew])
+  @@index([tagTopRated])
   @@map("courses")
 }
 

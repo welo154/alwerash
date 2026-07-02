@@ -85,6 +85,11 @@ export const CourseCreateSchema = z.object({
   featuredTrendingOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   totalDurationMinutes: z.number().int().min(0).max(1_000_000).nullable().optional(),
   rating: z.number().min(0).max(5).nullable().optional(),
+  tagGuided: z.boolean().optional(),
+  tagDeepDive: z.boolean().optional(),
+  tagBasics: z.boolean().optional(),
+  tagNew: z.boolean().optional(),
+  tagTopRated: z.boolean().optional(),
 });
 
 export const CourseUpdateSchema = CourseCreateSchema.partial().extend({

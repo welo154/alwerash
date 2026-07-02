@@ -3,8 +3,10 @@ import { requireRole } from "@/server/auth/require";
 import {
   adminListCourses,
   adminSetCoursePopular,
+  adminSetCourseTag,
   adminSetCourseTrending,
 } from "@/server/content/admin.service";
+import type { CourseCatalogTagKey } from "@/types/course-catalog-tags";
 import { AdminCoursesPageClient } from "./AdminCoursesPage";
 import { AdminCourseCard } from "./AdminCourseCard";
 import { CreateCourseForm } from "./CreateCourseForm";
@@ -35,6 +37,14 @@ export default async function AdminCoursesPage({
     revalidatePath("/learn");
   }
 
+  async function toggleCourseTag(courseId: string, tag: CourseCatalogTagKey, enabled: boolean) {
+    "use server";
+    await requireRole(["ADMIN"]);
+    await adminSetCourseTag(courseId, tag, enabled);
+    revalidatePath("/admin/content/courses");
+    revalidatePath("/learn");
+  }
+
   return (
     <div className="p-8">
       <h1 className="mb-6 text-2xl font-bold tracking-tight text-black">Courses</h1>
@@ -51,10 +61,16 @@ export default async function AdminCoursesPage({
               published: c.published,
               featuredMostPlayedOrder: c.featuredMostPlayedOrder ?? null,
               featuredTrendingOrder: c.featuredTrendingOrder ?? null,
+              tagGuided: c.tagGuided ?? false,
+              tagDeepDive: c.tagDeepDive ?? false,
+              tagBasics: c.tagBasics ?? false,
+              tagNew: c.tagNew ?? false,
+              tagTopRated: c.tagTopRated ?? false,
               track: c.track,
             }}
             togglePopular={toggleCoursePopular}
             toggleTrending={toggleCourseTrending}
+            toggleTag={toggleCourseTag}
           />
         ))}
         <AdminCoursesPageClient

@@ -90,24 +90,28 @@ function buildCourseTilesForTrack(
   track: Pick<TrackWithCourses, "title" | "slug" | "courses">
 ): LearnPopularTile[] {
   const tagPrimary = track.title.trim().toUpperCase() || "TRACK";
-  return track.courses
-    .filter((course) => course.featuredMostPlayedOrder != null)
-    .sort(
-      (a, b) => (a.featuredMostPlayedOrder ?? 0) - (b.featuredMostPlayedOrder ?? 0)
-    )
-    .map((course) => ({
-      id: course.id,
-      href: `/courses/${course.id}`,
-      title: course.title,
-      authorLabel: course.instructorName?.trim() || "Instructor",
-      tagPrimary,
-      coverImageSrc: effectiveCoverImage(
-        course.coverImage,
-        course.introVideoMuxPlaybackId,
-        course.title,
-        track.slug
-      ),
-    }));
+  const sorted = [...track.courses].sort((a, b) => {
+    const aPopular = a.featuredMostPlayedOrder;
+    const bPopular = b.featuredMostPlayedOrder;
+    if (aPopular != null && bPopular != null) return aPopular - bPopular;
+    if (aPopular != null) return -1;
+    if (bPopular != null) return 1;
+    return 0;
+  });
+
+  return sorted.map((course) => ({
+    id: course.id,
+    href: `/courses/${course.id}`,
+    title: course.title,
+    authorLabel: course.instructorName?.trim() || "Instructor",
+    tagPrimary,
+    coverImageSrc: effectiveCoverImage(
+      course.coverImage,
+      course.introVideoMuxPlaybackId,
+      course.title,
+      track.slug
+    ),
+  }));
 }
 
 function buildCourseTilesByTrackSlug(tracks: TrackWithCourses[]): Record<string, LearnPopularTile[]> {
@@ -119,21 +123,23 @@ function buildCourseTilesByTrackSlug(tracks: TrackWithCourses[]): Record<string,
 }
 
 function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[] {
-  return tracks.map((t) => ({
-    slug: t.slug,
-    cardProps: {
-      ...catalogShowcasePropsFromTrackAggregate({
-        title: t.title,
-        slug: t.slug,
-        courses: t.courses.map((c) => ({
-          totalDurationMinutes: c.totalDurationMinutes,
-          lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
-        })),
-      }),
-      bottomImageSrc: resolveTrackCoverImage(t.coverImage, t.slug),
-      showcaseSlug: t.slug,
-    },
-  }));
+  return tracks
+    .filter((t) => t.courses.length > 0)
+    .map((t) => ({
+      slug: t.slug,
+      cardProps: {
+        ...catalogShowcasePropsFromTrackAggregate({
+          title: t.title,
+          slug: t.slug,
+          courses: t.courses.map((c) => ({
+            totalDurationMinutes: c.totalDurationMinutes,
+            lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
+          })),
+        }),
+        topImageSrc: resolveTrackCoverImage(t.coverImage, t.slug),
+        showcaseSlug: t.slug,
+      },
+    }));
 }
 
 async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
@@ -316,8 +322,11 @@ export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTr
 }
 
 export async function publicGetTrackBySlug(slug: string) {
-  const track = await prisma.track.findUnique({
-    where: { slug },
+  const track = await prisma.track.findFirst({
+    where: {
+      published: true,
+      slug: { equals: slug, mode: "insensitive" },
+    },
     select: {
       id: true,
       title: true,
@@ -325,7 +334,6 @@ export async function publicGetTrackBySlug(slug: string) {
       description: true,
       coverImage: true,
       order: true,
-      published: true,
       courses: {
         where: { published: true },
         orderBy: { createdAt: "asc" },
@@ -344,7 +352,7 @@ export async function publicGetTrackBySlug(slug: string) {
     },
   });
 
-  if (!track || !track.published) throw new AppError("NOT_FOUND", 404, "Track not found");
+  if (!track) throw new AppError("NOT_FOUND", 404, "Track not found");
   return {
     ...track,
     coverImage: resolveTrackCoverImage(track.coverImage, track.slug),

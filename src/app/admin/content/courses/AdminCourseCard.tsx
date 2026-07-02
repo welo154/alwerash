@@ -3,6 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useTransition } from "react";
+import {
+  COURSE_CATALOG_TAGS,
+  type CourseCatalogTagKey,
+  type CourseCatalogTagState,
+} from "@/types/course-catalog-tags";
 
 export type AdminCourseCardCourse = {
   id: string;
@@ -13,21 +18,32 @@ export type AdminCourseCardCourse = {
   featuredMostPlayedOrder: number | null;
   featuredTrendingOrder: number | null;
   track: { title: string } | null;
-};
+} & CourseCatalogTagState;
 
 export function AdminCourseCard({
   course,
   togglePopular,
   toggleTrending,
+  toggleTag,
 }: {
   course: AdminCourseCardCourse;
   togglePopular: (courseId: string, popular: boolean) => Promise<void>;
   toggleTrending: (courseId: string, trending: boolean) => Promise<void>;
+  toggleTag: (courseId: string, tag: CourseCatalogTagKey, enabled: boolean) => Promise<void>;
 }) {
   const [isPopular, setIsPopular] = useState(course.featuredMostPlayedOrder != null);
   const [isTrending, setIsTrending] = useState(course.featuredTrendingOrder != null);
+  const [tags, setTags] = useState<CourseCatalogTagState>(() => ({
+    tagGuided: course.tagGuided,
+    tagDeepDive: course.tagDeepDive,
+    tagBasics: course.tagBasics,
+    tagNew: course.tagNew,
+    tagTopRated: course.tagTopRated,
+  }));
   const [popularPending, startPopularTransition] = useTransition();
   const [trendingPending, startTrendingTransition] = useTransition();
+  const [tagPending, startTagTransition] = useTransition();
+  const [pendingTagKey, setPendingTagKey] = useState<CourseCatalogTagKey | null>(null);
 
   function handlePopularChange(next: boolean) {
     const prev = isPopular;
@@ -50,6 +66,21 @@ export function AdminCourseCard({
       } catch {
         setIsTrending(prev);
         alert("Trending list is full (max 6 courses). Remove one first.");
+      }
+    });
+  }
+
+  function handleTagChange(key: CourseCatalogTagKey, next: boolean) {
+    const prev = tags[key];
+    setTags((current) => ({ ...current, [key]: next }));
+    setPendingTagKey(key);
+    startTagTransition(async () => {
+      try {
+        await toggleTag(course.id, key, next);
+      } catch {
+        setTags((current) => ({ ...current, [key]: prev }));
+      } finally {
+        setPendingTagKey(null);
       }
     });
   }
@@ -165,6 +196,32 @@ export function AdminCourseCard({
         />
         Trending class
       </label>
+
+      <div
+        className="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Tags</p>
+        <div className="grid grid-cols-1 gap-1">
+          {COURSE_CATALOG_TAGS.map(({ key, label }) => (
+            <label
+              key={key}
+              className={`flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-slate-700 ${
+                tagPending && pendingTagKey === key ? "opacity-60" : ""
+              }`}
+            >
+              <input
+                type="checkbox"
+                className="h-3 w-3 shrink-0 rounded border-slate-300 text-slate-700 focus:ring-slate-400"
+                checked={tags[key]}
+                disabled={tagPending && pendingTagKey === key}
+                onChange={(e) => handleTagChange(key, e.target.checked)}
+              />
+              <span className="leading-tight">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   adminUpdateCourse,
 } from "@/server/content/admin.service";
 import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleButton";
+import { COURSE_CATALOG_TAGS } from "@/types/course-catalog-tags";
 
 function FeaturedInBadges({
   featuredNewOrder,
@@ -102,6 +103,11 @@ export default async function AdminCourseDetail({
       totalDurationMinutes:
         totalDur === "" || totalDur == null ? null : Number(totalDur),
       rating: ratingVal === "" || ratingVal == null ? null : Number(ratingVal),
+      tagGuided: formData.get("tagGuided") === "on",
+      tagDeepDive: formData.get("tagDeepDive") === "on",
+      tagBasics: formData.get("tagBasics") === "on",
+      tagNew: formData.get("tagNew") === "on",
+      tagTopRated: formData.get("tagTopRated") === "on",
     });
     const parts = ["Course updated"];
     if (featuredNew !== "" && featuredNew != null) parts.push(`In "New" (order ${featuredNew})`);
@@ -361,6 +367,22 @@ export default async function AdminCourseDetail({
               If courses don&apos;t show in <strong>New</strong> or <strong>Most played</strong> on the home page, run{" "}
               <code className="rounded bg-slate-200 px-1 py-0.5">npm run db:deploy</code> so the database has the required columns.
             </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800">Catalog tags</h3>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {COURSE_CATALOG_TAGS.map(({ key, label }) => (
+                <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    name={key}
+                    defaultChecked={(course as Record<string, boolean | undefined>)[key] ?? false}
+                    className="h-3.5 w-3.5 rounded border-slate-300 text-slate-700 focus:ring-slate-400"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <div>

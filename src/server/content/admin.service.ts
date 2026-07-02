@@ -2,6 +2,14 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import type { CourseCatalogTagKey, CourseCatalogTagState } from "@/types/course-catalog-tags";
+import {
+  EMPTY_COURSE_TAGS,
+  sqlGetCourseTagMap,
+  sqlGetCourseTags,
+  sqlSetCourseTag,
+  sqlUpdateCourseTags,
+} from "./course-catalog-tags-sql";
 import {
   sqlCountFeaturedMentors,
   sqlGetFeaturedOrder,
@@ -127,8 +135,10 @@ export async function adminListCourses(trackId?: string) {
       },
     });
     const trendingById = await sqlGetTrendingOrderMap(rows.map((c) => c.id));
+    const tagsById = await sqlGetCourseTagMap(rows.map((c) => c.id));
     return rows.map((c) => ({
       ...c,
+      ...tagsById.get(c.id) ?? EMPTY_COURSE_TAGS,
       featuredTrendingOrder: trendingById.get(c.id) ?? null,
     }));
   } catch (e) {
@@ -162,6 +172,11 @@ async function adminListCoursesRawSafe(trackId?: string) {
     published: row.published,
     featuredMostPlayedOrder: null as number | null,
     featuredTrendingOrder: null as number | null,
+    tagGuided: false,
+    tagDeepDive: false,
+    tagBasics: false,
+    tagNew: false,
+    tagTopRated: false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     track: null as { id: string; title: string; slug: string } | null,
@@ -202,8 +217,10 @@ export async function adminGetCourse(id: string) {
     } catch {
       // mentor_id column may not exist yet (run prisma migrate deploy)
     }
+    const tags = await sqlGetCourseTags(id);
     return {
       ...c,
+      ...tags,
       mentorId,
       featuredTrendingOrder: await sqlGetTrendingOrder(id),
     };
@@ -297,10 +314,23 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
     featuredUpdates.push(`"featured_trending_order" = $${featuredIdx}`);
     featuredValues.push(data.featuredTrendingOrder === null || data.featuredTrendingOrder === "" ? null : Number(data.featuredTrendingOrder));
   }
+  const tagPatch: Partial<CourseCatalogTagState> = {};
+  if (data.tagGuided !== undefined) tagPatch.tagGuided = Boolean(data.tagGuided);
+  if (data.tagDeepDive !== undefined) tagPatch.tagDeepDive = Boolean(data.tagDeepDive);
+  if (data.tagBasics !== undefined) tagPatch.tagBasics = Boolean(data.tagBasics);
+  if (data.tagNew !== undefined) tagPatch.tagNew = Boolean(data.tagNew);
+  if (data.tagTopRated !== undefined) tagPatch.tagTopRated = Boolean(data.tagTopRated);
 
   try {
     if (featuredUpdates.length > 0) {
       await runUpdate(featuredUpdates, featuredValues);
+      if (Object.keys(tagPatch).length > 0) {
+        try {
+          await sqlUpdateCourseTags(courseId, tagPatch);
+        } catch {
+          // tag_* columns may not exist yet
+        }
+      }
       return courseFindRawSafe(courseId);
     }
   } catch (e) {
@@ -309,8 +339,24 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
     // featured_* columns don't exist; fall back to base columns only
   }
 
-  if (baseUpdates.length === 0) return courseFindRawSafe(courseId);
+  if (baseUpdates.length === 0) {
+    if (Object.keys(tagPatch).length > 0) {
+      try {
+        await sqlUpdateCourseTags(courseId, tagPatch);
+      } catch {
+        // tag_* columns may not exist yet
+      }
+    }
+    return courseFindRawSafe(courseId);
+  }
   await runUpdate(baseUpdates, baseValues);
+  if (Object.keys(tagPatch).length > 0) {
+    try {
+      await sqlUpdateCourseTags(courseId, tagPatch);
+    } catch {
+      // tag_* columns may not exist yet
+    }
+  }
   return courseFindRawSafe(courseId);
 }
 
@@ -348,6 +394,7 @@ async function adminGetCourseSafeFallback(id: string) {
     where: { courseId: id },
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
   });
+  const tags = await sqlGetCourseTags(id);
   return {
     ...course,
     mentorId: null as string | null,
@@ -358,6 +405,7 @@ async function adminGetCourseSafeFallback(id: string) {
     featuredTrendingOrder: null as number | null,
     totalDurationMinutes: null as number | null,
     rating: null as number | null,
+    ...tags,
   };
 }
 
@@ -374,12 +422,23 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
       }
     }
   }
-  // Don't pass mentorId or trending order to Prisma (client may lag behind migrations).
+  // Don't pass mentorId, trending order, or catalog tags to Prisma (client may lag behind migrations).
   const {
     mentorId: _m,
     featuredTrendingOrder: trendingOrderToSet,
+    tagGuided,
+    tagDeepDive,
+    tagBasics,
+    tagNew,
+    tagTopRated,
     ...dataForPrisma
   } = updateData;
+  const tagPatch: Partial<CourseCatalogTagState> = {};
+  if (tagGuided !== undefined) tagPatch.tagGuided = Boolean(tagGuided);
+  if (tagDeepDive !== undefined) tagPatch.tagDeepDive = Boolean(tagDeepDive);
+  if (tagBasics !== undefined) tagPatch.tagBasics = Boolean(tagBasics);
+  if (tagNew !== undefined) tagPatch.tagNew = Boolean(tagNew);
+  if (tagTopRated !== undefined) tagPatch.tagTopRated = Boolean(tagTopRated);
   try {
     const updated = await prisma.course.update({ where: { id: courseId }, data: dataForPrisma });
     if (mentorIdToSet !== undefined) {
@@ -395,8 +454,17 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
         trendingOrderToSet === null || trendingOrderToSet === "" ? null : Number(trendingOrderToSet)
       );
     }
+    if (Object.keys(tagPatch).length > 0) {
+      try {
+        await sqlUpdateCourseTags(courseId, tagPatch);
+      } catch {
+        // tag_* columns may not exist yet
+      }
+    }
+    const tags = await sqlGetCourseTags(courseId);
     return {
       ...updated,
+      ...tags,
       featuredTrendingOrder: await sqlGetTrendingOrder(courseId),
     };
   } catch (e) {
@@ -494,6 +562,16 @@ export async function adminSetCourseTrending(courseId: string, trending: boolean
 
   const nextOrder = (await sqlMaxTrendingOrder()) + 1;
   await sqlSetTrendingOrder(courseId, nextOrder);
+  return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
+}
+
+/** Toggle a learn catalog filter tag on a course. */
+export async function adminSetCourseTag(
+  courseId: string,
+  tag: CourseCatalogTagKey,
+  enabled: boolean
+) {
+  await sqlSetCourseTag(courseId, tag, enabled);
   return prisma.course.findUniqueOrThrow({ where: { id: courseId } });
 }
 

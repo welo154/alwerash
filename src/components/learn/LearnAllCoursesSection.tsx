@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
@@ -11,8 +11,8 @@ import type {
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
-const DEEP_DIVE_MIN_LESSONS = 5;
-const DEEP_DIVE_MIN_MINUTES = 90;
+const DEEP_DIVE_MIN_LESSONS = 3;
+const DEEP_DIVE_MIN_MINUTES = 45;
 
 const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "all", label: "All courses" },
@@ -20,63 +20,16 @@ const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "deepDive", label: "Deep dive" },
 ];
 
-function FilterChevron() {
-  return (
-    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden className="shrink-0">
-      <path
-        d="M1 1L5 5L9 1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+const filterSelectClass =
+  "h-8 min-w-[140px] max-w-[220px] cursor-pointer appearance-none rounded-[8px] border border-black bg-white bg-[length:10px_6px] bg-[right_12px_center] bg-no-repeat py-0 pl-4 pr-8 text-black";
 
-function LearnFilterDropdown({
-  label,
-  open,
-  onToggle,
-  children,
-  align = "right",
-}: {
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  children: ReactNode;
-  align?: "left" | "right";
-}) {
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={onToggle}
-        className="inline-flex h-8 min-w-[106px] shrink-0 items-center justify-between gap-2 rounded-[8px] border border-black bg-white px-4 text-black transition-colors hover:bg-slate-50"
-        style={{
-          fontFamily: pangeaFont,
-          fontSize: "16px",
-          fontWeight: 400,
-          lineHeight: "19.6px",
-        }}
-      >
-        <span className="truncate">{label}</span>
-        <FilterChevron />
-      </button>
-      {open ? (
-        <div
-          className={`absolute top-[calc(100%+8px)] z-20 max-h-[280px] min-w-[180px] overflow-y-auto rounded-[8px] border border-black bg-white py-1 shadow-md ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-          style={{ fontFamily: pangeaFont }}
-        >
-          {children}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+const filterSelectStyle = {
+  fontFamily: pangeaFont,
+  fontSize: "16px",
+  fontWeight: 400,
+  lineHeight: "19.6px",
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+} as const;
 
 function LearnAllCoursesHeading() {
   return (
@@ -111,13 +64,19 @@ function LearnAllCoursesHeading() {
   );
 }
 
+function normalizeSlug(slug: string | null | undefined): string {
+  return slug?.trim().toLowerCase() ?? "";
+}
+
 function filterByType(courses: LearnAllCourseItem[], type: LearnCourseTypeFilter): LearnAllCourseItem[] {
   if (type === "all") return courses;
 
   if (type === "topRated") {
-    return [...courses]
-      .filter((course) => course.rating != null)
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    return [...courses].sort((a, b) => {
+      const aRating = a.rating ?? -1;
+      const bRating = b.rating ?? -1;
+      return bRating - aRating;
+    });
   }
 
   return courses.filter(
@@ -127,6 +86,27 @@ function filterByType(courses: LearnAllCourseItem[], type: LearnCourseTypeFilter
   );
 }
 
+function buildTrackOptions(
+  courses: LearnAllCourseItem[],
+  tracks: LearnCourseTrackOption[]
+): LearnCourseTrackOption[] {
+  const bySlug = new Map<string, string>();
+  for (const track of tracks) {
+    const slug = normalizeSlug(track.slug);
+    if (slug) bySlug.set(slug, track.title);
+  }
+  for (const course of courses) {
+    const slug = normalizeSlug(course.trackSlug);
+    if (slug && !bySlug.has(slug)) {
+      const title = course.tagPrimary.trim() || slug;
+      bySlug.set(slug, title.charAt(0) + title.slice(1).toLowerCase());
+    }
+  }
+  return Array.from(bySlug.entries())
+    .map(([slug, title]) => ({ slug, title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
 export default function LearnAllCoursesSection({
   courses,
   tracks,
@@ -134,100 +114,65 @@ export default function LearnAllCoursesSection({
   courses: LearnAllCourseItem[];
   tracks: LearnCourseTrackOption[];
 }) {
-  const [openMenu, setOpenMenu] = useState<"track" | "type" | null>(null);
-  const [trackSlug, setTrackSlug] = useState<string>("all");
+  const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
-  const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const trackLabel =
-    trackSlug === "all"
-      ? "All tracks"
-      : tracks.find((track) => track.slug === trackSlug)?.title ?? "Track";
-
-  const typeLabel = TYPE_OPTIONS.find((option) => option.id === typeFilter)?.label ?? "All courses";
+  const trackOptions = useMemo(
+    () => buildTrackOptions(courses, tracks),
+    [courses, tracks]
+  );
 
   const visibleCourses = useMemo(() => {
     let items = courses;
     if (trackSlug !== "all") {
-      items = items.filter((course) => course.trackSlug === trackSlug);
+      const selected = normalizeSlug(trackSlug);
+      items = items.filter((course) => normalizeSlug(course.trackSlug) === selected);
     }
     return filterByType(items, typeFilter);
   }, [courses, trackSlug, typeFilter]);
 
-  useEffect(() => {
-    if (!openMenu) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setOpenMenu(null);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [openMenu]);
-
   if (courses.length === 0) return null;
 
   return (
-    <section aria-label="All courses" className="min-w-0 w-full max-w-full">
+    <section aria-label="All courses" className="relative z-30 min-w-0 w-full max-w-full">
       <div className="flex flex-wrap items-start justify-between gap-6">
         <LearnAllCoursesHeading />
 
-        <div ref={menuRef} className="flex shrink-0 flex-wrap items-center gap-3">
-          <LearnFilterDropdown
-            label={trackLabel}
-            open={openMenu === "track"}
-            onToggle={() => setOpenMenu((prev) => (prev === "track" ? null : "track"))}
-            align="right"
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          <label className="sr-only" htmlFor="learn-all-courses-track-filter">
+            Filter by track
+          </label>
+          <select
+            id="learn-all-courses-track-filter"
+            value={trackSlug}
+            onChange={(e) => setTrackSlug(e.target.value)}
+            className={filterSelectClass}
+            style={filterSelectStyle}
           >
-            <button
-              type="button"
-              className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${
-                trackSlug === "all" ? "font-medium" : "font-normal"
-              }`}
-              onClick={() => {
-                setTrackSlug("all");
-                setOpenMenu(null);
-              }}
-            >
-              All tracks
-            </button>
-            {tracks.map((track) => (
-              <button
-                key={track.slug}
-                type="button"
-                className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${
-                  trackSlug === track.slug ? "font-medium" : "font-normal"
-                }`}
-                onClick={() => {
-                  setTrackSlug(track.slug);
-                  setOpenMenu(null);
-                }}
-              >
+            <option value="all">All tracks</option>
+            {trackOptions.map((track) => (
+              <option key={track.slug} value={track.slug}>
                 {track.title}
-              </button>
+              </option>
             ))}
-          </LearnFilterDropdown>
+          </select>
 
-          <LearnFilterDropdown
-            label={typeLabel}
-            open={openMenu === "type"}
-            onToggle={() => setOpenMenu((prev) => (prev === "type" ? null : "type"))}
-            align="right"
+          <label className="sr-only" htmlFor="learn-all-courses-type-filter">
+            Filter by course type
+          </label>
+          <select
+            id="learn-all-courses-type-filter"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as LearnCourseTypeFilter)}
+            className={filterSelectClass}
+            style={filterSelectStyle}
           >
             {TYPE_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${
-                  typeFilter === option.id ? "font-medium" : "font-normal"
-                }`}
-                onClick={() => {
-                  setTypeFilter(option.id);
-                  setOpenMenu(null);
-                }}
-              >
+              <option key={option.id} value={option.id}>
                 {option.label}
-              </button>
+              </option>
             ))}
-          </LearnFilterDropdown>
+          </select>
         </div>
       </div>
 
@@ -240,7 +185,11 @@ export default function LearnAllCoursesSection({
             No courses match these filters.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-x-[18px] gap-y-[30px]" data-gsap-stagger-group>
+          <div
+            key={`${trackSlug}-${typeFilter}`}
+            className="flex flex-wrap gap-x-[18px] gap-y-[30px]"
+            data-gsap-stagger-group
+          >
             {visibleCourses.map((course) => (
               <LearnPopularFigmaTile key={course.id} {...course} />
             ))}
