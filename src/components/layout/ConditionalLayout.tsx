@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { SiteLayout } from "./SiteLayout";
 import { AdminLayout } from "./AdminLayout";
 import { ConditionalSiteFooter } from "./ConditionalSiteFooter";
+import { LibraryHeader } from "@/components/library/LibraryHeader";
 
 function isStandaloneRoute(pathname: string) {
   return (
@@ -21,6 +22,8 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   /** Guest marketing home — HeroSection includes its own green nav shell. */
   const isGuestLanding = pathname === "/";
   const isStandalone = isStandaloneRoute(pathname);
+  /** Library has its own dedicated header — skip the global SiteHeader. */
+  const isLibrary = pathname === "/library" || pathname.startsWith("/library/");
 
   if (isAdmin) {
     return <AdminLayout>{children}</AdminLayout>;
@@ -37,6 +40,16 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   if (isGuestLanding) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
+        <main className="min-w-0 flex-1">{children}</main>
+        <ConditionalSiteFooter />
+      </div>
+    );
+  }
+
+  if (isLibrary) {
+    return (
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
+        <LibraryHeader />
         <main className="min-w-0 flex-1">{children}</main>
         <ConditionalSiteFooter />
       </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LearnCoursesSidebarAside } from "./LearnCoursesSidebarAside";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -98,40 +99,49 @@ function SidebarListItem({
 export function LearnCoursesSidebar({
   categories,
   activeCategoryKey,
+  showCoursesSection = true,
 }: {
   categories: LearnCoursesSidebarCategory[];
   activeCategoryKey?: string;
+  /** Library sidebar hides the courses filter list. */
+  showCoursesSection?: boolean;
 }) {
-  const allCategories = [...categories, ...sidebarExtraCategories];
+  const allCategories = showCoursesSection
+    ? [...categories, ...sidebarExtraCategories]
+    : categories;
 
   return (
-    <aside className="w-full shrink-0 lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:h-[calc(100vh-2rem)] lg:overflow-y-auto">
-      <div>
-        <h2
-          className="uppercase"
-          style={{
-            fontFamily: pangeaFont,
-            fontSize: "24px",
-            fontStyle: "italic",
-            fontWeight: 700,
-            lineHeight: "28.8px",
-          }}
-        >
-          COURSES
-        </h2>
-        <ul className="mt-2 space-y-0.5">
-          {sidebarCourseFilters.map((item, idx) => (
-            <SidebarListItem key={item} active={idx === 0}>
-              {item}
-            </SidebarListItem>
-          ))}
-        </ul>
-      </div>
+    <LearnCoursesSidebarAside>
+      {showCoursesSection ? (
+        <>
+          <div>
+            <h2
+              className="uppercase"
+              style={{
+                fontFamily: pangeaFont,
+                fontSize: "24px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                lineHeight: "28.8px",
+              }}
+            >
+              COURSES
+            </h2>
+            <ul className="mt-2 space-y-0.5">
+              {sidebarCourseFilters.map((item, idx) => (
+                <SidebarListItem key={item} active={idx === 0}>
+                  {item}
+                </SidebarListItem>
+              ))}
+            </ul>
+          </div>
 
-      <div
-        aria-hidden
-        className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
-      />
+          <div
+            aria-hidden
+            className="mt-[25px] mb-[25px] block h-px w-[266px] max-w-full shrink-0 bg-black"
+          />
+        </>
+      ) : null}
 
       <div>
         <h3
@@ -183,6 +193,6 @@ export function LearnCoursesSidebar({
           ))}
         </ul>
       </div>
-    </aside>
+    </LearnCoursesSidebarAside>
   );
 }
