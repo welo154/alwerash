@@ -249,3 +249,123 @@ export async function getCourseProgress(
     modules,
   };
 }
+
+export type TrackProgressRecord = {
+  trackId: string;
+  trackTitle: string;
+  completedCount: number;
+  totalCount: number;
+  progressPercent: number;
+};
+
+/**
+ * Get track progress: completed lessons / total published lessons across all courses in the track.
+ */
+export async function getTrackProgress(
+  userId: string,
+  trackId: string
+): Promise<TrackProgressRecord | null> {
+  const track = await prisma.track.findUnique({
+    where: { id: trackId, published: true },
+    select: {
+      id: true,
+      title: true,
+      courses: {
+        where: { published: true },
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+        select: {
+          modules: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+            select: {
+              lessons: {
+                where: { published: true },
+                orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+                select: { id: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!track) return null;
+
+  const allLessonIds: string[] = [];
+  for (const course of track.courses) {
+    for (const mod of course.modules) {
+      for (const lesson of mod.lessons) {
+        allLessonIds.push(lesson.id);
+      }
+    }
+  }
+
+  if (allLessonIds.length === 0) {
+    return {
+      trackId: track.id,
+      trackTitle: track.title,
+      completedCount: 0,
+      totalCount: 0,
+      progressPercent: 100,
+    };
+  }
+
+  const completedRows = await prisma.lessonProgress.findMany({
+    where: {
+      userId,
+      lessonId: { in: allLessonIds },
+      completedAt: { not: null },
+    },
+    select: { lessonId: true },
+  });
+  const completedCount = completedRows.length;
+  const totalCount = allLessonIds.length;
+  const progressPercent =
+    totalCount === 0 ? 100 : (completedCount / totalCount) * 100;
+
+  return {
+    trackId: track.id,
+    trackTitle: track.title,
+    completedCount,
+    totalCount,
+    progressPercent: Math.round(progressPercent * 100) / 100,
+  };
+}
+
+export type CourseProgressSummary = {
+  courseId: string;
+  completedCount: number;
+  totalCount: number;
+  progressPercent: number;
+};
+
+/**
+ * Batch course progress for catalog views (e.g. track page cards).
+ */
+export async function getCourseProgressForCourses(
+  userId: string,
+  courseIds: string[]
+): Promise<CourseProgressSummary[]> {
+  if (courseIds.length === 0) return [];
+
+  const results = await Promise.all(
+    courseIds.map(async (courseId) => {
+      const progress = await getCourseProgress(userId, courseId);
+      if (!progress) {
+        return {
+          courseId,
+          completedCount: 0,
+          totalCount: 0,
+          progressPercent: 0,
+        };
+      }
+      return {
+        courseId: progress.courseId,
+        completedCount: progress.completedCount,
+        totalCount: progress.totalCount,
+        progressPercent: progress.progressPercent,
+      };
+    })
+  );
+
+  return results;
+}

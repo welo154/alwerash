@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { publicGetTrackBySlug, publicListTracks } from "@/server/content/public.service";
 import { AppError } from "@/server/lib/errors";
+import {
+  getCourseProgressForCourses,
+  getTrackProgress,
+} from "@/server/learning/progress.service";
 import {
   LearnCoursesSidebar,
   buildLearnSidebarCategories,
@@ -24,6 +29,30 @@ export default async function TrackPage({
   const tracks = await publicListTracks();
   const sidebarCategories = buildLearnSidebarCategories(tracks);
 
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  const courseIds = track.courses.map((c) => c.id);
+  const [trackProgressRecord, courseProgressList] = userId
+    ? await Promise.all([
+        getTrackProgress(userId, track.id),
+        getCourseProgressForCourses(userId, courseIds),
+      ])
+    : [null, []];
+
+  const progressByCourseId = new Map(
+    courseProgressList.map((p) => [p.courseId, p.progressPercent])
+  );
+
+  const trackProgress = trackProgressRecord
+    ? {
+        progressPercent: trackProgressRecord.progressPercent,
+        completedCount: trackProgressRecord.completedCount,
+        totalCount: trackProgressRecord.totalCount,
+        trackTitle: trackProgressRecord.trackTitle,
+      }
+    : null;
+
   const courseItems = track.courses.map((c) => ({
     id: c.id,
     href: `/courses/${c.id}`,
@@ -33,6 +62,7 @@ export default async function TrackPage({
     coverImageSrc: c.coverImage,
     rating: c.rating ?? null,
     popularOrder: c.featuredMostPlayedOrder ?? null,
+    progressPercent: userId ? (progressByCourseId.get(c.id) ?? 0) : null,
   }));
 
   return (
@@ -45,7 +75,11 @@ export default async function TrackPage({
           />
 
           <main className="min-w-0 flex-1">
-            <TrackCoursesSection trackTitle={track.title} courses={courseItems} />
+            <TrackCoursesSection
+              trackTitle={track.title}
+              courses={courseItems}
+              trackProgress={trackProgress}
+            />
           </main>
         </div>
       </div>

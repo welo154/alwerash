@@ -8,4 +8,6 @@ export type LearnPopularTile = {
   /** Figma `167:1738` — primary tag (e.g. track name), uppercase in UI. */
   tagPrimary: string;
   coverImageSrc: string | null;
+  /** Learner completion % (0–100); when set, shown instead of placeholder rating. */
+  progressPercent?: number | null;
 };

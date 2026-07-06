@@ -3,7 +3,11 @@
 import { useState, useCallback } from "react";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
 import { ProgressTracker } from "@/components/video/ProgressTracker";
-import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
+import {
+  LearningProgressBars,
+  type ProgressSummary,
+  type TrackProgressSummary,
+} from "@/components/learning/LearningProgressBars";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import Link from "next/link";
 
@@ -15,11 +19,8 @@ type Props = {
   streamUrl: string;
   posterUrl?: string;
   completeLesson: (lessonId: string, courseId: string) => Promise<void>;
-  courseProgress: {
-    progressPercent: number;
-    completedCount: number;
-    totalCount: number;
-  };
+  courseProgress: ProgressSummary;
+  trackProgress?: TrackProgressSummary | null;
   initialLastPositionSeconds?: number;
   initialWatchSeconds?: number;
 };
@@ -31,6 +32,7 @@ export function LessonPlayerWithActions({
   posterUrl,
   completeLesson,
   courseProgress,
+  trackProgress,
   initialLastPositionSeconds,
   initialWatchSeconds,
 }: Props) {
@@ -47,12 +49,7 @@ export function LessonPlayerWithActions({
 
   return (
     <div className="space-y-4">
-      <CourseProgressBar
-        progressPercent={courseProgress.progressPercent}
-        completedCount={courseProgress.completedCount}
-        totalCount={courseProgress.totalCount}
-        label="Course progress"
-      />
+      <LearningProgressBars course={courseProgress} track={trackProgress} />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 ring-1 ring-slate-200/50 transition-shadow duration-300 hover:shadow-xl hover:shadow-slate-200/60">
         <ProgressTracker

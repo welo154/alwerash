@@ -7,8 +7,9 @@ import {
   getOrderedLessonIds,
   getCompletedLessonIdsForCourse,
 } from "@/server/progress/course-progress.service";
+import { getCourseProgress, getTrackProgress } from "@/server/learning/progress.service";
 import { CourseCurriculum } from "./CourseCurriculum";
-import { CourseProgressBar } from "@/components/learning/CourseProgressBar";
+import { LearningProgressBars } from "@/components/learning/LearningProgressBars";
 
 export default async function LearnCoursePage({
   params,
@@ -41,13 +42,30 @@ export default async function LearnCoursePage({
   // All lessons are enterable (no sequential lock); progress tracking still applies.
   const unlockedLessonIds = orderedLessonIds;
 
-  const lessonCount = modules.reduce(
-    (acc, m) => acc + (m.lessons?.length ?? 0),
-    0
-  );
-  const completedCount = completedLessonIds.size;
-  const progressPercent =
-    lessonCount > 0 ? (completedCount / lessonCount) * 100 : 0;
+  const trackId = course.track?.id;
+  const [courseProgressRecord, trackProgressRecord] = await Promise.all([
+    getCourseProgress(userId, courseId),
+    trackId ? getTrackProgress(userId, trackId) : Promise.resolve(null),
+  ]);
+
+  const courseProgress = courseProgressRecord
+    ? {
+        progressPercent: courseProgressRecord.progressPercent,
+        completedCount: courseProgressRecord.completedCount,
+        totalCount: courseProgressRecord.totalCount,
+      }
+    : { progressPercent: 0, completedCount: 0, totalCount: 0 };
+
+  const trackProgress = trackProgressRecord
+    ? {
+        progressPercent: trackProgressRecord.progressPercent,
+        completedCount: trackProgressRecord.completedCount,
+        totalCount: trackProgressRecord.totalCount,
+        trackTitle: trackProgressRecord.trackTitle,
+      }
+    : null;
+
+  const lessonCount = courseProgress.totalCount;
 
   const ESTIMATED_MINUTES: Record<string, number> = { VIDEO: 10, ARTICLE: 5, RESOURCE: 5 };
   const totalMinutes = modules.reduce(
@@ -116,14 +134,9 @@ export default async function LearnCoursePage({
                 {durationLabel} total
               </span>
             </div>
-            {lessonCount > 0 && (
+            {(courseProgress.totalCount > 0 || (trackProgress?.totalCount ?? 0) > 0) && (
               <div className="mt-6">
-                <CourseProgressBar
-                  progressPercent={progressPercent}
-                  completedCount={completedCount}
-                  totalCount={lessonCount}
-                  label="Course progress"
-                />
+                <LearningProgressBars course={courseProgress} track={trackProgress} />
               </div>
             )}
           </div>

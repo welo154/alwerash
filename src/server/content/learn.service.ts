@@ -224,7 +224,7 @@ export async function getCourseForLearning(courseId: string) {
       summary: true,
       coverImage: true,
       published: true,
-      track: { select: { published: true, slug: true, title: true } },
+      track: { select: { id: true, published: true, slug: true, title: true } },
       modules: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         select: {

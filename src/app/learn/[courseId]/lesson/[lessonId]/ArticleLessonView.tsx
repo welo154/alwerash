@@ -1,11 +1,18 @@
 "use client";
 
+import {
+  LearningProgressBars,
+  type ProgressSummary,
+  type TrackProgressSummary,
+} from "@/components/learning/LearningProgressBars";
 import { completeLesson } from "./actions";
 
 type ArticleLessonViewProps = {
   courseId: string;
   lessonId: string;
   body: string;
+  courseProgress: ProgressSummary;
+  trackProgress?: TrackProgressSummary | null;
 };
 
 function renderArticleBody(body: string) {
@@ -20,9 +27,16 @@ function renderArticleBody(body: string) {
   ));
 }
 
-export function ArticleLessonView({ courseId, lessonId, body }: ArticleLessonViewProps) {
+export function ArticleLessonView({
+  courseId,
+  lessonId,
+  body,
+  courseProgress,
+  trackProgress,
+}: ArticleLessonViewProps) {
   return (
     <div className="mt-6 opacity-0 animate-fade-in-up animation-delay-150">
+      <LearningProgressBars course={courseProgress} track={trackProgress} className="mb-6" />
       <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="prose prose-slate max-w-none space-y-4">{renderArticleBody(body)}</div>
       </article>

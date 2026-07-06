@@ -130,6 +130,9 @@ export const LEARN_POPULAR_FIGMA_TILE_W = 346;
 /** Legacy fixed height (≈447); slides use `height: auto` — kept for callers that need a minimum. */
 export const LEARN_POPULAR_FIGMA_TILE_H = 166 + 281;
 
+/** Overlap between image and white panel as a fraction of card width (211px at 346px wide). */
+const GRID_PANEL_OVERLAP = `-${(WHITE_PULL_UP / LEARN_POPULAR_FIGMA_TILE_W) * 100}%`;
+
 /** Figma `167:1729` — author max width 181; 5px below title. */
 const AUTHOR_MAX_W = 181;
 /** Space from white panel top to title (193 − 166). */
@@ -145,8 +148,24 @@ const POPULAR_CLASS_COVER_IMAGE = "/learn/popular-class-cover.png";
 /** Between center and top so faces/subjects stay in the visible band above the white panel. */
 const POPULAR_COVER_OBJECT_POSITION = "center 38%";
 
-export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: string }) {
-  const { href, title, authorLabel, tagPrimary, coverImageSrc, className = "" } = props;
+export function LearnPopularFigmaTile(
+  props: LearnPopularTile & { className?: string; size?: "default" | "grid" }
+) {
+  const {
+    href,
+    title,
+    authorLabel,
+    tagPrimary,
+    coverImageSrc,
+    progressPercent,
+    className = "",
+    size = "default",
+  } = props;
+  const isGrid = size === "grid";
+  const completionLabel =
+    progressPercent != null
+      ? `${Math.min(100, Math.max(0, Math.round(progressPercent)))}%`
+      : "98%";
   const grayCoverSrc = coverImageSrc?.trim() || POPULAR_CLASS_COVER_IMAGE;
   const [isStartHovered, setIsStartHovered] = useState(false);
   const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
@@ -252,28 +271,37 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
   };
 
   const activateHover = (el: HTMLElement) => {
+    if (isGrid) return;
     setIsStartHovered(true);
     bringSlideToFront(el);
     unlockOverflowForHoverCard(el);
   };
 
   const deactivateHover = (el: HTMLElement) => {
+    if (isGrid) return;
     setIsStartHovered(false);
     resetSlideStacking(el);
     restoreOverflowAfterHoverCard(el);
   };
 
-  return (
-    <>
+  const cardLink = (
       <Link
         ref={containerRef}
         href={href}
         aria-label={`${title}. ${authorLabel}. ${tagPrimary}. Start`}
-        className={`relative flex w-[346px] shrink-0 flex-col overflow-visible no-underline ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()}
-        onMouseLeave={(e: MouseEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)}
-        onBlur={(e: FocusEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)}
+        className={
+          isGrid
+            ? `relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
+            : `relative flex w-[346px] shrink-0 flex-col overflow-visible no-underline ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
+        }
+        onMouseLeave={
+          isGrid ? undefined : (e: MouseEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)
+        }
+        onBlur={
+          isGrid ? undefined : (e: FocusEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)
+        }
       >
-      {isStartHovered ? (
+      {!isGrid && isStartHovered ? (
         <div
           className="absolute left-0 top-1/2 z-1001 -translate-y-1/2"
           style={{ position: "absolute", width: "608px", height: "567px" }}
@@ -540,7 +568,11 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
 
       <div
         className={`relative shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
-        style={{ width: LEARN_POPULAR_FIGMA_TILE_W, height: GRAY_H }}
+        style={
+          isGrid
+            ? { width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }
+            : { width: LEARN_POPULAR_FIGMA_TILE_W, height: GRAY_H }
+        }
         aria-hidden
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -552,22 +584,37 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
         />
       </div>
       <div
-        className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black bg-white pl-[37px] pr-[37px]${isStartHovered ? " opacity-0" : ""}`}
-        style={{
-          marginTop: -WHITE_PULL_UP,
-          width: LEARN_POPULAR_FIGMA_TILE_W,
-          paddingTop: WHITE_INNER_PT,
-          paddingBottom: 26,
-          fontFamily: pangeaFont,
-        }}
+        className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black bg-white${isGrid ? " flex-1" : ""}${isStartHovered ? " opacity-0" : ""}`}
+        style={
+          isGrid
+            ? {
+                marginTop: GRID_PANEL_OVERLAP,
+                paddingTop: WHITE_INNER_PT,
+                paddingBottom: 26,
+                paddingLeft: "9%",
+                paddingRight: "9%",
+                fontFamily: pangeaFont,
+              }
+            : {
+                marginTop: -WHITE_PULL_UP,
+                width: LEARN_POPULAR_FIGMA_TILE_W,
+                paddingTop: WHITE_INNER_PT,
+                paddingBottom: 26,
+                paddingLeft: 37,
+                paddingRight: 37,
+                fontFamily: pangeaFont,
+              }
+        }
       >
-        <div className="flex max-w-[274px] flex-col gap-[5px]">
-          <p className="m-0 max-w-full text-[18px] font-normal not-italic leading-normal text-black">
+        <div className={`flex flex-col gap-[5px]${isGrid ? " min-h-[68px]" : " max-w-[274px]"}`}>
+          <p
+            className={`m-0 max-w-full font-normal not-italic leading-normal text-black${isGrid ? " line-clamp-2 text-[16px]" : " text-[18px]"}`}
+          >
             {title}
           </p>
           <p
-            className="m-0 text-[16px] font-normal not-italic leading-normal text-black opacity-60"
-            style={{ maxWidth: AUTHOR_MAX_W }}
+            className={`m-0 font-normal not-italic leading-normal text-black opacity-60${isGrid ? " text-[14px]" : " text-[16px]"}`}
+            style={isGrid ? undefined : { maxWidth: AUTHOR_MAX_W }}
           >
             {authorLabel}
           </p>
@@ -576,7 +623,7 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
           className="inline-flex w-max max-w-full items-center justify-center self-start rounded-[8px] border border-solid border-black bg-white px-4"
           style={{
             height: TAG_PRIMARY_H,
-            maxWidth: TAG_PILL_MAX_W,
+            maxWidth: isGrid ? "100%" : TAG_PILL_MAX_W,
             marginTop: GAP_AUTHOR_TO_TAG,
             fontFamily: pangeaFont,
           }}
@@ -585,23 +632,47 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
             {tagPrimary}
           </span>
         </div>
+        {isGrid && progressPercent != null ? (
+          <div className="mt-3 w-full" aria-label={`Course completion: ${completionLabel}`}>
+            <div className="mb-1 flex items-center justify-between text-[12px] text-black/60">
+              <span style={{ fontFamily: pangeaFont }}>Progress</span>
+              <span className="tabular-nums font-medium text-black/80" style={{ fontFamily: pangeaFont }}>
+                {completionLabel}
+              </span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-indigo-600 transition-all duration-300"
+                style={{
+                  width: `${Math.min(100, Math.max(0, progressPercent))}%`,
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
         <div
-          className="flex flex-wrap items-center self-start"
-          style={{ marginTop: GAP_TAG_TO_START }}
+          className={`flex flex-wrap items-center self-start${isGrid ? " mt-auto" : ""}`}
+          style={isGrid ? { marginTop: GAP_TAG_TO_START } : { marginTop: GAP_TAG_TO_START }}
         >
           <span
             className="inline-flex h-[42px] w-[106px] shrink-0 items-center justify-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] text-white"
-            onMouseEnter={(e: MouseEvent<HTMLSpanElement>) => activateHover(e.currentTarget)}
-            onFocus={(e: FocusEvent<HTMLSpanElement>) => activateHover(e.currentTarget)}
-            onClick={(e: MouseEvent<HTMLSpanElement>) => {
-              if (!isStartHovered) {
-                // First tap: show the expanded card instead of navigating
-                e.preventDefault();
-                e.stopPropagation();
-                activateHover(e.currentTarget);
-              }
-              // Second tap (card already shown): let click reach the Link → navigate
-            }}
+            onMouseEnter={
+              isGrid ? undefined : (e: MouseEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
+            }
+            onFocus={
+              isGrid ? undefined : (e: FocusEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
+            }
+            onClick={
+              isGrid
+                ? undefined
+                : (e: MouseEvent<HTMLSpanElement>) => {
+                    if (!isStartHovered) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      activateHover(e.currentTarget);
+                    }
+                  }
+            }
             style={{
               fontFamily: pangeaFont,
               fontSize: "18px",
@@ -614,20 +685,27 @@ export function LearnPopularFigmaTile(props: LearnPopularTile & { className?: st
             <span className="inline-block -translate-x-[3px]">START</span>
           </span>
           <LearnPopularStartArrowIcon />
-          <div className="ml-[11px] flex items-center gap-[7px]">
-            <LearnPopularTileLikeBadge />
-            <span
-              className="text-[16px] font-normal not-italic leading-normal text-black opacity-60"
-              style={{ fontFamily: pangeaFont, color: "var(--Black, #000)" }}
-            >
-              98%
-            </span>
-          </div>
+          {!(isGrid && progressPercent != null) ? (
+            <div className="ml-[11px] flex items-center gap-[7px]">
+              <LearnPopularTileLikeBadge />
+              <span
+                className="text-[16px] font-normal not-italic leading-normal text-black opacity-60"
+                style={{ fontFamily: pangeaFont, color: "var(--Black, #000)" }}
+              >
+                {completionLabel}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
       </Link>
+  );
 
-      {isLearnMoreOpen ? (
+  return (
+    <>
+      {cardLink}
+
+      {!isGrid && isLearnMoreOpen ? (
         typeof window !== "undefined" &&
         createPortal(
           <div

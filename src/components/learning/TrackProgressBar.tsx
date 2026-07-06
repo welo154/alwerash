@@ -6,31 +6,32 @@ type Props = {
   progressPercent: number;
   completedCount: number;
   totalCount: number;
-  label?: string;
+  trackTitle: string;
   className?: string;
 };
 
-export function CourseProgressBar({
+export function TrackProgressBar({
   progressPercent,
   completedCount,
   totalCount,
-  label,
+  trackTitle,
   className = "",
 }: Props) {
   const percent = Math.min(100, Math.max(0, progressPercent));
-  const labelText = label ?? "Course progress";
+  const label = `${trackTitle} track · ${percent.toFixed(0)}%`;
 
   return (
     <ProgressBar
       className={className}
       percent={percent}
-      label={`${labelText} · ${percent.toFixed(0)}%`}
+      label={label}
+      barClassName="bg-emerald-600"
       statusText={
         totalCount > 0
           ? `${completedCount} / ${totalCount} lessons`
           : undefined
       }
-      aria-label={`Course progress: ${percent}%`}
+      aria-label={`Track progress: ${percent}%`}
     />
   );
 }

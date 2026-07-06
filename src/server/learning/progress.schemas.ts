@@ -41,3 +41,14 @@ export const courseProgressResponseSchema = z.object({
 
 export type CourseProgressResponse = z.infer<typeof courseProgressResponseSchema>;
 export type ModuleProgress = z.infer<typeof moduleProgressSchema>;
+
+/** GET /api/learning/progress/track/[trackId] — track progress %. */
+export const trackProgressResponseSchema = z.object({
+  trackId: z.string(),
+  trackTitle: z.string(),
+  completedCount: z.number(),
+  totalCount: z.number(),
+  progressPercent: z.number().min(0).max(100),
+});
+
+export type TrackProgressResponse = z.infer<typeof trackProgressResponseSchema>;

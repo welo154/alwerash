@@ -9,6 +9,7 @@ type Props = {
   label?: string;
   statusText?: string;
   className?: string;
+  barClassName?: string;
   "aria-label"?: string;
 };
 
@@ -17,6 +18,7 @@ export function ProgressBar({
   label,
   statusText,
   className = "",
+  barClassName = "bg-indigo-600",
   "aria-label": ariaLabel,
 }: Props) {
   const percent = Math.min(100, Math.max(0, rawPercent));
@@ -38,7 +40,7 @@ export function ProgressBar({
         aria-label={ariaLabel ?? (label ? `${label}: ${percent}%` : `Progress: ${percent}%`)}
       >
         <div
-          className="h-full rounded-full bg-indigo-600 transition-all duration-300 ease-out"
+          className={`h-full rounded-full transition-all duration-300 ease-out ${barClassName}`}
           style={{ width: `${percent}%` }}
         />
       </div>

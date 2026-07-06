@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireSubscription } from "@/server/subscription/require-subscription";
 import { getLessonForLearning, getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
-import { getCourseProgress, getLessonProgress } from "@/server/learning/progress.service";
+import { getCourseProgress, getLessonProgress, getTrackProgress } from "@/server/learning/progress.service";
 import { CourseCurriculumSidebar } from "../../CourseCurriculumSidebar";
 import { completeLesson } from "./actions";
 import { LessonPlayerWithActions } from "./LessonPlayerWithActions";
@@ -44,9 +44,11 @@ export default async function LearnLessonPage({
     throw e;
   }
 
-  const [courseProgressRecord, lessonProgressRecord] = await Promise.all([
+  const trackId = course.track?.id;
+  const [courseProgressRecord, lessonProgressRecord, trackProgressRecord] = await Promise.all([
     getCourseProgress(userId, courseId),
     getLessonProgress(userId, lessonId),
+    trackId ? getTrackProgress(userId, trackId) : Promise.resolve(null),
   ]);
   const courseProgress = courseProgressRecord
     ? {
@@ -55,6 +57,14 @@ export default async function LearnLessonPage({
         totalCount: courseProgressRecord.totalCount,
       }
     : { progressPercent: 0, completedCount: 0, totalCount: 0 };
+  const trackProgress = trackProgressRecord
+    ? {
+        progressPercent: trackProgressRecord.progressPercent,
+        completedCount: trackProgressRecord.completedCount,
+        totalCount: trackProgressRecord.totalCount,
+        trackTitle: trackProgressRecord.trackTitle,
+      }
+    : null;
   const initialLastPositionSeconds = lessonProgressRecord?.lastPositionSeconds ?? 0;
   const initialWatchSeconds = lessonProgressRecord?.watchSeconds ?? 0;
 
@@ -96,7 +106,13 @@ export default async function LearnLessonPage({
             </h1>
 
             {lessonType === "ARTICLE" ? (
-              <ArticleLessonView courseId={courseId} lessonId={lessonId} body={articleBody} />
+              <ArticleLessonView
+                courseId={courseId}
+                lessonId={lessonId}
+                body={articleBody}
+                courseProgress={courseProgress}
+                trackProgress={trackProgress}
+              />
             ) : streamUrl ? (
               <div className="mt-6 opacity-0 animate-scale-in animation-delay-150">
                 <LessonPlayerWithActions
@@ -106,6 +122,7 @@ export default async function LearnLessonPage({
                   posterUrl={posterUrl}
                   completeLesson={completeLesson}
                   courseProgress={courseProgress}
+                  trackProgress={trackProgress}
                   initialLastPositionSeconds={
                     initialLastPositionSeconds > 0 ? initialLastPositionSeconds : undefined
                   }
