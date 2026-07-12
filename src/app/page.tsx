@@ -10,6 +10,7 @@ export default async function GuestLandingPage() {
   if (session?.user) {
     const roles = (session.user.roles as string[]) ?? [];
     if (roles.includes("ADMIN")) redirect("/admin");
+    if (roles.includes("MENTOR")) redirect("/mentor");
     if (roles.includes("INSTRUCTOR")) redirect("/instructor");
     redirect("/home");
   }

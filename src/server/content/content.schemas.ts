@@ -125,17 +125,17 @@ export const LessonArticleUpsertSchema = z.object({
   body: z.string().max(100_000),
 });
 
-// --- Assignment ---
+// --- Assignment (Phase 1: course-final) ---
 
 export const AssignmentCreateSchema = z.object({
-  lessonId: Cuid,
+  courseId: Cuid,
   title: z.string().min(2, "Title too short").max(200),
   instructions: z.string().max(10_000).optional(),
   rubricJson: z.record(z.unknown()).optional(),
   published: z.boolean().optional(),
 });
 
-export const AssignmentUpdateSchema = AssignmentCreateSchema.partial().omit({ lessonId: true });
+export const AssignmentUpdateSchema = AssignmentCreateSchema.partial().omit({ courseId: true });
 
 // --- Mentor ---
 

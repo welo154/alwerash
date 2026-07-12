@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CatalogShowcaseCard, CATALOG_SHOWCASE_CARD_H } from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 
-const FULL_BLEED = "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2";
+/** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
+const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
 const META_FILTERS: { id: HomeTrackMetaFilter; label: string }[] = [
   { id: "featured", label: "FEATURED" },
@@ -16,9 +17,17 @@ const META_FILTERS: { id: HomeTrackMetaFilter; label: string }[] = [
   { id: "activity", label: "ACTIVITY" },
 ];
 
+/** Same continuous drift as LearnTrendingClassesSection. */
+const MARQUEE_PIXELS_PER_SECOND = 47;
+const PILL_GAP_PX = 25;
+
 const pillFont = {
   fontFamily: '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
   lineHeight: "19.6px",
+} as const;
+
+const bodyTextFont = {
+  fontFamily: '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
 } as const;
 
 function MetaFilterPill({
@@ -81,6 +90,125 @@ function TrackSelectPill({
   );
 }
 
+type LoopPill = HomeTrackPill & { loopKey: string };
+
+function buildMarqueePills(pills: HomeTrackPill[]): LoopPill[] {
+  if (pills.length === 0) return [];
+  const copies = pills.length < 6 ? 4 : 2;
+  const result: LoopPill[] = [];
+  for (let round = 0; round < copies; round += 1) {
+    for (const pill of pills) {
+      result.push({ ...pill, loopKey: `${pill.slug}-m${round}` });
+    }
+  }
+  return result;
+}
+
+function TrackPillsMarqueeRow({
+  pills,
+  renderPill,
+  className = "",
+  reverse = false,
+}: {
+  pills: HomeTrackPill[];
+  renderPill: (pill: HomeTrackPill, key: string) => ReactNode;
+  className?: string;
+  reverse?: boolean;
+}) {
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const offsetRef = useRef(0);
+  const pausedRef = useRef(false);
+  const [paused, setPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  const marqueePills = useMemo(() => buildMarqueePills(pills), [pills]);
+  const copyCount = pills.length > 0 ? marqueePills.length / pills.length : 1;
+  const loopWidthRef = useRef(0);
+
+  const applyOffset = useCallback((px: number) => {
+    const loopWidth = loopWidthRef.current;
+    if (loopWidth <= 0) return;
+    let next = px % loopWidth;
+    if (next < 0) next += loopWidth;
+    offsetRef.current = next;
+    const track = trackRef.current;
+    if (track) track.style.transform = `translate3d(-${next}px, 0, 0)`;
+  }, []);
+
+  useEffect(() => {
+    pausedRef.current = paused || reduceMotion;
+  }, [paused, reduceMotion]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || copyCount < 1) return;
+
+    const syncLoopWidth = () => {
+      loopWidthRef.current = track.scrollWidth / copyCount;
+    };
+
+    syncLoopWidth();
+    const ro = new ResizeObserver(syncLoopWidth);
+    ro.observe(track);
+    return () => ro.disconnect();
+  }, [copyCount, marqueePills]);
+
+  useEffect(() => {
+    if (marqueePills.length === 0) return;
+    let raf = 0;
+    let last = performance.now();
+    const direction = reverse ? -1 : 1;
+
+    const tick = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      if (!pausedRef.current && loopWidthRef.current > 0) {
+        applyOffset(offsetRef.current + direction * MARQUEE_PIXELS_PER_SECOND * dt);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [applyOffset, marqueePills.length, reverse]);
+
+  if (pills.length === 0) return null;
+
+  return (
+    <div
+      ref={scrollAreaRef}
+      className={`${FULL_BLEED} overflow-hidden ${className}`.trim()}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
+      }}
+    >
+      <div
+        ref={trackRef}
+        className="flex w-max will-change-transform pl-6 sm:pl-8"
+        style={{ gap: PILL_GAP_PX }}
+      >
+        {marqueePills.map((pill) => (
+          <div key={pill.loopKey} className="shrink-0">
+            {renderPill(pill, pill.loopKey)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export type HomeTrackExplorerSectionProps = {
   trackPillRow1: HomeTrackPill[];
   trackPillRow2: HomeTrackPill[];
@@ -92,6 +220,10 @@ export type HomeTrackExplorerSectionProps = {
   maxVisibleCourses?: number;
   showDiscoverCta?: boolean;
   sectionClassName?: string;
+  /** Featured / Top rated / Activity row. Off on guest home for now. */
+  showMetaFilters?: boolean;
+  /** Two-row infinite marquee for track pills (guest home). */
+  marqueeTrackPills?: boolean;
 };
 
 export function HomeTrackExplorerSection({
@@ -103,6 +235,8 @@ export function HomeTrackExplorerSection({
   maxVisibleCourses,
   showDiscoverCta = true,
   sectionClassName = "mt-[107px]",
+  showMetaFilters = true,
+  marqueeTrackPills = false,
 }: HomeTrackExplorerSectionProps) {
   const [metaFilter, setMetaFilter] = useState<HomeTrackMetaFilter>("featured");
   const allPills = useMemo(
@@ -147,42 +281,65 @@ export function HomeTrackExplorerSection({
 
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
 
-  const renderTrackPill = (pill: HomeTrackPill) =>
+  const renderTrackPill = (pill: HomeTrackPill, key = pill.slug) =>
     trackPillSelectsCourses ? (
       <TrackSelectPill
-        key={pill.slug}
+        key={key}
         pill={pill}
         pressed={pill.slug === activeTrackSlug}
         onClick={() => setSelectedTrackSlug(pill.slug)}
       />
     ) : (
-      <TrackLinkPill key={pill.slug} pill={pill} />
+      <TrackLinkPill key={key} pill={pill} />
     );
 
   return (
-    <section className={`${sectionClassName} w-full overflow-x-hidden`}>
-      <div className={`${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`}>
-        {META_FILTERS.map((f) => (
-          <MetaFilterPill
-            key={f.id}
-            label={f.label}
-            pressed={metaFilter === f.id}
-            onClick={() => setMetaFilter(f.id)}
+    <section className={`${sectionClassName} w-full`}>
+      {showMetaFilters ? (
+        <div className={`${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`}>
+          {META_FILTERS.map((f) => (
+            <MetaFilterPill
+              key={f.id}
+              label={f.label}
+              pressed={metaFilter === f.id}
+              onClick={() => setMetaFilter(f.id)}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {marqueeTrackPills ? (
+        <div className={showMetaFilters ? "mt-[25px]" : undefined}>
+          <TrackPillsMarqueeRow
+            pills={trackPillRow1}
+            renderPill={(pill, key) => renderTrackPill(pill, key)}
           />
-        ))}
-      </div>
-
-      {trackPillRow1.length > 0 ? (
-        <div className={`${FULL_BLEED} mt-[25px] flex flex-wrap gap-[25px] px-6 sm:px-8`}>
-          {trackPillRow1.map(renderTrackPill)}
+          {trackPillRow2.length > 0 ? (
+            <TrackPillsMarqueeRow
+              pills={trackPillRow2}
+              renderPill={(pill, key) => renderTrackPill(pill, key)}
+              className="mt-[11px]"
+              reverse
+            />
+          ) : null}
         </div>
-      ) : null}
+      ) : (
+        <>
+          {trackPillRow1.length > 0 ? (
+            <div
+              className={`${FULL_BLEED} ${showMetaFilters ? "mt-[25px]" : ""} flex flex-wrap gap-[25px] px-6 sm:px-8`}
+            >
+              {trackPillRow1.map((pill) => renderTrackPill(pill))}
+            </div>
+          ) : null}
 
-      {trackPillRow2.length > 0 ? (
-        <div className={`${FULL_BLEED} mt-[11px] flex flex-wrap gap-[25px] px-6 sm:px-8 pr-[68px]`}>
-          {trackPillRow2.map(renderTrackPill)}
-        </div>
-      ) : null}
+          {trackPillRow2.length > 0 ? (
+            <div className={`${FULL_BLEED} mt-[11px] flex flex-wrap gap-[25px] px-6 sm:px-8 pr-[68px]`}>
+              {trackPillRow2.map((pill) => renderTrackPill(pill))}
+            </div>
+          ) : null}
+        </>
+      )}
 
       <div
         className="mx-auto mt-[64px] w-full max-w-[1600px] px-6 sm:px-8"
@@ -208,7 +365,7 @@ export function HomeTrackExplorerSection({
               <div className="mt-10 flex justify-center">
                 <Link
                   href={`/tracks/${encodeURIComponent(activeTrackSlug!)}`}
-                  className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-slate-50"
+                  className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-black hover:text-white"
                   style={pillFont}
                 >
                   View more
@@ -226,9 +383,12 @@ export function HomeTrackExplorerSection({
       </div>
 
       {showDiscoverCta ? (
-        <div className="mx-auto mt-[65px] max-w-[1600px] px-4 sm:px-6 lg:px-8">
-          <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6 lg:pl-[92px] lg:pr-[72px]">
-            <p className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black" style={pillFont}>
+        <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
+          <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
+            <p
+              className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
+              style={bodyTextFont}
+            >
               Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
               industry professionals.
             </p>

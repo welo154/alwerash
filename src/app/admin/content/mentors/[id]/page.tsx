@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
 import { requireRole } from "@/server/auth/require";
 import { adminDeleteMentor, adminGetMentor, adminUpdateMentor, MAX_LANDING_POPULAR_MENTORS } from "@/server/content/admin.service";
+import { adminGetMentorAccountStatus } from "@/server/auth/adminUsers.service";
 import { revalidatePublicMentorPaths } from "@/server/content/revalidate-public-paths";
 import { MentorPhotoUpload } from "../../components/MentorPhotoUpload";
+import { MentorAccountClient } from "../MentorAccountClient";
 
 export default async function AdminMentorEditPage({
   params,
@@ -14,7 +16,10 @@ export default async function AdminMentorEditPage({
 }) {
   await requireRole(["ADMIN"]);
   const { id } = await params;
-  const mentor = await adminGetMentor(id);
+  const [mentor, accountStatus] = await Promise.all([
+    adminGetMentor(id),
+    adminGetMentorAccountStatus(id),
+  ]);
 
   async function update(formData: FormData) {
     "use server";
@@ -164,6 +169,11 @@ export default async function AdminMentorEditPage({
           />
         </form>
       </div>
+
+      <MentorAccountClient
+        mentorId={mentor.id}
+        linkedEmail={accountStatus.linked ? accountStatus.user.email : null}
+      />
     </div>
   );
 }

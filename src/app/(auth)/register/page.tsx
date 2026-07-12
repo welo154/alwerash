@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { AuthRegisterPanel } from "@/components/auth/AuthRegisterPanel";
@@ -19,7 +18,9 @@ function getErrorMessage(e: unknown): string {
 }
 
 export default function RegisterPage() {
-  async function action(formData: FormData): Promise<{ success: true } | { success: false; error: string }> {
+  async function action(
+    formData: FormData
+  ): Promise<{ success: true; email: string } | { success: false; error: string }> {
     "use server";
     const raw = {
       email: String(formData.get("email") ?? "").trim(),
@@ -39,7 +40,7 @@ export default function RegisterPage() {
     } catch (e) {
       return { success: false, error: getErrorMessage(e) };
     }
-    redirect(`/register/check-email?email=${encodeURIComponent(parsed.data.email)}`);
+    return { success: true, email: parsed.data.email };
   }
 
   return (

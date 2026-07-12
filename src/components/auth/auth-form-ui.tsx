@@ -214,7 +214,11 @@ export function AuthPasswordField({
   );
 }
 
-export function AuthOAuthSection() {
+export function AuthOAuthSection({
+  onOAuthSignIn,
+}: {
+  onOAuthSignIn?: (providerId: string) => void;
+}) {
   return (
     <>
       <div className="h-[17px] shrink-0" aria-hidden />
@@ -227,8 +231,17 @@ export function AuthOAuthSection() {
           <button
             key={item.label}
             type="button"
-            aria-label={item.label}
-            className="shrink-0"
+            aria-label={item.enabled ? item.label : `${item.label} (coming soon)`}
+            aria-disabled={!item.enabled}
+            disabled={!item.enabled}
+            onClick={
+              item.enabled && onOAuthSignIn
+                ? () => onOAuthSignIn(item.providerId)
+                : undefined
+            }
+            className={`shrink-0 border-none bg-transparent p-0 ${
+              item.enabled ? "cursor-pointer" : "cursor-not-allowed opacity-40"
+            }`}
             style={{
               width: 44,
               height: 43,

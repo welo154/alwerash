@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useEffect, useState } from "react";
@@ -12,6 +13,8 @@ import {
   authSubmitButtonStyle,
   authText24,
 } from "./auth-form-ui";
+import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { CheckEmailModal } from "./CheckEmailModal";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REQUIREMENTS = {
@@ -69,19 +72,36 @@ function mapServerError(message: string): RegisterFieldErrors {
 export function AuthRegisterPanel({
   action,
 }: {
-  action: (formData: FormData) => Promise<{ success: true } | { success: false; error: string }>;
+  action: (
+    formData: FormData
+  ) => Promise<{ success: true; email: string } | { success: false; error: string }>;
 }) {
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
+  const nextParam = searchParams.get("next");
+  const checkEmailParam = searchParams.get("checkEmail");
+  const emailQueryParam = searchParams.get("email");
+  const presetCheckEmail = (checkEmailParam ?? emailQueryParam ?? "").trim();
+  const shouldOpenFromQuery = checkEmailParam !== null || Boolean(emailQueryParam?.trim());
+  const oauthCallbackUrl = buildOAuthCallbackUrl(nextParam);
   const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [checkEmailOpen, setCheckEmailOpen] = useState(shouldOpenFromQuery);
+  const [checkEmailAddress, setCheckEmailAddress] = useState(presetCheckEmail);
 
   useEffect(() => {
     if (errorParam) {
       setFieldErrors(mapServerError(errorParam));
     }
   }, [errorParam]);
+
+  useEffect(() => {
+    if (shouldOpenFromQuery) {
+      setCheckEmailAddress(presetCheckEmail);
+      setCheckEmailOpen(true);
+    }
+  }, [shouldOpenFromQuery, presetCheckEmail]);
 
   function clearFieldError(field: keyof RegisterFieldErrors) {
     setFieldErrors((prev) => {
@@ -112,7 +132,10 @@ export function AuthRegisterPanel({
       const result = await action(formData);
       if (!result.success) {
         setFieldErrors(mapServerError(result.error));
+        return;
       }
+      setCheckEmailAddress(result.email);
+      setCheckEmailOpen(true);
     } catch (err) {
       if (isRedirectError(err)) throw err;
       setFieldErrors({ email: "Something went wrong. Please try again." });
@@ -193,7 +216,9 @@ export function AuthRegisterPanel({
         </button>
       </form>
 
-      <AuthOAuthSection />
+      <AuthOAuthSection
+        onOAuthSignIn={(providerId) => signIn(providerId, { callbackUrl: oauthCallbackUrl })}
+      />
 
       <div className="h-[40px] shrink-0" aria-hidden />
 
@@ -203,6 +228,12 @@ export function AuthRegisterPanel({
           Log in
         </Link>
       </p>
+
+      <CheckEmailModal
+        open={checkEmailOpen}
+        email={checkEmailAddress}
+        onClose={() => setCheckEmailOpen(false)}
+      />
     </div>
   );
 }

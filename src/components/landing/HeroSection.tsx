@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 
 export type HeroTrack = { id: string; title: string; slug: string };
 
@@ -272,11 +273,8 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 >
                   Or continue with
                 </p>
-                <div className="mt-[24px] flex w-[300px] items-center justify-center gap-[13px]">
-                  <Image src="/social/google.png" alt="Google" width={46} height={46} className="h-[46px] w-[46px]" unoptimized />
-                  <Image src="/social/apple.png" alt="Apple" width={46} height={46} className="h-[46px] w-[46px]" unoptimized />
-                  <Image src="/social/facebook.png" alt="Facebook" width={46} height={46} className="h-[46px] w-[46px]" unoptimized />
-                  <Image src="/social/email.png" alt="Email" width={46} height={46} className="h-[46px] w-[46px]" unoptimized />
+                <div className="mt-[24px] w-[300px]">
+                  <LandingSocialSignInRow variant="hero" />
                 </div>
               </div>
 

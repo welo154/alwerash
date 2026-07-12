@@ -9,9 +9,9 @@ export type CatalogShowcaseCardProps = {
   viewMoreHref?: string;
   onViewMore?: () => void;
   className?: string;
-  /** Photo for the upper stacked panel (track cards). */
+  /** @deprecated Prefer `bottomImageSrc` — track covers render in the lower photo panel. */
   topImageSrc?: string;
-  /** Photo for the lower stacked panel only (featured course cards). */
+  /** Photo for the lower stacked panel (track / featured cards). */
   bottomImageSrc?: string;
 };
 

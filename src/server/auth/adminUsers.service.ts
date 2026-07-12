@@ -11,6 +11,13 @@ const CreateInstructorSchema = z.object({
   country: z.string().length(2).optional(),
 });
 
+const CreateMentorAccountSchema = z.object({
+  mentorId: z.string().min(1),
+  email: z.string().email().transform((v) => v.toLowerCase().trim()),
+  name: z.string().min(1).max(100).optional(),
+  country: z.string().length(2).optional(),
+});
+
 const AssignInstructorSchema = z.object({
   courseId: z.string().min(1),
   instructorId: z.string().min(1),
@@ -120,4 +127,58 @@ export async function adminListCourseInstructorAssignments() {
       instructor: { select: { id: true, email: true, name: true } },
     },
   });
+}
+
+export async function adminGetMentorAccountStatus(mentorId: string) {
+  const mentor = await prisma.mentor.findUnique({
+    where: { id: mentorId },
+    select: {
+      userId: true,
+      user: { select: { id: true, email: true, name: true, createdAt: true } },
+    },
+  });
+  if (!mentor) throw new AppError("NOT_FOUND", 404, "Mentor not found");
+  return mentor.user
+    ? { linked: true as const, user: mentor.user }
+    : { linked: false as const, user: null };
+}
+
+export async function adminCreateMentorAccount(input: unknown) {
+  const data = parse(CreateMentorAccountSchema, input);
+
+  const mentor = await prisma.mentor.findUnique({
+    where: { id: data.mentorId },
+    select: { id: true, userId: true, name: true },
+  });
+  if (!mentor) throw new AppError("NOT_FOUND", 404, "Mentor not found");
+  if (mentor.userId) {
+    throw new AppError("CONFLICT", 409, "This mentor already has a login account");
+  }
+
+  const temporaryPassword = generateTemporaryPassword();
+  const passwordHash = await hashPassword(temporaryPassword);
+
+  try {
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email: data.email,
+          name: data.name ?? mentor.name,
+          country: data.country,
+          passwordHash,
+          emailVerified: new Date(),
+          roles: { create: { role: Role.MENTOR } },
+        },
+        select: { id: true, email: true, name: true, country: true, createdAt: true },
+      });
+      await tx.mentor.update({
+        where: { id: data.mentorId },
+        data: { userId: created.id },
+      });
+      return created;
+    });
+    return { user, temporaryPassword };
+  } catch (e) {
+    handlePrismaError(e);
+  }
 }

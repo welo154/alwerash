@@ -136,7 +136,7 @@ function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[]
             lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
           })),
         }),
-        topImageSrc: resolveTrackCoverImage(t.coverImage, t.slug),
+        bottomImageSrc: resolveTrackCoverImage(t.coverImage, t.slug),
         showcaseSlug: t.slug,
       },
     }));

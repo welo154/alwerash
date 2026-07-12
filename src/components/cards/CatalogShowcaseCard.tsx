@@ -31,11 +31,13 @@ function ExternalLinkGlyph({ className }: { className?: string }) {
   );
 }
 
+/** Figma track card: white text panel on top, photo panel (347×339) below. */
+const SHOWCASE_PHOTO_H = 339;
 const SHOWCASE_TOP_H = 378;
-const SHOWCASE_BOTTOM_H = 339;
-const SHOWCASE_PANEL_OVERLAP = SHOWCASE_BOTTOM_H - 207;
-const SHOWCASE_WHITE_TOP = SHOWCASE_TOP_H - SHOWCASE_PANEL_OVERLAP;
-const SHOWCASE_CARD_H = SHOWCASE_WHITE_TOP + SHOWCASE_BOTTOM_H;
+const SHOWCASE_PANEL_OVERLAP = SHOWCASE_PHOTO_H - 207;
+const SHOWCASE_PHOTO_TOP = SHOWCASE_TOP_H - SHOWCASE_PANEL_OVERLAP;
+const SHOWCASE_CARD_H = SHOWCASE_PHOTO_TOP + SHOWCASE_PHOTO_H;
+const SHOWCASE_ACCENT = "#89F496";
 
 /** Fixed catalog tile size — keep carousels in sync with CatalogShowcaseCard layout. */
 export const CATALOG_SHOWCASE_CARD_W = 347;
@@ -236,7 +238,7 @@ function CatalogShowcaseHoverCard({
         {href ? (
           <Link
             href={href}
-            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white no-underline"
+            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white no-underline transition-colors hover:bg-white hover:text-[#004B3C]"
             style={{ fontFamily: pangeaFont }}
           >
             VIEW MORE
@@ -246,7 +248,7 @@ function CatalogShowcaseHoverCard({
           </Link>
         ) : (
           <div
-            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white"
+            className="absolute bottom-7 left-[49px] flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-[18px] font-bold leading-none text-white transition-colors hover:bg-white hover:text-[#004B3C]"
             style={{ fontFamily: pangeaFont }}
           >
             VIEW MORE
@@ -341,8 +343,11 @@ export function CatalogShowcaseCard({
     onMouseLeave: scheduleHideHover,
   };
 
+  /** Track covers historically used `topImageSrc`; photo always renders in the lower panel. */
+  const photoSrc = bottomImageSrc ?? topImageSrc;
+
   const ctaClassName =
-    "pointer-events-auto absolute bottom-[26px] left-[38px] z-10 flex h-[43px] w-[166px] items-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] pl-4 pr-10 text-white no-underline";
+    "pointer-events-auto absolute bottom-[26px] left-[38px] z-10 flex h-[43px] w-[166px] items-center rounded-[8px] border border-black bg-[#89F496] pl-4 pr-10 text-black no-underline transition-colors hover:bg-black hover:text-[#89F496]";
 
   const ctaStyle = {
     fontFamily: pangeaFont,
@@ -360,6 +365,24 @@ export function CatalogShowcaseCard({
     </>
   );
 
+  const titleClassName =
+    "pointer-events-auto mt-[18px] block max-w-[270px] text-[32px] font-normal uppercase leading-normal text-black no-underline hover:opacity-90";
+
+  const titleInner = (
+    <>
+      {titlePrimary}
+      {titleSecondary ? (
+        <>
+          <br />
+          {titleSecondary}
+        </>
+      ) : null}
+      <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
+        <ExternalLinkGlyph className="h-[20px] w-[20px]" />
+      </span>
+    </>
+  );
+
   return (
     <>
       <div
@@ -368,76 +391,57 @@ export function CatalogShowcaseCard({
         style={{ height: SHOWCASE_CARD_H }}
         {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}
       >
+        {/* Upper white text panel */}
         <div
-          className={`absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black ${topImageSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
+          className="absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black bg-white"
           style={{ height: SHOWCASE_TOP_H }}
           aria-hidden
-        >
-          {topImageSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={topImageSrc} alt="" className="h-full w-full object-cover object-center" />
-          ) : null}
-        </div>
+        />
 
+        {/* Lower photo panel — Figma 347×339 */}
         <div
-          className="absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black bg-white"
-          style={{ top: SHOWCASE_WHITE_TOP, height: SHOWCASE_BOTTOM_H }}
+          className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black ${photoSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
+          style={{ top: SHOWCASE_PHOTO_TOP, height: SHOWCASE_PHOTO_H }}
           aria-hidden
         >
-          {bottomImageSrc ? (
+          {photoSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={bottomImageSrc} alt="" className="h-full w-full object-cover object-center" />
+            <img src={photoSrc} alt="" className="h-full w-full object-cover object-center" />
           ) : null}
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-3">
-          <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between pl-[38px] pr-[30px] pt-[28px]">
-            <span className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black bg-white px-4 text-[20px] leading-none text-black">
-              {levelLabel}
-            </span>
-            <span
-              className="text-[18px] font-normal leading-normal text-black opacity-60"
-              style={{ fontFamily: pangeaFont }}
-            >
-              {durationLabel}
-            </span>
-          </div>
-
-          {resolvedViewMoreHref ? (
-            <Link
-              href={resolvedViewMoreHref}
-              className="pointer-events-auto absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black no-underline hover:opacity-90"
-              style={{ fontFamily: pangeaFont }}
-              aria-label={`Open ${titlePrimary}${titleSecondary ? ` ${titleSecondary}` : ""}`}
-            >
-              {titlePrimary}
-              {titleSecondary ? (
-                <>
-                  <br />
-                  {titleSecondary}
-                </>
-              ) : null}
-              <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
-                <ExternalLinkGlyph className="h-[20px] w-[20px]" />
+          <div className="absolute inset-x-0 top-0 pl-[38px] pr-[30px] pt-[28px]">
+            <div className="pointer-events-auto flex items-center justify-between">
+              <span
+                className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black px-4 text-[20px] leading-none text-black"
+                style={{ backgroundColor: SHOWCASE_ACCENT }}
+              >
+                {levelLabel}
               </span>
-            </Link>
-          ) : (
-            <div
-              className="pointer-events-auto absolute bottom-[351px] left-[38px] text-[32px] font-normal uppercase leading-normal text-black"
-              style={{ fontFamily: pangeaFont }}
-            >
-              {titlePrimary}
-              {titleSecondary ? (
-                <>
-                  <br />
-                  {titleSecondary}
-                </>
-              ) : null}
-              <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
-                <ExternalLinkGlyph className="h-[20px] w-[20px]" />
+              <span
+                className="text-[18px] font-normal leading-normal text-black opacity-60"
+                style={{ fontFamily: pangeaFont }}
+              >
+                {durationLabel}
               </span>
             </div>
-          )}
+
+            {resolvedViewMoreHref ? (
+              <Link
+                href={resolvedViewMoreHref}
+                className={titleClassName}
+                style={{ fontFamily: pangeaFont }}
+                aria-label={`Open ${titlePrimary}${titleSecondary ? ` ${titleSecondary}` : ""}`}
+              >
+                {titleInner}
+              </Link>
+            ) : (
+              <div className={titleClassName} style={{ fontFamily: pangeaFont }}>
+                {titleInner}
+              </div>
+            )}
+          </div>
 
           {resolvedViewMoreHref ? (
             <Link

@@ -14,6 +14,8 @@ import {
   adminListMentors,
   adminUpdateCourse,
 } from "@/server/content/admin.service";
+import { adminGetCourseAssignment } from "@/server/content/assignment.service";
+import { CourseAssignmentEditor } from "@/app/admin/content/components/CourseAssignmentEditor";
 import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleButton";
 import { COURSE_CATALOG_TAGS } from "@/types/course-catalog-tags";
 
@@ -59,10 +61,11 @@ export default async function AdminCourseDetail({
   await requireRole(["ADMIN"]);
   const { courseId } = await params;
 
-  const [course, tracks, mentors] = await Promise.all([
+  const [course, tracks, mentors, assignment] = await Promise.all([
     adminGetCourse(courseId),
     adminListTracks(),
     adminListMentors(),
+    adminGetCourseAssignment(courseId),
   ]);
 
 
@@ -434,6 +437,14 @@ export default async function AdminCourseDetail({
             <p className="text-sm text-green-600">Intro video is set. View it on the course page. Upload again to replace.</p>
           )}
         </div>
+      </section>
+
+      <section className="mb-8">
+        <CourseAssignmentEditor
+          courseId={courseId}
+          courseTitle={course.title}
+          initialAssignment={assignment}
+        />
       </section>
 
       {/* Modules Section */}

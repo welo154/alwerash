@@ -13,6 +13,7 @@ enum Role {
   GUEST
   LEARNER
   INSTRUCTOR
+  MENTOR
   ADMIN
 }
 
@@ -101,6 +102,7 @@ model User {
   entitlements    Entitlement[]
   lessonProgress  LessonProgress[]
   instructorCourses CourseInstructor[] @relation("InstructorCourseAssignments")
+  mentorProfile         Mentor?
   learningDays          UserLearningDay[]
   courseLearningDays    UserCourseLearningDay[]
 
@@ -229,6 +231,7 @@ model Course {
   introVideoUploads      CourseIntroVideoUpload[]
   instructors            CourseInstructor[]
   userCourseLearningDays UserCourseLearningDay[]
+  assignments            Assignment[]
 
   @@index([trackId, order])
   @@index([mentorId])
@@ -360,7 +363,10 @@ model VideoEvent {
 
 model Assignment {
   id           String   @id @default(cuid())
-  lessonId     String   @map("lesson_id")
+  /// Phase 1: course-final assignment. Lesson/module scopes come later.
+  courseId     String?  @map("course_id")
+  /// Optional for later lesson-scoped assignments.
+  lessonId     String?  @map("lesson_id")
   title        String
   instructions String?
   rubricJson   Json?    @map("rubric_json")
@@ -368,9 +374,11 @@ model Assignment {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  lesson      Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  course      Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson      Lesson?      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   submissions Submission[]
 
+  @@unique([courseId])
   @@index([lessonId])
   @@map("assignments")
 }
@@ -514,6 +522,7 @@ model PaymentEvent {
 
 model Mentor {
   id              String   @id @default(cuid())
+  userId          String?  @unique @map("user_id")
   name            String
   photo           String?  // URL path e.g. /mentor-photos/xxx.jpg
   certificateName String?  @map("certificate_name")
@@ -525,6 +534,7 @@ model Mentor {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   courses         Course[]
 
   @@index([featuredOrder])

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -96,40 +97,7 @@ export function LandingGetStartedCtaSection() {
           Or continue with
         </p>
 
-        <div className="mt-[40px] flex items-center justify-center gap-[18.5px]">
-          <Image
-            src="/social/google.png"
-            alt="Google"
-            width={64}
-            height={64}
-            className="h-[64px] w-[64px]"
-            unoptimized
-          />
-          <Image
-            src="/social/apple.png"
-            alt="Apple"
-            width={64}
-            height={64}
-            className="h-[64px] w-[64px]"
-            unoptimized
-          />
-          <Image
-            src="/social/facebook.png"
-            alt="Facebook"
-            width={64}
-            height={64}
-            className="h-[64px] w-[64px]"
-            unoptimized
-          />
-          <Image
-            src="/social/email.png"
-            alt="Email"
-            width={64}
-            height={64}
-            className="h-[64px] w-[64px]"
-            unoptimized
-          />
-        </div>
+        <LandingSocialSignInRow variant="cta" className="mt-[40px]" />
       </div>
     </section>
   );

@@ -12,8 +12,17 @@ import {
   authSubmitButtonStyle,
   authText24,
 } from "./auth-form-ui";
+import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  OAuthAccountNotLinked:
+    "This email is already registered with a password. Sign in with email instead, or use the same sign-in method you used when you registered.",
+  OAuthSignin: "Could not start sign-in. Please try again.",
+  OAuthCallback: "Sign-in was interrupted. Please try again.",
+  AccessDenied: "Access was denied. Please try again or use another sign-in method.",
+};
 
 type LoginFieldErrors = {
   email?: string;
@@ -25,9 +34,13 @@ export function AuthLoginPanel() {
   const nextParam = searchParams.get("next");
   const registered = searchParams.get("registered") === "1";
   const verified = searchParams.get("verified") === "1";
+  const oauthError = searchParams.get("error");
+  const oauthErrorMessage = oauthError ? OAUTH_ERROR_MESSAGES[oauthError] : undefined;
+  const oauthCallbackUrl = buildOAuthCallbackUrl(nextParam);
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailDraft, setEmailDraft] = useState("");
 
   function clearFieldError(field: keyof LoginFieldErrors) {
     setFieldErrors((prev) => {
@@ -83,12 +96,15 @@ export function AuthLoginPanel() {
     const session = (await res.json()) as { user?: { roles?: string[] } };
     const roles = session?.user?.roles ?? [];
     const isAdmin = roles.includes("ADMIN");
+    const isMentor = roles.includes("MENTOR");
     const isInstructor = roles.includes("INSTRUCTOR");
 
     if (nextParam && nextParam.startsWith("/")) {
       window.location.href = nextParam.includes("?") ? `${nextParam}&${toast}` : `${nextParam}?${toast}`;
     } else if (isAdmin) {
       window.location.href = `/admin/content/tracks?${toast}`;
+    } else if (isMentor) {
+      window.location.href = `/mentor?${toast}`;
     } else if (isInstructor) {
       window.location.href = `/instructor?${toast}`;
     } else {
@@ -114,6 +130,11 @@ export function AuthLoginPanel() {
             Registration successful. Please sign in.
           </p>
         )}
+        {oauthErrorMessage && (
+          <p className="mb-[18px] text-center text-red-700" style={authText24}>
+            {oauthErrorMessage}
+          </p>
+        )}
 
         <AuthTextField
           id="email"
@@ -124,7 +145,11 @@ export function AuthLoginPanel() {
           required
           error={fieldErrors.email}
           errorId="login-email-error"
-          onValueChange={() => clearFieldError("email")}
+          onValueChange={() => {
+            const el = document.getElementById("email") as HTMLInputElement | null;
+            setEmailDraft(el?.value ?? "");
+            clearFieldError("email");
+          }}
         />
         <div className="h-[18px] shrink-0" aria-hidden />
 
@@ -163,13 +188,22 @@ export function AuthLoginPanel() {
         </button>
       </form>
 
-      <AuthOAuthSection />
+      <AuthOAuthSection
+        onOAuthSignIn={(providerId) => signIn(providerId, { callbackUrl: oauthCallbackUrl })}
+      />
 
       <div className="h-[68px] shrink-0" aria-hidden />
 
       <p className="m-0 mx-auto w-[477px] text-center text-black" style={authText24}>
         If you haven&apos;t received the confirmation email, you can{" "}
-        <Link href="/register/check-email" className="text-black underline">
+        <Link
+          href={
+            emailDraft.trim()
+              ? `/register?checkEmail=${encodeURIComponent(emailDraft.trim())}`
+              : "/register?checkEmail="
+          }
+          className="text-black underline"
+        >
           resend it
         </Link>
         .

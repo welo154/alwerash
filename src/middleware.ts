@@ -17,17 +17,22 @@ export async function middleware(req: NextRequest) {
   const isAdminApi = pathname.startsWith("/api/admin");
   const isInstructorPath = pathname.startsWith("/instructor");
   const isInstructorApi = pathname.startsWith("/api/instructor");
+  const isMentorPath = pathname.startsWith("/mentor");
+  const isMentorApi = pathname.startsWith("/api/mentor");
   const isPlaybackApi = pathname.startsWith("/api/video/playback/");
 
   const token = await getToken({ req, secret });
   const roles = (token?.roles as string[] | undefined) ?? [];
   const isAdmin = roles.includes("ADMIN");
   const isInstructor = roles.includes("INSTRUCTOR");
+  const isMentor = roles.includes("MENTOR");
 
   // Marketing `/` is for guests only — signed-in learners go to `/home`
   if (pathname === "/" && token?.sub && !isAdmin) {
     const url = req.nextUrl.clone();
-    url.pathname = isInstructor ? "/instructor" : "/home";
+    if (isMentor) url.pathname = "/mentor";
+    else if (isInstructor) url.pathname = "/instructor";
+    else url.pathname = "/home";
     return NextResponse.redirect(url);
   }
 
@@ -50,6 +55,7 @@ export async function middleware(req: NextRequest) {
   if (isAuthPage && token?.sub) {
     const url = req.nextUrl.clone();
     if (isAdmin) url.pathname = "/admin";
+    else if (isMentor) url.pathname = "/mentor";
     else if (isInstructor) url.pathname = "/instructor";
     else url.pathname = "/home";
     return NextResponse.redirect(url);
@@ -64,7 +70,9 @@ export async function middleware(req: NextRequest) {
     !isAdminPath &&
     !isAdminApi &&
     !isInstructorPath &&
-    !isInstructorApi
+    !isInstructorApi &&
+    !isMentorPath &&
+    !isMentorApi
   ) {
     const url = req.nextUrl.clone();
     url.pathname = "/admin";
@@ -103,6 +111,24 @@ export async function middleware(req: NextRequest) {
     }
     if (!isInstructor && !isAdmin) {
       if (isInstructorApi) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      const url = req.nextUrl.clone();
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
+  // Mentor portal + APIs: MENTOR or ADMIN
+  if (isMentorPath || isMentorApi) {
+    if (!token?.sub) {
+      if (isMentorApi) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    if (!isMentor && !isAdmin) {
+      if (isMentorApi) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
       const url = req.nextUrl.clone();
       url.pathname = "/403";
       return NextResponse.redirect(url);

@@ -28,12 +28,13 @@ Primary app root: `src/` (Next.js App Router)
 | **Guest** | (no account) | — | `/` | Public catalog, marketing pages, auth pages |
 | **Student** | `LEARNER` | Self-registration at `/register` | `/home` | Protected learning routes; requires active subscription or entitlement for lesson playback |
 | **Instructor** | `INSTRUCTOR` | Admin creates via `/admin/content/instructors` | `/instructor` | Assigned courses + learner progress rosters |
+| **Mentor** | `MENTOR` | Admin creates login on `/admin/content/mentors/[id]` | `/mentor` | Courses where `course.mentorId` matches; submission review queue |
 | **Admin** | `ADMIN` | Seeded via `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `/admin` | Full CMS, user activity, all instructor capabilities |
 
 **Notes:**
 - A user can hold multiple roles (`user_roles` join table), but middleware treats **ADMIN** as highest privilege.
-- **Mentors** (`mentors` table) are marketing profiles linked to courses — not login accounts.
-- **Course instructors** (`course_instructors`) are `User` records with `INSTRUCTOR` role assigned to specific courses.
+- **Mentors** (`mentors` table) are public profiles linked to courses via `course.mentorId`; optional `mentors.user_id` links a login account with `MENTOR` role.
+- **Course instructors** (`course_instructors`) are `User` records with `INSTRUCTOR` role assigned to specific courses (separate from face mentors).
 
 ---
 
@@ -122,6 +123,15 @@ Redirects `/admin` → `/admin/content/tracks`.
 | `/instructor` | Dashboard: assigned courses + learner counts |
 | `/instructor/courses/[courseId]` | Learner roster for a course |
 
+### Mentor `/mentor`
+
+| Route | Purpose |
+|-------|---------|
+| `/mentor` | Dashboard: stats, courses, learner counts |
+| `/mentor/courses/[courseId]` | Learners + submissions for a course |
+| `/mentor/submissions` | Submission review queue |
+| `/mentor/submissions/[submissionId]` | Review detail + feedback |
+
 ### Utility
 
 | Route | Purpose |
@@ -137,8 +147,9 @@ Uses JWT `getToken` (edge-safe). Key rules:
 - `/home` — login required; admins redirected to `/admin`
 - `/admin`, `/api/admin` — `ADMIN` only
 - `/instructor`, `/api/instructor` — `INSTRUCTOR` or `ADMIN`
+- `/mentor`, `/api/mentor` — `MENTOR` or `ADMIN`
 - `/api/video/playback/*` — login required
-- Signed-in admins confined to `/admin` and `/instructor` areas
+- Signed-in admins confined to `/admin`, `/instructor`, and `/mentor` areas
 - Matcher excludes `/api/auth/*`, static assets, `/_next/*`
 
 Many routes (profile, catalog APIs, progress APIs) rely on **page/API-level** auth instead of middleware.
@@ -225,6 +236,32 @@ components/
 |--------|------|---------|
 | GET | `/api/instructor/courses` | Assigned courses |
 | GET | `/api/instructor/courses/[courseId]/learners` | Learner roster + progress |
+
+### Mentor (`MENTOR` or `ADMIN`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/api/mentor/stats` | Dashboard stats |
+| GET | `/api/mentor/courses` | Mentor's courses |
+| GET | `/api/mentor/submissions` | Submission queue |
+| GET, PATCH | `/api/mentor/submissions/[id]` | Submission detail + review |
+
+### Learning (submissions)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/api/learning/lessons/[lessonId]/assignment` | Published assignment + learner submission |
+| POST | `/api/learning/assignments/[assignmentId]/submissions` | Save draft |
+| POST | `/api/learning/assignments/[assignmentId]/submit` | Submit for review |
+| POST | `/api/learning/submissions/[submissionId]/files` | Upload submission file |
+| GET | `/api/learning/submissions/files/[fileKey]` | Download submission file |
+
+### Admin (mentor accounts & assignments)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET, POST | `/api/admin/mentors/[id]/account` | Mentor login account |
+| GET, POST, PUT, DELETE | `/api/admin/lessons/[lessonId]/assignment` | Lesson assignment CRUD |
 
 ### Admin (`ADMIN`)
 

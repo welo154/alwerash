@@ -10,6 +10,9 @@ import {
 import { getCourseProgress, getTrackProgress } from "@/server/learning/progress.service";
 import { CourseCurriculum } from "./CourseCurriculum";
 import { LearningProgressBars } from "@/components/learning/LearningProgressBars";
+import { getPublishedAssignmentForCourse } from "@/server/content/assignment.service";
+import { getLearnerSubmissionForCourse } from "@/server/learning/submission.service";
+import { AssignmentSubmissionPanel } from "@/components/learning/AssignmentSubmissionPanel";
 
 export default async function LearnCoursePage({
   params,
@@ -43,9 +46,11 @@ export default async function LearnCoursePage({
   const unlockedLessonIds = orderedLessonIds;
 
   const trackId = course.track?.id;
-  const [courseProgressRecord, trackProgressRecord] = await Promise.all([
+  const [courseProgressRecord, trackProgressRecord, assignment, submission] = await Promise.all([
     getCourseProgress(userId, courseId),
     trackId ? getTrackProgress(userId, trackId) : Promise.resolve(null),
+    getPublishedAssignmentForCourse(courseId),
+    getLearnerSubmissionForCourse(courseId, userId),
   ]);
 
   const courseProgress = courseProgressRecord
@@ -166,6 +171,13 @@ export default async function LearnCoursePage({
             </>
           )}
         </section>
+
+        {assignment ? (
+          <AssignmentSubmissionPanel
+            assignment={assignment}
+            initialSubmission={submission}
+          />
+        ) : null}
 
         <div className="mt-10 pt-6 border-t border-slate-200">
           <Link

@@ -286,7 +286,7 @@ export function LoggedInHome({
   const firstName = userName.split(" ")[0];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white font-sans">
+    <div className="min-h-screen bg-white font-sans">
       <section
         className="bg-white px-6 sm:px-10 md:px-[80px]"
         style={{ paddingTop: "58px", fontFamily: pangeaFont }}

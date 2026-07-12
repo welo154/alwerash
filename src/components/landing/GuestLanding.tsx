@@ -29,6 +29,8 @@ export async function GuestLanding() {
         courseTilesByTrackSlug={trackBundle.courseTilesByTrackSlug}
         maxVisibleCourses={4}
         showDiscoverCta
+        showMetaFilters={false}
+        marqueeTrackPills
       />
       <LandingEverythingInOneSection />
       {landingMostsMentors.length > 0 ? (

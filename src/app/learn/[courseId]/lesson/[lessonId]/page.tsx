@@ -45,7 +45,8 @@ export default async function LearnLessonPage({
   }
 
   const trackId = course.track?.id;
-  const [courseProgressRecord, lessonProgressRecord, trackProgressRecord] = await Promise.all([
+  const [courseProgressRecord, lessonProgressRecord, trackProgressRecord] =
+    await Promise.all([
     getCourseProgress(userId, courseId),
     getLessonProgress(userId, lessonId),
     trackId ? getTrackProgress(userId, trackId) : Promise.resolve(null),
@@ -137,6 +138,7 @@ export default async function LearnLessonPage({
                 <p className="text-slate-600">Video not yet available for this lesson.</p>
               </div>
             )}
+
           </main>
 
           <div className="opacity-0 animate-fade-in-up animation-delay-225">

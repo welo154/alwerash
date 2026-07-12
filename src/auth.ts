@@ -1,8 +1,10 @@
 // file: src/auth.ts — NextAuth v4 config
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getServerSession } from "next-auth";
+import { Role } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
@@ -18,6 +20,14 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
     Credentials({
       credentials: { email: {}, password: {} },
       async authorize(credentials) {
@@ -46,8 +56,19 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      await prisma.userRole.create({
+        data: { userId: user.id, role: Role.LEARNER },
+      });
+    },
+  },
   callbacks: {
-    async jwt({ token }) {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.sub = user.id;
+        delete (token as { roles?: string[] }).roles;
+      }
       if (token.sub && !token.roles) {
         try {
           const roles = await prisma.userRole.findMany({

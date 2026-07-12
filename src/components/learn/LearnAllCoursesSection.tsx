@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  LEARN_POPULAR_FIGMA_TILE_W,
+  LearnPopularFigmaTile,
+} from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
   LearnCourseTrackOption,
@@ -13,6 +16,8 @@ const pangeaFont =
 
 const DEEP_DIVE_MIN_LESSONS = 3;
 const DEEP_DIVE_MIN_MINUTES = 45;
+const GRID_GAP_X = 18;
+const INITIAL_VISIBLE_ROWS = 3;
 
 const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "all", label: "All courses" },
@@ -116,13 +121,16 @@ export default function LearnAllCoursesSection({
 }) {
   const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
+  const [showAll, setShowAll] = useState(false);
+  const [columns, setColumns] = useState(4);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const trackOptions = useMemo(
     () => buildTrackOptions(courses, tracks),
     [courses, tracks]
   );
 
-  const visibleCourses = useMemo(() => {
+  const filteredCourses = useMemo(() => {
     let items = courses;
     if (trackSlug !== "all") {
       const selected = normalizeSlug(trackSlug);
@@ -130,6 +138,35 @@ export default function LearnAllCoursesSection({
     }
     return filterByType(items, typeFilter);
   }, [courses, trackSlug, typeFilter]);
+
+  useEffect(() => {
+    setShowAll(false);
+  }, [trackSlug, typeFilter]);
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+
+    const updateColumns = () => {
+      const width = el.clientWidth;
+      const next = Math.max(
+        1,
+        Math.floor((width + GRID_GAP_X) / (LEARN_POPULAR_FIGMA_TILE_W + GRID_GAP_X))
+      );
+      setColumns(next);
+    };
+
+    updateColumns();
+    const observer = new ResizeObserver(updateColumns);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredCourses.length]);
+
+  const initialLimit = columns * INITIAL_VISIBLE_ROWS;
+  const visibleCourses = showAll
+    ? filteredCourses
+    : filteredCourses.slice(0, initialLimit);
+  const showViewMore = !showAll && filteredCourses.length > initialLimit;
 
   if (courses.length === 0) return null;
 
@@ -177,7 +214,7 @@ export default function LearnAllCoursesSection({
       </div>
 
       <div className="mt-8 min-w-0">
-        {visibleCourses.length === 0 ? (
+        {filteredCourses.length === 0 ? (
           <p
             className="text-center text-[20px] text-black/60"
             style={{ fontFamily: pangeaFont }}
@@ -185,15 +222,30 @@ export default function LearnAllCoursesSection({
             No courses match these filters.
           </p>
         ) : (
-          <div
-            key={`${trackSlug}-${typeFilter}`}
-            className="flex flex-wrap gap-x-[18px] gap-y-[30px]"
-            data-gsap-stagger-group
-          >
-            {visibleCourses.map((course) => (
-              <LearnPopularFigmaTile key={course.id} {...course} />
-            ))}
-          </div>
+          <>
+            <div
+              ref={gridRef}
+              key={`${trackSlug}-${typeFilter}`}
+              className="flex flex-wrap gap-x-[18px] gap-y-[30px]"
+              data-gsap-stagger-group
+            >
+              {visibleCourses.map((course) => (
+                <LearnPopularFigmaTile key={course.id} {...course} />
+              ))}
+            </div>
+            {showViewMore ? (
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  className="inline-flex h-[56px] cursor-pointer items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black transition-colors hover:bg-black hover:text-white"
+                  style={{ fontFamily: pangeaFont }}
+                >
+                  View more
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </section>
