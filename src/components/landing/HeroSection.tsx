@@ -42,40 +42,12 @@ const SOFTWARE_COURSES = [
 ];
 
 /**
- * Clockwise pulse: 8 s total period (4 boxes × 2 s each).
- * Each box uses the same @keyframes but a different negative delay so they
- * are always out-of-phase — one grows while the other three shrink simultaneously.
- *
- * Delay math: box N becomes "big" at real-time N*2000 ms.
- * Negative delay = animation-start offset into the 8000 ms cycle.
- *   box 0 → 0 ms          (big at t = 0 s)
- *   box 1 → −6000 ms      (big at t = 2 s)
- *   box 2 → −4000 ms      (big at t = 4 s)
- *   box 3 → −2000 ms      (big at t = 6 s)
+ * Four boxes sit in a fixed 554×709 frame. One box expands at a time by moving
+ * only its inner edges; neighbors react on shared edges only (diagonal on both).
+ * Cycle: TL → TR → BR → BL, 8 s, driven by synced CSS keyframes per box.
  */
-/**
- * Delay is embedded in the animation shorthand string (second <time> value).
- * Never use a separate `animationDelay` prop alongside `animation` shorthand —
- * the shorthand resets animation-delay to 0ms and wins the cascade, making all
- * boxes animate in sync. By embedding the delay here, each box starts at a
- * different phase of the 8-second cycle so exactly one is big at any moment.
- *
- * Format: name duration timing-function delay iteration-count
- *   box 0 (top-left)     →    0ms  → big at t = 0 s
- *   box 1 (top-right)    → −6000ms → big at t = 2 s
- *   box 2 (bottom-right) → −4000ms → big at t = 4 s
- *   box 3 (bottom-left)  → −2000ms → big at t = 6 s
- */
-const BOX_ANIMATIONS = [
-  "alwerash-hero-box-pulse 8000ms linear    0ms infinite",
-  "alwerash-hero-box-pulse 8000ms linear -6000ms infinite",
-  "alwerash-hero-box-pulse 8000ms linear -4000ms infinite",
-  "alwerash-hero-box-pulse 8000ms linear -2000ms infinite",
-] as const;
-
-const boxStyle = (clockwiseIndex: 0 | 1 | 2 | 3): React.CSSProperties => ({
-  animation: BOX_ANIMATIONS[clockwiseIndex],
-});
+const HERO_MOSAIC_FRAME = { width: 554, height: 709 } as const;
+const mosaicAnim = (name: string) => `${name} 8000ms linear infinite`;
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 
@@ -149,7 +121,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                     aria-hidden
                   />
 
-                  <div className="absolute top-full left-0 z-2000 mt-1 opacity-0 transition-opacity delay-500 duration-1000 ease-out pointer-events-none hover:pointer-events-auto hover:opacity-100 hover:delay-0 hover:duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:delay-0 group-hover:duration-200">
+                  <div className="absolute top-full left-0 z-2000 mt-1 opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100">
                     <div
                       className="w-[582px] rounded-[50px] border border-black bg-white px-[35px] py-[28px] shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
                       style={{ fontFamily: pangeaFont }}
@@ -280,33 +252,29 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 
               <div className="lg:col-span-6">
                 <div
-                  className="flex gap-[20px]"
-                  style={{ animation: "alwerash-hero-grid-float 5000ms ease-in-out infinite" }}
+                  className="relative"
+                  style={{
+                    width: HERO_MOSAIC_FRAME.width,
+                    height: HERO_MOSAIC_FRAME.height,
+                    animation: "alwerash-hero-grid-float 5000ms ease-in-out infinite",
+                  }}
                 >
-                  <div className="flex w-[314px] flex-col gap-[20px]">
-                    {/* box 0: top-left */}
-                    <div
-                      className="h-[423px] w-[314px] rounded-[50px] border border-black bg-white"
-                      style={boxStyle(0)}
-                    />
-                    {/* box 3: bottom-left (clockwise: last in the left col) */}
-                    <div
-                      className="h-[266px] w-[314px] rounded-[50px] border border-black bg-white"
-                      style={boxStyle(3)}
-                    />
-                  </div>
-                  <div className="flex w-[220px] flex-col gap-[20px]">
-                    {/* box 1: top-right */}
-                    <div
-                      className="h-[323px] w-[220px] rounded-[50px] border border-black bg-white"
-                      style={boxStyle(1)}
-                    />
-                    {/* box 2: bottom-right */}
-                    <div
-                      className="h-[366px] w-[220px] rounded-[50px] border border-black bg-white"
-                      style={boxStyle(2)}
-                    />
-                  </div>
+                  <div
+                    className="absolute rounded-[50px] border border-black bg-white"
+                    style={{ animation: mosaicAnim("alwerash-hero-mosaic-tl") }}
+                  />
+                  <div
+                    className="absolute rounded-[50px] border border-black bg-white"
+                    style={{ animation: mosaicAnim("alwerash-hero-mosaic-tr") }}
+                  />
+                  <div
+                    className="absolute rounded-[50px] border border-black bg-white"
+                    style={{ animation: mosaicAnim("alwerash-hero-mosaic-br") }}
+                  />
+                  <div
+                    className="absolute rounded-[50px] border border-black bg-white"
+                    style={{ animation: mosaicAnim("alwerash-hero-mosaic-bl") }}
+                  />
                 </div>
               </div>
             </div>

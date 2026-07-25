@@ -168,37 +168,66 @@ label:has(input[type="radio"]) {
 .animation-delay-225 { animation-delay: 225ms; }
 
 /*
- * ── Animation 1: Clockwise emphasis ──────────────────────────────────────────
- * Period = 8 000 ms  (4 boxes × 2 000 ms slot each).
- * Transition duration = 900 ms (≈ 11.25% of 8 000 ms).
+ * ── Hero mosaic (edge-linked 2×2) ────────────────────────────────────────────
+ * Fixed frame 554×709. Rest sizes:
+ *   TL 314×423 | TR 220×323 | horiz gap 20
+ *   BL 314×276 | BR 220×366 | left vert gap 10, right vert gap 20
  *
- * Keyframe design — each box is BIG at 0 % of its own timeline:
- *   0 % – 13.75 %  →  hold big  (1 100 ms)
- *   13.75 % – 25 %  →  SHRINK   (900 ms, ease-in-out)
- *   25 % – 88.75 %  →  hold small (stay out while 3 others take turns)
- *   88.75 % – 100 % →  GROW     (900 ms, ease-in-out)
- *
- * The shrink of box N (13.75 %–25 %) and the grow of box N+1 (88.75 %–100 %)
- * are offset by exactly 2 000 ms so they run simultaneously — one grows
- * while the next shrinks at the exact same time. No "all equal" moment exists.
- *
- * Delays (clockwise: top-left → top-right → bottom-right → bottom-left):
- *   box 0  →    0 ms   (big at t = 0 s)
- *   box 1  → −6 000 ms (big at t = 2 s)
- *   box 2  → −4 000 ms (big at t = 4 s)
- *   box 3  → −2 000 ms (big at t = 6 s)
+ * Expansion E = 40px. One box grows by moving its inner edges; orthogonal
+ * neighbors move only the shared edge; the diagonal moves both.
+ * Cycle (8s): TL → TR → BR → BL. Holds ~1s, eases ~1s between phases.
  */
-@keyframes alwerash-hero-box-pulse {
-  0%     { transform: scale(1.10); }
-  13.75% { transform: scale(1.10); animation-timing-function: ease-in-out; }
-  25%    { transform: scale(0.94); }
-  88.75% { transform: scale(0.94); animation-timing-function: ease-in-out; }
-  100%   { transform: scale(1.10); }
+@keyframes alwerash-hero-mosaic-tl {
+  /* TL big: right→, bottom↓ */
+  0%, 12.5%   { left: 0; top: 0; width: 354px; height: 463px; animation-timing-function: ease-in-out; }
+  /* TR big: TL right← only */
+  25%, 37.5%  { left: 0; top: 0; width: 274px; height: 423px; animation-timing-function: ease-in-out; }
+  /* BR big: TL right← and bottom↑ */
+  50%, 62.5%  { left: 0; top: 0; width: 274px; height: 383px; animation-timing-function: ease-in-out; }
+  /* BL big: TL bottom↑ only */
+  75%, 87.5%  { left: 0; top: 0; width: 314px; height: 383px; animation-timing-function: ease-in-out; }
+  100%        { left: 0; top: 0; width: 354px; height: 463px; }
+}
+
+@keyframes alwerash-hero-mosaic-tr {
+  /* TL big: TR left→ only */
+  0%, 12.5%   { left: 374px; top: 0; width: 180px; height: 323px; animation-timing-function: ease-in-out; }
+  /* TR big: left←, bottom↓ */
+  25%, 37.5%  { left: 294px; top: 0; width: 260px; height: 363px; animation-timing-function: ease-in-out; }
+  /* BR big: TR bottom↑ only */
+  50%, 62.5%  { left: 334px; top: 0; width: 220px; height: 283px; animation-timing-function: ease-in-out; }
+  /* BL big: TR left→ and bottom↑ */
+  75%, 87.5%  { left: 374px; top: 0; width: 180px; height: 283px; animation-timing-function: ease-in-out; }
+  100%        { left: 374px; top: 0; width: 180px; height: 323px; }
+}
+
+@keyframes alwerash-hero-mosaic-br {
+  /* TL big: BR left→ and top↓ */
+  0%, 12.5%   { left: 374px; top: 383px; width: 180px; height: 326px; animation-timing-function: ease-in-out; }
+  /* TR big: BR top↓ only */
+  25%, 37.5%  { left: 334px; top: 383px; width: 220px; height: 326px; animation-timing-function: ease-in-out; }
+  /* BR big: left←, top↑ */
+  50%, 62.5%  { left: 294px; top: 303px; width: 260px; height: 406px; animation-timing-function: ease-in-out; }
+  /* BL big: BR left→ only */
+  75%, 87.5%  { left: 374px; top: 343px; width: 180px; height: 366px; animation-timing-function: ease-in-out; }
+  100%        { left: 374px; top: 383px; width: 180px; height: 326px; }
+}
+
+@keyframes alwerash-hero-mosaic-bl {
+  /* TL big: BL top↓ only */
+  0%, 12.5%   { left: 0; top: 473px; width: 314px; height: 236px; animation-timing-function: ease-in-out; }
+  /* TR big: BL right← and top↓ */
+  25%, 37.5%  { left: 0; top: 473px; width: 274px; height: 236px; animation-timing-function: ease-in-out; }
+  /* BR big: BL right← only */
+  50%, 62.5%  { left: 0; top: 433px; width: 274px; height: 276px; animation-timing-function: ease-in-out; }
+  /* BL big: right→, top↑ */
+  75%, 87.5%  { left: 0; top: 393px; width: 354px; height: 316px; animation-timing-function: ease-in-out; }
+  100%        { left: 0; top: 473px; width: 314px; height: 236px; }
 }
 
 /*
- * ── Animation 2: Grid float ───────────────────────────────────────────────────
- * The whole 2×2 grid gently floats 12 px up and back over 5 s, infinite loop.
+ * ── Grid float ────────────────────────────────────────────────────────────────
+ * The whole 2×2 frame gently floats 12 px up and back over 5 s, infinite loop.
  */
 @keyframes alwerash-hero-grid-float {
   0%, 100% { transform: translateY(0px); }
