@@ -134,11 +134,52 @@ export async function submitSubmission(assignmentId: string, userId: string) {
     throw new AppError("BAD_REQUEST", 400, "Upload a photo or PDF before submitting");
   }
 
-  return prisma.submission.update({
+  const updated = await prisma.submission.update({
     where: { id: submission.id },
     data: { status: SubmissionStatus.SUBMITTED },
-    include: { files: true },
+    include: {
+      files: true,
+      user: { select: { name: true, email: true } },
+      assignment: {
+        select: {
+          title: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              title: true,
+              mentor: {
+                select: {
+                  user: { select: { email: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
+
+  const mentorEmail = updated.assignment.course?.mentor?.user?.email;
+  if (mentorEmail) {
+    const { getAppBaseUrl, sendMentorCapstoneSubmittedEmail } = await import(
+      "@/server/email/resend.client"
+    );
+    const reviewUrl = `${getAppBaseUrl()}/mentor/submissions/${updated.id}`;
+    void sendMentorCapstoneSubmittedEmail({
+      to: mentorEmail,
+      learnerName: updated.user.name?.trim() || updated.user.email,
+      courseTitle: updated.assignment.course?.title ?? "your course",
+      assignmentTitle: updated.assignment.title,
+      reviewUrl,
+    }).catch((err) => console.error("[email] mentor notify failed:", err));
+  } else {
+    console.warn(
+      "[email] Capstone submitted but mentor has no linked login email; skipping notify"
+    );
+  }
+
+  return updated;
 }
 
 export async function canAccessSubmissionFile(

@@ -16,11 +16,14 @@ export function AddMentorForm() {
     setSubmitting(true);
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
-    const certificateName = (form.elements.namedItem("certificateName") as HTMLInputElement).value.trim() || undefined;
-    const aboutMe = (form.elements.namedItem("aboutMe") as HTMLTextAreaElement).value.trim() || undefined;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const certificateName =
+      (form.elements.namedItem("certificateName") as HTMLInputElement).value.trim() || undefined;
+    const aboutMe = (form.elements.namedItem("aboutMe") as HTMLTextAreaElement).value.trim();
 
-    if (!name) {
-      setError("Name is required");
+    if (!name || !email || !password || !aboutMe) {
+      setError("Name, login email, password, and description are required");
       setSubmitting(false);
       return;
     }
@@ -29,11 +32,17 @@ export function AddMentorForm() {
       const res = await fetch("/api/admin/mentors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, certificateName, aboutMe }),
+        body: JSON.stringify({ name, email, password, certificateName, aboutMe }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error ?? "Failed to create mentor");
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : typeof data.message === "string"
+              ? data.message
+              : "Failed to create mentor"
+        );
       }
       const mentorId = data.mentor?.id;
       if (!mentorId) {
@@ -73,6 +82,36 @@ export function AddMentorForm() {
         />
       </div>
       <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Login email <span className="text-red-600">*</span>
+        </label>
+        <input
+          name="email"
+          type="email"
+          placeholder="mentor@example.com"
+          required
+          autoComplete="off"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+        <p className="mt-1 text-xs text-slate-500">Used to sign in to the mentor portal.</p>
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Password <span className="text-red-600">*</span>
+        </label>
+        <input
+          name="password"
+          type="password"
+          required
+          minLength={10}
+          autoComplete="new-password"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          At least 10 characters, with uppercase, lowercase, and a number.
+        </p>
+      </div>
+      <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Photo</label>
         <input
           type="file"
@@ -91,17 +130,18 @@ export function AddMentorForm() {
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">About me</label>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Description <span className="text-red-600">*</span>
+        </label>
         <textarea
           name="aboutMe"
           placeholder="Short bio or description"
           rows={4}
+          required
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-end gap-2 pt-2">
         <Link
           href="/admin/content/mentors"

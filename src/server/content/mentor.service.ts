@@ -187,7 +187,7 @@ export async function mentorReviewSubmission(
   });
   if (!existing) throw new AppError("NOT_FOUND", 404, "Submission not found");
 
-  return prisma.submission.update({
+  const updated = await prisma.submission.update({
     where: { id: submissionId },
     data: {
       instructorFeedback: data.feedback,
@@ -205,6 +205,24 @@ export async function mentorReviewSubmission(
       },
     },
   });
+
+  const courseId = updated.assignment.course?.id;
+  if (updated.user.email && courseId) {
+    const { getAppBaseUrl, sendLearnerCapstoneReviewedEmail } = await import(
+      "@/server/email/resend.client"
+    );
+    const feedbackUrl = `${getAppBaseUrl()}/learn/${courseId}#final-assignment`;
+    void sendLearnerCapstoneReviewedEmail({
+      to: updated.user.email,
+      courseTitle: updated.assignment.course?.title ?? "your course",
+      assignmentTitle: updated.assignment.title,
+      feedback: data.feedback,
+      grade: data.grade ?? null,
+      feedbackUrl,
+    }).catch((err) => console.error("[email] learner notify failed:", err));
+  }
+
+  return updated;
 }
 
 export async function mentorOwnsSubmissionCourse(mentorId: string, submissionId: string) {

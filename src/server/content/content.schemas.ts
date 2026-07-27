@@ -139,13 +139,40 @@ export const AssignmentUpdateSchema = AssignmentCreateSchema.partial().omit({ co
 
 // --- Mentor ---
 
+const MentorPasswordSchema = z
+  .string()
+  .min(10, "Password must be at least 10 characters")
+  .max(200)
+  .refine((v) => /[A-Z]/.test(v), "Password must include an uppercase letter")
+  .refine((v) => /[a-z]/.test(v), "Password must include a lowercase letter")
+  .refine((v) => /[0-9]/.test(v), "Password must include a number");
+
 export const MentorCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
   photo: z.string().max(500).optional(),
   certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
-  aboutMe: z.string().max(5000).optional().transform((v) => (v?.trim() || undefined)),
+  aboutMe: z
+    .string()
+    .min(1, "Description is required")
+    .max(5000)
+    .transform((v) => v.trim()),
+  email: z.string().email("Valid login email is required").transform((v) => v.toLowerCase().trim()),
+  password: MentorPasswordSchema,
   featuredOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   landingPopularOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
 });
 
-export const MentorUpdateSchema = MentorCreateSchema.partial();
+/** Profile-only updates (no email/password on edit). */
+export const MentorUpdateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200).optional(),
+  photo: z.string().max(500).optional(),
+  certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
+  aboutMe: z
+    .string()
+    .min(1, "Description is required")
+    .max(5000)
+    .transform((v) => v.trim())
+    .optional(),
+  featuredOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  landingPopularOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
+});

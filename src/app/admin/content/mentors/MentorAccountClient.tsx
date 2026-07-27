@@ -61,37 +61,44 @@ export function MentorAccountClient({ mentorId, linkedEmail }: Props) {
           <p className="mt-1">{linkedEmail}</p>
           <p className="mt-2 text-emerald-800">
             Mentor can sign in at <code className="rounded bg-emerald-100 px-1">/login</code> and will
-            land on the mentor portal.
+            land on the mentor portal. Login was set when the mentor was created (or linked below for
+            older profiles).
           </p>
         </div>
       ) : (
-        <form onSubmit={onCreate} className="mt-4 space-y-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Display name (optional)</label>
-            <input
-              name="name"
-              type="text"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-          </div>
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-          >
-            {loading ? "Creating…" : "Create login"}
-          </button>
-        </form>
+        <>
+          <p className="mt-3 text-sm text-amber-800">
+            This mentor profile has no login yet (legacy). Create credentials below, or recreate the
+            mentor with email and password from Add Mentor.
+          </p>
+          <form onSubmit={onCreate} className="mt-4 space-y-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+              <input
+                name="email"
+                type="email"
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Display name (optional)</label>
+              <input
+                name="name"
+                type="text"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+            >
+              {loading ? "Creating…" : "Create login"}
+            </button>
+          </form>
+        </>
       )}
 
       {tempPassword ? (

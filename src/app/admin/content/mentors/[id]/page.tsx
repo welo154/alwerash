@@ -31,7 +31,7 @@ export default async function AdminMentorEditPage({
     await adminUpdateMentor(mentorId, {
       name: String(formData.get("name") ?? ""),
       certificateName: String(formData.get("certificateName") ?? "").trim() || undefined,
-      aboutMe: String(formData.get("aboutMe") ?? "").trim() || undefined,
+      aboutMe: String(formData.get("aboutMe") ?? "").trim(),
       featuredOrder:
         featuredOrder === "" || featuredOrder == null ? null : Number(featuredOrder),
       landingPopularOrder:
@@ -104,12 +104,15 @@ export default async function AdminMentorEditPage({
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">About me</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Description <span className="text-red-600">*</span>
+            </label>
             <textarea
               name="aboutMe"
               defaultValue={mentor.aboutMe ?? ""}
               placeholder="Short bio or description"
               rows={4}
+              required
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>

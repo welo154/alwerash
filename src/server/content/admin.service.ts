@@ -1,7 +1,8 @@
 // file: src/server/content/admin.service.ts
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import { hashPassword } from "@/server/auth/password";
 import type { CourseCatalogTagKey, CourseCatalogTagState } from "@/types/course-catalog-tags";
 import {
   EMPTY_COURSE_TAGS,
@@ -806,9 +807,40 @@ export async function adminSetMentorLandingPopular(mentorId: string, popular: bo
 }
 
 export async function adminCreateMentor(input: unknown) {
+  const data = parse(MentorCreateSchema, input);
+  const passwordHash = await hashPassword(data.password);
+
   try {
-    return await prisma.mentor.create({ data: parse(MentorCreateSchema, input) });
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          passwordHash,
+          emailVerified: new Date(),
+          roles: { create: { role: Role.MENTOR } },
+        },
+        select: { id: true },
+      });
+
+      return tx.mentor.create({
+        data: {
+          name: data.name,
+          photo: data.photo,
+          certificateName: data.certificateName,
+          aboutMe: data.aboutMe,
+          userId: user.id,
+          ...(data.featuredOrder !== undefined ? { featuredOrder: data.featuredOrder } : {}),
+          ...(data.landingPopularOrder !== undefined
+            ? { landingPopularOrder: data.landingPopularOrder }
+            : {}),
+        },
+      });
+    });
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw new AppError("CONFLICT", 409, "Email is already registered");
+    }
     handlePrismaError(e);
   }
 }

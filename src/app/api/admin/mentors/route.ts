@@ -19,7 +19,7 @@ export async function GET() {
   return NextResponse.json({ mentors });
 }
 
-/** POST /api/admin/mentors — create mentor (body: name, certificateName?, aboutMe?) */
+/** POST /api/admin/mentors — create mentor + login (name, email, password, aboutMe required) */
 export async function POST(request: NextRequest) {
   try {
     await requireRole(["ADMIN"]);
@@ -35,6 +35,13 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  const mentor = await adminCreateMentor(body);
-  return NextResponse.json({ mentor });
+  try {
+    const mentor = await adminCreateMentor(body);
+    return NextResponse.json({ mentor });
+  } catch (e) {
+    if (e instanceof AppError) {
+      return NextResponse.json({ error: e.message, message: e.message }, { status: e.status });
+    }
+    throw e;
+  }
 }
