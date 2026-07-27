@@ -40,7 +40,7 @@ export default async function AdminMentorEditPage({
           : Number(landingPopularOrder),
     });
     revalidatePath(`/admin/content/mentors/${mentorId}`);
-    revalidatePath("/learn");
+    revalidatePath("/course");
     revalidatePublicMentorPaths();
     redirect(`/admin/content/mentors/${mentorId}?toast=Mentor+updated`);
   }

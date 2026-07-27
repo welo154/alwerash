@@ -1,4 +1,6 @@
-/** Whether a published lesson can be opened in the learn player. */
+import { privateCoursePath } from "@/lib/course-access";
+
+/** Whether a published lesson can be opened in the course player. */
 export function isLessonLearnable(lesson: {
   type: string;
   video?: { muxPlaybackId: string } | null;
@@ -12,10 +14,11 @@ export function isLessonLearnable(lesson: {
   return false;
 }
 
+/** Href into the private full-course page (optionally anchored to a lesson). */
 export function lessonLearnHref(
   courseId: string,
   lesson: { id: string; type: string; video?: { muxPlaybackId: string } | null }
 ): string | undefined {
   if (!isLessonLearnable(lesson)) return undefined;
-  return `/learn/${encodeURIComponent(courseId)}/lesson/${encodeURIComponent(lesson.id)}`;
+  return `${privateCoursePath(courseId)}#${encodeURIComponent(lesson.id)}`;
 }

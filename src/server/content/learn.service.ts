@@ -223,8 +223,18 @@ export async function getCourseForLearning(courseId: string) {
       title: true,
       summary: true,
       coverImage: true,
+      instructorName: true,
       published: true,
       track: { select: { id: true, published: true, slug: true, title: true } },
+      instructors: {
+        orderBy: { createdAt: "asc" },
+        take: 1,
+        select: {
+          instructor: {
+            select: { name: true, profession: true },
+          },
+        },
+      },
       modules: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         select: {
@@ -277,6 +287,11 @@ export async function getCourseForLearning(courseId: string) {
     }),
     published: course.published,
     track: course.track,
+    instructorName:
+      course.instructors[0]?.instructor.name?.trim() ||
+      course.instructorName?.trim() ||
+      null,
+    instructorProfession: course.instructors[0]?.instructor.profession?.trim() || null,
     modules,
   };
 }

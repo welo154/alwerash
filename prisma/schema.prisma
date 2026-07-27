@@ -21,6 +21,7 @@ enum LessonType {
   VIDEO
   ARTICLE
   RESOURCE
+  INTRO
 }
 
 enum ThreadType {

@@ -1,8 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import {
+  type CourseViewerAccess,
+  getLockedLessonRedirect,
+} from "@/lib/course-access";
 
 export type CourseAccordionModule = {
   id: string;
@@ -15,18 +18,24 @@ type CourseContentAccordionProps = {
   fontFamily: string;
   modules: CourseAccordionModule[];
   totalDurationMinutes?: number | null;
+  freeLessonIds: string[];
+  viewerAccess: CourseViewerAccess;
+  activeFreeLessonId?: string | null;
+  onSelectFreeLesson?: (lessonId: string) => void;
 };
 
 type AccordionSection = {
   id: string;
   title: string;
-  firstLessonId: string | null;
-  lessons: { id: string; name: string; href: string; right: string; isAction: boolean }[];
+  firstPlayableLessonId: string | null;
+  lessons: {
+    id: string;
+    name: string;
+    right: string;
+    isAction: boolean;
+    isFree: boolean;
+  }[];
 };
-
-function lessonHref(courseId: string, lessonId: string): string {
-  return `/course-access/${encodeURIComponent(courseId)}#${encodeURIComponent(lessonId)}`;
-}
 
 function lessonMeta(type: string): { right: string; isAction: boolean } {
   const normalized = type.toUpperCase();
@@ -42,22 +51,34 @@ function lessonMeta(type: string): { right: string; isAction: boolean } {
   return { right: "PLAY", isAction: true };
 }
 
-function mapModules(courseId: string, modules: CourseAccordionModule[]): AccordionSection[] {
-  return modules.map((module) => ({
-    id: module.id,
-    title: module.title,
-    firstLessonId: module.lessons[0]?.id ?? null,
-    lessons: module.lessons.map((lesson, index) => {
+function mapModules(
+  courseId: string,
+  modules: CourseAccordionModule[],
+  freeLessonIdSet: Set<string>
+): AccordionSection[] {
+  return modules.map((module) => {
+    const lessons = module.lessons.map((lesson, index) => {
       const meta = lessonMeta(lesson.type);
+      const isFree = freeLessonIdSet.has(lesson.id);
       return {
         id: lesson.id,
         name: `${index + 1}. ${lesson.title}`,
-        href: lessonHref(courseId, lesson.id),
-        right: meta.right,
+        right: isFree ? meta.right : "LOCKED",
         isAction: meta.isAction,
+        isFree,
       };
-    }),
-  }));
+    });
+
+    const firstPlayableLessonId =
+      lessons.find((lesson) => lesson.isFree)?.id ?? null;
+
+    return {
+      id: module.id,
+      title: module.title,
+      firstPlayableLessonId,
+      lessons,
+    };
+  });
 }
 
 export function CourseContentAccordion({
@@ -65,9 +86,17 @@ export function CourseContentAccordion({
   fontFamily,
   modules,
   totalDurationMinutes,
+  freeLessonIds,
+  viewerAccess,
+  activeFreeLessonId = null,
+  onSelectFreeLesson,
 }: CourseContentAccordionProps) {
   const router = useRouter();
-  const sections = useMemo(() => mapModules(courseId, modules), [courseId, modules]);
+  const freeLessonIdSet = useMemo(() => new Set(freeLessonIds), [freeLessonIds]);
+  const sections = useMemo(
+    () => mapModules(courseId, modules, freeLessonIdSet),
+    [courseId, modules, freeLessonIdSet]
+  );
   const lessonCount = useMemo(
     () => sections.reduce((acc, section) => acc + section.lessons.length, 0),
     [sections]
@@ -91,11 +120,22 @@ export function CourseContentAccordion({
     return `${m}m`;
   })();
 
+  const handleLockedLesson = (lessonId: string) => {
+    router.push(getLockedLessonRedirect(courseId, viewerAccess, lessonId));
+  };
+
+  const handleFreeLesson = (lessonId: string) => {
+    onSelectFreeLesson?.(lessonId);
+  };
+
   const startSection = (section: AccordionSection) => {
-    if (section.firstLessonId) {
-      router.push(lessonHref(courseId, section.firstLessonId));
-    } else {
-      router.push(`/course/${encodeURIComponent(courseId)}`);
+    if (section.firstPlayableLessonId) {
+      handleFreeLesson(section.firstPlayableLessonId);
+      return;
+    }
+    const firstLessonId = section.lessons[0]?.id;
+    if (firstLessonId) {
+      handleLockedLesson(firstLessonId);
     }
   };
 
@@ -210,6 +250,23 @@ export function CourseContentAccordion({
         </button>
       </div>
 
+      {freeLessonIds.length > 0 ? (
+        <p
+          className="m-0 mt-[14px]"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily,
+            fontSize: "18px",
+            fontWeight: 400,
+            opacity: 0.65,
+          }}
+        >
+          {freeLessonIds.length} free preview{" "}
+          {freeLessonIds.length === 1 ? "lesson" : "lessons"} in the first section — subscribe to
+          unlock the full course.
+        </p>
+      ) : null}
+
       <div className="mt-[20px] flex w-[843px] flex-col gap-[22px]">
         {sections.map((section) => {
           const isOpen = !!openMap[section.id];
@@ -278,60 +335,85 @@ export function CourseContentAccordion({
                   isOpen ? "opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
-                {section.lessons.map((lesson, lessonIndex) => (
-                  <Link
-                    key={lesson.id}
-                    href={lesson.href}
-                    className={`block border-t border-black bg-white transition-colors duration-200 hover:bg-[#64E1FF] ${
-                      lessonIndex === 0 ? "rounded-t-[30px]" : ""
-                    }`}
-                  >
-                    <div className="flex h-[74px] items-center justify-between pl-[34px] pr-[38px]">
-                      <p
-                        className="m-0 truncate"
-                        style={{
-                          color: "var(--Black, #000)",
-                          fontFamily,
-                          fontSize: "24px",
-                          fontStyle: "normal",
-                          fontWeight: 400,
-                          lineHeight: "normal",
-                        }}
-                      >
+                {section.lessons.map((lesson, lessonIndex) => {
+                  const rowClassName = `flex h-[74px] w-full items-center justify-between border-t border-black bg-white pl-[34px] pr-[38px] text-left transition-colors duration-200 ${
+                    lesson.isFree
+                      ? activeFreeLessonId === lesson.id
+                        ? "bg-[#64E1FF] hover:bg-[#64E1FF]"
+                        : "hover:bg-[#64E1FF]"
+                      : "opacity-80 hover:bg-[#FFF5F5]"
+                  } ${lessonIndex === 0 ? "rounded-t-[30px]" : ""}`;
+
+                  const labelStyle = {
+                    color: "var(--Black, #000)",
+                    fontFamily,
+                    fontSize: "24px",
+                    fontStyle: "normal" as const,
+                    fontWeight: 400,
+                    lineHeight: "normal",
+                  };
+
+                  const badgeStyle = {
+                    color: "var(--Black, #000)",
+                    fontFamily,
+                    fontSize: "18px",
+                    fontStyle: "normal" as const,
+                    fontWeight: 400,
+                    lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                  };
+
+                  const badgeClassName = lesson.isFree
+                    ? "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-[#FF8CFF] px-[16px]"
+                    : "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-white px-[16px]";
+
+                  const rowContent = (
+                    <>
+                      <p className="m-0 truncate" style={labelStyle}>
                         {lesson.name}
                       </p>
                       {lesson.isAction ? (
-                        <span
-                          className="inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-[#FF8CFF] px-[16px]"
-                          style={{
-                            color: "var(--Black, #000)",
-                            fontFamily,
-                            fontSize: "18px",
-                            fontStyle: "normal",
-                            fontWeight: 400,
-                            lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-                          }}
-                        >
+                        <span className={badgeClassName} style={badgeStyle}>
                           {lesson.right}
                         </span>
                       ) : (
-                        <p
-                          className="m-0"
-                          style={{
-                            color: "var(--Black, #000)",
-                            fontFamily,
-                            fontSize: "24px",
-                            fontStyle: "normal",
-                            fontWeight: 400,
-                            lineHeight: "normal",
-                          }}
-                        >
+                        <p className="m-0" style={labelStyle}>
                           {lesson.right}
                         </p>
                       )}
-                    </div>
-                  </Link>
-                ))}
+                    </>
+                  );
+
+                  if (lesson.isFree) {
+                    return (
+                      <button
+                        key={lesson.id}
+                        type="button"
+                        onClick={() => handleFreeLesson(lesson.id)}
+                        className={rowClassName}
+                        aria-current={activeFreeLessonId === lesson.id ? "true" : undefined}
+                        aria-label={
+                          lesson.right === "VIEW" || lesson.right === "TASK"
+                            ? `Open free preview: ${lesson.name}`
+                            : `Play free preview: ${lesson.name}`
+                        }
+                      >
+                        {rowContent}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={lesson.id}
+                      type="button"
+                      onClick={() => handleLockedLesson(lesson.id)}
+                      className={rowClassName}
+                      aria-label={`${lesson.name} — locked, subscribe to unlock`}
+                    >
+                      {rowContent}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           );

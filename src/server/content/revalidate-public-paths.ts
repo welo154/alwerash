@@ -3,8 +3,8 @@ import { revalidatePath } from "next/cache";
 /** Call after track (or other catalog) mutations so `/`, courses, library, and events pick up changes. */
 export function revalidatePublicCatalogPaths() {
   revalidatePath("/");
-  revalidatePath("/learn");
   revalidatePath("/course");
+  revalidatePath("/course-access");
   revalidatePath("/tracks");
   revalidatePath("/library");
   revalidatePath("/events");

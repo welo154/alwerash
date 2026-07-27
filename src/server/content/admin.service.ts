@@ -711,8 +711,12 @@ export async function adminUpsertLessonArticle(lessonId: string, input: unknown)
     select: { id: true, type: true },
   });
   if (!lesson) throw new AppError("NOT_FOUND", 404, "Lesson not found");
-  if (lesson.type !== "ARTICLE") {
-    throw new AppError("BAD_REQUEST", 400, "Only ARTICLE lessons can have article content");
+  if (lesson.type !== "ARTICLE" && lesson.type !== "INTRO") {
+    throw new AppError(
+      "BAD_REQUEST",
+      400,
+      "Only ARTICLE or INTRO lessons can have article content"
+    );
   }
   try {
     return await prisma.lessonArticle.upsert({

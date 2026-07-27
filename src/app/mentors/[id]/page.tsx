@@ -174,7 +174,7 @@ export default async function MentorDetailsPage({ params }: Props) {
                         {trackCourses.map((course) => (
                           <Link
                             key={course.id}
-                            href={`/courses/${course.id}`}
+                            href={`/course/${course.id}`}
                             className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
                           >
                             <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-200">

@@ -129,7 +129,7 @@ export function catalogShowcasePropsFromCourse(
     durationLabel: formatCatalogDurationLabel(course.totalDurationMinutes, course.lessonCount ?? 0),
     titlePrimary,
     titleSecondary,
-    viewMoreHref: options?.onOpenModal ? undefined : `/courses/${course.id}`,
+    viewMoreHref: options?.onOpenModal ? undefined : `/course/${course.id}`,
     onViewMore: options?.onOpenModal,
   };
 }

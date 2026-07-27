@@ -10,6 +10,10 @@ export type HlsPlayerProps = {
   showQualitySelector?: boolean;
   /** Resume playback at this position (seconds). */
   initialTime?: number;
+  /** Start playback when the source is ready. */
+  autoPlay?: boolean;
+  /** Fill parent instead of using a 16:9 aspect box. */
+  fill?: boolean;
   /** Called on timeupdate (e.g. for progress tracking). Debounce in the consumer. */
   onProgress?: (currentTime: number, duration: number) => void;
 };
@@ -40,6 +44,8 @@ export function HlsPlayer({
   className = "w-full rounded-2xl bg-black",
   showQualitySelector = true,
   initialTime,
+  autoPlay = false,
+  fill = false,
   onProgress,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -122,6 +128,26 @@ export function HlsPlayer({
       return () => video.removeEventListener("loadedmetadata", seekToInitial);
     }
   }, [src, initialTime, mounted]);
+
+  useEffect(() => {
+    if (!mounted || !autoPlay) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const tryPlay = () => {
+      void video.play().catch(() => {
+        /* Autoplay may be blocked until a user gesture; ignore. */
+      });
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+      return;
+    }
+
+    video.addEventListener("canplay", tryPlay, { once: true });
+    return () => video.removeEventListener("canplay", tryPlay);
+  }, [src, autoPlay, mounted, useHlsJs]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -229,9 +255,9 @@ export function HlsPlayer({
 
   if (!mounted) {
     return (
-      <div className="relative w-full">
+      <div className={`relative w-full ${fill ? "h-full" : ""}`}>
         <div
-          className={`aspect-video overflow-hidden rounded-lg bg-black ${className}`}
+          className={`overflow-hidden rounded-lg bg-black ${fill ? "h-full w-full" : "aspect-video"} ${className}`}
           aria-hidden
         />
       </div>
@@ -239,8 +265,8 @@ export function HlsPlayer({
   }
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      <div className={`aspect-video overflow-hidden rounded-lg bg-black ${className}`}>
+    <div ref={containerRef} className={`relative w-full ${fill ? "h-full" : ""}`}>
+      <div className={`overflow-hidden rounded-lg bg-black ${fill ? "h-full w-full" : "aspect-video"} ${className}`}>
         <video
           ref={videoRef}
           className="h-full w-full object-contain"

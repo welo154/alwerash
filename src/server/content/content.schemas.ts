@@ -109,7 +109,7 @@ export const ModuleUpdateSchema = ModuleCreateSchema.partial().omit({ courseId: 
 
 // --- Lesson ---
 
-export const LessonTypeEnum = z.enum(["VIDEO", "ARTICLE", "RESOURCE"]);
+export const LessonTypeEnum = z.enum(["VIDEO", "ARTICLE", "RESOURCE", "INTRO"]);
 
 export const LessonCreateSchema = z.object({
   moduleId: Cuid,

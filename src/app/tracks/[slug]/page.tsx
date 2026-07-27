@@ -55,7 +55,7 @@ export default async function TrackPage({
 
   const courseItems = track.courses.map((c) => ({
     id: c.id,
-    href: `/courses/${c.id}`,
+    href: `/course/${c.id}`,
     title: c.title,
     authorLabel: c.instructorName?.trim() || "Instructor",
     tagPrimary: track.title.toUpperCase(),

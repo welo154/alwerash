@@ -13,6 +13,7 @@ import {
 } from "@/lib/catalog-cover-images";
 import { sqlGetLandingPopularMentorIds } from "./landing-popular-mentor-sql";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+import { getFreeLessonIds, isFreeLesson } from "@/lib/course-access";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
 import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
@@ -101,7 +102,7 @@ function buildCourseTilesForTrack(
 
   return sorted.map((course) => ({
     id: course.id,
-    href: `/courses/${course.id}`,
+    href: `/course/${course.id}`,
     title: course.title,
     authorLabel: course.instructorName?.trim() || "Instructor",
     tagPrimary,
@@ -370,7 +371,7 @@ export async function publicListTrackCoursesForTile(trackSlug: string): Promise<
   const track = await publicGetTrackBySlug(trackSlug);
   return track.courses.map((c) => ({
     id: c.id,
-    href: `/courses/${c.id}`,
+    href: `/course/${c.id}`,
     title: c.title,
     authorLabel: c.instructorName?.trim() || "Instructor",
     tagPrimary: track.title.toUpperCase(),
@@ -423,6 +424,93 @@ export async function publicGetCourseById(courseId: string) {
       course.track?.slug
     ),
   };
+}
+
+/** Public preview lesson — only for free intro videos on the marketing course page. */
+export async function publicGetPreviewLesson(courseId: string, lessonId: string) {
+  const course = await publicGetCourseById(courseId);
+
+  if (!isFreeLesson(lessonId, course.modules)) {
+    throw new AppError("FORBIDDEN", 403, "This lesson requires a subscription");
+  }
+
+  // Preview lessons are videos only — avoid selecting `article` so this works
+  // even when the generated Prisma client is behind the schema.
+  const lesson = await prisma.lesson.findFirst({
+    where: {
+      id: lessonId,
+      published: true,
+      module: { courseId, course: { published: true } },
+    },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      video: { select: { muxPlaybackId: true } },
+      module: {
+        select: {
+          course: { select: { id: true, title: true } },
+        },
+      },
+    },
+  });
+
+  if (!lesson) throw new AppError("NOT_FOUND", 404, "Lesson not found");
+  return lesson;
+}
+
+export type PublicFreePreviewVideo = {
+  lessonId: string;
+  title: string;
+  type: string;
+  streamUrl: string | null;
+  posterUrl: string | null;
+  articleBody: string | null;
+};
+
+/** Free first-section lessons for in-page playback / reading on the public course page. */
+export async function publicGetFreePreviewVideos(
+  courseId: string
+): Promise<PublicFreePreviewVideo[]> {
+  const course = await publicGetCourseById(courseId);
+  const freeIds = getFreeLessonIds(course.modules);
+  if (freeIds.length === 0) return [];
+
+  const lessons = await prisma.lesson.findMany({
+    where: {
+      id: { in: freeIds },
+      published: true,
+      module: { courseId, course: { published: true } },
+    },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      video: { select: { muxPlaybackId: true } },
+      article: { select: { body: true } },
+    },
+  });
+
+  const byId = new Map(lessons.map((lesson) => [lesson.id, lesson]));
+
+  return freeIds.flatMap((lessonId) => {
+    const lesson = byId.get(lessonId);
+    if (!lesson) return [];
+
+    const playbackId = lesson.video?.muxPlaybackId ?? null;
+    return [
+      {
+        lessonId,
+        title: lesson.title,
+        type: lesson.type,
+        streamUrl: playbackId ? `https://stream.mux.com/${playbackId}.m3u8` : null,
+        posterUrl: playbackId
+          ? `https://image.mux.com/${playbackId}/thumbnail.jpg?width=1280&height=720&fit_mode=smartcrop`
+          : null,
+        articleBody: lesson.article?.body?.trim() || null,
+      },
+    ];
+  });
 }
 
 /** Distinct users who have progress in any lesson of the given courses. */

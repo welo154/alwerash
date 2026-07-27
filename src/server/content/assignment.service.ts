@@ -103,13 +103,18 @@ export async function adminDeleteCourseAssignment(courseId: string) {
 }
 
 export async function getPublishedAssignmentForCourse(courseId: string) {
-  return prisma.assignment.findFirst({
-    where: { courseId, published: true },
-    select: {
-      id: true,
-      title: true,
-      instructions: true,
-      published: true,
-    },
-  });
+  try {
+    return await prisma.assignment.findFirst({
+      where: { courseId, published: true },
+      select: {
+        id: true,
+        title: true,
+        instructions: true,
+        published: true,
+      },
+    });
+  } catch {
+    // Prisma client/schema drift or missing course_id column — treat as no assignment.
+    return null;
+  }
 }

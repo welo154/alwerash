@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+﻿import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { requireRole } from "@/server/auth/require";
 import {
@@ -31,7 +31,7 @@ export default async function AdminMentorsPage() {
     await requireRole(["ADMIN"]);
     await adminSetMentorFeatured(mentorId, featured);
     revalidatePath("/admin/content/mentors");
-    revalidatePath("/learn");
+    revalidatePath("/course");
   }
 
   async function toggleMentorPopular(mentorId: string, popular: boolean) {
@@ -57,7 +57,7 @@ export default async function AdminMentorsPage() {
       <p className="mb-6 max-w-2xl text-sm text-slate-600">
         Mark up to <strong>8 mentors</strong> as featured for the Learn page (2 rows of 4), and up to{" "}
         <strong>{MAX_LANDING_POPULAR_MENTORS} mentors</strong> as popular for the signed-out home page
-        (“Current Mosts” section).
+        (â€œCurrent Mostsâ€ section).
       </p>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

@@ -1,5 +1,5 @@
-/**
- * Stable slugs for each landing catalog carousel card — import on `/learn` or
+﻿/**
+ * Stable slugs for each landing catalog carousel card â€” import on `/course` or
  * elsewhere to sync filters, deep links, or analytics to a specific tile.
  */
 export const LANDING_SHOWCASE_CAROUSEL_SLUGS = [

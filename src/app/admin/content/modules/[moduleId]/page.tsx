@@ -53,13 +53,13 @@ export default async function AdminModuleDetail({
     await adminCreateLesson({
       moduleId: id,
       title: String(formData.get("title") ?? ""),
-      type: (formData.get("type") as "VIDEO" | "ARTICLE" | "RESOURCE") ?? "VIDEO",
+      type: (formData.get("type") as "VIDEO" | "ARTICLE" | "RESOURCE" | "INTRO") ?? "VIDEO",
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
     });
     revalidatePath(`/admin/content/modules/${id}`);
-    revalidatePath(`/learn/${courseModule.courseId}`);
-    revalidatePath(`/courses/${courseModule.courseId}`);
+    revalidatePath(`/course/${courseModule.courseId}`);
+    revalidatePath(`/course-access/${courseModule.courseId}`);
   }
 
   async function updateLesson(formData: FormData) {
@@ -70,7 +70,9 @@ export default async function AdminModuleDetail({
     if (!lessonId) return;
     const typeRaw = formData.get("type");
     const type =
-      typeRaw === "ARTICLE" || typeRaw === "RESOURCE" ? typeRaw : "VIDEO";
+      typeRaw === "ARTICLE" || typeRaw === "RESOURCE" || typeRaw === "INTRO"
+        ? typeRaw
+        : "VIDEO";
     await adminUpdateLesson(lessonId, {
       title: String(formData.get("title") ?? "").trim() || undefined,
       type,
@@ -79,8 +81,8 @@ export default async function AdminModuleDetail({
     });
     revalidatePath(`/admin/content/modules/${moduleId}`);
     if (courseId) {
-      revalidatePath(`/learn/${courseId}`);
-      revalidatePath(`/courses/${courseId}`);
+      revalidatePath(`/course/${courseId}`);
+      revalidatePath(`/course-access/${courseId}`);
     }
   }
 
@@ -102,8 +104,8 @@ export default async function AdminModuleDetail({
     const courseId = courseModule.courseId;
     await adminDeleteModule(id);
     revalidatePath(`/admin/content/courses/${courseId}`);
-    revalidatePath(`/learn/${courseId}`);
-    revalidatePath(`/courses/${courseId}`);
+    revalidatePath(`/course/${courseId}`);
+    revalidatePath(`/course-access/${courseId}`);
     redirect(`/admin/content/courses/${courseId}?toast=Module+deleted`);
   }
 
@@ -126,8 +128,8 @@ export default async function AdminModuleDetail({
       body: String(formData.get("body") ?? ""),
     });
     revalidatePath(`/admin/content/modules/${moduleId}`);
-    revalidatePath(`/learn/${courseModule.courseId}`);
-    revalidatePath(`/courses/${courseModule.courseId}`);
+    revalidatePath(`/course/${courseModule.courseId}`);
+    revalidatePath(`/course-access/${courseModule.courseId}`);
   }
 
   return (
@@ -226,6 +228,7 @@ export default async function AdminModuleDetail({
                   className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 >
                   <option value="VIDEO">Video</option>
+                  <option value="INTRO">Introduction</option>
                   <option value="ARTICLE">Article</option>
                   <option value="RESOURCE">Resource</option>
                 </select>
@@ -296,6 +299,12 @@ export default async function AdminModuleDetail({
                       {l.type === "ARTICLE" && !l.article?.body?.trim() && (
                         <span className="text-amber-600">Article content missing</span>
                       )}
+                      {l.type === "INTRO" && l.article?.body?.trim() && (
+                        <span className="text-emerald-600">Intro ready</span>
+                      )}
+                      {l.type === "INTRO" && !l.article?.body?.trim() && (
+                        <span className="text-amber-600">Intro content missing</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-end gap-3">
@@ -307,6 +316,7 @@ export default async function AdminModuleDetail({
                         className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       >
                         <option value="VIDEO">Video</option>
+                        <option value="INTRO">Introduction</option>
                         <option value="ARTICLE">Article</option>
                         <option value="RESOURCE">Resource</option>
                       </select>
@@ -371,7 +381,7 @@ export default async function AdminModuleDetail({
                   />
                 </div>
               )}
-              {l.type === "ARTICLE" && (
+              {(l.type === "ARTICLE" || l.type === "INTRO") && (
                 <ArticleEditor
                   lessonId={l.id}
                   lessonTitle={l.title}

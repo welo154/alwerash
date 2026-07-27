@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+﻿import { revalidatePath } from "next/cache";
 import { requireRole } from "@/server/auth/require";
 import {
   adminListCourses,
@@ -26,7 +26,7 @@ export default async function AdminCoursesPage({
     await requireRole(["ADMIN"]);
     await adminSetCoursePopular(courseId, popular);
     revalidatePath("/admin/content/courses");
-    revalidatePath("/learn");
+    revalidatePath("/course");
   }
 
   async function toggleCourseTrending(courseId: string, trending: boolean) {
@@ -34,7 +34,7 @@ export default async function AdminCoursesPage({
     await requireRole(["ADMIN"]);
     await adminSetCourseTrending(courseId, trending);
     revalidatePath("/admin/content/courses");
-    revalidatePath("/learn");
+    revalidatePath("/course");
   }
 
   async function toggleCourseTag(courseId: string, tag: CourseCatalogTagKey, enabled: boolean) {
@@ -42,7 +42,7 @@ export default async function AdminCoursesPage({
     await requireRole(["ADMIN"]);
     await adminSetCourseTag(courseId, tag, enabled);
     revalidatePath("/admin/content/courses");
-    revalidatePath("/learn");
+    revalidatePath("/course");
   }
 
   return (

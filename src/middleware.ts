@@ -9,9 +9,35 @@ const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/register/") || pathname === "/verify-email";
-  const isLearnLanding = pathname === "/learn"; // public: anyone can view the learn/courses list
-  const isLearnProtected = pathname.startsWith("/learn/"); // e.g. /learn/[courseId], /learn/[courseId]/lesson/...
+  // Legacy /learn → catalog or private course access (never resurrect /learn pages)
+  if (pathname === "/learn" || pathname.startsWith("/learn/")) {
+    const url = req.nextUrl.clone();
+    if (pathname === "/learn") {
+      url.pathname = "/course";
+      return NextResponse.redirect(url);
+    }
+    // /learn/:courseId(/lesson/:lessonId)? → /course-access/:courseId
+    const learnCourseMatch = pathname.match(/^\/learn\/([^/]+)(?:\/.*)?$/);
+    if (learnCourseMatch) {
+      url.pathname = `/course-access/${learnCourseMatch[1]}`;
+      return NextResponse.redirect(url);
+    }
+    url.pathname = "/course";
+    return NextResponse.redirect(url);
+  }
+
+  // Accidental nested course URLs → stay on the public course page (no lesson routes)
+  {
+    const nestedCourseMatch = pathname.match(/^\/course\/([^/]+)\/.+/);
+    if (nestedCourseMatch) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/course/${nestedCourseMatch[1]}`;
+      return NextResponse.redirect(url);
+    }
+  }
+
+  const isCourseAccessPath =
+    pathname === "/course-access" || pathname.startsWith("/course-access/");
   const isLessonsPath = pathname.startsWith("/lessons/");
   const isAdminPath = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
@@ -20,6 +46,11 @@ export async function middleware(req: NextRequest) {
   const isMentorPath = pathname.startsWith("/mentor");
   const isMentorApi = pathname.startsWith("/api/mentor");
   const isPlaybackApi = pathname.startsWith("/api/video/playback/");
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/register/") ||
+    pathname === "/verify-email";
 
   const token = await getToken({ req, secret });
   const roles = (token?.roles as string[] | undefined) ?? [];
@@ -79,9 +110,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // /learn (exact) is public; /learn/... and /lessons/... require login
-  if (isLearnLanding) return NextResponse.next();
-  const isProtectedPage = isLearnProtected || isLessonsPath;
+  // /course-access/... requires login here; active subscription is enforced on the page.
+  // /lessons/... requires login (signed playback alternate route).
+  const isProtectedPage = isCourseAccessPath || isLessonsPath;
   if (isProtectedPage) {
     if (!token?.sub) {
       const url = req.nextUrl.clone();

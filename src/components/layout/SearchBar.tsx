@@ -189,7 +189,7 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
                       {results.courses.map((course) => (
                         <li key={course.id}>
                           <Link
-                            href={`/courses/${course.id}`}
+                            href={`/course/${course.id}`}
                             className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                             onClick={() => setOpen(false)}
                           >
@@ -289,7 +289,7 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
                     {results.courses.map((course) => (
                       <li key={course.id}>
                         <Link
-                          href={`/courses/${course.id}`}
+                          href={`/course/${course.id}`}
                           className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                           onClick={() => setOpen(false)}
                         >

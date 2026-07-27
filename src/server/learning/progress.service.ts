@@ -159,6 +159,7 @@ export type CourseProgressRecord = {
   totalCount: number;
   progressPercent: number;
   modules: ModuleProgressRecord[];
+  completedLessonIds: string[];
 };
 
 /**
@@ -201,6 +202,7 @@ export async function getCourseProgress(
       completedCount: 0,
       totalCount: 0,
       progressPercent: 100,
+      completedLessonIds: [],
       modules: course.modules.map((m) => ({
         moduleId: m.id,
         title: m.title,
@@ -219,7 +221,8 @@ export async function getCourseProgress(
     },
     select: { lessonId: true },
   });
-  const completedSet = new Set(completedRows.map((r) => r.lessonId));
+  const completedLessonIds = completedRows.map((r) => r.lessonId);
+  const completedSet = new Set(completedLessonIds);
 
   const modules: ModuleProgressRecord[] = moduleLessonIds.map(
     ({ moduleId, title, lessonIds }) => {
@@ -246,6 +249,7 @@ export async function getCourseProgress(
     completedCount,
     totalCount,
     progressPercent: Math.round(progressPercent * 100) / 100,
+    completedLessonIds,
     modules,
   };
 }
