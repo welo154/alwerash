@@ -237,37 +237,62 @@ export function LearnPopularFigmaTile(
 
   const bringSlideToFront = (el: HTMLElement) => {
     const slide = el.closest(".swiper-slide") as HTMLElement | null;
-    if (!slide) return;
-    slide.style.position = "relative";
-    slide.style.zIndex = "2000";
+    if (slide) {
+      slide.style.position = "relative";
+      slide.style.zIndex = "2000";
+      return;
+    }
+    const trendingTile = el.closest(".learn-trending-tile") as HTMLElement | null;
+    if (trendingTile) {
+      trendingTile.style.position = "relative";
+      trendingTile.style.zIndex = "2000";
+    }
   };
 
   const unlockOverflowForHoverCard = (el: HTMLElement) => {
     const swiperRoot = el.closest(".learn-popular-swiper--cards") as HTMLElement | null;
-    if (!swiperRoot) return;
-    swiperRoot.style.overflowX = "visible";
-    swiperRoot.style.overflowY = "visible";
-    const viewport = swiperRoot.parentElement;
-    if (!viewport) return;
-    viewport.style.overflowX = "visible";
-    viewport.style.overflowY = "visible";
+    if (swiperRoot) {
+      swiperRoot.style.overflowX = "visible";
+      swiperRoot.style.overflowY = "visible";
+      const viewport = swiperRoot.parentElement;
+      if (viewport) {
+        viewport.style.overflowX = "visible";
+        viewport.style.overflowY = "visible";
+      }
+      return;
+    }
+    const trendingRoot = el.closest(".learn-trending-marquee") as HTMLElement | null;
+    if (!trendingRoot) return;
+    trendingRoot.style.overflowX = "visible";
+    trendingRoot.style.overflowY = "visible";
   };
 
   const resetSlideStacking = (el: HTMLElement) => {
     const slide = el.closest(".swiper-slide") as HTMLElement | null;
-    if (!slide) return;
-    slide.style.zIndex = "";
+    if (slide) {
+      slide.style.zIndex = "";
+      return;
+    }
+    const trendingTile = el.closest(".learn-trending-tile") as HTMLElement | null;
+    if (trendingTile) trendingTile.style.zIndex = "";
   };
 
   const restoreOverflowAfterHoverCard = (el: HTMLElement) => {
     const swiperRoot = el.closest(".learn-popular-swiper--cards") as HTMLElement | null;
-    if (!swiperRoot) return;
-    swiperRoot.style.overflowX = "";
-    swiperRoot.style.overflowY = "";
-    const viewport = swiperRoot.parentElement;
-    if (!viewport) return;
-    viewport.style.overflowX = "";
-    viewport.style.overflowY = "";
+    if (swiperRoot) {
+      swiperRoot.style.overflowX = "";
+      swiperRoot.style.overflowY = "";
+      const viewport = swiperRoot.parentElement;
+      if (viewport) {
+        viewport.style.overflowX = "";
+        viewport.style.overflowY = "";
+      }
+      return;
+    }
+    const trendingRoot = el.closest(".learn-trending-marquee") as HTMLElement | null;
+    if (!trendingRoot) return;
+    trendingRoot.style.overflowX = "";
+    trendingRoot.style.overflowY = "";
   };
 
   const activateHover = (el: HTMLElement) => {

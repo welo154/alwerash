@@ -38,44 +38,47 @@ export function LearnPopularClassesSection({
     <div className="min-w-0 w-full max-w-full">
       <LearnPopularClassesHeading onNext={slideNext} atEnd={atEnd} />
 
-      <div
-        ref={scrollAreaRef}
-        className="relative mt-8 w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
-        style={{
-          minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined,
-          clipPath: "inset(-200px -200vw -200px 0)",
-        }}
-      >
-        <Swiper
-          dir="ltr"
-          modules={[Mousewheel]}
-          {...learnCarouselSwiperBehavior}
-          mousewheel={learnCarouselMousewheel}
-          className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
-          onSwiper={handleSwiper}
-          onSlideChange={handleNavSync}
-          onSlidesUpdated={handleNavSync}
-          onResize={handleNavSync}
+      {/* Break out of page padding so the track spans the full viewport width. */}
+      <div className="relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2">
+        <div
+          ref={scrollAreaRef}
+          className="relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+          style={{
+            minHeight: tiles.length > 0 ? LEARN_POPULAR_FIGMA_TILE_H : undefined,
+            clipPath: "inset(-200px -200vw -200px 0)",
+          }}
         >
-          {tiles.map((tile) => (
-            <SwiperSlide
-              key={tile.id}
-              className="h-auto! shrink-0 overflow-visible!"
-              style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
-            >
-              <LearnPopularFigmaTile {...tile} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          <Swiper
+            dir="ltr"
+            modules={[Mousewheel]}
+            {...learnCarouselSwiperBehavior}
+            mousewheel={learnCarouselMousewheel}
+            className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
+            onSwiper={handleSwiper}
+            onSlideChange={handleNavSync}
+            onSlidesUpdated={handleNavSync}
+            onResize={handleNavSync}
+          >
+            {tiles.map((tile) => (
+              <SwiperSlide
+                key={tile.id}
+                className="h-auto! shrink-0 overflow-visible!"
+                style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
+              >
+                <LearnPopularFigmaTile {...tile} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
-        <LearnCarouselEdgeNav
-          atBeginning={atBeginning}
-          atEnd={atEnd}
-          onPrev={slidePrev}
-          onNext={slideNext}
-          prevLabel="Previous popular class"
-          nextLabel="Next popular class"
-        />
+          <LearnCarouselEdgeNav
+            atBeginning={atBeginning}
+            atEnd={atEnd}
+            onPrev={slidePrev}
+            onNext={slideNext}
+            prevLabel="Previous popular class"
+            nextLabel="Next popular class"
+          />
+        </div>
       </div>
     </div>
   );

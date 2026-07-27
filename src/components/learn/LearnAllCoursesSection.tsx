@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  LEARN_POPULAR_FIGMA_TILE_W,
-  LearnPopularFigmaTile,
-} from "@/components/learn/LearnPopularFigmaTile";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
   LearnCourseTrackOption,
@@ -16,8 +13,10 @@ const pangeaFont =
 
 const DEEP_DIVE_MIN_LESSONS = 3;
 const DEEP_DIVE_MIN_MINUTES = 45;
-const GRID_GAP_X = 18;
-const INITIAL_VISIBLE_ROWS = 3;
+/** 4 columns × 2 rows per page. */
+const COLUMNS = 4;
+const ROWS_PER_PAGE = 2;
+const PAGE_SIZE = COLUMNS * ROWS_PER_PAGE;
 
 const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "all", label: "All courses" },
@@ -25,16 +24,104 @@ const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "deepDive", label: "Deep dive" },
 ];
 
-const filterSelectClass =
-  "h-8 min-w-[140px] max-w-[220px] cursor-pointer appearance-none rounded-[8px] border border-black bg-white bg-[length:10px_6px] bg-[right_12px_center] bg-no-repeat py-0 pl-4 pr-8 text-black";
+type FilterOption = { value: string; label: string };
+type OpenFilter = "track" | "type" | null;
 
-const filterSelectStyle = {
-  fontFamily: pangeaFont,
-  fontSize: "16px",
-  fontWeight: 400,
-  lineHeight: "19.6px",
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-} as const;
+function FilterChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="10"
+      height="6"
+      viewBox="0 0 10 6"
+      fill="none"
+      aria-hidden
+      className={`shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+    >
+      <path
+        d="M1 1L5 5L9 1"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function AllCoursesFilterDropdown({
+  id,
+  label,
+  value,
+  options,
+  open,
+  onToggle,
+  onSelect,
+  menuAlign = "right",
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: FilterOption[];
+  open: boolean;
+  onToggle: () => void;
+  onSelect: (value: string) => void;
+  menuAlign?: "left" | "right";
+}) {
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? label;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        id={id}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={label}
+        onClick={onToggle}
+        className="inline-flex h-9 min-w-[148px] max-w-[220px] items-center justify-between gap-3 rounded-[8px] border border-black bg-white px-4 text-black transition-colors hover:bg-black hover:text-white"
+        style={{
+          fontFamily: pangeaFont,
+          fontSize: "16px",
+          fontWeight: 400,
+          lineHeight: "19.6px",
+        }}
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <FilterChevron open={open} />
+      </button>
+
+      {open ? (
+        <ul
+          role="listbox"
+          aria-labelledby={id}
+          className={`absolute top-[calc(100%+8px)] z-40 max-h-[280px] min-w-full overflow-y-auto rounded-[12px] border border-black bg-white py-2 shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)] ${
+            menuAlign === "right" ? "right-0" : "left-0"
+          }`}
+          style={{ fontFamily: pangeaFont }}
+        >
+          {options.map((option) => {
+            const selected = option.value === value;
+            return (
+              <li key={option.value} role="option" aria-selected={selected}>
+                <button
+                  type="button"
+                  className={`flex w-full items-center px-4 py-2.5 text-left text-[16px] transition-colors ${
+                    selected
+                      ? "bg-black font-bold text-white"
+                      : "font-normal text-black hover:bg-[#8AF396]"
+                  }`}
+                  onClick={() => onSelect(option.value)}
+                >
+                  {option.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 function LearnAllCoursesHeading() {
   return (
@@ -112,6 +199,22 @@ function buildTrackOptions(
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
+function buildPageItems(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const items: (number | "ellipsis")[] = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+
+  if (start > 2) items.push("ellipsis");
+  for (let page = start; page <= end; page += 1) items.push(page);
+  if (end < total - 1) items.push("ellipsis");
+  items.push(total);
+  return items;
+}
+
 export default function LearnAllCoursesSection({
   courses,
   tracks,
@@ -121,13 +224,26 @@ export default function LearnAllCoursesSection({
 }) {
   const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
-  const [showAll, setShowAll] = useState(false);
-  const [columns, setColumns] = useState(4);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
+  const [openFilter, setOpenFilter] = useState<OpenFilter>(null);
+  const filtersRef = useRef<HTMLDivElement | null>(null);
 
   const trackOptions = useMemo(
     () => buildTrackOptions(courses, tracks),
     [courses, tracks]
+  );
+
+  const trackFilterOptions = useMemo<FilterOption[]>(
+    () => [
+      { value: "all", label: "All tracks" },
+      ...trackOptions.map((track) => ({ value: track.slug, label: track.title })),
+    ],
+    [trackOptions]
+  );
+
+  const typeFilterOptions = useMemo<FilterOption[]>(
+    () => TYPE_OPTIONS.map((option) => ({ value: option.id, label: option.label })),
+    []
   );
 
   const filteredCourses = useMemo(() => {
@@ -139,34 +255,35 @@ export default function LearnAllCoursesSection({
     return filterByType(items, typeFilter);
   }, [courses, trackSlug, typeFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
+
   useEffect(() => {
-    setShowAll(false);
+    setPage(1);
   }, [trackSlug, typeFilter]);
 
   useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
-    const updateColumns = () => {
-      const width = el.clientWidth;
-      const next = Math.max(
-        1,
-        Math.floor((width + GRID_GAP_X) / (LEARN_POPULAR_FIGMA_TILE_W + GRID_GAP_X))
-      );
-      setColumns(next);
+  useEffect(() => {
+    if (!openFilter) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!filtersRef.current?.contains(e.target as Node)) setOpenFilter(null);
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenFilter(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openFilter]);
 
-    updateColumns();
-    const observer = new ResizeObserver(updateColumns);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [filteredCourses.length]);
-
-  const initialLimit = columns * INITIAL_VISIBLE_ROWS;
-  const visibleCourses = showAll
-    ? filteredCourses
-    : filteredCourses.slice(0, initialLimit);
-  const showViewMore = !showAll && filteredCourses.length > initialLimit;
+  const pageCourses = filteredCourses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageItems = buildPageItems(page, totalPages);
+  const showPagination = filteredCourses.length > PAGE_SIZE;
 
   if (courses.length === 0) return null;
 
@@ -175,41 +292,34 @@ export default function LearnAllCoursesSection({
       <div className="flex flex-wrap items-start justify-between gap-6">
         <LearnAllCoursesHeading />
 
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <label className="sr-only" htmlFor="learn-all-courses-track-filter">
-            Filter by track
-          </label>
-          <select
+        <div ref={filtersRef} className="relative z-40 flex shrink-0 flex-wrap items-center gap-3">
+          <AllCoursesFilterDropdown
             id="learn-all-courses-track-filter"
+            label="Filter by track"
             value={trackSlug}
-            onChange={(e) => setTrackSlug(e.target.value)}
-            className={filterSelectClass}
-            style={filterSelectStyle}
-          >
-            <option value="all">All tracks</option>
-            {trackOptions.map((track) => (
-              <option key={track.slug} value={track.slug}>
-                {track.title}
-              </option>
-            ))}
-          </select>
+            options={trackFilterOptions}
+            open={openFilter === "track"}
+            onToggle={() => setOpenFilter((prev) => (prev === "track" ? null : "track"))}
+            onSelect={(value) => {
+              setTrackSlug(value);
+              setOpenFilter(null);
+            }}
+            menuAlign="left"
+          />
 
-          <label className="sr-only" htmlFor="learn-all-courses-type-filter">
-            Filter by course type
-          </label>
-          <select
+          <AllCoursesFilterDropdown
             id="learn-all-courses-type-filter"
+            label="Filter by course type"
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as LearnCourseTypeFilter)}
-            className={filterSelectClass}
-            style={filterSelectStyle}
-          >
-            {TYPE_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            options={typeFilterOptions}
+            open={openFilter === "type"}
+            onToggle={() => setOpenFilter((prev) => (prev === "type" ? null : "type"))}
+            onSelect={(value) => {
+              setTypeFilter(value as LearnCourseTypeFilter);
+              setOpenFilter(null);
+            }}
+            menuAlign="right"
+          />
         </div>
       </div>
 
@@ -224,26 +334,86 @@ export default function LearnAllCoursesSection({
         ) : (
           <>
             <div
-              ref={gridRef}
-              key={`${trackSlug}-${typeFilter}`}
-              className="flex flex-wrap gap-x-[18px] gap-y-[30px]"
+              key={`${trackSlug}-${typeFilter}-${page}`}
+              className="grid grid-cols-2 gap-x-[18px] gap-y-[30px] md:grid-cols-3 lg:grid-cols-4"
               data-gsap-stagger-group
             >
-              {visibleCourses.map((course) => (
-                <LearnPopularFigmaTile key={course.id} {...course} />
+              {pageCourses.map((course) => (
+                <LearnPopularFigmaTile key={course.id} {...course} size="grid" />
               ))}
             </div>
-            {showViewMore ? (
-              <div className="mt-10 flex justify-center">
+
+            {showPagination ? (
+              <nav
+                className="mt-10 flex flex-wrap items-center justify-center gap-2"
+                aria-label="All courses pages"
+              >
                 <button
                   type="button"
-                  onClick={() => setShowAll(true)}
-                  className="inline-flex h-[56px] cursor-pointer items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black transition-colors hover:bg-black hover:text-white"
+                  aria-label="Previous page"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black bg-white text-black transition-colors hover:bg-black hover:text-white disabled:pointer-events-none disabled:opacity-35"
                   style={{ fontFamily: pangeaFont }}
                 >
-                  View more
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path
+                      d="M15 6L9 12L15 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
-              </div>
+
+                {pageItems.map((item, index) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="inline-flex h-11 min-w-8 items-center justify-center text-[18px] text-black/50"
+                      aria-hidden
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-label={`Page ${item}`}
+                      aria-current={item === page ? "page" : undefined}
+                      onClick={() => setPage(item)}
+                      className={`inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black px-3 text-[18px] font-bold transition-colors ${
+                        item === page
+                          ? "bg-black text-white"
+                          : "bg-white text-black hover:bg-black hover:text-white"
+                      }`}
+                      style={{ fontFamily: pangeaFont }}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  aria-label="Next page"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black bg-white text-black transition-colors hover:bg-black hover:text-white disabled:pointer-events-none disabled:opacity-35"
+                  style={{ fontFamily: pangeaFont }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path
+                      d="M9 6L15 12L9 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </nav>
             ) : null}
           </>
         )}

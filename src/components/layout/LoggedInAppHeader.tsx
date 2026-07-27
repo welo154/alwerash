@@ -118,7 +118,7 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
                   aria-hidden
                 />
 
-                <div className="absolute top-full left-0 z-2000 mt-1 opacity-0 transition-opacity delay-500 duration-1000 ease-out pointer-events-none hover:pointer-events-auto hover:opacity-100 hover:delay-0 hover:duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:delay-0 group-hover:duration-200">
+                <div className="absolute top-full left-0 z-2000 mt-1 opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100">
                   <div
                     className="w-[582px] rounded-[50px] border border-black bg-white px-[35px] py-[28px] shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
                     style={{ fontFamily: pangeaFont }}

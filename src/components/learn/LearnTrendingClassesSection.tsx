@@ -134,44 +134,51 @@ export function LearnTrendingClassesSection({
         nextAriaLabel="Next trending class"
       />
 
-      <div
-        ref={scrollAreaRef}
-        className="relative mt-8 w-full min-w-0 shrink-0 overflow-hidden"
-        style={{ minHeight: LEARN_POPULAR_FIGMA_TILE_H }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocusCapture={() => setPaused(true)}
-        onBlurCapture={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
-        }}
-      >
+      {/* Break out of page padding so the track spans the full viewport width. */}
+      <div className="relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2">
         <div
-          ref={trackRef}
-          className="flex w-max will-change-transform"
-          style={{ gap: CARD_GAP }}
+          ref={scrollAreaRef}
+          className="learn-trending-marquee relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+          style={{
+            minHeight: LEARN_POPULAR_FIGMA_TILE_H,
+            /* Allow START hover card (~608×567) to overflow the tile without being clipped. */
+            clipPath: "inset(-220px -280px -220px -280px)",
+          }}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
+          }}
         >
-          {marqueeTiles.map((tile) => (
-            <div key={tile.loopKey} className="shrink-0">
-              <LearnPopularFigmaTile
-                id={tile.id}
-                href={tile.href}
-                title={tile.title}
-                authorLabel={tile.authorLabel}
-                tagPrimary={tile.tagPrimary}
-                coverImageSrc={tile.coverImageSrc}
-              />
-            </div>
-          ))}
-        </div>
+          <div
+            ref={trackRef}
+            className="flex w-max will-change-transform"
+            style={{ gap: CARD_GAP }}
+          >
+            {marqueeTiles.map((tile) => (
+              <div key={tile.loopKey} className="learn-trending-tile relative shrink-0">
+                <LearnPopularFigmaTile
+                  id={tile.id}
+                  href={tile.href}
+                  title={tile.title}
+                  authorLabel={tile.authorLabel}
+                  tagPrimary={tile.tagPrimary}
+                  coverImageSrc={tile.coverImageSrc}
+                />
+              </div>
+            ))}
+          </div>
 
-        <LearnCarouselEdgeNav
-          atBeginning={false}
-          atEnd={false}
-          onPrev={slidePrev}
-          onNext={slideNext}
-          prevLabel="Previous trending class"
-          nextLabel="Next trending class"
-        />
+          <LearnCarouselEdgeNav
+            atBeginning={false}
+            atEnd={false}
+            onPrev={slidePrev}
+            onNext={slideNext}
+            prevLabel="Previous trending class"
+            nextLabel="Next trending class"
+          />
+        </div>
       </div>
     </div>
   );
