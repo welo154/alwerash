@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 const CTA_GREEN = "#A2FF86";
 const CTA_BUTTON_TEXT = "#141413";

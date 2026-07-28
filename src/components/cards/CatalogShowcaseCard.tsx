@@ -5,11 +5,11 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
 import { appendShowcaseToHref } from "./catalog-showcase-map";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 export type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 function ExternalLinkGlyph({ className }: { className?: string }) {
   return (

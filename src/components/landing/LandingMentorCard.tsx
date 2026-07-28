@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useId } from "react";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 /** Mentor portrait for all landing mentor cards (Figma subtract shape). */
 const MENTOR_CARD_PHOTO = "/landing/mentor-card-photo.png";
@@ -51,7 +51,7 @@ export function LandingMentorCard({
 
   const card = (
     <article
-      className={`relative mx-auto max-w-full shrink-0 overflow-hidden${fillWidth ? " w-full" : ""}`}
+      className={`relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : " ml-0"}`}
       style={sizeStyle}
       aria-hidden={href ? true : undefined}
       aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}

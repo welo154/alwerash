@@ -7,6 +7,7 @@ import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-m
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
@@ -22,12 +23,12 @@ const MARQUEE_PIXELS_PER_SECOND = 47;
 const PILL_GAP_PX = 25;
 
 const pillFont = {
-  fontFamily: '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+  fontFamily: pangeaFontFamily,
   lineHeight: "19.6px",
 } as const;
 
 const bodyTextFont = {
-  fontFamily: '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+  fontFamily: pangeaFontFamily,
 } as const;
 
 function MetaFilterPill({
@@ -342,8 +343,14 @@ export function HomeTrackExplorerSection({
       )}
 
       <div
-        className="mx-auto mt-[64px] w-full max-w-[1600px] px-6 sm:px-8"
-        style={trackPillSelectsCourses ? undefined : { minHeight: CATALOG_SHOWCASE_CARD_H }}
+        key={cardGridKey}
+        className="mt-[64px] flex max-w-full flex-wrap justify-start gap-x-[27px] gap-y-6 px-4 sm:px-6 lg:px-0"
+        style={{
+          width: 346 * 3 + 27 * 2,
+          marginLeft: "max(0px, calc((100vw - 1301px) / 2))",
+          marginRight: "auto",
+          minHeight: trackPillSelectsCourses ? undefined : CATALOG_SHOWCASE_CARD_H,
+        }}
       >
         {isEmpty ? (
           <p
@@ -356,31 +363,28 @@ export function HomeTrackExplorerSection({
           </p>
         ) : trackPillSelectsCourses ? (
           <>
-            <div key={cardGridKey} className="flex flex-wrap justify-center gap-6">
-              {visibleCourseTiles.map((tile) => (
-                <LearnPopularFigmaTile key={tile.id} {...tile} />
-              ))}
-            </div>
-            {showViewMoreCourses ? (
-              <div className="mt-10 flex justify-center">
-                <Link
-                  href={`/tracks/${encodeURIComponent(activeTrackSlug!)}`}
-                  className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-black hover:text-white"
-                  style={pillFont}
-                >
-                  View more
-                </Link>
-              </div>
-            ) : null}
+            {visibleCourseTiles.map((tile) => (
+              <LearnPopularFigmaTile key={`${cardGridKey}-${tile.id}`} {...tile} />
+            ))}
           </>
         ) : (
-          <div key={cardGridKey} className="flex flex-wrap justify-center gap-[30px]">
-            {trackSlides.map(({ slug, cardProps }) => (
-              <CatalogShowcaseCard key={slug} {...cardProps} showcaseSlug={slug} />
-            ))}
-          </div>
+          trackSlides.map(({ slug, cardProps }) => (
+            <CatalogShowcaseCard key={`${cardGridKey}-${slug}`} {...cardProps} showcaseSlug={slug} />
+          ))
         )}
       </div>
+
+      {showViewMoreCourses && trackPillSelectsCourses ? (
+        <div className="mt-10 flex justify-center">
+          <Link
+            href={`/tracks/${encodeURIComponent(activeTrackSlug!)}`}
+            className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-black hover:text-white"
+            style={pillFont}
+          >
+            View more
+          </Link>
+        </div>
+      ) : null}
 
       {showDiscoverCta ? (
         <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>

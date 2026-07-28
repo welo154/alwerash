@@ -2,9 +2,9 @@
 
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { LandingMentorCard } from "./LandingMentorCard";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 /**
  * “THE CURRENT MOSTS” strip — below Everything-in-one-place.
@@ -41,8 +41,8 @@ export function LandingCurrentMostsSection({
 }) {
   const columnCount = mentorsPerRow ?? (forceTwoPerRow ? 2 : 3);
   const useFluidCards = mentorsPerRow != null && mentorsPerRow >= 4;
-  const gapX = columnCount >= 4 ? "gap-x-6" : "gap-x-[48px]";
-  const gapY = columnCount >= 4 ? "gap-y-8" : "gap-y-[50px]";
+  const gapX = "gap-x-[27px]";
+  const gapY = "gap-y-[40px]";
 
   const gridColsClass =
     columnCount === 4
@@ -53,12 +53,12 @@ export function LandingCurrentMostsSection({
 
   const fixedColGridClass =
     columnCount === 4
-      ? "md:grid-cols-[repeat(2,469px)] xl:grid-cols-[repeat(4,234.5px)]"
+      ? "md:grid-cols-[repeat(2,383px)] xl:grid-cols-[repeat(4,191.5px)]"
       : columnCount === 2
-        ? "md:grid-cols-[repeat(2,469px)]"
-        : "md:grid-cols-[repeat(2,469px)] lg:grid-cols-[repeat(3,469px)]";
+        ? "md:grid-cols-[repeat(2,383px)]"
+        : "md:grid-cols-[repeat(2,383px)] lg:grid-cols-[repeat(3,383px)]";
 
-  const gridJustify = alignToRight ? "justify-end" : contained ? "justify-start" : "justify-center";
+  const gridJustify = alignToRight ? "justify-end" : "justify-center";
   const gridMaxWidthClass = !contained && alignToRight ? "ml-auto mr-0" : "mx-auto";
   const gridClassName = contained
     ? useFluidCards
@@ -67,8 +67,8 @@ export function LandingCurrentMostsSection({
         ? `grid ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`
         : `grid ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`
     : forceTwoPerRow
-      ? `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} md:pl-[77px] md:pr-[76px] ${fixedColGridClass}`
-      : `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} md:pl-[77px] md:pr-[76px] ${fixedColGridClass}`;
+    ? `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`
+    : `${gridMaxWidthClass} grid max-w-[1600px] ${gridColsClass} ${gridJustify} ${gapX} ${gapY} ${fixedColGridClass}`;
   /** Contained + right align: breakout to viewport width from a narrow main column, content flush right. */
   const sectionSpacingClass =
     contained && alignToRight
@@ -80,8 +80,8 @@ export function LandingCurrentMostsSection({
           ? "relative mb-0 w-full overflow-visible pt-0"
           : "relative mb-[90px] w-full overflow-visible pt-[97px]"
         : compactVerticalSpacing
-          ? `relative left-1/2 mb-0 w-screen max-w-[100vw] -translate-x-1/2 overflow-x-hidden pl-[85px] pr-[64px] pt-0${alignToRight ? " flex flex-col items-end" : ""}`
-          : `relative left-1/2 mb-[90px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-hidden pl-[85px] pr-[64px] pt-[97px]${alignToRight ? " flex flex-col items-end" : ""}`;
+          ? `relative left-1/2 mb-0 w-screen max-w-[100vw] -translate-x-1/2 overflow-x-hidden px-4 pt-0${alignToRight ? " flex flex-col items-end pr-[64px] pl-[85px]" : ""}`
+          : `relative left-1/2 mb-[90px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-hidden px-4 pt-[97px]${alignToRight ? " flex flex-col items-end pr-[64px] pl-[85px]" : ""}`;
   const cardsTopClass =
     contained && alignToRight
       ? compactVerticalSpacing
@@ -92,12 +92,20 @@ export function LandingCurrentMostsSection({
           ? "relative mt-[70px] w-full"
           : "relative mt-[82px] w-full"
         : compactVerticalSpacing
-          ? "relative left-1/2 mt-[70px] w-screen max-w-[100vw] -translate-x-1/2 px-4 sm:px-6 md:px-0"
-          : "relative left-1/2 mt-[82px] w-screen max-w-[100vw] -translate-x-1/2 px-4 sm:px-6 md:px-0";
+          ? "relative mt-[70px] w-full"
+          : "relative mt-[82px] w-full";
   const sectionInlineStyle = {
     paddingLeft: leftInsetPx !== undefined ? `${leftInsetPx}px` : undefined,
     paddingRight: rightInsetPx !== undefined ? `${rightInsetPx}px` : undefined,
   } as const;
+
+  const cardW = mentorCardWidthPx ?? (columnCount === 4 ? 191.5 : 383);
+  const contentRowWidthPx =
+    columnCount === 4
+      ? cardW * 4 + 27 * 3
+      : columnCount === 2
+        ? cardW * 2 + 27
+        : cardW * 3 + 27 * 2;
 
   return (
     <section
@@ -106,41 +114,60 @@ export function LandingCurrentMostsSection({
       data-gsap-reveal
       aria-labelledby="landing-current-mosts-heading"
     >
-      <div className="flex flex-col gap-6">
+      <div
+        className={
+          alignToRight
+            ? "ml-auto flex w-full max-w-full flex-col"
+            : contained
+              ? "flex w-full flex-col"
+              : "mx-auto flex w-full max-w-full flex-col"
+        }
+        style={
+          alignToRight || contained
+            ? undefined
+            : { width: contentRowWidthPx, maxWidth: "100%" }
+        }
+      >
         <h2
           id="landing-current-mosts-heading"
-          className={`m-0 text-[48px] uppercase leading-[120%] text-black${alignToRight ? " text-right" : ""}`}
+          className={`m-0 w-full text-[48px] uppercase leading-[120%] text-black ${alignToRight ? "text-right" : "text-left"}`}
           style={{ fontFamily: pangeaFont }}
         >
           <span className="font-normal not-italic">THE CURRENT </span>
           <span className="font-bold italic">MOSTS</span>
         </h2>
-      </div>
 
-      <div className={cardsTopClass}>
-        <div className={gridClassName}>
-          {mentors.map((m) => (
-            <LandingMentorCard
-              key={m.id}
-              variant={m.variant}
-              name={m.name}
-              profession={m.profession}
-              href={`/mentors/${m.id}`}
-              fillWidth={useFluidCards}
-              widthPx={
-                useFluidCards
-                  ? undefined
-                  : mentorCardWidthPx ??
-                    (columnCount === 4 ? 234.5 : 469)
-              }
-              heightPx={
-                useFluidCards
-                  ? undefined
-                  : mentorCardHeightPx ??
-                    (columnCount === 4 ? 212.5 : 424.999)
-              }
-            />
-          ))}
+        <div className={alignToRight || contained ? cardsTopClass : "mt-[82px] w-full"}>
+          <div
+            className={
+              alignToRight || contained
+                ? gridClassName
+                : `grid w-full justify-start ${gapX} ${gapY} grid-cols-1 ${fixedColGridClass}`
+            }
+          >
+            {mentors.map((m) => (
+              <LandingMentorCard
+                key={m.id}
+                variant={m.variant}
+                name={m.name}
+                profession={m.profession}
+                href={`/mentors/${m.id}`}
+                fillWidth={useFluidCards}
+                widthPx={
+                  useFluidCards
+                    ? undefined
+                    : mentorCardWidthPx ??
+                      (columnCount === 4 ? 191.5 : 383)
+                }
+                heightPx={
+                  useFluidCards
+                    ? undefined
+                    : mentorCardHeightPx ??
+                      (columnCount === 4 ? 178.5 : 357)
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

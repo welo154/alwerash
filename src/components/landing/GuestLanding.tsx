@@ -6,10 +6,11 @@ import { HeroSection } from "./HeroSection";
 import { HomeTrackExplorerSection } from "@/components/home/HomeTrackExplorerSection";
 import { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
 import { LandingEverythingInOneSection } from "./LandingEverythingInOneSection";
-import { LandingWhyStudentsLoveSection } from "./LandingWhyStudentsLoveSection";
+import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
 import { LandingFaqSection } from "./LandingFaqSection";
 import { LandingGetStartedCtaSection } from "./LandingGetStartedCtaSection";
 import { GsapAnimationLayer } from "@/components/gsap/GsapAnimationLayer";
+import { pangeaVar } from "@/lib/fonts/pangea";
 
 /** Public marketing landing — used only on `/` for signed-out visitors. */
 export async function GuestLanding() {
@@ -19,7 +20,7 @@ export async function GuestLanding() {
   ]);
 
   return (
-    <div className="font-sans">
+    <div className={`${pangeaVar.className} font-sans`}>
       <HeroSection tracks={trackBundle.heroTracks} />
       <HomeTrackExplorerSection
         trackPillRow1={trackBundle.trackPillRow1}
@@ -27,20 +28,23 @@ export async function GuestLanding() {
         slidesByFilter={trackBundle.slidesByFilter}
         trackPillSelectsCourses
         courseTilesByTrackSlug={trackBundle.courseTilesByTrackSlug}
-        maxVisibleCourses={4}
+        maxVisibleCourses={3}
         showDiscoverCta
         showMetaFilters={false}
         marqueeTrackPills
+        sectionClassName="mt-[63px]"
       />
       <LandingEverythingInOneSection />
       {landingMostsMentors.length > 0 ? (
         <LandingCurrentMostsSection
           mentors={landingMostsMentors}
-          mentorCardWidthPx={409}
-          mentorCardHeightPx={424.999}
+          mentorCardWidthPx={383}
+          mentorCardHeightPx={357}
         />
       ) : null}
-      <LandingWhyStudentsLoveSection />
+      <div className="mb-0 w-full px-10">
+        <StudentsRatingWorkSection sectionClassName="py-0" />
+      </div>
       <LandingFaqSection />
       <LandingGetStartedCtaSection />
       <GsapAnimationLayer />

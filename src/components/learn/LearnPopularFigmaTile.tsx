@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import localFont from "next/font/local";
 import { useEffect, useRef, useState } from "react";
 import type { FocusEvent, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 /** `var(--sds-color-icon-default-default)` */
 const ICON_STROKE = "#1E1E1E";
@@ -59,14 +59,7 @@ function LearnPopularTileLikeBadge() {
   );
 }
 
-const pangeaVar = localFont({
-  src: "../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
-  display: "swap",
-  weight: "100 900",
-  style: "normal",
-});
-
-const pangeaFont = `${pangeaVar.style.fontFamily}, var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif`;
+const pangeaFont = pangeaFontFamily;
 
 const LEARNER_AVATAR_COLORS = ["#FFFFFF", "#89F496", "#66E0F2"] as const;
 const LEARNER_AVATAR_INITIALS = ["AM", "RK", "YT"] as const;

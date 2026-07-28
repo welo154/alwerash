@@ -1,9 +1,9 @@
 "use client";
 
 import type { ComponentType } from "react";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 type GlyphProps = { className?: string };
 

@@ -169,9 +169,9 @@ label:has(input[type="radio"]) {
 
 /*
  * ── Hero mosaic (edge-linked 2×2) ────────────────────────────────────────────
- * Fixed frame 554×709. Rest sizes:
- *   TL 314×423 | TR 220×323 | horiz gap 20
- *   BL 314×276 | BR 220×366 | left vert gap 10, right vert gap 20
+ * Fixed frame 497×597. Rest sizes:
+ *   TL 282×357 | TR 197×272 | horiz gap 18
+ *   BL 282×224 | BR 197×308 | vert gap 16
  *
  * Expansion E = 40px. One box grows by moving its inner edges; orthogonal
  * neighbors move only the shared edge; the diagonal moves both.
@@ -179,50 +179,50 @@ label:has(input[type="radio"]) {
  */
 @keyframes alwerash-hero-mosaic-tl {
   /* TL big: right→, bottom↓ */
-  0%, 12.5%   { left: 0; top: 0; width: 354px; height: 463px; animation-timing-function: ease-in-out; }
+  0%, 12.5%   { left: 0; top: 0; width: 322px; height: 397px; animation-timing-function: ease-in-out; }
   /* TR big: TL right← only */
-  25%, 37.5%  { left: 0; top: 0; width: 274px; height: 423px; animation-timing-function: ease-in-out; }
+  25%, 37.5%  { left: 0; top: 0; width: 242px; height: 357px; animation-timing-function: ease-in-out; }
   /* BR big: TL right← and bottom↑ */
-  50%, 62.5%  { left: 0; top: 0; width: 274px; height: 383px; animation-timing-function: ease-in-out; }
+  50%, 62.5%  { left: 0; top: 0; width: 242px; height: 317px; animation-timing-function: ease-in-out; }
   /* BL big: TL bottom↑ only */
-  75%, 87.5%  { left: 0; top: 0; width: 314px; height: 383px; animation-timing-function: ease-in-out; }
-  100%        { left: 0; top: 0; width: 354px; height: 463px; }
+  75%, 87.5%  { left: 0; top: 0; width: 282px; height: 317px; animation-timing-function: ease-in-out; }
+  100%        { left: 0; top: 0; width: 322px; height: 397px; }
 }
 
 @keyframes alwerash-hero-mosaic-tr {
   /* TL big: TR left→ only */
-  0%, 12.5%   { left: 374px; top: 0; width: 180px; height: 323px; animation-timing-function: ease-in-out; }
+  0%, 12.5%   { left: 340px; top: 0; width: 157px; height: 272px; animation-timing-function: ease-in-out; }
   /* TR big: left←, bottom↓ */
-  25%, 37.5%  { left: 294px; top: 0; width: 260px; height: 363px; animation-timing-function: ease-in-out; }
+  25%, 37.5%  { left: 260px; top: 0; width: 237px; height: 312px; animation-timing-function: ease-in-out; }
   /* BR big: TR bottom↑ only */
-  50%, 62.5%  { left: 334px; top: 0; width: 220px; height: 283px; animation-timing-function: ease-in-out; }
+  50%, 62.5%  { left: 300px; top: 0; width: 197px; height: 232px; animation-timing-function: ease-in-out; }
   /* BL big: TR left→ and bottom↑ */
-  75%, 87.5%  { left: 374px; top: 0; width: 180px; height: 283px; animation-timing-function: ease-in-out; }
-  100%        { left: 374px; top: 0; width: 180px; height: 323px; }
+  75%, 87.5%  { left: 340px; top: 0; width: 157px; height: 232px; animation-timing-function: ease-in-out; }
+  100%        { left: 340px; top: 0; width: 157px; height: 272px; }
 }
 
 @keyframes alwerash-hero-mosaic-br {
   /* TL big: BR left→ and top↓ */
-  0%, 12.5%   { left: 374px; top: 383px; width: 180px; height: 326px; animation-timing-function: ease-in-out; }
-  /* TR big: BR top↓ only */
-  25%, 37.5%  { left: 334px; top: 383px; width: 220px; height: 326px; animation-timing-function: ease-in-out; }
+  0%, 12.5%   { left: 340px; top: 328px; width: 157px; height: 268px; animation-timing-function: ease-in-out; }
+  /* TR big: BR left← (follow TR) and top↓ */
+  25%, 37.5%  { left: 260px; top: 328px; width: 197px; height: 268px; animation-timing-function: ease-in-out; }
   /* BR big: left←, top↑ */
-  50%, 62.5%  { left: 294px; top: 303px; width: 260px; height: 406px; animation-timing-function: ease-in-out; }
+  50%, 62.5%  { left: 260px; top: 248px; width: 237px; height: 348px; animation-timing-function: ease-in-out; }
   /* BL big: BR left→ only */
-  75%, 87.5%  { left: 374px; top: 343px; width: 180px; height: 366px; animation-timing-function: ease-in-out; }
-  100%        { left: 374px; top: 383px; width: 180px; height: 326px; }
+  75%, 87.5%  { left: 340px; top: 288px; width: 157px; height: 308px; animation-timing-function: ease-in-out; }
+  100%        { left: 340px; top: 328px; width: 157px; height: 268px; }
 }
 
 @keyframes alwerash-hero-mosaic-bl {
   /* TL big: BL top↓ only */
-  0%, 12.5%   { left: 0; top: 473px; width: 314px; height: 236px; animation-timing-function: ease-in-out; }
+  0%, 12.5%   { left: 0; top: 413px; width: 282px; height: 184px; animation-timing-function: ease-in-out; }
   /* TR big: BL right← and top↓ */
-  25%, 37.5%  { left: 0; top: 473px; width: 274px; height: 236px; animation-timing-function: ease-in-out; }
+  25%, 37.5%  { left: 0; top: 413px; width: 242px; height: 184px; animation-timing-function: ease-in-out; }
   /* BR big: BL right← only */
-  50%, 62.5%  { left: 0; top: 433px; width: 274px; height: 276px; animation-timing-function: ease-in-out; }
+  50%, 62.5%  { left: 0; top: 373px; width: 242px; height: 224px; animation-timing-function: ease-in-out; }
   /* BL big: right→, top↑ */
-  75%, 87.5%  { left: 0; top: 393px; width: 354px; height: 316px; animation-timing-function: ease-in-out; }
-  100%        { left: 0; top: 473px; width: 314px; height: 236px; }
+  75%, 87.5%  { left: 0; top: 333px; width: 322px; height: 264px; animation-timing-function: ease-in-out; }
+  100%        { left: 0; top: 413px; width: 282px; height: 184px; }
 }
 
 /*

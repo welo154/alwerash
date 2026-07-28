@@ -7,6 +7,7 @@ import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { CatalogShowcaseCard, CATALOG_SHOWCASE_CARD_H, CATALOG_SHOWCASE_CARD_W } from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import "swiper/css";
 
 /** Break out of a centered page column to full viewport width (no horizontal scroll). */
@@ -102,8 +103,7 @@ function LandingTagPill({
         pressed ? "bg-[#59CBE8]" : "bg-white"
       }`}
       style={{
-        fontFamily:
-          '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+        fontFamily: pangeaFontFamily,
         lineHeight: "19.6px",
       }}
       suppressHydrationWarning
@@ -304,8 +304,7 @@ export function LandingBoxesSection({
           <p
             className="w-[612px] max-w-full text-[24px] font-normal not-italic leading-[127%] text-black"
             style={{
-              fontFamily:
-                '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+              fontFamily: pangeaFontFamily,
             }}
           >
             Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
@@ -315,8 +314,7 @@ export function LandingBoxesSection({
             href="/course"
             className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal not-italic leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
             style={{
-              fontFamily:
-                '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif',
+              fontFamily: pangeaFontFamily,
               backgroundColor: "var(--Blue, #64E1FF)",
             }}
           >

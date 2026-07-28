@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const FOOTER_BG = "#89F496";
 
-/** Matches hero / Figma: FwTRIAL Pangea VAR with DM Sans fallback */
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+/** Loaded Pangea from public/fonts/FwTRIAL-PangeaVAR.woff2 */
+const pangeaFont = pangeaFontFamily;
 
 const footerColumnLinkClassName =
   "text-[18px] font-normal leading-[161%] tracking-[0] text-black underline-offset-2 transition-opacity hover:opacity-70 whitespace-normal sm:whitespace-nowrap";
@@ -191,19 +191,19 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Large wordmark — native <a>+<img> matches SSR/CSR exactly; multiply drops baked-in white */}
-        <div className="bg-transparent  -mb-9 -mt-5">
+        {/* Large wordmark — same slot; hero logo asset */}
+        <div className="bg-transparent -mb-9 -mt-5">
           <Link
             href="/"
             className="-ml-[31px] inline-block max-w-[calc(100%+31px)] bg-transparent max-sm:max-w-full"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; blend matches SSR/CSR */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; matches SSR/CSR */}
             <img
-              src="/brand/alwerash-logo.png"
+              src="/brand/alwerash-logo-hero.png"
               alt="Alwerash"
-              width={325}
-              height={116}
-              className="block h-auto w-[677px] max-w-full bg-transparent object-contain object-left opacity-100 mix-blend-multiply"
+              width={677}
+              height={240}
+              className="block h-auto w-[677px] max-w-full object-contain object-left"
             />
           </Link>
         </div>

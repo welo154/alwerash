@@ -7,7 +7,6 @@ export { MentorsSection } from "./MentorsSection";
 export { LandingBoxesSection } from "./LandingBoxesSection";
 export { LandingEverythingInOneSection } from "./LandingEverythingInOneSection";
 export { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
-export { LandingWhyStudentsLoveSection } from "./LandingWhyStudentsLoveSection";
 export { LandingFaqSection } from "./LandingFaqSection";
 export { LandingGetStartedCtaSection } from "./LandingGetStartedCtaSection";
 export { LandingMentorCard } from "./LandingMentorCard";
