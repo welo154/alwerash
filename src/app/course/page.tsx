@@ -109,7 +109,7 @@ export default async function LearnPage() {
               >
                 <LandingCurrentMostsSection
                   mentors={featuredMentors}
-                  mentorsPerRow={4}
+                  mentorsPerRow={3}
                   compactVerticalSpacing
                   contained
                 />

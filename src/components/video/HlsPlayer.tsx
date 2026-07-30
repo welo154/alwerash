@@ -16,6 +16,8 @@ export type HlsPlayerProps = {
   fill?: boolean;
   /** Called on timeupdate (e.g. for progress tracking). Debounce in the consumer. */
   onProgress?: (currentTime: number, duration: number) => void;
+  /** Called when playback reaches the end (e.g. auto-advance to next lesson). */
+  onEnded?: () => void;
 };
 
 type LevelInfo = { height: number; width: number; index: number };
@@ -47,6 +49,7 @@ export function HlsPlayer({
   autoPlay = false,
   fill = false,
   onProgress,
+  onEnded,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -115,10 +118,16 @@ export function HlsPlayer({
     if (!video || initialTime == null || initialTime <= 0) return;
 
     const seekToInitial = () => {
-      if (Number.isFinite(initialTime) && initialTime > 0) {
-        video.currentTime = initialTime;
-        setCurrentTime(initialTime);
+      if (!Number.isFinite(initialTime) || initialTime <= 0) return;
+      const duration = video.duration;
+      // Near-end resume would immediately fire `ended` and cascade auto-next.
+      if (Number.isFinite(duration) && duration > 0 && initialTime >= duration - 2) {
+        video.currentTime = 0;
+        setCurrentTime(0);
+        return;
       }
+      video.currentTime = initialTime;
+      setCurrentTime(initialTime);
     };
 
     if (video.readyState >= 1) {
@@ -171,7 +180,7 @@ export function HlsPlayer({
     setCurrentLevel(level);
   }, []);
 
-  // Sync video state (time, duration, play, volume) and optional onProgress
+  // Sync video state (time, duration, play, volume) and optional onProgress / onEnded
   useEffect(() => {
     if (!mounted) return;
     const video = videoRef.current;
@@ -189,12 +198,17 @@ export function HlsPlayer({
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onVolumeChange = () => setVolume(video.volume);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      onEnded?.();
+    };
 
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("durationchange", onDurationChange);
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("volumechange", onVolumeChange);
+    video.addEventListener("ended", handleEnded);
     setDuration(video.duration);
     setCurrentTime(video.currentTime);
     setVolume(video.volume);
@@ -205,8 +219,9 @@ export function HlsPlayer({
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("volumechange", onVolumeChange);
+      video.removeEventListener("ended", handleEnded);
     };
-  }, [src, onProgress, mounted]);
+  }, [src, onProgress, onEnded, mounted]);
 
   // Click outside to close settings menu
   useEffect(() => {

@@ -40,6 +40,8 @@ export function LandingCurrentMostsSection({
   mentorCardHeightPx?: number;
 }) {
   const columnCount = mentorsPerRow ?? (forceTwoPerRow ? 2 : 3);
+  /** Hard cap: 2 rows × up to 3 columns. */
+  const visibleMentors = mentors.slice(0, columnCount * 2);
   const useFluidCards = mentorsPerRow != null && mentorsPerRow >= 4;
   const gapX = "gap-x-[27px]";
   const gapY = "gap-y-[40px]";
@@ -145,7 +147,7 @@ export function LandingCurrentMostsSection({
                 : `grid w-full justify-start ${gapX} ${gapY} grid-cols-1 ${fixedColGridClass}`
             }
           >
-            {mentors.map((m) => (
+            {visibleMentors.map((m) => (
               <LandingMentorCard
                 key={m.id}
                 variant={m.variant}

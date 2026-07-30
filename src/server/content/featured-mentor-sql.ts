@@ -1,6 +1,6 @@
 import { prisma } from "@/server/db/prisma";
 
-export const MAX_FEATURED_MENTORS = 8;
+export const MAX_FEATURED_MENTORS = 6;
 
 function isMissingFeaturedColumnError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);

@@ -34,7 +34,7 @@ export function AdminMentorCard({
         await toggleFeatured(mentor.id, next);
       } catch {
         setIsFeatured(prev);
-        alert("Featured mentor list is full (max 8). Remove one first.");
+        alert("Featured mentor list is full (max 6). Remove one first.");
       }
     });
   }
@@ -47,7 +47,7 @@ export function AdminMentorCard({
         await togglePopular(mentor.id, next);
       } catch {
         setIsPopular(prev);
-        alert("Popular home mentor list is full (max 12). Remove one first.");
+        alert("Popular home mentor list is full (max 6). Remove one first.");
       }
     });
   }

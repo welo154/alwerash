@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
 import {
   CourseContentAccordion,
@@ -83,11 +83,12 @@ export function CoursePreviewExperience({
   freeLessonIds,
   viewerAccess,
 }: CoursePreviewExperienceProps) {
-  const firstVideo = trials.find(isVideoLesson) ?? null;
+  const videoTrials = useMemo(() => trials.filter(isVideoLesson), [trials]);
+  const firstVideo = videoTrials[0] ?? null;
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     firstVideo?.lessonId ?? trials[0]?.lessonId ?? null
   );
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(() => Boolean(firstVideo));
 
   const activeLesson =
     trials.find((trial) => trial.lessonId === activeLessonId) ?? firstVideo ?? trials[0] ?? null;
@@ -111,6 +112,15 @@ export function CoursePreviewExperience({
     if (!activeLesson || !isVideoLesson(activeLesson)) return;
     setIsPlaying(true);
   };
+
+  const handleVideoEnded = useCallback(() => {
+    if (!activeLessonId) return;
+    const index = videoTrials.findIndex((trial) => trial.lessonId === activeLessonId);
+    const next = index >= 0 ? videoTrials[index + 1] : null;
+    if (!next) return;
+    setActiveLessonId(next.lessonId);
+    setIsPlaying(true);
+  }, [activeLessonId, videoTrials]);
 
   return (
     <>
@@ -150,6 +160,7 @@ export function CoursePreviewExperience({
               fill
               showQualitySelector
               className="h-full w-full rounded-none bg-black"
+              onEnded={handleVideoEnded}
             />
           </div>
         ) : activeLesson && activeLesson.type.toUpperCase() === "VIDEO" && !activeLesson.streamUrl ? (

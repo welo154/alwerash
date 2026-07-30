@@ -1,6 +1,6 @@
 import { prisma } from "@/server/db/prisma";
 
-export const MAX_LANDING_POPULAR_MENTORS = 12;
+export const MAX_LANDING_POPULAR_MENTORS = 6;
 
 function isMissingLandingPopularColumnError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);

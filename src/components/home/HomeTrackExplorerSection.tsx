@@ -344,11 +344,8 @@ export function HomeTrackExplorerSection({
 
       <div
         key={cardGridKey}
-        className="mt-[64px] flex max-w-full flex-wrap justify-start gap-x-[27px] gap-y-6 px-4 sm:px-6 lg:px-0"
+        className="mt-[64px] mx-auto flex w-full max-w-full flex-wrap justify-center gap-x-[27px] gap-y-6 px-4 sm:px-6"
         style={{
-          width: 346 * 3 + 27 * 2,
-          marginLeft: "max(0px, calc((100vw - 1301px) / 2))",
-          marginRight: "auto",
           minHeight: trackPillSelectsCourses ? undefined : CATALOG_SHOWCASE_CARD_H,
         }}
       >
