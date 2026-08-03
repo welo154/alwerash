@@ -21,13 +21,6 @@ const categoriesLinks: { label: string; href: string }[] = [
   { label: "Architecture & Spaces courses", href: "/course" },
   { label: "Writing courses", href: "/course" },
   { label: "Fashion courses", href: "/course" },
-  { label: "Web & App Design courses", href: "/course" },
-  { label: "Calligraphy & Typography courses", href: "/course" },
-  { label: "Music & Audio courses", href: "/course" },
-  { label: "Culinary courses", href: "/course" },
-  { label: "Artificial Intelligence courses", href: "/course" },
-  { label: "Wellness courses", href: "/course" },
-  { label: "How to become courses", href: "/course" },
 ];
 
 const softwareLinks: { label: string; href: string }[] = [
@@ -61,9 +54,13 @@ const sectionLinks: { label: string; href: string }[] = [
 function FooterColumn({
   title,
   links,
+  viewMoreHref,
+  viewMoreLabel = "View more",
 }: {
   title: string;
   links: { label: string; href: string }[];
+  viewMoreHref?: string;
+  viewMoreLabel?: string;
 }) {
   return (
     <div className="w-full min-w-0 max-w-full sm:w-max sm:min-w-max sm:max-w-none">
@@ -82,6 +79,17 @@ function FooterColumn({
             </Link>
           </li>
         ))}
+        {viewMoreHref ? (
+          <li>
+            <Link
+              href={viewMoreHref}
+              className={`${footerColumnLinkClassName} underline transition-opacity hover:opacity-70`}
+              style={{ fontFamily: pangeaFont }}
+            >
+              {viewMoreLabel}
+            </Link>
+          </li>
+        ) : null}
       </ul>
     </div>
   );
@@ -184,7 +192,12 @@ export function SiteFooter() {
         {/* Four columns — max-content widths + 100px gaps so labels stay one line (scroll on narrow viewports) */}
         <div className="overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch]">
           <div className="grid w-max min-w-full max-w-full grid-cols-1 gap-y-10 sm:grid-cols-[repeat(2,max-content)] sm:gap-x-[100px] sm:gap-y-10 lg:grid-cols-[repeat(4,max-content)] lg:gap-x-[100px]">
-            <FooterColumn title="Categories" links={categoriesLinks} />
+            <FooterColumn
+              title="Categories"
+              links={categoriesLinks}
+              viewMoreHref="/course"
+              viewMoreLabel="View more"
+            />
             <FooterColumn title="Software" links={softwareLinks} />
             <FooterColumn title="Discover" links={discoverLinks} />
             <FooterColumn title="Sections" links={sectionLinks} />
