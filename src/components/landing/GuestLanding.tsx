@@ -30,7 +30,6 @@ export async function GuestLanding() {
         courseTilesByTrackSlug={trackBundle.courseTilesByTrackSlug}
         maxVisibleCourses={3}
         showDiscoverCta
-        showMetaFilters={false}
         marqueeTrackPills
         sectionClassName="mt-[63px]"
       />

@@ -9,13 +9,13 @@ const pangeaFont = pangeaFontFamily;
 /** Mentor portrait for all landing mentor cards (Figma subtract shape). */
 const MENTOR_CARD_PHOTO = "/landing/mentor-card-photo.png";
 
-/** Card silhouette — viewBox 409×425, rendered at 469×424.999px (non-uniform scale). */
+/** Card silhouette — viewBox 383×357 (Figma), rendered 1:1 at 383×357px. */
 const CARD_PATH =
-  "M354 0C384.376 2.09384e-06 409 24.6244 409 55V370C409 400.375 384.376 425 354 425H55C24.6245 425 0.000205489 400.375 0 370V122C0 94.3858 22.3858 72 50 72H147.208C161.567 72 173.208 60.3594 173.208 46C173.208 20.5949 193.803 0 219.208 0H354Z";
+  "M328 0C358.376 2.67367e-06 383 24.6244 383 55V302C383 332.376 358.376 357 328 357H55C24.6244 357 0.000156442 332.376 0 302V110.48C0 82.8662 22.3858 60.4805 50 60.4805H136.197C150.557 60.4805 162.197 48.8396 162.197 34.4805C162.197 15.4374 177.635 0 196.678 0H328Z";
 
-/** Figma “inside” stroke path — paired with mask for a clean 1px outline. */
+/** Figma “inside” stroke path — paired with mask for a clean 0.3px outline. */
 const CARD_STROKE_MASK_PATH =
-  "M354 0V-1V-1V0ZM409 55H410V55L409 55ZM409 370H410V370H409ZM55 425V426V426V425ZM0 370H-1V370H0ZM354 0V1C383.823 1 408 25.1767 408 55L409 55L410 55C410 24.0721 384.928 -0.999998 354 -1V0ZM409 55H408V370H409H410V55H409ZM409 370H408C408 399.823 383.823 424 354 424V425V426C384.928 426 410 400.928 410 370H409ZM354 425V424H55V425V426H354V425ZM55 425V424C25.1768 424 1.0002 399.823 1 370H0H-1C-0.999791 400.928 24.0722 426 55 426V425ZM0 370H1V122H0H-1V370H0ZM50 72V73H147.208V72V71H50V72ZM147.208 72V73C162.12 73 174.208 60.9117 174.208 46H173.208H172.208C172.208 59.8071 161.015 71 147.208 71V72ZM219.208 0V1H354V0V-1H219.208V0ZM173.208 46H174.208C174.208 21.1472 194.355 1 219.208 1V0V-1C193.251 -1 172.208 20.0426 172.208 46H173.208ZM0 122H1C1 94.938 22.938 73 50 73V72V71C21.8335 71 -1 93.8335 -1 122H0Z";
+  "M328 0V-0.3V-0.3V0ZM383 55H383.3V55H383ZM383 302H383.3V302H383ZM55 357V357.3V357.3V357ZM0 302H-0.3V302H0ZM162.197 34.4805L162.497 34.4805V34.4805H162.197ZM328 0V0.3C358.21 0.300003 382.7 24.7901 382.7 55H383H383.3C383.3 24.4587 358.541 -0.299997 328 -0.3V0ZM383 55H382.7V302H383H383.3V55H383ZM383 302H382.7C382.7 332.21 358.21 356.7 328 356.7V357V357.3C358.541 357.3 383.3 332.541 383.3 302H383ZM328 357V356.7H55V357V357.3H328V357ZM55 357V356.7C24.7901 356.7 0.300156 332.21 0.3 302H0H-0.3C-0.299843 332.541 24.4588 357.3 55 357.3V357ZM0 302H0.3V110.48H0H-0.3V302H0ZM50 60.4805V60.7805H136.197V60.4805V60.1805H50V60.4805ZM136.197 60.4805V60.7805C150.722 60.7805 162.497 49.0053 162.497 34.4805L162.197 34.4805L161.897 34.4805C161.897 48.674 150.391 60.1805 136.197 60.1805V60.4805ZM196.678 0V0.3H328V0V-0.3H196.678V0ZM162.197 34.4805H162.497C162.497 15.6031 177.8 0.3 196.678 0.3V0V-0.3C177.469 -0.3 161.897 15.2717 161.897 34.4805H162.197ZM0 110.48H0.3C0.3 83.0319 22.5515 60.7805 50 60.7805V60.4805V60.1805C22.2201 60.1805 -0.3 82.7005 -0.3 110.48H0Z";
 
 export type LandingMentorCardProps = {
   variant: "popular" | "watched";
@@ -29,15 +29,15 @@ export type LandingMentorCardProps = {
   fillWidth?: boolean;
 };
 
-const MENTOR_CARD_ASPECT = 469 / 424.999;
+const MENTOR_CARD_ASPECT = 383 / 357;
 
 export function LandingMentorCard({
   variant,
   name,
   profession,
   href,
-  widthPx = 469,
-  heightPx = 424.999,
+  widthPx = 383,
+  heightPx = 357,
   fillWidth = false,
 }: LandingMentorCardProps) {
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
@@ -58,7 +58,8 @@ export function LandingMentorCard({
     >
       <svg
         className="absolute inset-0 h-full w-full overflow-hidden"
-        viewBox="0 0 409 425"
+        style={{ overflow: "hidden" }}
+        viewBox="0 0 383 357"
         preserveAspectRatio="none"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +74,7 @@ export function LandingMentorCard({
         </defs>
 
         <g clipPath={`url(#${clipId})`}>
-          <foreignObject x="0" y="0" width="409" height="425">
+          <foreignObject x="0" y="0" width="383" height="357">
             <div
               style={{ width: "100%", height: "100%", overflow: "hidden" }}
             >
@@ -87,6 +88,8 @@ export function LandingMentorCard({
                   objectFit: "cover",
                   objectPosition: "center top",
                   display: "block",
+                  transform: "scale(1.12)",
+                  transformOrigin: "center top",
                 }}
               />
             </div>
@@ -118,7 +121,7 @@ export function LandingMentorCard({
           </div>
         </foreignObject>
 
-        <foreignObject x="27" y="0" width="382" height="425">
+        <foreignObject x="27" y="0" width="356" height="357">
           <div
             style={{
               boxSizing: "border-box",
@@ -128,7 +131,7 @@ export function LandingMentorCard({
               flexDirection: "column",
               justifyContent: "flex-end",
               alignItems: "flex-start",
-              maxWidth: "382px",
+              maxWidth: "356px",
             }}
           >
             <div

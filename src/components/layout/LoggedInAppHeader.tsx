@@ -8,6 +8,8 @@ import { SearchBar } from "./SearchBar";
 export type LoggedInAppHeaderProps = {
   user?: { name?: string | null; email?: string | null; image?: string | null } | null;
   isAdmin?: boolean;
+  /** Authenticated `/home` only: fixed bar size + hero logo (no transparent hit overlay). */
+  homeLayout?: boolean;
 };
 
 const BAR_GREEN = "#004B3C";
@@ -41,18 +43,28 @@ const SOFTWARE_COURSES = [
   "Design courses",
 ];
 
-export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
+export function LoggedInAppHeader({ user, homeLayout = false }: LoggedInAppHeaderProps) {
   const isGuest = !user;
 
   return (
     <header
-      className="relative z-50 mb-[50px] w-full px-[40px] pt-[35px]"
+      className={
+        homeLayout
+          ? "relative z-50 mb-0 w-full px-[40px] pt-[35px]"
+          : "relative z-50 mb-[50px] w-full px-[40px] pt-[35px]"
+      }
       aria-label={isGuest ? "Site header" : "Logged in header"}
     >
-      <div className="relative h-[112px] w-full">
+      <div
+        className={
+          homeLayout
+            ? "relative mx-auto h-[112px] w-[1345.585px] max-w-full overflow-visible"
+            : "relative h-[112px] w-full"
+        }
+      >
         <svg
-          className="absolute inset-0 z-30 h-full w-full"
-          viewBox="0 0 1345 112"
+          className="pointer-events-none absolute inset-0 z-30 h-full w-full overflow-visible"
+          viewBox={homeLayout ? "0 0 1345.585 112" : "0 0 1345 112"}
           preserveAspectRatio="none"
           fill="none"
           aria-hidden
@@ -65,29 +77,50 @@ export function LoggedInAppHeader({ user }: LoggedInAppHeaderProps) {
           />
         </svg>
 
-        <Link
-          href={isGuest ? "/" : "/home"}
-          className="absolute top-[8px] left-0 z-10 block bg-transparent"
-          aria-label={isGuest ? "Go to landing page" : "Go to home"}
-          tabIndex={-1}
-        >
-          <Image
-            src="/brand/alwerash-logo.png"
-            alt="Alwerash"
-            width={220}
-            height={96}
-            className="h-[96px] w-[220px] bg-transparent object-contain mix-blend-multiply"
-            unoptimized
-            priority
-          />
-        </Link>
+        {homeLayout ? (
+          <Link
+            href="/home"
+            className="absolute left-[-12px] top-[4px] z-50 block"
+            style={{ width: 220 }}
+            aria-label="Go to home"
+          >
+            <Image
+              src="/brand/alwerash-logo-hero.png"
+              alt="Alwerash"
+              width={220}
+              height={220}
+              className="block h-auto w-[220px] max-w-none"
+              unoptimized
+              priority
+            />
+          </Link>
+        ) : (
+          <>
+            <Link
+              href={isGuest ? "/" : "/home"}
+              className="absolute top-[8px] left-0 z-10 block bg-transparent"
+              aria-label={isGuest ? "Go to landing page" : "Go to home"}
+              tabIndex={-1}
+            >
+              <Image
+                src="/brand/alwerash-logo.png"
+                alt="Alwerash"
+                width={220}
+                height={96}
+                className="h-[96px] w-[220px] bg-transparent object-contain mix-blend-multiply"
+                unoptimized
+                priority
+              />
+            </Link>
 
-        {/* Transparent click-target sitting above the z-40 nav bar, covering only the logo area */}
-        <Link
-          href={isGuest ? "/" : "/home"}
-          className="absolute top-[8px] left-0 z-50 block h-[96px] w-[220px] bg-transparent"
-          aria-label={isGuest ? "Go to landing page" : "Go to home"}
-        />
+            {/* Transparent click-target sitting above the z-40 nav bar, covering only the logo area */}
+            <Link
+              href={isGuest ? "/" : "/home"}
+              className="absolute top-[8px] left-0 z-50 block h-[96px] w-[220px] bg-transparent"
+              aria-label={isGuest ? "Go to landing page" : "Go to home"}
+            />
+          </>
+        )}
 
         <div
           className="absolute inset-0 z-40 flex min-w-0 items-center justify-between pl-[280px] pr-[55px] text-white"

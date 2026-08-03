@@ -114,7 +114,8 @@ export async function getWeeklyActivitySummary(
 
     return { days, weekTotalSeconds };
   } catch (err) {
-    console.error("[learning-activity] getWeeklyActivitySummary failed", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn("[learning-activity] getWeeklyActivitySummary unavailable:", message);
     return emptyWeeklyActivitySummary(now);
   }
 }
