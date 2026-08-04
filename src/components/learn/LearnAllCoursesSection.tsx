@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import {
+  learnCarouselMousewheel,
+  learnCarouselSwiperBehavior,
+} from "@/components/learn/learn-carousel-swiper-config";
+import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
+import {
+  LearnPopularFigmaTile,
+  LEARN_POPULAR_FIGMA_TILE_H,
+  LEARN_POPULAR_FIGMA_TILE_W,
+} from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
   LearnCourseTrackOption,
@@ -13,10 +27,6 @@ const pangeaFont =
 
 const DEEP_DIVE_MIN_LESSONS = 3;
 const DEEP_DIVE_MIN_MINUTES = 45;
-/** 4 columns × 2 rows per page. */
-const COLUMNS = 4;
-const ROWS_PER_PAGE = 2;
-const PAGE_SIZE = COLUMNS * ROWS_PER_PAGE;
 
 const TYPE_OPTIONS: { id: LearnCourseTypeFilter; label: string }[] = [
   { id: "all", label: "All courses" },
@@ -123,35 +133,77 @@ function AllCoursesFilterDropdown({
   );
 }
 
-function LearnAllCoursesHeading() {
+function LearnAllCoursesHeading({
+  onNext,
+  atEnd,
+}: {
+  onNext: () => void;
+  atEnd: boolean;
+}) {
   return (
-    <div className="inline-flex h-[72px] items-center rounded-[44px] bg-white pl-[22px] pr-[22px]">
-      <h2
-        className="m-0 uppercase leading-none"
-        style={{ fontFamily: pangeaFont, lineHeight: "57.6px" }}
+    <div className="flex items-center gap-4">
+      <div className="inline-flex h-[72px] items-center rounded-[44px] bg-white pl-[22px] pr-[22px]">
+        <h2
+          className="m-0 uppercase leading-none"
+          style={{ fontFamily: pangeaFont, lineHeight: "57.6px" }}
+        >
+          <span
+            style={{
+              color: "#000",
+              fontSize: "48px",
+              fontStyle: "italic",
+              fontWeight: 700,
+            }}
+          >
+            ALL
+          </span>
+          <span
+            style={{
+              color: "#000",
+              fontSize: "48px",
+              fontStyle: "normal",
+              fontWeight: 400,
+            }}
+          >
+            {" "}
+            COURSES
+          </span>
+        </h2>
+      </div>
+      <button
+        type="button"
+        className="-ml-[15px] inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+        aria-label="Next courses"
+        disabled={atEnd}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onNext();
+        }}
       >
-        <span
-          style={{
-            color: "#000",
-            fontSize: "48px",
-            fontStyle: "italic",
-            fontWeight: 700,
-          }}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={60}
+          height={60}
+          viewBox="0 0 62 62"
+          fill="none"
+          className="h-[60px] w-[60px]"
+          aria-hidden
         >
-          ALL
-        </span>
-        <span
-          style={{
-            color: "#000",
-            fontSize: "48px",
-            fontStyle: "normal",
-            fontWeight: 400,
-          }}
-        >
-          {" "}
-          COURSES
-        </span>
-      </h2>
+          <path
+            d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z"
+            fill="var(--White, #FFF)"
+          />
+          <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
+          <path
+            d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
+            stroke="var(--Black, #000)"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
     </div>
   );
 }
@@ -199,34 +251,37 @@ function buildTrackOptions(
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
-function buildPageItems(current: number, total: number): (number | "ellipsis")[] {
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1);
-  }
-
-  const items: (number | "ellipsis")[] = [1];
-  const start = Math.max(2, current - 1);
-  const end = Math.min(total - 1, current + 1);
-
-  if (start > 2) items.push("ellipsis");
-  for (let page = start; page <= end; page += 1) items.push(page);
-  if (end < total - 1) items.push("ellipsis");
-  items.push(total);
-  return items;
-}
-
 export default function LearnAllCoursesSection({
   courses,
   tracks,
+  /**
+   * `true` — full viewport breakout (centered).
+   * `false` — stay inside the parent column.
+   * `"right"` — keep the left edge, bleed to the viewport’s right edge (no white gutter).
+   */
+  fullBleed = "right",
 }: {
   courses: LearnAllCourseItem[];
   tracks: LearnCourseTrackOption[];
+  fullBleed?: boolean | "right";
 }) {
   const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
-  const [page, setPage] = useState(1);
   const [openFilter, setOpenFilter] = useState<OpenFilter>(null);
   const filtersRef = useRef<HTMLDivElement | null>(null);
+  const bleedWrapRef = useRef<HTMLDivElement | null>(null);
+  const bleedRight = fullBleed === "right";
+  const bleedWidth = useBleedRightToViewport(bleedWrapRef, bleedRight);
+
+  const {
+    scrollAreaRef,
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
 
   const trackOptions = useMemo(
     () => buildTrackOptions(courses, tracks),
@@ -255,16 +310,6 @@ export default function LearnAllCoursesSection({
     return filterByType(items, typeFilter);
   }, [courses, trackSlug, typeFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
-
-  useEffect(() => {
-    setPage(1);
-  }, [trackSlug, typeFilter]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
   useEffect(() => {
     if (!openFilter) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -281,18 +326,21 @@ export default function LearnAllCoursesSection({
     };
   }, [openFilter]);
 
-  const pageCourses = filteredCourses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const pageItems = buildPageItems(page, totalPages);
-  const showPagination = filteredCourses.length > PAGE_SIZE;
-
   if (courses.length === 0) return null;
+
+  const trackWrapClass =
+    fullBleed === true
+      ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
+      : bleedRight
+        ? "relative mt-8 max-w-none overflow-x-visible"
+        : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
   return (
     <section aria-label="All courses" className="relative z-30 min-w-0 w-full max-w-full">
       <div className="flex flex-wrap items-start justify-between gap-6">
-        <LearnAllCoursesHeading />
+        <LearnAllCoursesHeading onNext={slideNext} atEnd={atEnd} />
 
-        <div ref={filtersRef} className="relative z-40 flex shrink-0 flex-wrap items-center gap-3">
+        <div ref={filtersRef} className="relative z-40 flex shrink-0 flex-wrap items-center gap-3 pr-6 sm:pr-8 lg:pr-10">
           <AllCoursesFilterDropdown
             id="learn-all-courses-track-filter"
             label="Filter by track"
@@ -323,101 +371,64 @@ export default function LearnAllCoursesSection({
         </div>
       </div>
 
-      <div className="mt-8 min-w-0">
-        {filteredCourses.length === 0 ? (
-          <p
-            className="text-center text-[20px] text-black/60"
-            style={{ fontFamily: pangeaFont }}
+      {filteredCourses.length === 0 ? (
+        <p
+          className="mt-8 text-center text-[20px] text-black/60"
+          style={{ fontFamily: pangeaFont }}
+        >
+          No courses match these filters.
+        </p>
+      ) : (
+        <div
+          ref={bleedWrapRef}
+          className={trackWrapClass}
+          style={bleedRight ? { width: bleedWidth ?? "100%" } : undefined}
+        >
+          <div
+            key={`${trackSlug}-${typeFilter}`}
+            ref={scrollAreaRef}
+            className="relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+            style={{
+              minHeight: LEARN_POPULAR_FIGMA_TILE_H,
+              clipPath:
+                fullBleed === false
+                  ? "inset(-200px 0 -200px 0)"
+                  : "inset(-200px -100vw -200px 0)",
+            }}
           >
-            No courses match these filters.
-          </p>
-        ) : (
-          <>
-            <div
-              key={`${trackSlug}-${typeFilter}-${page}`}
-              className="grid grid-cols-2 gap-x-[18px] gap-y-[30px] md:grid-cols-3 lg:grid-cols-4"
-              data-gsap-stagger-group
+            <Swiper
+              dir="ltr"
+              modules={[Mousewheel]}
+              {...learnCarouselSwiperBehavior}
+              mousewheel={learnCarouselMousewheel}
+              className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
+              onSwiper={handleSwiper}
+              onSlideChange={handleNavSync}
+              onSlidesUpdated={handleNavSync}
+              onResize={handleNavSync}
             >
-              {pageCourses.map((course) => (
-                <LearnPopularFigmaTile key={course.id} {...course} size="grid" />
+              {filteredCourses.map((course) => (
+                <SwiperSlide
+                  key={course.id}
+                  className="h-auto! shrink-0 overflow-visible!"
+                  style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
+                >
+                  <LearnPopularFigmaTile {...course} />
+                </SwiperSlide>
               ))}
-            </div>
+            </Swiper>
 
-            {showPagination ? (
-              <nav
-                className="mt-10 flex flex-wrap items-center justify-center gap-2"
-                aria-label="All courses pages"
-              >
-                <button
-                  type="button"
-                  aria-label="Previous page"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black bg-white text-black transition-colors hover:bg-black hover:text-white disabled:pointer-events-none disabled:opacity-35"
-                  style={{ fontFamily: pangeaFont }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path
-                      d="M15 6L9 12L15 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-
-                {pageItems.map((item, index) =>
-                  item === "ellipsis" ? (
-                    <span
-                      key={`ellipsis-${index}`}
-                      className="inline-flex h-11 min-w-8 items-center justify-center text-[18px] text-black/50"
-                      aria-hidden
-                    >
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={item}
-                      type="button"
-                      aria-label={`Page ${item}`}
-                      aria-current={item === page ? "page" : undefined}
-                      onClick={() => setPage(item)}
-                      className={`inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black px-3 text-[18px] font-bold transition-colors ${
-                        item === page
-                          ? "bg-black text-white"
-                          : "bg-white text-black hover:bg-black hover:text-white"
-                      }`}
-                      style={{ fontFamily: pangeaFont }}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-
-                <button
-                  type="button"
-                  aria-label="Next page"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black bg-white text-black transition-colors hover:bg-black hover:text-white disabled:pointer-events-none disabled:opacity-35"
-                  style={{ fontFamily: pangeaFont }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path
-                      d="M9 6L15 12L9 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </nav>
-            ) : null}
-          </>
-        )}
-      </div>
+            <LearnCarouselEdgeNav
+              atBeginning={atBeginning}
+              atEnd={atEnd}
+              onPrev={slidePrev}
+              onNext={slideNext}
+              prevLabel="Previous courses"
+              nextLabel="Next courses"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }

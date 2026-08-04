@@ -201,6 +201,8 @@ export type HomeTrackExplorerSectionProps = {
   contentLeftPx?: number;
   /** Gap between track pills; falls back to 25px rows. */
   pillGapPx?: number;
+  /** When set, show only the first N track pills (combined across both rows). */
+  maxPills?: number;
   /** "WHAT TO LEARN NEXT" heading between the pills and the cards (logged-in `/home`). */
   showWhatToLearnNextHeading?: boolean;
 };
@@ -217,12 +219,15 @@ export function HomeTrackExplorerSection({
   marqueeTrackPills = false,
   contentLeftPx,
   pillGapPx,
+  maxPills,
   showWhatToLearnNextHeading = false,
 }: HomeTrackExplorerSectionProps) {
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
     [trackPillRow1, trackPillRow2]
   );
+  const pillRow1 = maxPills != null ? allPills.slice(0, maxPills) : trackPillRow1;
+  const pillRow2 = maxPills != null ? [] : trackPillRow2;
 
   const defaultTrackSlug = allPills[0]?.slug ?? null;
   const [selectedTrackSlug, setSelectedTrackSlug] = useState<string | null>(defaultTrackSlug);
@@ -308,18 +313,18 @@ export function HomeTrackExplorerSection({
         </div>
       ) : (
         <>
-          {trackPillRow1.length > 0 ? (
+          {pillRow1.length > 0 ? (
             <div className={pillRowClass} style={pillRowStyle}>
-              {trackPillRow1.map((pill) => renderTrackPill(pill))}
+              {pillRow1.map((pill) => renderTrackPill(pill))}
             </div>
           ) : null}
 
-          {trackPillRow2.length > 0 ? (
+          {pillRow2.length > 0 ? (
             <div
               className={`${pillRowClass} mt-[11px]${contentLeftPx == null ? " pr-[68px]" : ""}`}
               style={pillRowStyle}
             >
-              {trackPillRow2.map((pill) => renderTrackPill(pill))}
+              {pillRow2.map((pill) => renderTrackPill(pill))}
             </div>
           ) : null}
         </>

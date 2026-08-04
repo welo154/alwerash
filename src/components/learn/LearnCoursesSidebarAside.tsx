@@ -36,7 +36,7 @@ export function LearnCoursesSidebarAside({
   return (
     <aside
       ref={asideRef}
-      className={`w-full shrink-0 lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:h-[calc(100vh-2rem)] ${
+      className={`relative z-20 w-full shrink-0 bg-white lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-2rem)] no-scrollbar ${
         scrollable ? "lg:overflow-y-auto" : "lg:overflow-y-hidden"
       }`}
     >

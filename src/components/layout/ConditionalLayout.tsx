@@ -32,7 +32,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   if (isStandalone) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col bg-white">
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   if (isGuestLanding) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
         <ConditionalSiteFooter />
       </div>
     );
@@ -49,8 +49,10 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   if (isLibrary) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
-        <LibraryHeader />
-        <main className="min-w-0 flex-1">{children}</main>
+        <div className="mx-auto w-full max-w-[1440px] min-w-0">
+          <LibraryHeader />
+        </div>
+        <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
         <ConditionalSiteFooter />
       </div>
     );

@@ -676,10 +676,14 @@ export function LoggedInHome({
           trackPillRow1={trackExplorer.trackPillRow1}
           trackPillRow2={trackExplorer.trackPillRow2}
           slidesByFilter={trackExplorer.slidesByFilter}
+          trackPillSelectsCourses
+          courseTilesByTrackSlug={trackExplorer.courseTilesByTrackSlug}
+          maxVisibleCourses={3}
           showDiscoverCta={false}
           sectionClassName="mt-[24px]"
           contentLeftPx={120}
           pillGapPx={15}
+          maxPills={8}
           showWhatToLearnNextHeading
         />
         {landingMostsMentors.length > 0 ? (

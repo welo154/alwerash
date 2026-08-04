@@ -259,7 +259,7 @@ label:has(input[type="radio"]) {
 .landing-showcase-swiper--cards.swiper {
   padding-bottom: 4px;
   overflow: visible !important;
-  height: var(--landing-showcase-card-h, 585px) !important;
+  height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
 .landing-showcase-swiper--cards .swiper-wrapper {
@@ -267,8 +267,8 @@ label:has(input[type="radio"]) {
 }
 
 .landing-showcase-swiper--cards .swiper-slide {
-  width: var(--landing-showcase-card-w, 347px) !important;
-  height: var(--landing-showcase-card-h, 585px) !important;
+  width: var(--landing-showcase-card-w, 323px) !important;
+  height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
 .learn-featured-swiper.swiper {

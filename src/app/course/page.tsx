@@ -13,6 +13,10 @@ import LearnAllCoursesSection from "@/components/learn/LearnAllCoursesSection";
 import type { LearnAllCourseItem } from "@/components/learn/learn-all-courses-types";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { LandingCurrentMostsSection } from "@/components/landing";
+import {
+  LearnCoursesSidebar,
+  buildLearnSidebarCategories,
+} from "@/components/learn/LearnCoursesSidebar";
 
 function toPopularTiles(
   courses: Awaited<ReturnType<typeof publicListPopularClassCourses>>
@@ -66,56 +70,69 @@ export default async function LearnPage() {
   const allCourseItems = toAllCourseItems(allCourses);
   const trackOptions = tracks.map((track) => ({ slug: track.slug, title: track.title }));
   const hasCarouselSections = popularTiles.length > 0 || trendingTiles.length > 0;
+  const sidebarCategories = buildLearnSidebarCategories(tracks);
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-clip bg-white pb-16 pt-8 font-sans">
-      <div className="w-full min-w-0 px-6 sm:px-8 lg:px-10">
-        <main className="min-w-0 w-full">
-          <section aria-label="Tracks" className="w-full min-w-0">
-            <LearnFeaturedCoursesPanel
-              slides={trackShowcaseSlides.map((slide) => ({
-                id: slide.slug,
-                cardProps: { ...slide.cardProps, showcaseSlug: slide.slug },
-              }))}
-            />
-          </section>
+    <div className="min-w-0 max-w-full overflow-x-visible bg-white pb-16 pt-8 font-sans">
+      {/* No right padding — lets the green tracks shell bleed past the page edge. */}
+      <div className="w-full min-w-0 pl-6 sm:pl-8 lg:pl-10">
+        <main className="min-w-0 w-full overflow-x-visible">
+          {/* Sidebar spans everything above the mentors section. */}
+          <div className="flex min-w-0 max-w-full flex-col gap-8 overflow-x-visible lg:flex-row lg:items-start lg:gap-[55px]">
+            <LearnCoursesSidebar categories={sidebarCategories} />
 
-          <div className="mt-[55px] min-w-0 w-full overflow-visible">
-            {popularTiles.length > 0 ? (
-              <section aria-label="Popular classes">
-                <LearnPopularClassesSection tiles={popularTiles} />
-              </section>
-            ) : null}
-
-            {trendingTiles.length > 0 ? (
-              <div className={popularTiles.length > 0 ? "mt-[55px]" : ""}>
-                <section aria-label="Trending classes">
-                  <LearnTrendingClassesSection tiles={trendingTiles} />
-                </section>
-              </div>
-            ) : null}
-
-            {allCourseItems.length > 0 ? (
-              <div className={hasCarouselSections ? "mt-[55px]" : ""}>
-                <LearnAllCoursesSection courses={allCourseItems} tracks={trackOptions} />
-              </div>
-            ) : null}
-
-            {featuredMentors.length > 0 ? (
-              <div
-                className={
-                  hasCarouselSections || allCourseItems.length > 0 ? "mt-[70px]" : ""
-                }
-              >
-                <LandingCurrentMostsSection
-                  mentors={featuredMentors}
-                  mentorsPerRow={4}
-                  compactVerticalSpacing
-                  contained
+            <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
+              <section aria-label="Tracks" className="w-full min-w-0 overflow-x-visible">
+                <LearnFeaturedCoursesPanel
+                  slides={trackShowcaseSlides.map((slide) => ({
+                    id: slide.slug,
+                    cardProps: { ...slide.cardProps, showcaseSlug: slide.slug },
+                  }))}
                 />
+              </section>
+
+              <div className="mt-[55px] min-w-0 w-full overflow-x-visible">
+                {popularTiles.length > 0 ? (
+                  <section aria-label="Popular classes">
+                    <LearnPopularClassesSection tiles={popularTiles} fullBleed="right" />
+                  </section>
+                ) : null}
+
+                {trendingTiles.length > 0 ? (
+                  <div className={popularTiles.length > 0 ? "mt-[55px]" : ""}>
+                    <section aria-label="Trending classes">
+                      <LearnTrendingClassesSection tiles={trendingTiles} fullBleed="right" />
+                    </section>
+                  </div>
+                ) : null}
+
+                {allCourseItems.length > 0 ? (
+                  <div className={hasCarouselSections ? "mt-[55px]" : ""}>
+                    <LearnAllCoursesSection
+                      courses={allCourseItems}
+                      tracks={trackOptions}
+                      fullBleed="right"
+                    />
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </div>
           </div>
+
+          {featuredMentors.length > 0 ? (
+            <div
+              className={`pr-6 sm:pr-8 lg:pr-10 ${
+                hasCarouselSections || allCourseItems.length > 0 ? "mt-[70px]" : ""
+              }`}
+            >
+              <LandingCurrentMostsSection
+                mentors={featuredMentors}
+                mentorsPerRow={4}
+                compactVerticalSpacing
+                contained
+              />
+            </div>
+          ) : null}
         </main>
       </div>
     </div>

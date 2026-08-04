@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
 import { LearnClassesCarouselHeading } from "@/components/learn/LearnClassesCarouselHeading";
+import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import {
   LearnPopularFigmaTile,
   LEARN_POPULAR_FIGMA_TILE_H,
@@ -31,15 +32,25 @@ function buildMarqueeTiles(tiles: LearnPopularTile[]): LoopTile[] {
 
 export function LearnTrendingClassesSection({
   tiles = [],
+  /**
+   * `true` — full viewport breakout (centered).
+   * `false` — stay inside the parent column.
+   * `"right"` — keep the left edge, bleed to the viewport’s right edge (no white gutter).
+   */
+  fullBleed = true,
 }: {
   tiles?: LearnPopularTile[];
+  fullBleed?: boolean | "right";
 }) {
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const bleedWrapRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const offsetRef = useRef(0);
   const pausedRef = useRef(false);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const bleedRight = fullBleed === "right";
+  const bleedWidth = useBleedRightToViewport(bleedWrapRef, bleedRight);
 
   const marqueeTiles = useMemo(() => buildMarqueeTiles(tiles), [tiles]);
   const copyCount = tiles.length > 0 ? marqueeTiles.length / tiles.length : 1;
@@ -62,8 +73,9 @@ export function LearnTrendingClassesSection({
     [applyOffset]
   );
 
-  const slideNext = useCallback(() => nudge(CARD_STEP), [nudge]);
-  const slidePrev = useCallback(() => nudge(-CARD_STEP), [nudge]);
+  /** Next moves the strip rightward (cards travel to the right). */
+  const slideNext = useCallback(() => nudge(-CARD_STEP), [nudge]);
+  const slidePrev = useCallback(() => nudge(CARD_STEP), [nudge]);
 
   useEffect(() => {
     pausedRef.current = paused || reduceMotion;
@@ -100,7 +112,8 @@ export function LearnTrendingClassesSection({
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       if (!pausedRef.current) {
-        applyOffset(offsetRef.current + MARQUEE_PIXELS_PER_SECOND * dt);
+        // Negative delta → strip moves right.
+        applyOffset(offsetRef.current - MARQUEE_PIXELS_PER_SECOND * dt);
       }
       raf = requestAnimationFrame(tick);
     };
@@ -134,15 +147,27 @@ export function LearnTrendingClassesSection({
         nextAriaLabel="Next trending class"
       />
 
-      {/* Break out of page padding so the track spans the full viewport width. */}
-      <div className="relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2">
+      <div
+        ref={bleedWrapRef}
+        className={
+          fullBleed === true
+            ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
+            : bleedRight
+              ? "relative mt-8 max-w-none overflow-x-visible"
+              : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip"
+        }
+        style={bleedRight ? { width: bleedWidth ?? "100%" } : undefined}
+      >
         <div
           ref={scrollAreaRef}
           className="learn-trending-marquee relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
           style={{
             minHeight: LEARN_POPULAR_FIGMA_TILE_H,
-            /* Allow START hover card (~608×567) to overflow the tile without being clipped. */
-            clipPath: "inset(-220px -280px -220px -280px)",
+            /* Clip left (protect sidebar); allow cards to exit past the right edge. */
+            clipPath:
+              fullBleed === false
+                ? "inset(-220px 0 -220px 0)"
+                : "inset(-220px -100vw -220px 0)",
           }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
