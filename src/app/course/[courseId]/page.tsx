@@ -25,6 +25,7 @@ import {
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { CourseBreadcrumb } from "./CourseBreadcrumb";
+import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
 
 const pangeaVar = localFont({
   src: "../../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
@@ -541,148 +542,8 @@ export default async function PublicCoursePage({
         </div>
       </div>
 
-      <div className="mt-[66px]">
-        <div className="relative h-[833px] w-[1360px] overflow-hidden">
-          <svg className="absolute inset-0" xmlns="http://www.w3.org/2000/svg" width="1360" height="833" viewBox="0 0 1360 833" fill="none" aria-hidden>
-            <path
-              d="M55 833C24.6244 833 2.15273e-06 808.376 4.80825e-06 778L6.80149e-05 54.9999C7.06704e-05 24.6242 24.6245 -0.000116742 55.0001 -0.000114087L1305 -4.80825e-06C1335.38 -2.15273e-06 1360 24.6243 1360 55L1360 778C1360 808.376 1335.38 833 1305 833L55 833Z"
-              fill="#004B3C"
-            />
-          </svg>
-
-          <div className="relative z-10 px-[30px] pt-[56px]">
-            <div className="flex items-center justify-between">
-              <p
-                className="m-0 ml-[19px]"
-                style={{
-                  color: "var(--White, #FFF)",
-                  fontFamily: pangeaVar.style.fontFamily,
-                  fontSize: "36px",
-                  fontStyle: "normal",
-                  fontWeight: 400,
-                  lineHeight: "normal",
-                }}
-              >
-                STUDENTS <span style={{ fontStyle: "italic", fontWeight: 600 }}>RATING &amp; WORK</span>
-              </p>
-
-              <div className="flex items-center">
-                <p
-                  className="m-0"
-                  style={{
-                    color: "var(--White, #FFF)",
-                    fontFamily: pangeaVar.style.fontFamily,
-                    fontSize: "24px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "120%",
-                  }}
-                >
-                  VIEW ALL COMMENTS
-                </p>
-                <svg className="ml-[18px]" xmlns="http://www.w3.org/2000/svg" width="35" height="36" viewBox="0 0 37 38" fill="none" aria-hidden>
-                  <path
-                    d="M18.5 26.2L25.5 19M25.5 19L18.5 11.8M25.5 19L11.5 19M36 19C36 28.9411 28.165 37 18.5 37C8.83502 37 1 28.9411 1 19C1 9.05887 8.83502 1 18.5 1C28.165 1 36 9.05887 36 19Z"
-                    stroke="var(--White, #FFF)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            <div className="mt-[49px] grid grid-cols-2 gap-x-[13px] gap-y-[21px]">
-              {Array.from({ length: 4 }).map((_, idx) => (
-                <div key={`student-rating-card-${idx}`} className="h-[297.16px] w-[644px] rounded-[36px] border border-black bg-white p-[28px]">
-                  <div className="flex h-full items-start justify-between gap-[26px]">
-                    <div className="flex flex-1 flex-col justify-center">
-                      <p
-                        className="m-0"
-                        style={{
-                          width: "311px",
-                          color: "var(--Black, #000)",
-                          fontFamily: pangeaVar.style.fontFamily,
-                          fontSize: "18px",
-                          fontStyle: "normal",
-                          fontWeight: 400,
-                          lineHeight: "normal",
-                        }}
-                      >
-                        This class helped me understand that I already have a style within me... and all I need to do is trust myself and my process.
-                        The exercises and the way Ali explains them are awesome. Thank you for sharing.
-                      </p>
-                      <div className="mt-[18px] flex items-center gap-[10px]">
-                        <div className="flex h-[63px] w-[63px] items-center justify-center rounded-full border border-black bg-white">
-                          <span
-                            style={{
-                              color: "var(--Black, #000)",
-                              fontFamily: pangeaVar.style.fontFamily,
-                              fontSize: "32px",
-                              fontStyle: "normal",
-                              fontWeight: 600,
-                              lineHeight: "normal",
-                            }}
-                          >
-                            MS
-                          </span>
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-[8px]">
-                            <p
-                              className="m-0"
-                              style={{
-                                color: "var(--Black, #000)",
-                                fontFamily: pangeaVar.style.fontFamily,
-                                fontSize: "20px",
-                                fontStyle: "normal",
-                                fontWeight: 400,
-                                lineHeight: "normal",
-                              }}
-                            >
-                              MOHAMED SABRY
-                            </p>
-                            <p
-                              className="m-0"
-                              style={{
-                                color: "var(--Black, #000)",
-                                fontFamily: pangeaVar.style.fontFamily,
-                                fontSize: "18px",
-                                fontStyle: "normal",
-                                fontWeight: 400,
-                                lineHeight: "normal",
-                              }}
-                            >
-                              4.5
-                            </p>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden>
-                              <path d="M8.5 0L11.1265 5.59516L17 6.4979L12.75 10.8507L13.753 17L8.5 14.0952L3.247 17L4.25 10.8507L0 6.4979L5.8735 5.59516L8.5 0Z" fill="var(--Black, #000)" />
-                            </svg>
-                          </div>
-                          <p
-                            className="m-0"
-                            style={{
-                              color: "var(--Black, #000)",
-                              fontFamily: pangeaVar.style.fontFamily,
-                              fontSize: "20px",
-                              fontStyle: "normal",
-                              fontWeight: 400,
-                              lineHeight: "normal",
-                              opacity: 0.6,
-                            }}
-                          >
-                            Graphic designer
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-[253px] w-[226px] shrink-0 rounded-[36px] border border-black bg-[#E7E7E7]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="mt-[66px] w-full max-w-full">
+        <StudentsRatingWorkSection sectionClassName="py-0" />
       </div>
 
       <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />

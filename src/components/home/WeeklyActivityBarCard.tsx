@@ -1,5 +1,5 @@
-import type { WeeklyActivitySummary } from "@/server/home/learning-activity.service";
-import { formatSecondsAsHhMm } from "@/server/home/learning-activity.service";
+import type { WeeklyActivitySummary } from "@/lib/learning-activity";
+import { formatSecondsAsHhMm } from "@/lib/learning-activity";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;

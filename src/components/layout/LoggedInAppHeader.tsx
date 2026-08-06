@@ -10,6 +10,8 @@ export type LoggedInAppHeaderProps = {
   isAdmin?: boolean;
   /** Authenticated `/home` only: fixed bar size + hero logo (no transparent hit overlay). */
   homeLayout?: boolean;
+  /** Drop the default 50px header bottom margin (page controls spacing). */
+  flushBottom?: boolean;
 };
 
 const BAR_GREEN = "#004B3C";
@@ -43,13 +45,18 @@ const SOFTWARE_COURSES = [
   "Design courses",
 ];
 
-export function LoggedInAppHeader({ user, homeLayout = false }: LoggedInAppHeaderProps) {
+export function LoggedInAppHeader({
+  user,
+  isAdmin = false,
+  homeLayout = false,
+  flushBottom = false,
+}: LoggedInAppHeaderProps) {
   const isGuest = !user;
 
   return (
     <header
       className={
-        homeLayout
+        homeLayout || flushBottom
           ? "relative z-50 mb-0 w-full px-[40px] pt-[35px]"
           : "relative z-50 mb-[50px] w-full px-[40px] pt-[35px]"
       }

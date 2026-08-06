@@ -50,7 +50,14 @@ export function SiteHeader() {
   }
 
   if (session?.user) {
-    return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} />;
+    const flushBottom = pathname === "/profile" || pathname.startsWith("/profile/");
+    return (
+      <LoggedInAppHeader
+        user={session.user}
+        isAdmin={isAdmin}
+        flushBottom={flushBottom}
+      />
+    );
   }
 
   return <GuestSiteHeader />;

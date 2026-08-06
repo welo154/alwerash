@@ -85,6 +85,8 @@ model User {
   name          String?
   /// e.g. "Frontend developer" — shown under name on /home
   profession    String?   @map("profession")
+  bio           String?
+  skills        String[]  @default([])
   country       String?
   passwordHash  String?   @map("password_hash")
   emailVerified DateTime? @map("email_verified")
