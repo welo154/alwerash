@@ -55,9 +55,9 @@ export default async function AdminMentorsPage() {
       )}
 
       <p className="mb-6 max-w-2xl text-sm text-slate-600">
-        Mark up to <strong>8 mentors</strong> as featured for the Learn page (2 rows of 4), and up to{" "}
+        Mark up to <strong>6 mentors</strong> as featured for the course page (2 rows of 3), and up to{" "}
         <strong>{MAX_LANDING_POPULAR_MENTORS} mentors</strong> as popular for the signed-out home page
-        (â€œCurrent Mostsâ€ section).
+        (“Current Mosts” section).
       </p>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

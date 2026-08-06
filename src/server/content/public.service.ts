@@ -863,9 +863,11 @@ export async function publicListMentors() {
 
 export type { LandingMostsMentorCardDto };
 
-export const LEARN_FEATURED_MENTOR_LIMIT = 8;
+/** Max mentors on Learn / course page strip — 2 rows × 3. */
+export const LEARN_FEATURED_MENTOR_LIMIT = 6;
 
-const LANDING_MOSTS_MENTOR_LIMIT = 12;
+/** Max mentors on guest/home “Current Mosts” — 2 rows × 3. */
+const LANDING_MOSTS_MENTOR_LIMIT = 6;
 
 function mapMentorsToMostsDtos(
   rows: { id: string; name: string; certificateName: string | null }[]
@@ -878,7 +880,7 @@ function mapMentorsToMostsDtos(
   }));
 }
 
-/** Featured mentors for the Learn page (max 8 — two rows of four). */
+/** Featured mentors for the Learn / course page (max 6 — two rows of three). */
 export async function publicListFeaturedMentors(
   limit = LEARN_FEATURED_MENTOR_LIMIT
 ): Promise<LandingMostsMentorCardDto[]> {

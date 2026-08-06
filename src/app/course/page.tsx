@@ -132,6 +132,7 @@ export default async function LearnPage() {
             >
               <LandingCurrentMostsSection
                 mentors={featuredMentors}
+                mentorsPerRow={3}
                 mentorCardWidthPx={383}
                 mentorCardHeightPx={357}
                 compactVerticalSpacing

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { HlsPlayer } from "@/components/video/HlsPlayer";
 import { ProgressTracker } from "@/components/video/ProgressTracker";
 import { probeHlsDuration } from "@/components/video/probeHlsDuration";
@@ -124,6 +124,32 @@ function isIntroLesson(lesson: FullAccessLesson): boolean {
 function isArticleLesson(lesson: FullAccessLesson): boolean {
   const type = lesson.type.toUpperCase();
   return type === "ARTICLE" || type === "READING" || type === "RESOURCE";
+}
+
+function isPlayableVideo(lesson: FullAccessLesson): boolean {
+  return isVideoLesson(lesson) && Boolean(lesson.streamUrl);
+}
+
+function findFirstPlayableVideo(modules: FullAccessModule[]): FullAccessLesson | null {
+  for (const mod of modules) {
+    for (const lesson of mod.lessons) {
+      if (isPlayableVideo(lesson)) return lesson;
+    }
+  }
+  return null;
+}
+
+function findNextPlayableVideo(
+  orderedLessons: FullAccessLesson[],
+  currentLessonId: string
+): FullAccessLesson | null {
+  const index = orderedLessons.findIndex((lesson) => lesson.id === currentLessonId);
+  if (index < 0) return null;
+  for (let i = index + 1; i < orderedLessons.length; i += 1) {
+    const lesson = orderedLessons[i];
+    if (lesson && isPlayableVideo(lesson)) return lesson;
+  }
+  return null;
 }
 
 function LessonCompleteCheckIcon() {
@@ -380,6 +406,7 @@ function VideoLessonBlock({
   playingLessonId,
   onPlay,
   onVideoProgress,
+  onEnded,
   durationSeconds,
   onDuration,
 }: {
@@ -390,6 +417,7 @@ function VideoLessonBlock({
   playingLessonId: string | null;
   onPlay: (lessonId: string) => void;
   onVideoProgress: (lessonId: string, currentTime: number, duration: number) => void;
+  onEnded: (lessonId: string) => void;
   durationSeconds: number | null;
   onDuration: (lessonId: string, duration: number) => void;
 }) {
@@ -467,6 +495,7 @@ function VideoLessonBlock({
                 fill
                 showQualitySelector
                 className="h-full w-full rounded-none bg-black"
+                onEnded={() => onEnded(lesson.id)}
               />
             </ProgressTracker>
           </div>
@@ -541,13 +570,20 @@ export function FullCourseLearningExperience({
   completedLessonIds: initialCompletedLessonIds,
 }: FullCourseLearningExperienceProps) {
   const firstModule = modules[0] ?? null;
+  const firstPlayableVideo = useMemo(() => findFirstPlayableVideo(modules), [modules]);
+  const orderedLessons = useMemo(
+    () => modules.flatMap((module) => module.lessons),
+    [modules]
+  );
 
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
-    firstModule?.id ?? null
+    firstPlayableVideo?.moduleId ?? firstModule?.id ?? null
   );
-  const [playingLessonId, setPlayingLessonId] = useState<string | null>(null);
+  const [playingLessonId, setPlayingLessonId] = useState<string | null>(
+    firstPlayableVideo?.id ?? null
+  );
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
-    firstModule?.lessons[0]?.id ?? null
+    firstPlayableVideo?.id ?? firstModule?.lessons[0]?.id ?? null
   );
   const [progressPercent, setProgressPercent] = useState(initialProgressPercent);
   const [completedIds, setCompletedIds] = useState(
@@ -560,8 +596,9 @@ export function FullCourseLearningExperience({
 
   const [openMap, setOpenMap] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
-    modules.forEach((module, index) => {
-      initial[module.id] = index === 0;
+    const openModuleId = firstPlayableVideo?.moduleId ?? firstModule?.id ?? null;
+    modules.forEach((module) => {
+      initial[module.id] = module.id === openModuleId;
     });
     return initial;
   });
@@ -721,7 +758,7 @@ export function FullCourseLearningExperience({
     (lesson: FullAccessLesson) => {
       selectModule(lesson.moduleId);
       setActiveLessonId(lesson.id);
-      if (isVideoLesson(lesson) && lesson.streamUrl) {
+      if (isPlayableVideo(lesson)) {
         setPlayingLessonId(lesson.id);
       } else {
         setPlayingLessonId(null);
@@ -733,6 +770,16 @@ export function FullCourseLearningExperience({
       });
     },
     [selectModule]
+  );
+
+  const handleVideoEnded = useCallback(
+    (lessonId: string) => {
+      const nextVideo = findNextPlayableVideo(orderedLessons, lessonId);
+      if (nextVideo) {
+        selectLesson(nextVideo);
+      }
+    },
+    [orderedLessons, selectLesson]
   );
 
   return (
@@ -862,6 +909,7 @@ export function FullCourseLearningExperience({
                         setPlayingLessonId(lessonId);
                       }}
                       onVideoProgress={handleVideoProgress}
+                      onEnded={handleVideoEnded}
                       durationSeconds={durationByLessonId[lesson.id] ?? null}
                       onDuration={handleDuration}
                     />

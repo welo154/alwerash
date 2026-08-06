@@ -129,7 +129,7 @@ export default async function AdminMentorEditPage({
               defaultValue={mentor.featuredOrder ?? ""}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
-            <p className="mt-0.5 text-xs text-slate-500">Max 8 featured mentors (2 rows of 4 on Learn). Lower = first.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Max 6 featured mentors (2 rows of 3 on the course page). Lower = first.</p>
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">

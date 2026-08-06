@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { publicListMentors } from "@/server/content/public.service";
 
-const MENTORS_HOME_LIMIT = 8;
+const MENTORS_HOME_LIMIT = 6;
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -29,7 +29,7 @@ export async function MentorsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
           {mentors.map((m) => (
             <Link
               key={m.id}
