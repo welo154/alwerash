@@ -259,7 +259,7 @@ label:has(input[type="radio"]) {
 .landing-showcase-swiper--cards.swiper {
   padding-bottom: 4px;
   overflow: visible !important;
-  height: var(--landing-showcase-card-h, 585px) !important;
+  height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
 .landing-showcase-swiper--cards .swiper-wrapper {
@@ -267,8 +267,8 @@ label:has(input[type="radio"]) {
 }
 
 .landing-showcase-swiper--cards .swiper-slide {
-  width: var(--landing-showcase-card-w, 347px) !important;
-  height: var(--landing-showcase-card-h, 585px) !important;
+  width: var(--landing-showcase-card-w, 323px) !important;
+  height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
 .learn-featured-swiper.swiper {
@@ -293,6 +293,11 @@ label:has(input[type="radio"]) {
 
 .learn-popular-swiper .swiper-wrapper {
   align-items: stretch;
+  flex-wrap: nowrap !important;
+}
+
+.learn-popular-swiper .swiper-slide {
+  flex-shrink: 0;
 }
 
 .landing-showcase-swiper--tags.swiper {
@@ -342,4 +347,58 @@ label:has(input[type="radio"]) {
   width: 0 !important;
   height: 0 !important;
   background: transparent !important;
+}
+
+/* Schedule add modal: slim variant of learn-more scrollbar (vertical only).
+   Do NOT set scrollbar-width/color on Chromium — they override ::-webkit-* and bring back OS arrows. */
+.schedule-add-scroll {
+  overflow-x: hidden;
+}
+
+.schedule-add-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 0;
+  background: transparent;
+}
+
+.schedule-add-scroll::-webkit-scrollbar:horizontal {
+  display: none;
+  height: 0;
+}
+
+.schedule-add-scroll::-webkit-scrollbar-track {
+  background: #07423c;
+  border-radius: 50px;
+  border: 1px solid #000;
+}
+
+.schedule-add-scroll::-webkit-scrollbar-thumb {
+  background: #ffffff;
+  border-radius: 50px;
+  border: 1px solid #000;
+}
+
+.schedule-add-scroll::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.schedule-add-scroll::-webkit-scrollbar-button:single-button,
+.schedule-add-scroll::-webkit-scrollbar-button:vertical:start:decrement,
+.schedule-add-scroll::-webkit-scrollbar-button:vertical:end:increment,
+.schedule-add-scroll::-webkit-scrollbar-button:vertical:decrement,
+.schedule-add-scroll::-webkit-scrollbar-button:vertical:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .schedule-add-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff #07423c;
+  }
 }

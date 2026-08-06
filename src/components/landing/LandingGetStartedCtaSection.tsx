@@ -5,7 +5,6 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
 
-const CTA_GREEN = "#A2FF86";
 const CTA_BUTTON_TEXT = "#141413";
 /** Inline headline logo — 104:31, larger than previous 208×62 */
 const CTA_INLINE_LOGO_W = 260;
@@ -65,9 +64,8 @@ export function LandingGetStartedCtaSection() {
 
         <Link
           href="/register"
-          className="mt-[50px] flex h-[123px] w-[390px] max-w-full shrink-0 items-center justify-center rounded-2xl border border-black px-[16px] py-0 text-center font-bold uppercase tracking-[0] transition-opacity hover:opacity-90"
+          className="mt-[50px] flex h-[123px] w-[390px] max-w-full shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black bg-[#8AF396] px-4 py-0 text-center font-bold uppercase tracking-[0] transition-colors hover:bg-[#64E1FF]"
           style={{
-            backgroundColor: CTA_GREEN,
             fontFamily: pangeaFont,
             color: CTA_BUTTON_TEXT,
             fontSize: "48px",

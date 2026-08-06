@@ -56,7 +56,7 @@ function MenuRow({
 }
 
 function MenuDivider({ className = "" }: { className?: string }) {
-  return <div className={`h-[2px] w-[277px] bg-black ${className}`.trim()} aria-hidden />;
+  return <div className={`h-px w-[277px] bg-black ${className}`.trim()} aria-hidden />;
 }
 
 export function UserMenu({ user, theme = "black" }: UserMenuProps) {
@@ -159,6 +159,9 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
           </div>
 
           <nav aria-label="Activity" className="mt-[28px] flex flex-col gap-[20px]">
+            <MenuRow href="/profile" onClose={() => setOpen(false)}>
+              Profile
+            </MenuRow>
             <MenuRow href="/course" onClose={() => setOpen(false)}>
               My Learning
             </MenuRow>
@@ -174,12 +177,12 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
             >
               Notifications
             </MenuRow>
-            <MenuRow href="/profile" onClose={() => setOpen(false)}>
+            <MenuRow href="/settings" onClose={() => setOpen(false)}>
               Messages
             </MenuRow>
           </nav>
 
-          <MenuDivider className="mt-[31px] h-px" />
+          <MenuDivider className="mt-[31px]" />
 
           <nav aria-label="Account" className="mt-[8px] flex flex-col gap-[20px]">
             <MenuRow href="/settings" onClose={() => setOpen(false)}>

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { LandingMentorCard } from "./LandingMentorCard";
+import { LandingMentorModal } from "./LandingMentorModal";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -23,6 +25,9 @@ export function LandingCurrentMostsSection({
   rightInsetPx,
   contained = false,
   alignToRight = false,
+  alignCardsLeft = false,
+  headingSizePx,
+  cardsTopGapPx,
   mentorCardWidthPx,
   mentorCardHeightPx,
 }: {
@@ -36,15 +41,26 @@ export function LandingCurrentMostsSection({
   contained?: boolean;
   /** When true, heading and mentor grid hug the right edge of the section / viewport breakout. */
   alignToRight?: boolean;
+  /** When true, the mentor grid starts at the same left edge as the heading (logged-in `/home`). */
+  alignCardsLeft?: boolean;
+  /** Heading font size; defaults to the guest-landing 48px. */
+  headingSizePx?: number;
+  /** Gap between the heading and the card grid; defaults to 82px (70px compact). */
+  cardsTopGapPx?: number;
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
 }) {
+  const [selectedMentor, setSelectedMentor] =
+    useState<LandingMostsMentorCardDto | null>(null);
+
   const columnCount = mentorsPerRow ?? (forceTwoPerRow ? 2 : 3);
   /** Hard cap: 2 rows × up to 3 columns. */
   const visibleMentors = mentors.slice(0, columnCount * 2);
   const useFluidCards = mentorsPerRow != null && mentorsPerRow >= 4;
-  const gapX = "gap-x-[27px]";
+  const gapX = "gap-x-[26px]";
   const gapY = "gap-y-[40px]";
+  /** Center a card-row-wide stack so the title shares the leftmost card’s vertical line. */
+  const pinToCardRow = !alignToRight && !(contained && alignCardsLeft);
 
   const gridColsClass =
     columnCount === 4
@@ -60,7 +76,11 @@ export function LandingCurrentMostsSection({
         ? "md:grid-cols-[repeat(2,383px)]"
         : "md:grid-cols-[repeat(2,383px)] lg:grid-cols-[repeat(3,383px)]";
 
-  const gridJustify = alignToRight ? "justify-end" : "justify-center";
+  const gridJustify = alignToRight
+    ? "justify-end"
+    : alignCardsLeft || pinToCardRow
+      ? "justify-start"
+      : "justify-center";
   const gridMaxWidthClass = !contained && alignToRight ? "ml-auto mr-0" : "mx-auto";
   const gridClassName = contained
     ? useFluidCards
@@ -104,10 +124,10 @@ export function LandingCurrentMostsSection({
   const cardW = mentorCardWidthPx ?? (columnCount === 4 ? 191.5 : 383);
   const contentRowWidthPx =
     columnCount === 4
-      ? cardW * 4 + 27 * 3
+      ? cardW * 4 + 26 * 3
       : columnCount === 2
-        ? cardW * 2 + 27
-        : cardW * 3 + 27 * 2;
+        ? cardW * 2 + 26
+        : cardW * 3 + 26 * 2;
 
   return (
     <section
@@ -120,26 +140,52 @@ export function LandingCurrentMostsSection({
         className={
           alignToRight
             ? "ml-auto flex w-full max-w-full flex-col"
-            : contained
-              ? "flex w-full flex-col"
-              : "mx-auto flex w-full max-w-full flex-col"
+            : pinToCardRow
+              ? "mx-auto flex w-full max-w-full flex-col"
+              : "flex w-full flex-col"
         }
         style={
-          alignToRight || contained
-            ? undefined
-            : { width: contentRowWidthPx, maxWidth: "100%" }
+          pinToCardRow
+            ? { width: contentRowWidthPx, maxWidth: "100%" }
+            : undefined
         }
       >
         <h2
           id="landing-current-mosts-heading"
-          className={`m-0 w-full text-[48px] uppercase leading-[120%] text-black ${alignToRight ? "text-right" : "text-left"}`}
-          style={{ fontFamily: pangeaFont }}
+          className={`m-0 w-full uppercase text-black ${
+            alignToRight ? "text-right" : "text-left"
+          }`}
+          style={{
+            fontFamily: pangeaFont,
+            fontSize: `${headingSizePx ?? 48}px`,
+            lineHeight: "120%",
+            color: "#000",
+          }}
         >
-          <span className="font-normal not-italic">THE CURRENT </span>
-          <span className="font-bold italic">MOSTS</span>
+          <span
+            style={{
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            THE CURRENT{" "}
+          </span>
+          <span
+            style={{
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            MOSTS
+          </span>
         </h2>
 
-        <div className={alignToRight || contained ? cardsTopClass : "mt-[82px] w-full"}>
+        <div
+          className={alignToRight || contained ? cardsTopClass : "mt-[82px] w-full"}
+          style={cardsTopGapPx != null ? { marginTop: `${cardsTopGapPx}px` } : undefined}
+        >
           <div
             className={
               alignToRight || contained
@@ -153,7 +199,7 @@ export function LandingCurrentMostsSection({
                 variant={m.variant}
                 name={m.name}
                 profession={m.profession}
-                href={`/mentors/${m.id}`}
+                onOpen={() => setSelectedMentor(m)}
                 fillWidth={useFluidCards}
                 widthPx={
                   useFluidCards
@@ -172,6 +218,12 @@ export function LandingCurrentMostsSection({
           </div>
         </div>
       </div>
+
+      <LandingMentorModal
+        mentor={selectedMentor}
+        open={selectedMentor != null}
+        onClose={() => setSelectedMentor(null)}
+      />
     </section>
   );
 }

@@ -31,16 +31,17 @@ function ExternalLinkGlyph({ className }: { className?: string }) {
   );
 }
 
-/** Figma track card: white text panel on top, photo panel (347×339) below. */
-const SHOWCASE_PHOTO_H = 339;
-const SHOWCASE_TOP_H = 378;
-const SHOWCASE_PANEL_OVERLAP = SHOWCASE_PHOTO_H - 207;
+/** Figma track card: white text panel (323×323.077) on top, photo panel (323×289.744) below. */
+const SHOWCASE_PHOTO_H = 289.744;
+const SHOWCASE_TOP_H = 323.077;
+/** Panels intersect by (photo height − 176)px, leaving 176px of the photo panel clear. */
+const SHOWCASE_PANEL_OVERLAP = SHOWCASE_PHOTO_H - 176;
 const SHOWCASE_PHOTO_TOP = SHOWCASE_TOP_H - SHOWCASE_PANEL_OVERLAP;
 const SHOWCASE_CARD_H = SHOWCASE_PHOTO_TOP + SHOWCASE_PHOTO_H;
 const SHOWCASE_ACCENT = "#89F496";
 
 /** Fixed catalog tile size — keep carousels in sync with CatalogShowcaseCard layout. */
-export const CATALOG_SHOWCASE_CARD_W = 347;
+export const CATALOG_SHOWCASE_CARD_W = 323;
 export const CATALOG_SHOWCASE_CARD_H = SHOWCASE_CARD_H;
 
 export function ViewMoreCircleGlyph({ className }: { className?: string }) {
@@ -336,7 +337,7 @@ export function CatalogShowcaseCard({
 
   const isTrackLink = Boolean(viewMoreHref?.startsWith("/tracks/"));
 
-  const shellClass = `relative w-[347px] overflow-visible rounded-[50px] ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
+  const shellClass = `relative w-[323px] overflow-visible rounded-[50px] ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
 
   const ctaHoverHandlers = {
     onMouseEnter: openHover,
@@ -398,7 +399,7 @@ export function CatalogShowcaseCard({
           aria-hidden
         />
 
-        {/* Lower photo panel — Figma 347×339 */}
+        {/* Lower photo panel — Figma 323×289.744 */}
         <div
           className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black ${photoSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
           style={{ top: SHOWCASE_PHOTO_TOP, height: SHOWCASE_PHOTO_H }}

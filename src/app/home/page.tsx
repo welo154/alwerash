@@ -5,9 +5,23 @@ import { getContinueLearningCardsForUser } from "@/server/home/continue-learning
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
+import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 
 export const metadata = {
   title: "Home – Alwerash",
+};
+
+const EMPTY_TRACK_EXPLORER: HomeTrackExplorerBundle = {
+  heroTracks: [],
+  trackPills: [],
+  trackPillRow1: [],
+  trackPillRow2: [],
+  slidesByFilter: {
+    featured: [],
+    topRated: [],
+    activity: [],
+  },
+  courseTilesByTrackSlug: {},
 };
 
 export default async function LoggedInHomePage() {
@@ -29,11 +43,21 @@ export default async function LoggedInHomePage() {
   const subtitleLeftOfEdit = profession || "Frontend Developer";
 
   const now = new Date();
+
   const [continueLearningCourses, landingMostsMentors, trackBundle, weeklyActivity] =
     await Promise.all([
-      getContinueLearningCardsForUser(userId, 3),
-      publicListLandingMostsMentors(),
-      publicGetHomeTrackExplorerBundle(),
+      getContinueLearningCardsForUser(userId, 3).catch((err) => {
+        console.warn("[home] continue learning unavailable", err instanceof Error ? err.message : err);
+        return [];
+      }),
+      publicListLandingMostsMentors().catch((err) => {
+        console.warn("[home] mosts mentors unavailable", err instanceof Error ? err.message : err);
+        return [];
+      }),
+      publicGetHomeTrackExplorerBundle().catch((err) => {
+        console.warn("[home] track explorer unavailable", err instanceof Error ? err.message : err);
+        return EMPTY_TRACK_EXPLORER;
+      }),
       getWeeklyActivitySummary(userId, now),
     ]);
 

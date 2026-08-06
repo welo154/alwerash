@@ -2,21 +2,31 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { CatalogShowcaseCard, CATALOG_SHOWCASE_CARD_H } from "@/components/cards";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
+import {
+  CatalogShowcaseCard,
+  CATALOG_SHOWCASE_CARD_H,
+  CATALOG_SHOWCASE_CARD_W,
+} from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
-import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import {
+  learnCarouselMousewheel,
+} from "@/components/learn/learn-carousel-swiper-config";
+import {
+  LearnPopularFigmaTile,
+  LEARN_POPULAR_FIGMA_TILE_H,
+  LEARN_POPULAR_FIGMA_TILE_W,
+} from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
-
-const META_FILTERS: { id: HomeTrackMetaFilter; label: string }[] = [
-  { id: "featured", label: "FEATURED" },
-  { id: "topRated", label: "TOP RATED" },
-  { id: "activity", label: "ACTIVITY" },
-];
 
 /** Same continuous drift as LearnTrendingClassesSection. */
 const MARQUEE_PIXELS_PER_SECOND = 47;
@@ -31,36 +41,12 @@ const bodyTextFont = {
   fontFamily: pangeaFontFamily,
 } as const;
 
-function MetaFilterPill({
-  label,
-  pressed,
-  onClick,
-}: {
-  label: string;
-  pressed: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={pressed}
-      className={`inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black ${
-        pressed ? "bg-[#59CBE8]" : "bg-white"
-      }`}
-      style={pillFont}
-    >
-      {label}
-    </button>
-  );
-}
-
 function TrackLinkPill({ pill }: { pill: HomeTrackPill }) {
   return (
     <Link
       href={`/tracks/${encodeURIComponent(pill.slug)}`}
       className="inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black bg-white px-4 text-center text-[24px] font-bold text-black no-underline transition-colors hover:bg-slate-50"
-      style={pillFont}
+      style={{ ...pillFont, lineHeight: "19.6px" }}
     >
       {pill.label}
     </Link>
@@ -84,7 +70,7 @@ function TrackSelectPill({
       className={`inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black transition-colors ${
         pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"
       }`}
-      style={pillFont}
+      style={{ ...pillFont, lineHeight: "19.6px" }}
     >
       {pill.label}
     </button>
@@ -221,10 +207,16 @@ export type HomeTrackExplorerSectionProps = {
   maxVisibleCourses?: number;
   showDiscoverCta?: boolean;
   sectionClassName?: string;
-  /** Featured / Top rated / Activity row. Off on guest home for now. */
-  showMetaFilters?: boolean;
   /** Two-row infinite marquee for track pills (guest home). */
   marqueeTrackPills?: boolean;
+  /** When set, align pills + cards to this inset from the viewport left (e.g. logged-in `/home`). */
+  contentLeftPx?: number;
+  /** Gap between track pills; falls back to 25px rows. */
+  pillGapPx?: number;
+  /** When set, show only the first N track pills (combined across both rows). */
+  maxPills?: number;
+  /** "WHAT TO LEARN NEXT" heading between the pills and the cards (logged-in `/home`). */
+  showWhatToLearnNextHeading?: boolean;
 };
 
 export function HomeTrackExplorerSection({
@@ -236,14 +228,28 @@ export function HomeTrackExplorerSection({
   maxVisibleCourses,
   showDiscoverCta = true,
   sectionClassName = "mt-[107px]",
-  showMetaFilters = true,
   marqueeTrackPills = false,
+  contentLeftPx,
+  pillGapPx,
+  maxPills,
+  showWhatToLearnNextHeading = false,
 }: HomeTrackExplorerSectionProps) {
-  const [metaFilter, setMetaFilter] = useState<HomeTrackMetaFilter>("featured");
+  const {
+    scrollAreaRef,
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
+
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
     [trackPillRow1, trackPillRow2]
   );
+  const pillRow1 = maxPills != null ? allPills.slice(0, maxPills) : trackPillRow1;
+  const pillRow2 = maxPills != null ? [] : trackPillRow2;
 
   const defaultTrackSlug = allPills[0]?.slug ?? null;
   const [selectedTrackSlug, setSelectedTrackSlug] = useState<string | null>(defaultTrackSlug);
@@ -258,7 +264,7 @@ export function HomeTrackExplorerSection({
       ? selectedTrackSlug
       : null;
 
-  const trackSlides = slidesByFilter[metaFilter] ?? [];
+  const trackSlides = slidesByFilter.featured ?? [];
   const courseTiles = trackPillSelectsCourses
     ? activeTrackSlug
       ? (courseTilesByTrackSlug[activeTrackSlug] ?? [])
@@ -266,21 +272,34 @@ export function HomeTrackExplorerSection({
     : [];
 
   const visibleCourseTiles =
-    trackPillSelectsCourses && maxVisibleCourses != null
+    trackPillSelectsCourses && maxVisibleCourses != null && !showWhatToLearnNextHeading
       ? courseTiles.slice(0, maxVisibleCourses)
       : courseTiles;
 
   const showViewMoreCourses =
     trackPillSelectsCourses &&
+    !showWhatToLearnNextHeading &&
     maxVisibleCourses != null &&
     activeTrackSlug != null &&
     courseTiles.length > maxVisibleCourses;
 
   const cardGridKey = trackPillSelectsCourses
     ? `courses-${activeTrackSlug ?? "none"}`
-    : metaFilter;
+    : "featured";
 
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
+
+  const pillRowClass =
+    contentLeftPx != null
+      ? "flex flex-wrap gap-[25px] pr-[160px]"
+      : `${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`;
+  const pillRowStyle =
+    contentLeftPx != null || pillGapPx != null
+      ? {
+          paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
+          gap: pillGapPx != null ? `${pillGapPx}px` : undefined,
+        }
+      : undefined;
 
   const renderTrackPill = (pill: HomeTrackPill, key = pill.slug) =>
     trackPillSelectsCourses ? (
@@ -296,21 +315,8 @@ export function HomeTrackExplorerSection({
 
   return (
     <section className={`${sectionClassName} w-full`}>
-      {showMetaFilters ? (
-        <div className={`${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`}>
-          {META_FILTERS.map((f) => (
-            <MetaFilterPill
-              key={f.id}
-              label={f.label}
-              pressed={metaFilter === f.id}
-              onClick={() => setMetaFilter(f.id)}
-            />
-          ))}
-        </div>
-      ) : null}
-
       {marqueeTrackPills ? (
-        <div className={showMetaFilters ? "mt-[25px]" : undefined}>
+        <div>
           <TrackPillsMarqueeRow
             pills={trackPillRow1}
             renderPill={(pill, key) => renderTrackPill(pill, key)}
@@ -326,22 +332,161 @@ export function HomeTrackExplorerSection({
         </div>
       ) : (
         <>
-          {trackPillRow1.length > 0 ? (
-            <div
-              className={`${FULL_BLEED} ${showMetaFilters ? "mt-[25px]" : ""} flex flex-wrap gap-[25px] px-6 sm:px-8`}
-            >
-              {trackPillRow1.map((pill) => renderTrackPill(pill))}
+          {pillRow1.length > 0 ? (
+            <div className={pillRowClass} style={pillRowStyle}>
+              {pillRow1.map((pill) => renderTrackPill(pill))}
             </div>
           ) : null}
 
-          {trackPillRow2.length > 0 ? (
-            <div className={`${FULL_BLEED} mt-[11px] flex flex-wrap gap-[25px] px-6 sm:px-8 pr-[68px]`}>
-              {trackPillRow2.map((pill) => renderTrackPill(pill))}
+          {pillRow2.length > 0 ? (
+            <div
+              className={`${pillRowClass} mt-[11px]${contentLeftPx == null ? " pr-[68px]" : ""}`}
+              style={pillRowStyle}
+            >
+              {pillRow2.map((pill) => renderTrackPill(pill))}
             </div>
           ) : null}
         </>
       )}
 
+      {showWhatToLearnNextHeading ? (
+        <div
+          className="mt-[76px] flex items-center gap-[26px]"
+          style={{
+            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
+          }}
+        >
+          <h2
+            className="m-0 text-[36px] font-normal leading-[120%] text-black"
+            style={{ fontFamily: pangeaFontFamily }}
+          >
+            WHAT TO LEARN NEXT
+          </h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="43"
+            height="43"
+            viewBox="0 0 45 45"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <path
+              d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
+              fill="white"
+            />
+            <path d="M22.5 31.1L31.1 22.5L22.5 13.9" fill="white" />
+            <path
+              d="M22.5 13.9L31.1 22.5L22.5 31.1M31.1 22.5L13.9 22.5M44 22.5C44 34.3741 34.3741 44 22.5 44C10.6259 44 1 34.3741 1 22.5C1 10.6259 10.6259 1 22.5 1C34.3741 1 44 10.6259 44 22.5Z"
+              stroke="black"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      ) : null}
+
+      {showWhatToLearnNextHeading ? (
+        <p
+          className="m-0 mt-[5px] text-[18px] font-normal leading-[127%] text-black"
+          style={{
+            fontFamily: pangeaFontFamily,
+            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
+          }}
+        >
+          Recommended for you
+        </p>
+      ) : null}
+
+      {showWhatToLearnNextHeading ? (
+        <div
+          key={cardGridKey}
+          className="home-learn-next-track relative left-1/2 mt-[67px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip overflow-y-visible"
+          style={{
+            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
+            paddingRight: 24,
+          }}
+        >
+          <div
+            ref={scrollAreaRef}
+            className="relative w-full min-w-0 overflow-x-visible overflow-y-visible"
+            style={{
+              minHeight: trackPillSelectsCourses
+                ? LEARN_POPULAR_FIGMA_TILE_H
+                : CATALOG_SHOWCASE_CARD_H,
+              /* Allow hover expand card to paint outside the slide without page scroll. */
+              clipPath: "inset(-160px -320px -160px 0)",
+            }}
+          >
+            {isEmpty ? (
+              <p
+                className="text-left text-[20px] text-black/60"
+                style={pillFont}
+              >
+                {trackPillSelectsCourses && activeTrackSlug
+                  ? "No published courses in this track yet."
+                  : "No tracks to show."}
+              </p>
+            ) : (
+              <>
+                <Swiper
+                  key={cardGridKey}
+                  dir="ltr"
+                  modules={[Mousewheel]}
+                  slidesPerView="auto"
+                  spaceBetween={27}
+                  slidesPerGroup={1}
+                  speed={400}
+                  grabCursor
+                  allowTouchMove
+                  simulateTouch
+                  observer
+                  observeParents
+                  watchOverflow
+                  mousewheel={learnCarouselMousewheel}
+                  className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
+                  onSwiper={handleSwiper}
+                  onSlideChange={handleNavSync}
+                  onSlidesUpdated={handleNavSync}
+                  onResize={handleNavSync}
+                >
+                  {trackPillSelectsCourses
+                    ? visibleCourseTiles.map((tile) => (
+                        <SwiperSlide
+                          key={`${cardGridKey}-${tile.id}`}
+                          className="h-auto! w-[346px]! shrink-0 overflow-visible!"
+                        >
+                          <LearnPopularFigmaTile {...tile} />
+                        </SwiperSlide>
+                      ))
+                    : trackSlides.map(({ slug, cardProps }) => (
+                        <SwiperSlide
+                          key={`${cardGridKey}-${slug}`}
+                          className="h-auto! shrink-0 overflow-visible!"
+                          style={{ width: CATALOG_SHOWCASE_CARD_W }}
+                        >
+                          <CatalogShowcaseCard
+                            {...cardProps}
+                            showcaseSlug={slug}
+                          />
+                        </SwiperSlide>
+                      ))}
+                </Swiper>
+
+                <LearnCarouselEdgeNav
+                  atBeginning={atBeginning}
+                  atEnd={atEnd}
+                  onPrev={slidePrev}
+                  onNext={slideNext}
+                  prevLabel="Previous course"
+                  nextLabel="Next course"
+                />
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
       <div
         key={cardGridKey}
         className="mt-[64px] mx-auto flex w-full max-w-full flex-wrap justify-center gap-x-[27px] gap-y-6 px-4 sm:px-6"
@@ -370,6 +515,7 @@ export function HomeTrackExplorerSection({
           ))
         )}
       </div>
+      )}
 
       {showViewMoreCourses && trackPillSelectsCourses ? (
         <div className="mt-10 flex justify-center">

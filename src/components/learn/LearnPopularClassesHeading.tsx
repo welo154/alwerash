@@ -16,6 +16,8 @@ export function LearnPopularClassesHeading({
       onNext={onNext}
       atEnd={atEnd}
       nextAriaLabel="Next popular class"
+      arrowGapPx={25}
+      arrowSize={47}
     />
   );
 }

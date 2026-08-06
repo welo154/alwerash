@@ -1,8 +1,8 @@
-import type { WeeklyActivitySummary } from "@/server/home/learning-activity.service";
-import { formatSecondsAsHhMm } from "@/server/home/learning-activity.service";
+import type { WeeklyActivitySummary } from "@/lib/learning-activity";
+import { formatSecondsAsHhMm } from "@/lib/learning-activity";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 const HIGHLIGHT = "#8AF396";
 const BAR_MAX_PX = 202;
@@ -25,17 +25,17 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
 
   return (
     <div
-      className="relative h-[401px] w-full max-w-[509px] overflow-hidden rounded-[50px] border border-[var(--Black,#000)]"
+      className="relative box-border flex h-[401px] w-[445px] max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] border border-[var(--Black,#000)] pt-[31px] px-[31px] pb-[21px] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
       style={{ background: "var(--White, #FFF)" }}
       aria-label="Weekly activity"
     >
-      <div className="pt-[31px] pl-[45px]">
+      <div>
         <p
           className="m-0 uppercase"
           style={{
-            color: "#000",
+            color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "36px",
+            fontSize: "32px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
@@ -45,11 +45,11 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           ACTIVITY
         </p>
         <p
-          className="m-0 mt-[6px]"
+          className="m-0 mt-[3px]"
           style={{
-            color: "#000",
+            color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "18px",
+            fontSize: "16px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -60,11 +60,11 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           Learnt this week
         </p>
         <p
-          className="m-0 mt-[6px]"
+          className="m-0 mt-[5px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "36px",
+            fontSize: "32px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
@@ -75,76 +75,77 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
         </p>
       </div>
 
-      <div
-        className="absolute bottom-[48px] left-0 right-0 flex items-end justify-between px-[40px] pb-0"
-        style={{ height: `${BAR_MAX_PX + 52}px`, paddingTop: "12px" }}
-      >
-        {summary.days.map((d, i) => {
-          const isHi = i === highlightDayIndex;
-          const ratio = d.watchSeconds / maxSeconds;
-          const barH = Math.max(10, Math.round(ratio * BAR_MAX_PX));
-          return (
-            <div
-              key={d.dateKey}
-              className="relative flex w-[55px] shrink-0 flex-col items-center justify-end"
-              style={{ height: BAR_MAX_PX + 44 }}
-            >
-              {isHi ? (
-                <div
-                  className="absolute flex h-[44px] min-w-[70px] items-center justify-center rounded-[50px] border border-[var(--Black,#000)] px-2"
-                  style={{
-                    background: HIGHLIGHT,
-                    bottom: barH + 8,
-                  }}
-                >
-                  <p
-                    className="m-0 whitespace-nowrap"
+      <div className="relative mt-auto flex min-h-0 flex-1 flex-col justify-end">
+        <div
+          className="flex items-end gap-[6px]"
+          style={{ height: `${BAR_MAX_PX + 52}px` }}
+        >
+          {summary.days.map((d, i) => {
+            const isHi = i === highlightDayIndex;
+            const ratio = d.watchSeconds / maxSeconds;
+            const barH = Math.max(10, Math.round(ratio * BAR_MAX_PX));
+            return (
+              <div
+                key={d.dateKey}
+                className="relative flex w-[49px] shrink-0 flex-col items-center justify-end"
+                style={{ height: BAR_MAX_PX + 44 }}
+              >
+                {isHi ? (
+                  <div
+                    className="absolute flex h-[44px] w-[62px] items-center justify-center rounded-[50px] border-[0.3px] border-[var(--Black,#000)]"
                     style={{
-                      color: "#000",
-                      fontFamily: pangeaFont,
-                      fontSize: "18px",
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      lineHeight: "normal",
-                      opacity: 0.85,
-                      fontVariationSettings: '"wght" 400',
+                      background: "var(--Green, #8AF396)",
+                      bottom: barH + 8,
                     }}
                   >
-                    {tooltipLabel}
-                  </p>
-                </div>
-              ) : null}
-              <div
-                className="w-full rounded-[50px] border border-[var(--Black,#000)]"
-                style={{
-                  height: barH,
-                  background: isHi ? HIGHLIGHT : "#fff",
-                }}
-              />
-            </div>
-          );
-        })}
-      </div>
+                    <p
+                      className="m-0 whitespace-nowrap"
+                      style={{
+                        color: "var(--Black, #000)",
+                        fontFamily: pangeaFont,
+                        fontSize: "16px",
+                        fontStyle: "normal",
+                        fontWeight: 400,
+                        lineHeight: "normal",
+                        opacity: 0.6,
+                        fontVariationSettings: '"wght" 400',
+                      }}
+                    >
+                      {tooltipLabel}
+                    </p>
+                  </div>
+                ) : null}
+                <div
+                  className="w-full rounded-[50px] border border-[var(--Black,#000)]"
+                  style={{
+                    height: barH,
+                    background: isHi ? HIGHLIGHT : "#fff",
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-[18px] flex justify-between px-[40px]">
-        {summary.days.map((d) => (
-          <p
-            key={`${d.dateKey}-lab`}
-            className="m-0 w-[55px] text-center"
-            style={{
-              color: "#000",
-              fontFamily: pangeaFont,
-              fontSize: "18px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "normal",
-              opacity: 0.6,
-              fontVariationSettings: '"wght" 400',
-            }}
-          >
-            {d.label}
-          </p>
-        ))}
+        <div className="mt-[8px] flex gap-[6px]">
+          {summary.days.map((d) => (
+            <p
+              key={`${d.dateKey}-lab`}
+              className="m-0 w-[49px] text-center"
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "16px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+                fontVariationSettings: '"wght" 400',
+              }}
+            >
+              {d.label}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );

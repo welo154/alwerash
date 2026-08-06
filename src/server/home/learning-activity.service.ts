@@ -1,62 +1,37 @@
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/server/db/prisma";
+import {
+  emptyWeeklyActivitySummary,
+  startOfUtcWeek,
+  WEEKDAY_LABELS,
+  type MonthActivitySummary,
+  type WeeklyActivitySummary,
+  type WeeklyDayActivity,
+} from "@/lib/learning-activity";
+
+export type {
+  MonthActivitySummary,
+  WeekdayLabel,
+  WeeklyActivitySummary,
+  WeeklyDayActivity,
+} from "@/lib/learning-activity";
+export {
+  emptyWeeklyActivitySummary,
+  formatSecondsAsHhMm,
+  startOfUtcWeek,
+  WEEKDAY_LABELS,
+} from "@/lib/learning-activity";
 
 /** Max seconds credited toward aggregates per debounced PATCH (abuse / clock skew guard). */
 export const MAX_WATCH_DELTA_PER_PATCH = 300;
-
-const WEEKDAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
-
-export type WeekdayLabel = (typeof WEEKDAY_LABELS)[number];
-
-export type WeeklyDayActivity = {
-  dayIndex: number;
-  label: WeekdayLabel;
-  /** UTC date YYYY-MM-DD */
-  dateKey: string;
-  watchSeconds: number;
-};
-
-export type WeeklyActivitySummary = {
-  days: WeeklyDayActivity[];
-  weekTotalSeconds: number;
-};
-
-export type MonthActivitySummary = {
-  year: number;
-  monthIndex: number;
-  monthTotalSeconds: number;
-};
 
 export function utcCalendarDate(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
-/** Sunday 00:00 UTC of the week that contains `d`. */
-export function startOfUtcWeek(d: Date): Date {
-  const dow = d.getUTCDay();
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow));
-}
-
 function dateKeyUtc(d: Date): string {
   return d.toISOString().slice(0, 10);
-}
-
-/** Safe fallback when DB migrations are behind or aggregates are unavailable. */
-function emptyWeeklyActivitySummary(now: Date): WeeklyActivitySummary {
-  const start = startOfUtcWeek(now);
-  const days: WeeklyDayActivity[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(start);
-    d.setUTCDate(start.getUTCDate() + i);
-    days.push({
-      dayIndex: i,
-      label: WEEKDAY_LABELS[i],
-      dateKey: dateKeyUtc(d),
-      watchSeconds: 0,
-    });
-  }
-  return { days, weekTotalSeconds: 0 };
 }
 
 function emptyMonthActivitySummary(now: Date): MonthActivitySummary {
@@ -65,13 +40,6 @@ function emptyMonthActivitySummary(now: Date): MonthActivitySummary {
     monthIndex: now.getUTCMonth(),
     monthTotalSeconds: 0,
   };
-}
-
-export function formatSecondsAsHhMm(totalSeconds: number): string {
-  const s = Math.max(0, Math.floor(totalSeconds));
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return `${h}h${m}m`;
 }
 
 export async function getWeeklyActivitySummary(
@@ -114,7 +82,8 @@ export async function getWeeklyActivitySummary(
 
     return { days, weekTotalSeconds };
   } catch (err) {
-    console.error("[learning-activity] getWeeklyActivitySummary failed", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn("[learning-activity] getWeeklyActivitySummary unavailable:", message);
     return emptyWeeklyActivitySummary(now);
   }
 }

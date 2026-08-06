@@ -27,14 +27,14 @@ export function SiteHeader() {
     if (status === "loading") {
       return (
         <div
-          className="sticky top-0 z-50 mb-[50px] h-[112px] w-full animate-pulse bg-neutral-100"
+          className="sticky top-0 z-50 mb-0 h-[112px] w-full animate-pulse bg-neutral-100"
           aria-busy
           aria-label="Loading header"
         />
       );
     }
     if (session?.user) {
-      return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} />;
+      return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} homeLayout />;
     }
     return null;
   }
@@ -50,7 +50,14 @@ export function SiteHeader() {
   }
 
   if (session?.user) {
-    return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} />;
+    const flushBottom = pathname === "/profile" || pathname.startsWith("/profile/");
+    return (
+      <LoggedInAppHeader
+        user={session.user}
+        isAdmin={isAdmin}
+        flushBottom={flushBottom}
+      />
+    );
   }
 
   return <GuestSiteHeader />;
