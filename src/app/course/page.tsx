@@ -78,11 +78,16 @@ export default async function LearnPage() {
       <div className="w-full min-w-0 pl-6 sm:pl-8 lg:pl-10">
         <main className="min-w-0 w-full overflow-x-visible">
           {/* Sidebar spans everything above the mentors section. */}
-          <div className="flex min-w-0 max-w-full flex-col gap-8 overflow-x-visible lg:flex-row lg:items-start lg:gap-[55px]">
+          {/* Sidebar ↔ content: 88px from the sidebar rule for all sections after Featured.
+              Featured keeps the previous 55px inset via a compensating pull. */}
+          <div className="flex min-w-0 max-w-full flex-col gap-8 overflow-x-visible lg:flex-row lg:items-start lg:gap-[88px]">
             <LearnCoursesSidebar categories={sidebarCategories} />
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
-              <section aria-label="Tracks" className="w-full min-w-0 overflow-x-visible">
+              <section
+                aria-label="Featured courses"
+                className="w-full min-w-0 overflow-x-visible lg:-ml-[33px]"
+              >
                 <LearnFeaturedCoursesPanel
                   slides={trackShowcaseSlides.map((slide) => ({
                     id: slide.slug,
@@ -100,7 +105,7 @@ export default async function LearnPage() {
 
                 {trendingTiles.length > 0 ? (
                   <div className={popularTiles.length > 0 ? "mt-[55px]" : ""}>
-                    <section aria-label="Trending classes">
+                    <section aria-label="Recently added classes">
                       <LearnTrendingClassesSection tiles={trendingTiles} fullBleed="right" />
                     </section>
                   </div>
@@ -127,9 +132,11 @@ export default async function LearnPage() {
             >
               <LandingCurrentMostsSection
                 mentors={featuredMentors}
-                mentorsPerRow={4}
+                mentorCardWidthPx={383}
+                mentorCardHeightPx={357}
                 compactVerticalSpacing
                 contained
+                headingSizePx={36}
               />
             </div>
           ) : null}

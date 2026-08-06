@@ -139,27 +139,40 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
 
       <div className="pointer-events-none absolute left-0 top-0 z-30 w-full min-w-0">
         <div
-          className="pointer-events-auto absolute top-0 flex items-center gap-4"
-          style={{ left: SVG_LEFT_PX }}
+          className="pointer-events-auto absolute flex items-center"
+          style={{ left: SVG_LEFT_PX, top: 10 }}
         >
-          <div className="inline-flex h-[72px] items-center rounded-[44px] bg-white pl-[22px] pr-[22px]">
-            <h1 className="m-0 uppercase leading-none">
+          <div className="inline-flex items-center rounded-[44px] bg-white pl-[22px] pr-[22px]">
+            <h1 className="m-0 uppercase" style={{ fontFamily: pangeaFont, lineHeight: "120%" }}>
               <span
                 style={{
-                  fontFamily: pangeaFont,
-                  color: "#000",
-                  fontSize: "48px",
-                  fontWeight: 400,
-                  lineHeight: "57.6px",
+                  color: "var(--Black, #000)",
+                  fontSize: 36,
+                  fontStyle: "italic",
+                  fontWeight: 600,
+                  lineHeight: "120%",
                 }}
               >
-                TRACKS
+                FEATURED
+              </span>
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                {" "}
+                COURSES
               </span>
             </h1>
           </div>
           <button
             type="button"
-            className="-ml-[15px] inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            className="inline-flex shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+            style={{ marginLeft: 12, width: 46, height: 46 }}
             aria-label="Next featured track"
             disabled={atEnd}
             suppressHydrationWarning
@@ -171,20 +184,20 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width={60}
-              height={60}
-              viewBox="0 0 62 62"
+              width={46}
+              height={46}
+              viewBox="0 0 48 48"
               fill="none"
-              className="h-[60px] w-[60px]"
               aria-hidden
+              className="block"
             >
               <path
-                d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z"
+                d="M24 47C36.7025 47 47 36.7025 47 24C47 11.2975 36.7025 1 24 1C11.2975 1 1 11.2975 1 24C1 36.7025 11.2975 47 24 47Z"
                 fill="var(--White, #FFF)"
               />
-              <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
+              <path d="M24 33.2L33.2 24L24 14.8" fill="var(--White, #FFF)" />
               <path
-                d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
+                d="M24 14.8L33.2 24L24 33.2M33.2 24L14.8 24M47 24C47 36.7025 36.7025 47 24 47C11.2975 47 1 36.7025 1 24C1 11.2975 11.2975 1 24 1C36.7025 1 47 11.2975 47 24Z"
                 stroke="var(--Black, #000)"
                 strokeWidth={2}
                 strokeLinecap="round"

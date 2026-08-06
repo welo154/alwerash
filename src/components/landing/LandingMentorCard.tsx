@@ -23,6 +23,8 @@ export type LandingMentorCardProps = {
   profession: string;
   /** When set, the whole card links to the public mentor profile. */
   href?: string;
+  /** When set, card click opens a modal instead of navigating. */
+  onOpen?: () => void;
   widthPx?: number;
   heightPx?: number;
   /** Fill grid cell width; height follows {@link MENTOR_CARD_ASPECT}. */
@@ -36,6 +38,7 @@ export function LandingMentorCard({
   name,
   profession,
   href,
+  onOpen,
   widthPx = 383,
   heightPx = 357,
   fillWidth = false,
@@ -44,6 +47,7 @@ export function LandingMentorCard({
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
   const clipId = `mentor-card-clip-${rawId}`;
+  const isInteractive = Boolean(onOpen || href);
 
   const sizeStyle = fillWidth
     ? ({ width: "100%", aspectRatio: `${MENTOR_CARD_ASPECT}` } as const)
@@ -51,10 +55,10 @@ export function LandingMentorCard({
 
   const card = (
     <article
-      className={`relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : " ml-0"}`}
+      className={`group relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : " ml-0"}`}
       style={sizeStyle}
-      aria-hidden={href ? true : undefined}
-      aria-label={href ? undefined : `${name}, ${profession}. ${badge}`}
+      aria-hidden={isInteractive ? true : undefined}
+      aria-label={isInteractive ? undefined : `${name}, ${profession}. ${badge}`}
     >
       <svg
         className="absolute inset-0 h-full w-full overflow-hidden"
@@ -76,31 +80,56 @@ export function LandingMentorCard({
         <g clipPath={`url(#${clipId})`}>
           <foreignObject x="0" y="0" width="383" height="357">
             <div
-              style={{ width: "100%", height: "100%", overflow: "hidden" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                overflow: "hidden",
+                position: "relative",
+              }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={MENTOR_CARD_PHOTO}
                 alt=""
                 style={{
+                  position: "absolute",
+                  inset: 0,
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  objectPosition: "center top",
+                  objectPosition: "center 22%",
+                  transform: "scale(1.14)",
+                  transformOrigin: "center 28%",
                   display: "block",
-                  transform: "scale(1.12)",
-                  transformOrigin: "center top",
                 }}
               />
             </div>
           </foreignObject>
         </g>
 
-        <path d={CARD_STROKE_MASK_PATH} fill="#000" mask={`url(#${maskId})`} />
+        {/* Default thin black outline */}
+        <path
+          d={CARD_STROKE_MASK_PATH}
+          className="fill-black transition-opacity duration-200 group-hover:opacity-0"
+          mask={`url(#${maskId})`}
+        />
+
+        {/* Hover: 2px inside stroke (strokeWidth 4 + clip ≈ 2px visible) */}
+        <g
+          clipPath={`url(#${clipId})`}
+          className="pointer-events-none opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        >
+          <path
+            d={CARD_PATH}
+            fill="none"
+            stroke="var(--Green, #8AF396)"
+            strokeWidth={4}
+          />
+        </g>
 
         <foreignObject x="24" y="10" width="131" height="52">
           <div
-            className="text-black"
+            className="text-black transition-colors duration-200 group-hover:text-[#004B3C]"
             style={{
               fontFamily: pangeaFont,
               fontSize: "24px",
@@ -135,8 +164,8 @@ export function LandingMentorCard({
             }}
           >
             <div
+              className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
-                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -149,8 +178,8 @@ export function LandingMentorCard({
               MEET
             </div>
             <div
+              className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
-                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "32px",
                 fontStyle: "normal",
@@ -164,8 +193,8 @@ export function LandingMentorCard({
               {name}
             </div>
             <div
+              className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
-                color: "var(--White, #FFF)",
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -185,12 +214,26 @@ export function LandingMentorCard({
     </article>
   );
 
+  if (onOpen) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`${name}, ${profession}. ${badge}`}
+        className={`group mx-auto block max-w-full shrink-0 cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left text-inherit outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2${fillWidth ? " w-full" : ""}`}
+        style={sizeStyle}
+      >
+        {card}
+      </button>
+    );
+  }
+
   if (href) {
     return (
       <Link
         href={href}
         aria-label={`${name}, ${profession}. ${badge}`}
-        className={`mx-auto block max-w-full shrink-0 overflow-hidden text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2${fillWidth ? " w-full" : ""}`}
+        className={`group mx-auto block max-w-full shrink-0 overflow-hidden text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-offset-2${fillWidth ? " w-full" : ""}`}
         style={sizeStyle}
       >
         {card}

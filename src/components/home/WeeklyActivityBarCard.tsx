@@ -25,7 +25,7 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
 
   return (
     <div
-      className="relative box-border flex h-[401px] w-[445px] max-w-full shrink-0 flex-col overflow-hidden rounded-[50px] border border-[var(--Black,#000)] pt-[31px] px-[31px] pb-[21px]"
+      className="relative box-border flex h-[401px] w-[445px] max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] border border-[var(--Black,#000)] pt-[31px] px-[31px] pb-[21px] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
       style={{ background: "var(--White, #FFF)" }}
       aria-label="Weekly activity"
     >

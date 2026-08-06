@@ -2,14 +2,26 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
 import {
   CatalogShowcaseCard,
   CATALOG_SHOWCASE_CARD_H,
   CATALOG_SHOWCASE_CARD_W,
 } from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
-import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import {
+  learnCarouselMousewheel,
+} from "@/components/learn/learn-carousel-swiper-config";
+import {
+  LearnPopularFigmaTile,
+  LEARN_POPULAR_FIGMA_TILE_H,
+  LEARN_POPULAR_FIGMA_TILE_W,
+} from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
@@ -222,6 +234,16 @@ export function HomeTrackExplorerSection({
   maxPills,
   showWhatToLearnNextHeading = false,
 }: HomeTrackExplorerSectionProps) {
+  const {
+    scrollAreaRef,
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
+
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
     [trackPillRow1, trackPillRow2]
@@ -250,12 +272,13 @@ export function HomeTrackExplorerSection({
     : [];
 
   const visibleCourseTiles =
-    trackPillSelectsCourses && maxVisibleCourses != null
+    trackPillSelectsCourses && maxVisibleCourses != null && !showWhatToLearnNextHeading
       ? courseTiles.slice(0, maxVisibleCourses)
       : courseTiles;
 
   const showViewMoreCourses =
     trackPillSelectsCourses &&
+    !showWhatToLearnNextHeading &&
     maxVisibleCourses != null &&
     activeTrackSlug != null &&
     courseTiles.length > maxVisibleCourses;
@@ -380,9 +403,97 @@ export function HomeTrackExplorerSection({
         </p>
       ) : null}
 
+      {showWhatToLearnNextHeading ? (
+        <div
+          key={cardGridKey}
+          className="home-learn-next-track relative left-1/2 mt-[67px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip overflow-y-visible"
+          style={{
+            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
+            paddingRight: 24,
+          }}
+        >
+          <div
+            ref={scrollAreaRef}
+            className="relative w-full min-w-0 overflow-x-visible overflow-y-visible"
+            style={{
+              minHeight: trackPillSelectsCourses
+                ? LEARN_POPULAR_FIGMA_TILE_H
+                : CATALOG_SHOWCASE_CARD_H,
+              /* Allow hover expand card to paint outside the slide without page scroll. */
+              clipPath: "inset(-160px -320px -160px 0)",
+            }}
+          >
+            {isEmpty ? (
+              <p
+                className="text-left text-[20px] text-black/60"
+                style={pillFont}
+              >
+                {trackPillSelectsCourses && activeTrackSlug
+                  ? "No published courses in this track yet."
+                  : "No tracks to show."}
+              </p>
+            ) : (
+              <>
+                <Swiper
+                  key={cardGridKey}
+                  dir="ltr"
+                  modules={[Mousewheel]}
+                  slidesPerView="auto"
+                  spaceBetween={27}
+                  slidesPerGroup={1}
+                  speed={400}
+                  grabCursor
+                  allowTouchMove
+                  simulateTouch
+                  observer
+                  observeParents
+                  watchOverflow
+                  mousewheel={learnCarouselMousewheel}
+                  className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
+                  onSwiper={handleSwiper}
+                  onSlideChange={handleNavSync}
+                  onSlidesUpdated={handleNavSync}
+                  onResize={handleNavSync}
+                >
+                  {trackPillSelectsCourses
+                    ? visibleCourseTiles.map((tile) => (
+                        <SwiperSlide
+                          key={`${cardGridKey}-${tile.id}`}
+                          className="h-auto! w-[346px]! shrink-0 overflow-visible!"
+                        >
+                          <LearnPopularFigmaTile {...tile} />
+                        </SwiperSlide>
+                      ))
+                    : trackSlides.map(({ slug, cardProps }) => (
+                        <SwiperSlide
+                          key={`${cardGridKey}-${slug}`}
+                          className="h-auto! shrink-0 overflow-visible!"
+                          style={{ width: CATALOG_SHOWCASE_CARD_W }}
+                        >
+                          <CatalogShowcaseCard
+                            {...cardProps}
+                            showcaseSlug={slug}
+                          />
+                        </SwiperSlide>
+                      ))}
+                </Swiper>
+
+                <LearnCarouselEdgeNav
+                  atBeginning={atBeginning}
+                  atEnd={atEnd}
+                  onPrev={slidePrev}
+                  onNext={slideNext}
+                  prevLabel="Previous course"
+                  nextLabel="Next course"
+                />
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
       <div
         key={cardGridKey}
-        className={`${showWhatToLearnNextHeading ? "mt-[67px]" : "mt-[64px]"} flex max-w-full flex-wrap justify-start gap-x-[27px] gap-y-6 px-4 sm:px-6 lg:px-0`}
+        className="mt-[64px] flex max-w-full flex-wrap justify-start gap-x-[27px] gap-y-6 px-4 sm:px-6 lg:px-0"
         style={{
           width: CATALOG_SHOWCASE_CARD_W * 3 + 27 * 2,
           marginLeft: cardsMarginLeft,
@@ -411,6 +522,7 @@ export function HomeTrackExplorerSection({
           ))
         )}
       </div>
+      )}
 
       {showViewMoreCourses && trackPillSelectsCourses ? (
         <div className="mt-10 flex justify-center">

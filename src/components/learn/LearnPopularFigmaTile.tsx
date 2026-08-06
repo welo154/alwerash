@@ -233,6 +233,7 @@ export function LearnPopularFigmaTile(
     if (slide) {
       slide.style.position = "relative";
       slide.style.zIndex = "2000";
+      slide.style.overflow = "visible";
       return;
     }
     const trendingTile = el.closest(".learn-trending-tile") as HTMLElement | null;
@@ -251,6 +252,12 @@ export function LearnPopularFigmaTile(
       if (viewport) {
         viewport.style.overflowX = "visible";
         viewport.style.overflowY = "visible";
+        viewport.style.clipPath = "none";
+      }
+      const track = el.closest(".home-learn-next-track") as HTMLElement | null;
+      if (track) {
+        track.style.overflowX = "visible";
+        track.style.overflowY = "visible";
       }
       return;
     }
@@ -264,6 +271,7 @@ export function LearnPopularFigmaTile(
     const slide = el.closest(".swiper-slide") as HTMLElement | null;
     if (slide) {
       slide.style.zIndex = "";
+      slide.style.overflow = "";
       return;
     }
     const trendingTile = el.closest(".learn-trending-tile") as HTMLElement | null;
@@ -279,6 +287,12 @@ export function LearnPopularFigmaTile(
       if (viewport) {
         viewport.style.overflowX = "";
         viewport.style.overflowY = "";
+        viewport.style.clipPath = "";
+      }
+      const track = el.closest(".home-learn-next-track") as HTMLElement | null;
+      if (track) {
+        track.style.overflowX = "";
+        track.style.overflowY = "";
       }
       return;
     }

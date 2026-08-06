@@ -10,4 +10,5 @@ export { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
 export { LandingFaqSection } from "./LandingFaqSection";
 export { LandingGetStartedCtaSection } from "./LandingGetStartedCtaSection";
 export { LandingMentorCard } from "./LandingMentorCard";
+export { LandingMentorModal } from "./LandingMentorModal";
 
