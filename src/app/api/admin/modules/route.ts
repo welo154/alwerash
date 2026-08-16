@@ -15,6 +15,6 @@ export const GET = handleRoute(async (req) => {
 export const POST = handleRoute(async (req) => {
   await requireRole(["ADMIN"]);
   const body = await req.json().catch(() => null);
-  const module = await adminCreateModule(body);
-  return NextResponse.json({ module }, { status: 201 });
+  const created = await adminCreateModule(body);
+  return NextResponse.json({ module: created }, { status: 201 });
 });

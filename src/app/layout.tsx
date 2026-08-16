@@ -5,6 +5,7 @@ import { SessionProvider } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/Toast";
 import { ToastFromUrl } from "@/components/ToastFromUrl";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
+import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -46,6 +47,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${playfair.variable}`}>
       <body suppressHydrationWarning className="font-sans antialiased">
+        <MicrosoftClarity userId={session?.user?.id} />
         <ToastProvider>
           <Suspense fallback={null}>
             <ToastFromUrl />

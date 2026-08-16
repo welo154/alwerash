@@ -49,6 +49,37 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
+function logCatalogError(scope: string, e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  console.error(`[catalog] ${scope}:`, msg);
+}
+
+async function catalogRequiresPublished(): Promise<boolean> {
+  try {
+    const [pubTracks, tracks, pubCourses, courses] = await Promise.all([
+      prisma.track.count({ where: { published: true } }),
+      prisma.track.count(),
+      prisma.course.count({ where: { published: true } }),
+      prisma.course.count(),
+    ]);
+    const hasRows = tracks + courses > 0;
+    const hasPublished = pubTracks + pubCourses > 0;
+    if (hasRows && !hasPublished) {
+      console.warn(
+        "[catalog] No published tracks/courses; listing unpublished rows from the database."
+      );
+    }
+    return hasPublished || !hasRows;
+  } catch (e) {
+    logCatalogError("catalogRequiresPublished", e);
+    return true;
+  }
+}
+
+function publishedWhere(requirePublished: boolean): { published: true } | Record<string, never> {
+  return requirePublished ? { published: true } : {};
+}
+
 type TrackCourseRow = {
   id: string;
   title: string;
@@ -144,21 +175,89 @@ function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[]
 }
 
 async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
-  return prisma.track.findMany({
-    where: { published: true },
-    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      coverImage: true,
-      order: true,
-      featuredOrder: true,
-      topRatedOrder: true,
-      activityOrder: true,
-      courses: trackCourseSelect,
-    },
-  });
+  const requirePublished = await catalogRequiresPublished();
+  const trackWhere = publishedWhere(requirePublished);
+  const courseWhere = publishedWhere(requirePublished);
+
+  try {
+    return await prisma.track.findMany({
+      where: trackWhere,
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        coverImage: true,
+        order: true,
+        featuredOrder: true,
+        topRatedOrder: true,
+        activityOrder: true,
+        courses: {
+          ...trackCourseSelect,
+          where: courseWhere,
+        },
+      },
+    });
+  } catch (e) {
+    logCatalogError("fetchPublishedTracksWithCourses", e);
+    if (!isPrismaMissingColumnError(e)) throw e;
+    return fetchTracksWithCoursesFallback(requirePublished);
+  }
+}
+
+async function fetchTracksWithCoursesFallback(
+  requirePublished: boolean
+): Promise<TrackWithCourses[]> {
+  const trackSql = requirePublished
+    ? `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
+    : `SELECT id, title, slug, description, "order" FROM tracks ORDER BY "order" ASC, created_at ASC`;
+  const courseSql = requirePublished
+    ? `SELECT id, title, instructor_name, cover_image, track_id FROM courses WHERE published = true ORDER BY created_at ASC`
+    : `SELECT id, title, instructor_name, cover_image, track_id FROM courses ORDER BY created_at ASC`;
+
+  const [trackRows, courseRows] = await Promise.all([
+    prisma.$queryRawUnsafe<
+      { id: string; title: string; slug: string; order: number }[]
+    >(trackSql),
+    prisma.$queryRawUnsafe<
+      {
+        id: string;
+        title: string;
+        instructor_name: string | null;
+        cover_image: string | null;
+        track_id: string | null;
+      }[]
+    >(courseSql),
+  ]);
+
+  const coursesByTrack = new Map<string, TrackCourseRow[]>();
+  for (const course of courseRows) {
+    if (!course.track_id) continue;
+    const list = coursesByTrack.get(course.track_id) ?? [];
+    list.push({
+      id: course.id,
+      title: course.title,
+      instructorName: course.instructor_name,
+      coverImage: course.cover_image,
+      introVideoMuxPlaybackId: null,
+      totalDurationMinutes: null,
+      featuredMostPlayedOrder: null,
+      modules: [],
+    });
+    coursesByTrack.set(course.track_id, list);
+  }
+
+  return trackRows.map((track) => ({
+    id: track.id,
+    title: track.title,
+    slug: track.slug,
+    coverImage: null,
+    order: track.order,
+    featuredOrder: null,
+    topRatedOrder: null,
+    activityOrder: null,
+    courses: coursesByTrack.get(track.id) ?? [],
+  }));
 }
 
 function filterTracksByMeta(tracks: TrackWithCourses[], filter: HomeTrackMetaFilter): TrackWithCourses[] {
@@ -197,7 +296,8 @@ export async function publicGetHomeTrackExplorerBundle(): Promise<HomeTrackExplo
       },
       courseTilesByTrackSlug: buildCourseTilesByTrackSlug(rows),
     };
-  } catch {
+  } catch (e) {
+    logCatalogError("publicGetHomeTrackExplorerBundle", e);
     return {
       heroTracks: [],
       trackPills: [],
@@ -214,7 +314,8 @@ export async function publicListTrackShowcaseSlides(): Promise<LandingShowcaseSl
   try {
     const rows = await fetchPublishedTracksWithCourses();
     return buildShowcaseSlides(rows);
-  } catch {
+  } catch (e) {
+    logCatalogError("publicListTrackShowcaseSlides", e);
     return [];
   }
 }
@@ -228,7 +329,10 @@ type PublicTrackListItem = {
   order: number;
 };
 
-async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
+async function publicListTracksRawSafe(requirePublished = true): Promise<PublicTrackListItem[]> {
+  const sql = requirePublished
+    ? `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
+    : `SELECT id, title, slug, description, "order" FROM tracks ORDER BY "order" ASC, created_at ASC`;
   const rows = await prisma.$queryRawUnsafe<
     {
       id: string;
@@ -237,9 +341,7 @@ async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
       description: string | null;
       order: number;
     }[]
-  >(
-    `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
-  );
+  >(sql);
 
   return rows.map((row) => ({
     id: row.id,
@@ -252,9 +354,11 @@ async function publicListTracksRawSafe(): Promise<PublicTrackListItem[]> {
 }
 
 export async function publicListTracks(): Promise<PublicTrackListItem[]> {
+  const requirePublished = await catalogRequiresPublished();
+  const where = publishedWhere(requirePublished);
   try {
     const rows = await prisma.track.findMany({
-      where: { published: true },
+      where,
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
         id: true,
@@ -270,8 +374,9 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
       coverImage: resolveTrackCoverImage(row.coverImage, row.slug),
     }));
   } catch (e) {
+    logCatalogError("publicListTracks", e);
     if (isPrismaMissingColumnError(e)) {
-      const rows = await publicListTracksRawSafe();
+      const rows = await publicListTracksRawSafe(requirePublished);
       return rows.map((row) => ({
         ...row,
         coverImage: resolveTrackCoverImage(null, row.slug),
@@ -291,7 +396,7 @@ export async function publicGetShowcaseTrackCardForSlug(
   try {
     const track = await prisma.track.findFirst({
       where: {
-        published: true,
+        ...publishedWhere(await catalogRequiresPublished()),
         slug: { equals: showcaseSlug, mode: "insensitive" },
       },
       select: {
@@ -323,9 +428,10 @@ export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTr
 }
 
 export async function publicGetTrackBySlug(slug: string) {
+  const requirePublished = await catalogRequiresPublished();
   const track = await prisma.track.findFirst({
     where: {
-      published: true,
+      ...publishedWhere(requirePublished),
       slug: { equals: slug, mode: "insensitive" },
     },
     select: {
@@ -336,7 +442,7 @@ export async function publicGetTrackBySlug(slug: string) {
       coverImage: true,
       order: true,
       courses: {
-        where: { published: true },
+        where: publishedWhere(requirePublished),
         orderBy: { createdAt: "asc" },
         select: {
           id: true,
@@ -412,8 +518,12 @@ export async function publicGetCourseById(courseId: string) {
     },
   });
 
-  if (!course || !course.published) throw new AppError("NOT_FOUND", 404, "Course not found");
-  if (course.track && !course.track.published) throw new AppError("NOT_FOUND", 404, "Course not found");
+  if (!course) throw new AppError("NOT_FOUND", 404, "Course not found");
+  const requirePublished = await catalogRequiresPublished();
+  if (requirePublished && !course.published) throw new AppError("NOT_FOUND", 404, "Course not found");
+  if (requirePublished && course.track && !course.track.published) {
+    throw new AppError("NOT_FOUND", 404, "Course not found");
+  }
 
   return {
     ...course,
@@ -516,19 +626,24 @@ export async function publicGetFreePreviewVideos(
 /** Distinct users who have progress in any lesson of the given courses. */
 async function getStudentCountsByCourseId(courseIds: string[]): Promise<Map<string, number>> {
   if (courseIds.length === 0) return new Map();
-  const rows = await prisma.$queryRaw<{ course_id: string; count: bigint }[]>`
-    SELECT m.course_id, COUNT(DISTINCT lp.user_id)::bigint as count
-    FROM lesson_progress lp
-    JOIN lessons l ON l.id = lp.lesson_id
-    JOIN modules m ON m.id = l.module_id
-    WHERE m.course_id = ANY(${courseIds}::text[])
-    GROUP BY m.course_id
-  `;
-  const map = new Map<string, number>();
-  for (const row of rows) {
-    map.set(row.course_id, Number(row.count));
+  try {
+    const rows = await prisma.$queryRaw<{ course_id: string; count: bigint }[]>`
+      SELECT m.course_id, COUNT(DISTINCT lp.user_id)::bigint as count
+      FROM lesson_progress lp
+      JOIN lessons l ON l.id = lp.lesson_id
+      JOIN modules m ON m.id = l.module_id
+      WHERE m.course_id = ANY(${courseIds}::text[])
+      GROUP BY m.course_id
+    `;
+    const map = new Map<string, number>();
+    for (const row of rows) {
+      map.set(row.course_id, Number(row.count));
+    }
+    return map;
+  } catch (e) {
+    logCatalogError("getStudentCountsByCourseId", e);
+    return new Map();
   }
-  return map;
 }
 
 export type CourseForCard = {
@@ -624,7 +739,10 @@ export async function publicListPopularClassCourses(
 export async function publicListMostPlayedCourses(limit = 12): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
-      where: { published: true, featuredMostPlayedOrder: { not: null } },
+      where: {
+        ...publishedWhere(await catalogRequiresPublished()),
+        featuredMostPlayedOrder: { not: null },
+      },
       orderBy: { featuredMostPlayedOrder: "asc" },
       take: limit,
       select: {
@@ -649,10 +767,10 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
         )
       );
     }
-  } catch {
-    // featured_most_played_order column may not exist yet
+  } catch (e) {
+    logCatalogError("publicListMostPlayedCourses", e);
   }
-  return [];
+  return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
 }
 
 export const MAX_TRENDING_CLASS_COURSES = 6;
@@ -663,10 +781,16 @@ export async function publicListTrendingCourses(
 ): Promise<CourseForCard[]> {
   try {
     const orderedIds = await sqlGetTrendingCourseIds(limit);
-    if (orderedIds.length === 0) return [];
+    if (orderedIds.length === 0) {
+      return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
+    }
 
+    const requirePublished = await catalogRequiresPublished();
     const courses = await prisma.course.findMany({
-      where: { id: { in: orderedIds }, published: true },
+      where: {
+        id: { in: orderedIds },
+        ...publishedWhere(requirePublished),
+      },
       select: {
         id: true,
         title: true,
@@ -691,10 +815,10 @@ export async function publicListTrendingCourses(
         studentCounts.get(c.id) ?? 0
       )
     );
-  } catch {
-    // featured_trending_order column may not exist yet
+  } catch (e) {
+    logCatalogError("publicListTrendingCourses", e);
   }
-  return [];
+  return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
 }
 
 const publishedCourseCardSelect = {
@@ -715,9 +839,10 @@ const publishedCourseCardSelect = {
 
 /** All published courses for the Learn page catalog grid. */
 export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
+  const requirePublished = await catalogRequiresPublished();
   try {
     const courses = await prisma.course.findMany({
-      where: { published: true },
+      where: publishedWhere(requirePublished),
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: publishedCourseCardSelect,
     });
@@ -735,15 +860,46 @@ export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> 
         studentCounts.get(c.id) ?? 0
       )
     );
-  } catch {
-    return [];
+  } catch (e) {
+    logCatalogError("publicListAllPublishedCourses", e);
+    return listCoursesCardFallback(requirePublished);
   }
+}
+
+async function listCoursesCardFallback(requirePublished: boolean): Promise<CourseForCard[]> {
+  const sql = requirePublished
+    ? `SELECT id, title, summary, cover_image, instructor_name FROM courses WHERE published = true ORDER BY created_at ASC`
+    : `SELECT id, title, summary, cover_image, instructor_name FROM courses ORDER BY created_at ASC`;
+  const rows = await prisma.$queryRawUnsafe<
+    {
+      id: string;
+      title: string;
+      summary: string | null;
+      cover_image: string | null;
+      instructor_name: string | null;
+    }[]
+  >(sql);
+  return rows.map((c) =>
+    mapCourseToCard(
+      {
+        id: c.id,
+        title: c.title,
+        summary: c.summary,
+        coverImage: c.cover_image,
+        instructorName: c.instructor_name,
+        instructorImage: null,
+        track: null,
+        modules: [],
+      },
+      0
+    )
+  );
 }
 
 export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
-      where: { published: true },
+      where: publishedWhere(await catalogRequiresPublished()),
       take: limit,
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
@@ -768,7 +924,8 @@ export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCar
         studentCounts.get(c.id) ?? 0
       )
     );
-  } catch {
+  } catch (e) {
+    logCatalogError("publicListFeaturedCourses", e);
     return [];
   }
 }
@@ -779,11 +936,15 @@ export async function publicGetSimilarCourses(
   limit = 4
 ): Promise<CourseForCard[]> {
   try {
+    const requirePublished = await catalogRequiresPublished();
     const courses = await prisma.course.findMany({
       where: {
-        published: true,
+        ...publishedWhere(requirePublished),
         id: { not: courseId },
-        track: { slug: trackSlug, published: true },
+        track: {
+          slug: trackSlug,
+          ...(requirePublished ? { published: true } : {}),
+        },
       },
       take: limit,
       orderBy: { order: "asc" },
@@ -819,10 +980,13 @@ export async function publicSearch(query: string, limit = 10) {
   const q = query.trim().toLowerCase();
   if (!q) return { tracks: [], courses: [] };
 
+  const requirePublished = await catalogRequiresPublished();
+  const where = publishedWhere(requirePublished);
+
   const [tracks, courses] = await Promise.all([
     prisma.track.findMany({
       where: {
-        published: true,
+        ...where,
         title: { contains: q, mode: "insensitive" },
       },
       take: limit,
@@ -831,7 +995,7 @@ export async function publicSearch(query: string, limit = 10) {
     }),
     prisma.course.findMany({
       where: {
-        published: true,
+        ...where,
         title: { contains: q, mode: "insensitive" },
       },
       take: limit,

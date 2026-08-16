@@ -252,6 +252,7 @@ export async function adminCreateCourse(input: unknown) {
     const course = await prisma.course.create({
       data: {
         ...rest,
+        published: rest.published ?? true,
         trackId: trackId ?? null,
         instructorName: instructorName ?? undefined,
         instructorImage: instructorImage ?? undefined,

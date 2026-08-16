@@ -893,7 +893,7 @@ This course will take you from having little knowledge in digital painting and d
                                   lineHeight: "120%",
                                 }}
                               >
-                                "
+                                {'"'}
                               </p>
                               <p
                                 className="m-0"
@@ -982,7 +982,7 @@ This course will take you from having little knowledge in digital painting and d
                                   lineHeight: "120%",
                                 }}
                               >
-                                "
+                                {'"'}
                               </p>
                               <p
                                 className="m-0"

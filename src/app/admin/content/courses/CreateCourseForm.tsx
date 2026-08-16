@@ -118,7 +118,7 @@ export async function CreateCourseForm() {
           />
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input name="published" type="checkbox" className="rounded border-slate-300" />
+          <input name="published" type="checkbox" defaultChecked className="rounded border-slate-300" />
           Published
         </label>
       </div>
