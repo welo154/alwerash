@@ -3,20 +3,22 @@ import { PrismaClient } from "@prisma/client";
 
 const MIN_CONNECTION_LIMIT = 15;
 const POOL_TIMEOUT_SECONDS = 30;
+const MISSING_URL_PLACEHOLDER =
+  "postgresql://prisma:prisma@127.0.0.1:5432/prisma?connect_timeout=1";
 
 /**
  * Normalize DATABASE_URL pool settings for Supabase Session pooler.
  * Prevents pool timeouts when pages run parallel queries (e.g. /home Promise.all).
- * Stale dev-server processes may otherwise keep connection_limit=1 from an old .env.
  */
 function resolveDatabaseUrl(): string {
-  const raw = process.env.DATABASE_URL;
+  const raw = process.env.DATABASE_URL?.trim();
   if (!raw) {
-    // Prisma is imported by the root layout; don't crash `next build` when env isn't loaded yet.
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      return "postgresql://prisma:prisma@127.0.0.1:5432/prisma";
+    if (process.env.NEXT_PHASE !== "phase-production-build") {
+      console.error(
+        "[prisma] DATABASE_URL is not set. Add it in Vercel → Settings → Environment Variables for Production and Preview, then Redeploy.",
+      );
     }
-    throw new Error("DATABASE_URL is not set");
+    return MISSING_URL_PLACEHOLDER;
   }
 
   try {
