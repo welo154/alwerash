@@ -18,6 +18,10 @@ const CredentialsSchema = z.object({
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  secret:
+    process.env.AUTH_SECRET ??
+    process.env.NEXTAUTH_SECRET ??
+    (process.env.NEXT_PHASE === "phase-production-build" ? "vercel-build-placeholder" : undefined),
   pages: { signIn: "/login" },
   providers: [
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET

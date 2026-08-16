@@ -8,6 +8,9 @@ import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { pangeaVar } from "@/lib/fonts/pangea";
 import "./globals.css";
 
+/** Avoid querying the database during `next build` on Vercel. */
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: {
     default: "Alwerash — Subscription education for design & creative",

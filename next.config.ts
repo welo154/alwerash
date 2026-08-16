@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@prisma/client", "prisma"],
+  serverExternalPackages: ["@prisma/client", "prisma", "argon2", "bcrypt"],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {

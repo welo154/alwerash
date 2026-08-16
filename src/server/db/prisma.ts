@@ -12,6 +12,10 @@ const POOL_TIMEOUT_SECONDS = 30;
 function resolveDatabaseUrl(): string {
   const raw = process.env.DATABASE_URL;
   if (!raw) {
+    // Prisma is imported by the root layout; don't crash `next build` when env isn't loaded yet.
+    if (process.env.NEXT_PHASE === "phase-production-build") {
+      return "postgresql://prisma:prisma@127.0.0.1:5432/prisma";
+    }
     throw new Error("DATABASE_URL is not set");
   }
 

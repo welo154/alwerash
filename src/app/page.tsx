@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { GuestLanding } from "@/components/landing/GuestLanding";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Guest marketing home (`/`). Signed-in members use `/home` instead.
  */

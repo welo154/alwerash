@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev -p 3002",
     "dev:turbo": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev --turbo -p 3002",
-    "build": "prisma generate && node --max-old-space-size=4096 ./node_modules/next/dist/bin/next build",
-    "postinstall": "prisma generate",
+    "build": "node scripts/prisma-generate.cjs && node --max-old-space-size=4096 ./node_modules/next/dist/bin/next build",
+    "postinstall": "node scripts/prisma-generate.cjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
