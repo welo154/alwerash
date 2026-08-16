@@ -17,7 +17,10 @@ import {
 import { adminGetCourseAssignment } from "@/server/content/assignment.service";
 import { CourseAssignmentEditor } from "@/app/admin/content/components/CourseAssignmentEditor";
 import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleButton";
-import { COURSE_CATALOG_TAGS } from "@/types/course-catalog-tags";
+import {
+  COURSE_CATALOG_TAGS,
+  type CourseCatalogTagKey,
+} from "@/types/course-catalog-tags";
 
 function FeaturedInBadges({
   featuredNewOrder,
@@ -379,7 +382,11 @@ export default async function AdminCourseDetail({
                   <input
                     type="checkbox"
                     name={key}
-                    defaultChecked={(course as Record<string, boolean | undefined>)[key] ?? false}
+                    defaultChecked={
+                      (course as unknown as Record<CourseCatalogTagKey, boolean | null | undefined>)[
+                        key
+                      ] ?? false
+                    }
                     className="h-3.5 w-3.5 rounded border-slate-300 text-slate-700 focus:ring-slate-400"
                   />
                   {label}
