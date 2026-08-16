@@ -114,7 +114,12 @@ export const authOptions: NextAuthOptions = {
 
 /** Get current session (use in API routes and server components). */
 export async function auth() {
-  return getServerSession(authOptions);
+  try {
+    return await getServerSession(authOptions);
+  } catch (error) {
+    console.error("[auth] getServerSession failed", error);
+    return null;
+  }
 }
 
 // signIn/signOut: use from "next-auth/react" in client components (see login form).

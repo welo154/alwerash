@@ -3,23 +3,10 @@ import { PrismaClient } from "@prisma/client";
 
 const MIN_CONNECTION_LIMIT = 15;
 const POOL_TIMEOUT_SECONDS = 30;
-const MISSING_URL_PLACEHOLDER =
-  "postgresql://prisma:prisma@127.0.0.1:5432/prisma?connect_timeout=1";
 
-/**
- * Normalize DATABASE_URL pool settings for Supabase Session pooler.
- * Prevents pool timeouts when pages run parallel queries (e.g. /home Promise.all).
- */
-function resolveDatabaseUrl(): string {
+function resolveDatabaseUrl(): string | null {
   const raw = process.env.DATABASE_URL?.trim();
-  if (!raw) {
-    if (process.env.NEXT_PHASE !== "phase-production-build") {
-      console.error(
-        "[prisma] DATABASE_URL is not set. Add it in Vercel → Settings → Environment Variables for Production and Preview, then Redeploy.",
-      );
-    }
-    return MISSING_URL_PLACEHOLDER;
-  }
+  if (!raw) return null;
 
   try {
     const url = new URL(raw.replace(/^postgresql:\/\//, "http://"));
@@ -28,7 +15,6 @@ function resolveDatabaseUrl(): string {
       url.searchParams.set("connection_limit", String(MIN_CONNECTION_LIMIT));
     }
     url.searchParams.set("pool_timeout", String(POOL_TIMEOUT_SECONDS));
-    // Session pooler (5432): pgbouncer=true is for transaction pooler (:6543) only.
     if (url.port === "5432") {
       url.searchParams.delete("pgbouncer");
     }
@@ -38,23 +24,31 @@ function resolveDatabaseUrl(): string {
   }
 }
 
-/**
- * Prisma client singleton. Reused in development to avoid creating new instances on hot reload.
- */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    datasources: {
-      db: { url: resolveDatabaseUrl() },
-    },
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["warn", "error"]
-        : ["error"],
-  });
+function getClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  const url = resolveDatabaseUrl();
+  if (!url) {
+    throw new Error(
+      "DATABASE_URL is not set. Add it in Vercel → Settings → Environment Variables (Production and Preview), then Redeploy.",
+    );
+  }
+
+  const client = new PrismaClient({
+    datasources: { db: { url } },
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
+  globalForPrisma.prisma = client;
+  return client;
 }
+
+/** Lazy Prisma client — constructed on first query, not at import. */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});

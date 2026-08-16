@@ -18,6 +18,9 @@ export const metadata = {
   },
   description:
     "Learn from industry experts. Subscribe once, access all courses in design, motion, and creative skills.",
+  icons: {
+    icon: "/brand/alwerash-logo.png",
+  },
   openGraph: {
     title: "Alwerash — Subscription education for design & creative",
     description: "Learn from industry experts. Subscribe once, access all courses.",
