@@ -1,27 +1,12 @@
 import { Suspense } from "react";
-import { DM_Sans, Playfair_Display } from "next/font/google";
 import { auth } from "@/auth";
 import { SessionProvider } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/Toast";
 import { ToastFromUrl } from "@/components/ToastFromUrl";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
+import { pangeaVar } from "@/lib/fonts/pangea";
 import "./globals.css";
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["italic", "normal"],
-  variable: "--font-logo",
-  display: "swap",
-});
 
 export const metadata = {
   title: {
@@ -45,7 +30,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${playfair.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${pangeaVar.variable} ${pangeaVar.className}`}>
       <body suppressHydrationWarning className="font-sans antialiased">
         <MicrosoftClarity userId={session?.user?.id} />
         <ToastProvider>

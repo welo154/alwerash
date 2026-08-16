@@ -5,6 +5,7 @@ export const pangeaVar = localFont({
   display: "swap",
   weight: "100 900",
   style: "normal",
+  variable: "--font-dm-sans",
 });
 
 /** Loaded Pangea family with DM Sans fallback. */

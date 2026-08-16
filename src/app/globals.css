@@ -23,7 +23,7 @@ body {
 
 /* Logo: elegant serif with slight slant (Playfair Display italic) */
 .font-logo {
-  font-family: var(--font-logo), Georgia, "Times New Roman", serif;
+  font-family: var(--font-logo, Georgia), Georgia, "Times New Roman", serif;
 }
 
 /**
