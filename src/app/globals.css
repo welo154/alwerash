@@ -249,7 +249,8 @@ label:has(input[type="radio"]) {
  */
 .learn-popular-swiper--cards.swiper {
   padding-bottom: 4px;
-  overflow-x: visible;
+  /* Clip previous slides on the left (sidebar); let the next card peek off the right. */
+  overflow-x: clip;
   overflow-y: visible;
 }
 

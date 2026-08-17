@@ -51,7 +51,7 @@ export function LearnTrendingClassesSection({
     fullBleed === true
       ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
       : bleedRight
-        ? "relative mt-8 max-w-none overflow-x-visible"
+        ? "relative mt-8 max-w-none overflow-x-clip overflow-y-visible"
         : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
   return (
@@ -73,7 +73,7 @@ export function LearnTrendingClassesSection({
       >
         <div
           ref={scrollAreaRef}
-          className="relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+          className="relative w-full min-w-0 shrink-0 overflow-x-clip overflow-y-visible"
           style={{
             minHeight: LEARN_POPULAR_FIGMA_TILE_H,
             /* Clip left (protect sidebar); allow cards to exit past the right edge. */

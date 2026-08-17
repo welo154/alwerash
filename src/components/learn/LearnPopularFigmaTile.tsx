@@ -246,17 +246,17 @@ export function LearnPopularFigmaTile(
   const unlockOverflowForHoverCard = (el: HTMLElement) => {
     const swiperRoot = el.closest(".learn-popular-swiper--cards") as HTMLElement | null;
     if (swiperRoot) {
-      swiperRoot.style.overflowX = "visible";
+      swiperRoot.style.overflowX = "clip";
       swiperRoot.style.overflowY = "visible";
       const viewport = swiperRoot.parentElement;
       if (viewport) {
-        viewport.style.overflowX = "visible";
+        viewport.style.overflowX = "clip";
         viewport.style.overflowY = "visible";
-        viewport.style.clipPath = "none";
+        viewport.style.clipPath = "inset(-200px -100vw -200px 0)";
       }
       const track = el.closest(".home-learn-next-track") as HTMLElement | null;
       if (track) {
-        track.style.overflowX = "visible";
+        track.style.overflowX = "clip";
         track.style.overflowY = "visible";
       }
       return;

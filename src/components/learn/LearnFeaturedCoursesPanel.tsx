@@ -91,7 +91,7 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
       >
         <div
           ref={scrollAreaRef}
-          className="relative w-full min-w-0 shrink-0 overflow-x-visible overflow-y-visible"
+          className="relative w-full min-w-0 shrink-0 overflow-x-clip overflow-y-visible"
           style={{
             minHeight: CATALOG_SHOWCASE_CARD_H,
             /* Allow cards to overflow right so the next slide peeks past the green. */

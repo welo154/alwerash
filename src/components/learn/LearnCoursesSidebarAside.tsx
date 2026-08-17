@@ -36,10 +36,16 @@ export function LearnCoursesSidebarAside({
   return (
     <aside
       ref={asideRef}
-      className={`relative z-20 w-full shrink-0 bg-white lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-2rem)] no-scrollbar ${
+      className={`relative z-40 w-full shrink-0 bg-white lg:w-[266px] lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-2rem)] no-scrollbar ${
         scrollable ? "lg:overflow-y-auto" : "lg:overflow-y-hidden"
       }`}
     >
+      {/* Cover any carousel slides that leak left of the sidebar column. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-full hidden bg-white lg:block"
+        style={{ width: "100vw" }}
+      />
       <div ref={contentRef}>{children}</div>
     </aside>
   );
