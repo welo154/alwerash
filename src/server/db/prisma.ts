@@ -48,6 +48,14 @@ function applyPoolSettings(
         url.searchParams.set("pgbouncer", "true");
       }
     } else if (role === "runtime") {
+      // Local `next dev` should use the Session pooler (:5432). Transaction
+      // pooler (:6543) is for Vercel lambdas; from home/office networks it
+      // often throws P1001 "Can't reach database server" and Next.js surfaces
+      // that as a fullscreen overlay even when the catalog catch path continues.
+      if (isSupabasePooler && url.port === "6543") {
+        url.port = "5432";
+        url.searchParams.delete("pgbouncer");
+      }
       const limit = Number(url.searchParams.get("connection_limit") ?? "0");
       if (!Number.isFinite(limit) || limit < LOCAL_MIN_CONNECTION_LIMIT) {
         url.searchParams.set("connection_limit", String(LOCAL_MIN_CONNECTION_LIMIT));
@@ -59,6 +67,13 @@ function applyPoolSettings(
     } else {
       url.searchParams.delete("pgbouncer");
       url.searchParams.set("connection_limit", "1");
+    }
+
+    if (isSupabasePooler && !url.searchParams.get("sslmode")) {
+      url.searchParams.set("sslmode", "require");
+    }
+    if (!url.searchParams.get("connect_timeout")) {
+      url.searchParams.set("connect_timeout", "10");
     }
 
     const rest = url.toString().replace(/^http:\/\//, "");

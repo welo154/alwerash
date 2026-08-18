@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { ProfileEditButton } from "@/components/profile/ProfileEditModal";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
@@ -191,20 +191,22 @@ export function ProfileInfoPanel({
         ) : null}
       </div>
 
-      <ProfileEditButton
-        initialName={name}
-        initialProfession={profession}
-        initialBio={bio}
-        initialSkills={skills}
-        onSaved={(next) => {
-          const nextProfession = next.profession || "Graphic Designer";
-          setName(next.name);
-          setProfession(nextProfession);
-          setBio(next.bio || FALLBACK_BIO);
-          setSkills(next.skills);
-          onProfessionChange?.(nextProfession);
-        }}
-      />
+      <Suspense fallback={null}>
+        <ProfileEditButton
+          initialName={name}
+          initialProfession={profession}
+          initialBio={bio}
+          initialSkills={skills}
+          onSaved={(next) => {
+            const nextProfession = next.profession || "Graphic Designer";
+            setName(next.name);
+            setProfession(nextProfession);
+            setBio(next.bio || FALLBACK_BIO);
+            setSkills(next.skills);
+            onProfessionChange?.(nextProfession);
+          }}
+        />
+      </Suspense>
     </div>
   );
 }

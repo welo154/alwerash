@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { useRef, useEffect, useState, type ReactNode } from "react";
+import { useToast } from "@/components/Toast";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -35,12 +36,10 @@ function MenuRow({
   href,
   children,
   onClose,
-  end,
 }: {
   href: string;
   children: ReactNode;
   onClose: () => void;
-  end?: ReactNode;
 }) {
   return (
     <Link
@@ -50,8 +49,30 @@ function MenuRow({
       style={{ fontFamily: pangeaFont }}
     >
       <span>{children}</span>
-      {end}
     </Link>
+  );
+}
+
+function ComingSoonRow({
+  label,
+  onClose,
+}: {
+  label: string;
+  onClose: () => void;
+}) {
+  const toast = useToast();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        toast(`${label} — coming soon`);
+        onClose();
+      }}
+      className="flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
+      style={{ fontFamily: pangeaFont, opacity: 0.4 }}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -66,6 +87,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
 
   const displayName = (user.name ?? "User").trim() || "User";
   const displayEmail = user.email?.trim() ?? "";
+  const close = () => setOpen(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -120,7 +142,6 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
           style={{ fontFamily: pangeaFont }}
           role="menu"
         >
-          {/* Profile header */}
           <div className="px-[30px] pt-[25px]">
             <div className="flex items-center gap-[11px]">
               <div className="relative h-[49px] w-[49px] shrink-0">
@@ -159,52 +180,36 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
           </div>
 
           <nav aria-label="Activity" className="mt-[28px] flex flex-col gap-[20px]">
-            <MenuRow href="/profile" onClose={() => setOpen(false)}>
+            <MenuRow href="/profile" onClose={close}>
               Profile
             </MenuRow>
-            <MenuRow href="/course" onClose={() => setOpen(false)}>
+            <MenuRow href="/profile?tab=Learning#profile-sections" onClose={close}>
               My Learning
             </MenuRow>
-            <MenuRow href="/dashboard" onClose={() => setOpen(false)}>
+            <MenuRow href="/profile?tab=Activity#profile-sections" onClose={close}>
               My Activity
             </MenuRow>
-            <MenuRow
-              href="/settings"
-              onClose={() => setOpen(false)}
-              end={
-                <span className="shrink-0 rounded-full bg-[#D8B4FE] px-2 py-0.5 text-xs font-bold text-black">3+</span>
-              }
-            >
-              Notifications
-            </MenuRow>
-            <MenuRow href="/settings" onClose={() => setOpen(false)}>
-              Messages
-            </MenuRow>
+            <ComingSoonRow label="Notifications" onClose={close} />
+            <ComingSoonRow label="Messages" onClose={close} />
           </nav>
 
           <MenuDivider className="mt-[31px]" />
 
           <nav aria-label="Account" className="mt-[8px] flex flex-col gap-[20px]">
-            <MenuRow href="/settings" onClose={() => setOpen(false)}>
+            <MenuRow href="/profile?edit=1" onClose={close}>
               Account Settings
             </MenuRow>
-            <MenuRow href="/subscription" onClose={() => setOpen(false)}>
+            <MenuRow href="/subscription" onClose={close}>
               Subscription
             </MenuRow>
-            <MenuRow href="/settings" onClose={() => setOpen(false)}>
-              Payment Methods
-            </MenuRow>
-            <MenuRow href="/settings" onClose={() => setOpen(false)}>
-              Language
-            </MenuRow>
+            <ComingSoonRow label="Payment Methods" onClose={close} />
+            <ComingSoonRow label="Language" onClose={close} />
           </nav>
 
           <MenuDivider className="mt-[24px]" />
 
           <div className="pb-[30px] pt-[26px]">
-            <MenuRow href="/settings" onClose={() => setOpen(false)}>
-              Help and Support
-            </MenuRow>
+            <ComingSoonRow label="Help and Support" onClose={close} />
             <button
               type="button"
               role="menuitem"

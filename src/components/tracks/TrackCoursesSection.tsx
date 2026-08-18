@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
-import { TrackProgressBar } from "@/components/learning/TrackProgressBar";
-import type { TrackProgressSummary } from "@/components/learning/LearningProgressBars";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -96,11 +94,9 @@ function sortCourses(
 export function TrackCoursesSection({
   trackTitle,
   courses,
-  trackProgress,
 }: {
   trackTitle: string;
   courses: TrackCourseItem[];
-  trackProgress?: TrackProgressSummary | null;
 }) {
   const [openFilter, setOpenFilter] = useState<FilterId | null>(null);
   const [ratingsSort, setRatingsSort] = useState<RatingsSort>("default");
@@ -236,17 +232,6 @@ export function TrackCoursesSection({
         </div>
       </div>
 
-      {trackProgress && (trackProgress.totalCount > 0 || trackProgress.progressPercent > 0) ? (
-        <div className="mt-8 max-w-xl">
-          <TrackProgressBar
-            progressPercent={trackProgress.progressPercent}
-            completedCount={trackProgress.completedCount}
-            totalCount={trackProgress.totalCount}
-            trackTitle={trackProgress.trackTitle}
-          />
-        </div>
-      ) : null}
-
       <div className="mt-[50px] min-w-0">
         {visibleCourses.length === 0 ? (
           <p
@@ -257,7 +242,12 @@ export function TrackCoursesSection({
           </p>
         ) : (
           <div
-            className="grid grid-cols-1 justify-items-center gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid min-w-0 justify-start"
+            style={{
+              gridTemplateColumns: "repeat(auto-fill, 313px)",
+              columnGap: 20,
+              rowGap: 20,
+            }}
             data-gsap-stagger-group
           >
             {visibleCourses.map((tile) => (
@@ -265,7 +255,7 @@ export function TrackCoursesSection({
                 key={tile.id}
                 {...tile}
                 size="grid"
-                className="h-full w-full max-w-[290px]"
+                className="h-full w-[313px]"
               />
             ))}
           </div>

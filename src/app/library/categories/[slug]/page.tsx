@@ -32,7 +32,7 @@ export default async function LibraryCategoryPage({
 
           <main className="min-w-0 flex-1">
             <LibraryCategoryMaterialsSection
-              categoryTitle={category.label}
+              categoryTitle={slug === "book-section" ? "Book" : category.label}
               books={books}
             />
           </main>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -16,7 +17,11 @@ const FALLBACK_SKILLS = [
   "CONCEPT ART",
 ];
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; edit?: string }>;
+}) {
   const session = await auth();
   if (!session?.user) redirect("/login?next=/profile");
 
@@ -42,6 +47,14 @@ export default async function ProfilePage() {
 
   const email = sessionUser.email?.trim() || "";
 
+  const params = await searchParams;
+  const initialTab =
+    params.tab === "Learning" ||
+    params.tab === "Activity" ||
+    params.tab === "Projects"
+      ? params.tab
+      : "Learning";
+
   const now = new Date();
   const [continueLearningCourses, weeklyActivity] = await Promise.all([
     getContinueLearningCardsForUser(userId, 3).catch(() => []),
@@ -61,11 +74,14 @@ export default async function ProfilePage() {
         initialSkills={dbSkills}
       />
 
-      <ProfileSectionTabs
-        continueLearningCourses={continueLearningCourses}
-        weeklyActivity={weeklyActivity}
-        activityHighlightDayIndex={now.getUTCDay()}
-      />
+      <Suspense fallback={null}>
+        <ProfileSectionTabs
+          initialTab={initialTab}
+          continueLearningCourses={continueLearningCourses}
+          weeklyActivity={weeklyActivity}
+          activityHighlightDayIndex={now.getUTCDay()}
+        />
+      </Suspense>
     </div>
   );
 }

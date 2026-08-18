@@ -638,7 +638,7 @@ export function LearnPopularFigmaTile(
               }
         }
       >
-        <div className={`flex flex-col gap-[5px]${isGrid ? " min-h-[68px]" : " max-w-[274px]"}`}>
+        <div className={`flex flex-col gap-[5px]${isGrid ? "" : " max-w-[274px]"}`}>
           <p
             className={`m-0 max-w-full font-normal not-italic leading-normal text-black${isGrid ? " line-clamp-2 text-[16px]" : " text-[18px]"}`}
           >
@@ -664,24 +664,6 @@ export function LearnPopularFigmaTile(
             {tagPrimary}
           </span>
         </div>
-        {isGrid && progressPercent != null ? (
-          <div className="mt-3 w-full" aria-label={`Course completion: ${completionLabel}`}>
-            <div className="mb-1 flex items-center justify-between text-[12px] text-black/60">
-              <span style={{ fontFamily: pangeaFont }}>Progress</span>
-              <span className="tabular-nums font-medium text-black/80" style={{ fontFamily: pangeaFont }}>
-                {completionLabel}
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-indigo-600 transition-all duration-300"
-                style={{
-                  width: `${Math.min(100, Math.max(0, progressPercent))}%`,
-                }}
-              />
-            </div>
-          </div>
-        ) : null}
         <div
           className={`flex flex-wrap items-center self-start${isGrid ? " mt-auto" : ""}`}
           style={isGrid ? { marginTop: GAP_TAG_TO_START } : { marginTop: GAP_TAG_TO_START }}

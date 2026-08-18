@@ -49,9 +49,27 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
+function isUnreachableDatabaseError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  return (
+    msg.includes("Can't reach database server") ||
+    msg.includes("P1001") ||
+    msg.includes("Timed out fetching a new connection") ||
+    msg.includes("Connection terminated unexpectedly")
+  );
+}
+
 function logCatalogError(scope: string, e: unknown) {
   const msg = e instanceof Error ? e.message : String(e);
-  console.error(`[catalog] ${scope}:`, msg);
+  // Next.js 15 treats `console.error` in Server Components as a blocking overlay.
+  // Catalog callers already fall back to empty lists — warn so the page still renders.
+  if (isUnreachableDatabaseError(e)) {
+    console.warn(
+      `[catalog] ${scope}: database unreachable (Supabase pooler). Using an empty catalog fallback.`
+    );
+    return;
+  }
+  console.warn(`[catalog] ${scope}:`, msg);
 }
 
 async function catalogRequiresPublished(): Promise<boolean> {
@@ -384,6 +402,91 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
     }
     throw e;
   }
+}
+
+export type CoursesMenuLink = { label: string; href: string };
+
+export type CoursesMenuPayload = {
+  allCourses: CoursesMenuLink[];
+  software: CoursesMenuLink[];
+};
+
+const SOFTWARE_TRACK_SLUG = "design-softwares";
+const COURSES_MENU_MAX_ITEMS = 8;
+const EXCLUDED_MENU_TRACK_SLUGS = new Set([
+  SOFTWARE_TRACK_SLUG,
+  "graphic-design",
+  "motion-design",
+]);
+
+const SOFTWARE_MENU_LABEL_BY_TITLE: Record<string, string> = {
+  "Photoshop Fundamentals": "Adobe Photoshop courses",
+  "Illustrator Fundamentals": "Adobe Illustrator courses",
+  "InDesign Fundamentals": "Adobe InDesign courses",
+  "After Effects Fundamentals": "Adobe After Effects courses",
+  "Figma Fundamentals": "Figma courses",
+  "Procreate & Digital Drawing": "Procreate courses",
+  TouchDesigner: "TouchDesigner courses",
+  Affinity: "Affinity courses",
+};
+
+function trackMenuLabel(title: string) {
+  const trimmed = title.trim();
+  return /courses?$/i.test(trimmed) ? trimmed : `${trimmed} courses`;
+}
+
+function isSoftwareIntroCourse(title: string) {
+  return /introduction to software/i.test(title);
+}
+
+/** Header mega-menu: only tracks/courses that exist and have a real destination. */
+export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
+  const requirePublished = await catalogRequiresPublished();
+  const visibility = publishedWhere(requirePublished);
+
+  const tracks = await prisma.track.findMany({
+    where: {
+      ...visibility,
+      NOT: { slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" } },
+      courses: { some: visibility },
+    },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    select: { title: true, slug: true },
+  });
+
+  const allCourses = tracks
+    .filter((track) => !EXCLUDED_MENU_TRACK_SLUGS.has(track.slug.toLowerCase()))
+    .slice(0, COURSES_MENU_MAX_ITEMS)
+    .map((track) => ({
+      label: trackMenuLabel(track.title),
+      href: `/tracks/${track.slug}`,
+    }));
+
+  const softwareTrack = await prisma.track.findFirst({
+    where: {
+      ...visibility,
+      slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" },
+    },
+    select: {
+      courses: {
+        where: visibility,
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+        select: { id: true, title: true },
+      },
+    },
+  });
+
+  const software = (softwareTrack?.courses ?? [])
+    .filter((course) => !isSoftwareIntroCourse(course.title))
+    .slice(0, COURSES_MENU_MAX_ITEMS)
+    .map((course) => ({
+      label:
+        SOFTWARE_MENU_LABEL_BY_TITLE[course.title] ??
+        trackMenuLabel(course.title),
+      href: `/course/${course.id}`,
+    }));
+
+  return { allCourses, software };
 }
 
 /**

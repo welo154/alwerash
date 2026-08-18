@@ -16,6 +16,7 @@ import {
   learnCarouselMousewheel,
   learnCarouselSwiperBehavior,
 } from "@/components/learn/learn-carousel-swiper-config";
+import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 
 const pangeaFont =
@@ -33,6 +34,8 @@ export type LearnFeaturedSlide = { id: string; cardProps: CatalogShowcaseCardPro
 
 export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSlide[] }) {
   const swiperRef = useRef<SwiperType | null>(null);
+  const bleedWrapRef = useRef<HTMLDivElement | null>(null);
+  const bleedWidth = useBleedRightToViewport(bleedWrapRef, true);
   const {
     scrollAreaRef,
     atBeginning,
@@ -48,7 +51,7 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
     if (!swiper) return;
     swiper.update();
     handleNavSync(swiper);
-  }, [handleNavSync, slides.length]);
+  }, [handleNavSync, slides.length, bleedWidth]);
 
   const cardSwiperStyle = {
     ["--landing-showcase-card-w" as string]: `${CATALOG_SHOWCASE_CARD_W}px`,
@@ -56,9 +59,13 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
   } as const;
 
   return (
-    <div className="relative w-full min-w-0 overflow-x-visible" style={{ height: PANEL_H }}>
+    <div
+      ref={bleedWrapRef}
+      className="relative min-w-0 overflow-x-clip"
+      style={{ height: PANEL_H, width: bleedWidth ?? "100%" }}
+    >
       {/*
-        Green shell starts 57px from the left, then stretches to (and past) the
+        Green shell starts 57px from the left, then stretches past the
         viewport’s right edge so the bottom-right border curve is clipped off-screen.
       */}
       <svg
@@ -70,9 +77,7 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
         className="pointer-events-none absolute top-0 z-0 block h-[646px]"
         style={{
           left: SVG_LEFT_PX,
-          right: "50%",
-          marginRight: `calc(-50vw - ${CURVE_HIDE_PX}px)`,
-          width: "auto",
+          width: `calc(100% - ${SVG_LEFT_PX}px + ${CURVE_HIDE_PX}px)`,
           height: PANEL_H,
         }}
         preserveAspectRatio="none"
@@ -84,18 +89,17 @@ export function LearnFeaturedCoursesPanel({ slides }: { slides: LearnFeaturedSli
         />
       </svg>
 
-      {/* Full-size cards in a horizontal swiper — extras peek on the right and stay reachable. */}
+      {/* Cards fill to the viewport right so the next slide is cut by the page edge. */}
       <div
-        className="absolute inset-0 z-10 box-border flex w-full flex-col pb-[42px] pt-[116px] pr-[24px]"
-        style={{ paddingLeft: SVG_LEFT_PX + 24 }}
+        className="absolute inset-y-0 left-0 z-10 box-border flex flex-col pb-[42px] pt-[116px]"
+        style={{ width: "100%", paddingLeft: SVG_LEFT_PX + 24 }}
       >
         <div
           ref={scrollAreaRef}
           className="relative w-full min-w-0 shrink-0 overflow-x-clip overflow-y-visible"
           style={{
             minHeight: CATALOG_SHOWCASE_CARD_H,
-            /* Allow cards to overflow right so the next slide peeks past the green. */
-            clipPath: "inset(-200px -100vw -200px 0)",
+            clipPath: "inset(-200px 0 -200px 0)",
             ...cardSwiperStyle,
           }}
         >

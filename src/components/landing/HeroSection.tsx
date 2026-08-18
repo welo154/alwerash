@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
+import { CoursesMegaMenuPanel } from "@/components/layout/CoursesMegaMenu";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
 export type HeroTrack = { id: string; title: string; slug: string };
@@ -15,33 +16,6 @@ const pangeaFont = pangeaFontFamily;
 /** Exact Subtract path from Figma 710:1466 — viewBox 1301×762. */
 const HERO_SHELL_PATH =
   "M1246 0C1276.38 1.22409e-05 1301 24.6243 1301 55V707C1301 737.376 1276.38 762 1246 762H55C24.6244 762 0 737.376 0 707V132.636C0 105.022 22.3858 82.6357 50 82.6357H176.023C200.324 82.6357 220.023 62.9363 220.023 38.6357C220.023 17.2978 237.321 0 258.659 0H1246Z";
-
-const ALL_COURSES = [
-  "Illustration courses",
-  "Craft courses",
-  "Marketing & Business courses",
-  "Photography & Video courses",
-  "Design courses",
-  "3D & Animation courses",
-  "Architecture & Spaces courses",
-  "Writing courses",
-  "Fashion courses",
-  "Web & App Design courses",
-  "Calligraphy & Typography courses",
-  "Music & Audio courses",
-  "Culinary courses",
-  "Artificial Intelligence courses",
-  "Wellness courses",
-  "How to become courses",
-];
-
-const SOFTWARE_COURSES = [
-  "Illustration courses",
-  "Craft courses",
-  "Marketing & Business courses",
-  "Photography & Video courses",
-  "Design courses",
-];
 
 const HERO_SHELL = { width: 1301, height: 762 } as const;
 
@@ -119,38 +93,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                   />
 
                   <div className="absolute top-full left-0 z-2000 mt-1 opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100">
-                    <div
-                      className="w-[582px] rounded-[50px] border border-black bg-white px-[35px] py-[28px] shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
-                      style={{ fontFamily: pangeaFont }}
-                    >
-                      <div className="grid grid-cols-2 gap-10 text-black">
-                        <div>
-                          <h3 className="mb-0 inline-flex items-center text-[18px] font-bold uppercase leading-[33px] text-black">
-                            ALL COURSES <span aria-hidden>↗</span>
-                          </h3>
-                          <ul className="space-y-0 text-[18px] font-normal text-black">
-                            {ALL_COURSES.map((item) => (
-                              <li key={item} className="flex h-[33px] items-center leading-[33px] whitespace-nowrap">
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div>
-                          <h3 className="mb-0 inline-flex items-center text-[18px] font-bold uppercase leading-[33px] text-black">
-                            SOFTWARE <span aria-hidden>↗</span>
-                          </h3>
-                          <ul className="space-y-0 text-[18px] font-normal text-black">
-                            {SOFTWARE_COURSES.map((item) => (
-                              <li key={item} className="flex h-[33px] items-center leading-[33px] whitespace-nowrap">
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
+                    <CoursesMegaMenuPanel />
                   </div>
                 </div>
                 <Link href="/library" className="transition-opacity hover:opacity-75">Library</Link>

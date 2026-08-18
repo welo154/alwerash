@@ -3,10 +3,10 @@ import localFont from "next/font/local";
 import {
   getBookAboutExcerpt,
   getBookAuthorsLabel,
-  getBookDetailImageSrc,
   getBookDetailTitle,
   type LibraryBook,
 } from "./library-books";
+import { LibraryBookDetailsScroller } from "./LibraryBookDetailsScroller";
 
 const pangeaVar = localFont({
   src: "../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
@@ -15,8 +15,21 @@ const pangeaVar = localFont({
   style: "normal",
 });
 
-const BOOK_IMAGE_WIDTH_PX = 460;
-const BOOK_IMAGE_HEIGHT_PX = 698.214;
+const BOOK_IMAGE_WIDTH_PX = 470.4;
+const BOOK_IMAGE_HEIGHT_PX = 714;
+const BOOK_DETAIL_COVER_SRC = "/library/books/book-detail-cover.png";
+const DESCRIPTION_DIVIDER_WIDTH_PX = 589;
+const DESCRIPTION_DIVIDER_STROKE_PX = 1;
+const DESCRIPTION_DIVIDER_V_HEIGHT_PX = 92 * 2;
+const DESCRIPTION_DIVIDER_INNER_X_PX = 176;
+const BOOK_TOPICS = [
+  "EDITORIAL DESIGN",
+  "TYPOGRAPHY",
+  "COLOR",
+  "PUBLICATION AND MAGAZINE LAYOUT",
+  "GRID SYSTEMS",
+  "VISUAL HEIRARCHY",
+] as const;
 const DETAILS_GAP_PX = 71;
 const INFO_BOX_WIDTH_PX = 589;
 const INFO_BOX_HEIGHT_PX = 100;
@@ -238,7 +251,73 @@ function LibraryBookLikeCell() {
   );
 }
 
-function LibraryBookDetailFavoriteIcon() {
+function LibraryBookMetaCell({
+  label,
+  value,
+  paddingLeft = 30,
+  verticallyCentered = true,
+}: {
+  label: string;
+  value: string;
+  paddingLeft?: number;
+  verticallyCentered?: boolean;
+}) {
+  return (
+    <div
+      className={`flex min-w-0 flex-col ${verticallyCentered ? "h-full justify-center" : ""}`}
+      style={{ paddingLeft }}
+    >
+      <p
+        className={`m-0 text-black ${pangeaVar.className}`}
+        style={{
+          fontSize: "24px",
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "normal",
+          opacity: 0.6,
+        }}
+      >
+        {label}
+      </p>
+      <p
+        className={`m-0 text-black ${pangeaVar.className}`}
+        style={{
+          marginTop: 8,
+          fontSize: "24px",
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "127%",
+        }}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function BookDetailPageBox() {
+  return (
+    <div
+      className={`box-border flex items-center justify-center text-black ${pangeaVar.className}`}
+      style={{
+        width: 62,
+        height: 38,
+        padding: "0 16px",
+        borderRadius: 8,
+        border: "0.3px solid #000",
+        background: "#FFF",
+        fontSize: "24px",
+        fontStyle: "normal",
+        fontWeight: 400,
+        lineHeight: "normal",
+      }}
+    >
+      1
+    </div>
+  );
+}
+
+function BookDetailFavoriteIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -246,14 +325,15 @@ function LibraryBookDetailFavoriteIcon() {
       height="33"
       viewBox="0 0 36 33"
       fill="none"
-      className="h-[31px] w-[34px] shrink-0"
+      className="shrink-0"
+      style={{ width: 34, height: 31 }}
       aria-hidden
     >
       <path
-        d="M32.1791 3.54061C31.3483 2.67175 30.3619 1.98252 29.2762 1.51227C28.1906 1.04202 27.0269 0.799988 25.8518 0.799988C24.6766 0.799988 23.513 1.04202 22.4273 1.51227C21.3417 1.98252 20.3553 2.67175 19.5245 3.54061L17.8003 5.34296L16.0762 3.54061C14.3981 1.7864 12.1221 0.800897 9.74892 0.800897C7.37572 0.800897 5.09973 1.7864 3.42163 3.54061C1.74353 5.29482 0.800781 7.67404 0.800781 10.1549C0.800781 12.6357 1.74353 15.0149 3.42163 16.7691L17.8003 31.8L32.1791 16.7691C33.0102 15.9007 33.6696 14.8696 34.1194 13.7347C34.5692 12.5998 34.8008 11.3833 34.8008 10.1549C34.8008 8.92641 34.5692 7.70998 34.1194 6.57509C33.6696 5.44019 33.0102 4.40906 32.1791 3.54061Z"
-        fill="white"
-        stroke="#1E1E1E"
-        strokeWidth="1.6"
+        d="M32.3783 3.74063C31.5475 2.87177 30.5611 2.18253 29.4755 1.71228C28.3898 1.24204 27.2262 1 26.051 1C24.8758 1 23.7122 1.24204 22.6265 1.71228C21.5409 2.18253 20.5545 2.87177 19.7237 3.74063L17.9996 5.54297L16.2754 3.74063C14.5973 1.98641 12.3213 1.00091 9.94813 1.00091C7.57494 1.00091 5.29895 1.98641 3.62085 3.74063C1.94275 5.49484 1 7.87405 1 10.3549C1 12.8357 1.94275 15.2149 3.62085 16.9691L17.9996 32L32.3783 16.9691C33.2094 16.1007 33.8688 15.0696 34.3186 13.9347C34.7685 12.7998 35 11.5833 35 10.3549C35 9.12642 34.7685 7.91 34.3186 6.7751C33.8688 5.6402 33.2094 4.60908 32.3783 3.74063Z"
+        fill="#FFF"
+        stroke="#000"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -261,29 +341,47 @@ function LibraryBookDetailFavoriteIcon() {
   );
 }
 
-function LibraryBookAboutActions({ bookTitle }: { bookTitle: string }) {
+function BookDetailDownloadIcon() {
   return (
-    <div className="mt-[35px] flex items-center">
-      <button
-        type="button"
-        className={`box-border flex h-[53px] w-[176px] items-center justify-center rounded-lg border border-black bg-[#EA83F0] px-4 text-center text-[#141413] hover:opacity-90 ${pangeaVar.className}`}
-        style={{
-          fontSize: "24px",
-          fontStyle: "normal",
-          fontWeight: 700,
-          lineHeight: "19.6px",
-        }}
-      >
-        DOWNLOAD
-      </button>
-      <button
-        type="button"
-        className="ml-[29px] shrink-0 hover:opacity-80"
-        aria-label={`Save ${bookTitle}`}
-      >
-        <LibraryBookDetailFavoriteIcon />
-      </button>
-    </div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="37"
+      height="37"
+      viewBox="0 0 37 37"
+      fill="none"
+      className="shrink-0"
+      aria-hidden
+    >
+      <path
+        d="M36 24.3333V32.1111C36 33.1425 35.5903 34.1317 34.861 34.861C34.1317 35.5903 33.1425 36 32.1111 36H4.88889C3.85749 36 2.86834 35.5903 2.13903 34.861C1.40972 34.1317 1 33.1425 1 32.1111V24.3333M28.2222 14.6111L18.5 24.3333L8.77778 14.6111M18.5 24.3333V1"
+        stroke="black"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function BookDetailShareIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="33"
+      height="37"
+      viewBox="0 0 33 37"
+      fill="none"
+      className="shrink-0"
+      aria-hidden
+    >
+      <path
+        d="M10.6272 21.1425L22.39 28.1075M22.3728 8.8925L10.6272 15.8575M32 6.25C32 9.1495 29.6868 11.5 26.8333 11.5C23.9799 11.5 21.6667 9.1495 21.6667 6.25C21.6667 3.35051 23.9799 1 26.8333 1C29.6868 1 32 3.35051 32 6.25ZM11.3333 18.5C11.3333 21.3995 9.02014 23.75 6.16667 23.75C3.3132 23.75 1 21.3995 1 18.5C1 15.6005 3.3132 13.25 6.16667 13.25C9.02014 13.25 11.3333 15.6005 11.3333 18.5ZM32 30.75C32 33.6495 29.6868 36 26.8333 36C23.9799 36 21.6667 33.6495 21.6667 30.75C21.6667 27.8505 23.9799 25.5 26.8333 25.5C29.6868 25.5 32 27.8505 32 30.75Z"
+        stroke="black"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -299,97 +397,250 @@ export function LibraryBookDetailsSection({ book }: { book: LibraryBook }) {
       style={{ gap: `${DETAILS_GAP_PX}px` }}
       aria-label="Book details"
     >
-      <div className="shrink-0" style={bookSizeStyle}>
-        <Image
-          src={getBookDetailImageSrc(book)}
-          alt={book.imageAlt}
-          width={BOOK_IMAGE_WIDTH_PX}
-          height={Math.round(BOOK_IMAGE_HEIGHT_PX)}
-          className="block"
-          style={bookSizeStyle}
-          draggable={false}
-          unoptimized
-          priority
-        />
-      </div>
-
-      <div className="min-w-0 shrink-0">
-        <h1
-          className={`m-0 text-black ${pangeaVar.className}`}
-          style={{
-            width: "599px",
-            fontSize: "36px",
-            fontWeight: 500,
-            lineHeight: "normal",
-          }}
-        >
-          {getBookDetailTitle(book)}
-        </h1>
-
-        <p
-          className={`m-0 mt-[20px] text-black/60 ${pangeaVar.className}`}
-          style={{
-            fontSize: "24px",
-            fontWeight: 400,
-            lineHeight: "normal",
-          }}
-        >
-          {getBookAuthorsLabel(book)}
-        </p>
-
-        <div
-          className="mt-[32px] box-border flex overflow-hidden border border-black/60 bg-white"
-          style={{
-            width: `${INFO_BOX_WIDTH_PX}px`,
-            height: `${INFO_BOX_HEIGHT_PX}px`,
-          }}
-        >
-          <InfoBoxCell width={INFO_BOX_COL_1_PX}>
-            <LibraryBookReadersCell />
-          </InfoBoxCell>
-          <div
-            className="shrink-0 bg-black"
-            style={{ width: `${INFO_BOX_DIVIDER_WIDTH_PX}px`, height: `${INFO_BOX_HEIGHT_PX}px` }}
+      <div className="flex shrink-0 flex-col" style={{ width: BOOK_IMAGE_WIDTH_PX }}>
+        <div className="shrink-0" style={{ ...bookSizeStyle, marginTop: 14 }}>
+          <Image
+            src={BOOK_DETAIL_COVER_SRC}
+            alt={book.imageAlt}
+            width={470}
+            height={BOOK_IMAGE_HEIGHT_PX}
+            className="block"
+            style={bookSizeStyle}
+            draggable={false}
+            unoptimized
+            priority
           />
-          <InfoBoxCell width={INFO_BOX_COL_2_PX}>
-            <LibraryBookPagesCell pages={book.pages} />
-          </InfoBoxCell>
-          <div
-            className="shrink-0 bg-black"
-            style={{ width: `${INFO_BOX_DIVIDER_WIDTH_PX}px`, height: `${INFO_BOX_HEIGHT_PX}px` }}
-          />
-          <InfoBoxCell width={INFO_BOX_COL_3_PX}>
-            <LibraryBookLikeCell />
-          </InfoBoxCell>
         </div>
 
-        <h2
-          className={`m-0 mt-[32px] text-black/60 ${pangeaVar.className}`}
-          style={{
-            fontSize: "24px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "normal",
-          }}
+        <div
+          className="flex w-full items-center justify-between"
+          style={{ marginTop: 20 }}
         >
-          About this book
-        </h2>
-
-        <p
-          className={`m-0 mt-[19px] text-black ${pangeaVar.className}`}
-          style={{
-            width: "575px",
-            fontSize: "24px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "127%",
-          }}
-        >
-          {getBookAboutExcerpt(book)}
-        </p>
-
-        <LibraryBookAboutActions bookTitle={book.title} />
+          <div className="flex items-center">
+            <BookDetailPageBox />
+            <span
+              className={`text-black ${pangeaVar.className}`}
+              style={{
+                marginLeft: 9,
+                fontSize: "24px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+              }}
+            >
+              / 1
+            </span>
+          </div>
+          <div className="flex items-center">
+            <button type="button" className="shrink-0 hover:opacity-80" aria-label={`Save ${book.title}`}>
+              <BookDetailFavoriteIcon />
+            </button>
+            <button
+              type="button"
+              className="shrink-0 hover:opacity-80"
+              style={{ marginLeft: 17 }}
+              aria-label={`Download ${book.title}`}
+            >
+              <BookDetailDownloadIcon />
+            </button>
+            <button
+              type="button"
+              className="shrink-0 hover:opacity-80"
+              style={{ marginLeft: 17 }}
+              aria-label={`Share ${book.title}`}
+            >
+              <BookDetailShareIcon />
+            </button>
+          </div>
+        </div>
       </div>
+
+      <LibraryBookDetailsScroller
+        className="box-border flex min-w-0 shrink-0 flex-col overflow-hidden"
+        style={{
+          width: 694,
+          height: BOOK_IMAGE_HEIGHT_PX + 34,
+          padding: "50px 47px 0",
+          borderRadius: 50,
+          border: "2px solid #89F496",
+        }}
+      >
+          <h1
+            className={`m-0 w-full text-black ${pangeaVar.className}`}
+            style={{
+              fontSize: "36px",
+              fontWeight: 500,
+              lineHeight: "normal",
+            }}
+          >
+            {getBookDetailTitle(book)}
+          </h1>
+
+          <p
+            className={`m-0 mt-[20px] w-full text-black/60 ${pangeaVar.className}`}
+            style={{
+              fontSize: "24px",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {getBookAuthorsLabel(book)}
+          </p>
+
+          <div
+            className="mt-[32px] box-border flex overflow-hidden border border-black/60 bg-white"
+            style={{
+              width: `${INFO_BOX_WIDTH_PX}px`,
+              height: `${INFO_BOX_HEIGHT_PX}px`,
+            }}
+          >
+            <InfoBoxCell width={INFO_BOX_COL_1_PX}>
+              <LibraryBookReadersCell />
+            </InfoBoxCell>
+            <div
+              className="shrink-0 bg-black"
+              style={{ width: `${INFO_BOX_DIVIDER_WIDTH_PX}px`, height: `${INFO_BOX_HEIGHT_PX}px` }}
+            />
+            <InfoBoxCell width={INFO_BOX_COL_2_PX}>
+              <LibraryBookPagesCell pages={book.pages} />
+            </InfoBoxCell>
+            <div
+              className="shrink-0 bg-black"
+              style={{ width: `${INFO_BOX_DIVIDER_WIDTH_PX}px`, height: `${INFO_BOX_HEIGHT_PX}px` }}
+            />
+            <InfoBoxCell width={INFO_BOX_COL_3_PX}>
+              <LibraryBookLikeCell />
+            </InfoBoxCell>
+          </div>
+
+          <h2
+            className={`m-0 mt-[32px] w-full text-black/60 ${pangeaVar.className}`}
+            style={{
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            Description
+          </h2>
+
+          <p
+            className={`m-0 mt-[19px] w-full text-black ${pangeaVar.className}`}
+            style={{
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "127%",
+            }}
+          >
+            {getBookAboutExcerpt(book)}
+          </p>
+
+          <div
+            className="mx-auto mt-[38px] box-border grid"
+            style={{
+              width: DESCRIPTION_DIVIDER_WIDTH_PX,
+              height: DESCRIPTION_DIVIDER_V_HEIGHT_PX,
+              gridTemplateColumns: `${DESCRIPTION_DIVIDER_INNER_X_PX}px 1fr`,
+              gridTemplateRows: "1fr 1fr",
+              border: `${DESCRIPTION_DIVIDER_STROKE_PX}px solid rgba(0, 0, 0, 0.6)`,
+            }}
+          >
+            <div
+              style={{
+                borderRight: `${DESCRIPTION_DIVIDER_STROKE_PX}px solid rgba(0, 0, 0, 0.6)`,
+                borderBottom: `${DESCRIPTION_DIVIDER_STROKE_PX}px solid rgba(0, 0, 0, 0.6)`,
+              }}
+            >
+              <LibraryBookMetaCell
+                label="Year"
+                value={String(book.publishedYear ?? 2003)}
+              />
+            </div>
+            <div
+              style={{
+                borderBottom: `${DESCRIPTION_DIVIDER_STROKE_PX}px solid rgba(0, 0, 0, 0.6)`,
+              }}
+            >
+              <LibraryBookMetaCell
+                label="Location"
+                value="New York, USA"
+                paddingLeft={65}
+              />
+            </div>
+            <div
+              style={{
+                borderRight: `${DESCRIPTION_DIVIDER_STROKE_PX}px solid rgba(0, 0, 0, 0.6)`,
+              }}
+            >
+              <LibraryBookMetaCell label="Type" value="Book" />
+            </div>
+            <div>
+              <LibraryBookMetaCell
+                label="Media"
+                value="Print Book.eBook"
+                paddingLeft={65}
+              />
+            </div>
+          </div>
+
+          <div
+            className="mx-auto"
+            style={{ width: DESCRIPTION_DIVIDER_WIDTH_PX, marginTop: 38 }}
+          >
+            <LibraryBookMetaCell
+              label="Publisher"
+              value="Allworth press"
+              verticallyCentered={false}
+            />
+          </div>
+
+          <div
+            className="mx-auto"
+            style={{ width: DESCRIPTION_DIVIDER_WIDTH_PX, marginTop: 38 }}
+          >
+            <div
+              style={{
+                width: DESCRIPTION_DIVIDER_WIDTH_PX,
+                height: 1,
+                opacity: 0.5,
+                background: "#000",
+              }}
+              aria-hidden
+            />
+
+            <p
+              className={`m-0 mt-[32px] text-black ${pangeaVar.className}`}
+              style={{
+                fontSize: "24px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+                opacity: 0.6,
+              }}
+            >
+              Topics
+            </p>
+
+            <div className="mt-[19px] flex flex-wrap" style={{ gap: 12 }}>
+              {BOOK_TOPICS.map((topic) => (
+                <span
+                  key={topic}
+                  className={`inline-flex h-[45px] items-center justify-center rounded-[8px] border border-black bg-white px-4 text-center text-black ${pangeaVar.className}`}
+                  style={{
+                    fontSize: "24px",
+                    fontStyle: "normal",
+                    fontWeight: 700,
+                    lineHeight: "19.6px",
+                  }}
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+      </LibraryBookDetailsScroller>
     </section>
   );
 }

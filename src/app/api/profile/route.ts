@@ -12,6 +12,20 @@ function skillsToSqlArray(skills: string[]): Prisma.Sql {
   )}]::text[]`;
 }
 
+function isMissingColumnError(e: unknown, column: string) {
+  const msg = e instanceof Error ? e.message : String(e);
+  return msg.includes(`"${column}"`) || msg.includes(`.${column}`) || msg.includes(`${column}" does not exist`) || msg.includes(`column "${column}" does not exist`) || msg.includes(`users.${column}`);
+}
+
+async function ensureBioSkillsColumns() {
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "bio" TEXT`
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "skills" TEXT[] DEFAULT ARRAY[]::TEXT[]`
+  );
+}
+
 /** PATCH /api/profile — update name, profession, bio, skills, country, image (no email). */
 export async function PATCH(request: NextRequest) {
   const session = await auth();
@@ -87,26 +101,22 @@ export async function PATCH(request: NextRequest) {
   const userId = session.user.id;
 
   try {
-    const core: {
-      name?: string | null;
-      profession?: string | null;
-      country?: string | null;
-      image?: string | null;
-    } = {};
-    if (name !== undefined) core.name = name;
-    if (profession !== undefined) core.profession = profession;
-    if (country !== undefined) core.country = country;
-    if (image !== undefined) core.image = image;
+    const coreSets: Prisma.Sql[] = [];
+    if (name !== undefined) coreSets.push(Prisma.sql`"name" = ${name}`);
+    if (profession !== undefined) {
+      coreSets.push(Prisma.sql`"profession" = ${profession}`);
+    }
+    if (country !== undefined) coreSets.push(Prisma.sql`"country" = ${country}`);
+    if (image !== undefined) coreSets.push(Prisma.sql`"image" = ${image}`);
 
-    if (Object.keys(core).length > 0) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: core,
-      });
+    if (coreSets.length > 0) {
+      await prisma.$executeRaw(
+        Prisma.sql`UPDATE "users" SET ${Prisma.join(coreSets, ", ")} WHERE "id" = ${userId}`
+      );
     }
 
     if (bio !== undefined || skills !== undefined) {
-      try {
+      const applyBioSkills = async () => {
         const sets: Prisma.Sql[] = [];
         if (bio !== undefined) sets.push(Prisma.sql`"bio" = ${bio}`);
         if (skills !== undefined) {
@@ -115,9 +125,16 @@ export async function PATCH(request: NextRequest) {
         await prisma.$executeRaw(
           Prisma.sql`UPDATE "users" SET ${Prisma.join(sets, ", ")} WHERE "id" = ${userId}`
         );
+      };
+
+      try {
+        await applyBioSkills();
       } catch (bioErr) {
-        // Columns may not exist until migration is applied — core fields still saved
-        console.warn("[api/profile] bio/skills update skipped:", bioErr);
+        if (!isMissingColumnError(bioErr, "bio") && !isMissingColumnError(bioErr, "skills")) {
+          throw bioErr;
+        }
+        await ensureBioSkillsColumns();
+        await applyBioSkills();
       }
     }
   } catch (err) {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ContinueLearningSection } from "@/components/home/ContinueLearningSection";
 import { TrackActivitySection } from "@/components/home/TrackActivitySection";
 import { ProfileProjectsSection } from "@/components/profile/ProfileProjectsSection";
@@ -12,6 +13,13 @@ const pangeaFont = pangeaFontFamily;
 
 const TABS = ["Learning", "Activity", "Projects"] as const;
 type ProfileTab = (typeof TABS)[number];
+
+function parseProfileTab(value: string | null | undefined): ProfileTab | undefined {
+  if (value === "Learning" || value === "Activity" || value === "Projects") {
+    return value;
+  }
+  return undefined;
+}
 
 function FullBleedRule({ className = "" }: { className?: string }) {
   return (
@@ -38,10 +46,36 @@ export function ProfileSectionTabs({
   weeklyActivity: WeeklyActivitySummary;
   activityHighlightDayIndex: number;
 }) {
-  const [selected, setSelected] = useState<ProfileTab>(initialTab);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [selected, setSelected] = useState<ProfileTab>(
+    () => parseProfileTab(searchParams.get("tab")) ?? initialTab
+  );
+
+  useEffect(() => {
+    const next = parseProfileTab(searchParams.get("tab"));
+    if (next) setSelected(next);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!searchParams.get("tab")) return;
+    document.getElementById("profile-sections")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [searchParams]);
+
+  function selectTab(tab: ProfileTab) {
+    setSelected(tab);
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("tab", tab);
+    next.delete("edit");
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  }
 
   return (
-    <>
+    <div id="profile-sections">
       <FullBleedRule className="mt-[59px]" />
 
       <div
@@ -62,7 +96,7 @@ export function ProfileSectionTabs({
               type="button"
               role="tab"
               aria-selected={isSelected}
-              onClick={() => setSelected(tab)}
+              onClick={() => selectTab(tab)}
               className="border-0 bg-transparent p-0"
               style={{
                 color: isSelected
@@ -103,6 +137,6 @@ export function ProfileSectionTabs({
       {selected === "Projects" ? (
         <ProfileProjectsSection className="mt-[68px] pb-16" />
       ) : null}
-    </>
+    </div>
   );
 }

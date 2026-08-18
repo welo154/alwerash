@@ -1,9 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
 import { LibraryBookBreadcrumb } from "./LibraryBookBreadcrumb";
 
-const DETAILS_BELOW_BREADCRUMB_PX = 65;
+const DETAILS_BELOW_LINE_PX = 26;
 
 export function LibraryBookDetailLayout({
   bookTitle,
@@ -12,37 +11,17 @@ export function LibraryBookDetailLayout({
   bookTitle: string;
   children: React.ReactNode;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const breadcrumbRef = useRef<HTMLElement>(null);
-  const [detailsTopPx, setDetailsTopPx] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const updateSpacing = () => {
-      const breadcrumb = breadcrumbRef.current;
-      const container = containerRef.current;
-      if (!breadcrumb || !container) return;
-
-      const breadcrumbBottom = breadcrumb.getBoundingClientRect().bottom;
-      const containerTop = container.getBoundingClientRect().top;
-      setDetailsTopPx(breadcrumbBottom - containerTop + DETAILS_BELOW_BREADCRUMB_PX);
-    };
-
-    updateSpacing();
-    window.addEventListener("resize", updateSpacing);
-    return () => window.removeEventListener("resize", updateSpacing);
-  }, []);
-
   return (
-    <div ref={containerRef} className="relative min-h-[50vh] bg-white pb-16">
-      <LibraryBookBreadcrumb ref={breadcrumbRef} bookTitle={bookTitle} />
-      <div
-        style={{
-          paddingTop: detailsTopPx ?? 0,
-          visibility: detailsTopPx === null ? "hidden" : "visible",
-        }}
-      >
-        {children}
+    <div className="min-h-[50vh] bg-white pb-16">
+      <div className="relative left-1/2 z-10 w-screen max-w-[100vw] -translate-x-1/2">
+        <LibraryBookBreadcrumb bookTitle={bookTitle} />
+        <div
+          className="h-px w-full"
+          style={{ background: "#000", opacity: 0.6 }}
+          aria-hidden
+        />
       </div>
+      <div style={{ paddingTop: DETAILS_BELOW_LINE_PX }}>{children}</div>
     </div>
   );
 }

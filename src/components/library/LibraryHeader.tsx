@@ -31,13 +31,13 @@ function CategoriesDropdownArrow() {
   );
 }
 
-export function LibraryHeader() {
+export function LibraryHeader({ compactBottom = false }: { compactBottom?: boolean }) {
   const { data: session } = useSession();
   const homeHref = session?.user ? "/home" : "/";
 
   return (
     <header
-      className="relative z-50 w-full bg-white pt-[44px] pb-8"
+      className={`relative z-50 w-full bg-white pt-[10px] ${compactBottom ? "pb-0" : "pb-8"}`}
       aria-label="Library header"
       style={{ fontFamily: pangeaFont }}
     >

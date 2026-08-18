@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getSession } from "next-auth/react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
@@ -181,19 +182,21 @@ export function ProfileEditModal({
       />
 
       <div
-        className="relative z-10 box-border overflow-hidden"
+        className="relative z-10 box-border flex flex-col"
         style={{
           width: 727,
-          height: 678,
+          minHeight: 678,
           maxWidth: "100%",
           maxHeight: "90vh",
+          overflowX: "visible",
+          overflowY: "auto",
           borderRadius: 50,
           border: "0.3px solid var(--Black, #000)",
           background: "#FFF",
           paddingTop: 88,
           paddingLeft: 62,
           paddingRight: 61,
-          paddingBottom: 40,
+          paddingBottom: 56,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -320,29 +323,36 @@ export function ProfileEditModal({
           })}
         </div>
 
-        {error ? (
-          <p
-            className="m-0 mt-[12px]"
-            style={{
-              color: "#B42318",
-              fontFamily: pangeaFont,
-              fontSize: 14,
-              fontWeight: 400,
-            }}
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
+        <div
+          className="mt-[12px]"
+          style={{ minHeight: 20 }}
+          role={error ? "alert" : undefined}
+        >
+          {error ? (
+            <p
+              className="m-0"
+              style={{
+                color: "#B42318",
+                fontFamily: pangeaFont,
+                fontSize: 14,
+                fontWeight: 400,
+              }}
+            >
+              {error}
+            </p>
+          ) : null}
+        </div>
 
+        <div className="mt-auto pt-7">
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="relative mt-[40px] box-border flex items-center border-0 p-0"
+          className="relative box-border flex shrink-0 items-center border-0 p-0"
           style={{
             width: 196,
             height: 39,
+            marginBottom: 8,
             paddingLeft: 16,
             paddingRight: 16,
             borderRadius: "var(--Radius-MD, 8px)",
@@ -394,6 +404,7 @@ export function ProfileEditModal({
             />
           </svg>
         </button>
+        </div>
       </div>
     </div>
   );
@@ -422,6 +433,18 @@ export function ProfileEditButton({
   onSaved,
 }: ProfileEditButtonProps) {
   const [open, setOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (searchParams.get("edit") !== "1") return;
+    setOpen(true);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("edit");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [searchParams, pathname, router]);
 
   return (
     <>

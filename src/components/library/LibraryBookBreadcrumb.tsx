@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import localFont from "next/font/local";
-import { forwardRef, useLayoutEffect, useRef, useState } from "react";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaVar = localFont({
-  src: "../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
-  display: "swap",
-  weight: "100 900",
-  style: "normal",
-});
+const pangeaFont = pangeaFontFamily;
 
-const BREADCRUMB_LEFT_PX = 55;
-const BREADCRUMB_BELOW_HOME_PX = 55;
+const breadcrumbTextStyle = {
+  color: "var(--Black, #000)",
+  fontFamily: pangeaFont,
+  fontSize: 18,
+  fontStyle: "normal" as const,
+  fontWeight: 400,
+  lineHeight: "normal",
+};
 
-const breadcrumbTextClass = `${pangeaVar.className} text-[24px] font-normal not-italic leading-normal text-black/[0.6]`;
+const breadcrumbTextClass = "opacity-60 hover:opacity-80";
 
 function LibraryBreadcrumbChevron() {
   return (
@@ -24,7 +24,8 @@ function LibraryBreadcrumbChevron() {
       height="17"
       viewBox="0 0 10 19"
       fill="none"
-      className="h-[17px] w-[8px] shrink-0 opacity-60"
+      className="h-[17px] w-[8px] shrink-0"
+      style={{ opacity: 0.6 }}
       aria-hidden
     >
       <path
@@ -38,64 +39,34 @@ function LibraryBreadcrumbChevron() {
   );
 }
 
-export const LibraryBookBreadcrumb = forwardRef<
-  HTMLElement,
-  { bookTitle: string }
->(function LibraryBookBreadcrumb({ bookTitle }, ref) {
-  const navRef = useRef<HTMLElement>(null);
-  const [topPx, setTopPx] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const updatePosition = () => {
-      const home = document.getElementById("library-nav-home");
-      const nav = navRef.current;
-      const parent = nav?.parentElement;
-      if (!home || !nav || !parent) return;
-
-      const homeBottom = home.getBoundingClientRect().bottom;
-      const parentTop = parent.getBoundingClientRect().top;
-      setTopPx(homeBottom + BREADCRUMB_BELOW_HOME_PX - parentTop);
-    };
-
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    return () => window.removeEventListener("resize", updatePosition);
-  }, []);
-
-  const setNavRef = (node: HTMLElement | null) => {
-    navRef.current = node;
-    if (typeof ref === "function") {
-      ref(node);
-    } else if (ref) {
-      ref.current = node;
-    }
-  };
-
+export function LibraryBookBreadcrumb({ bookTitle }: { bookTitle: string }) {
   return (
     <nav
-      ref={setNavRef}
       aria-label="Breadcrumb"
-      className="absolute z-[60] flex items-center gap-3"
+      className="flex items-center"
       style={{
-        left: `${BREADCRUMB_LEFT_PX}px`,
-        top: topPx ?? 0,
-        visibility: topPx === null ? "hidden" : "visible",
+        paddingLeft: 40,
+        paddingTop: 8,
+        paddingBottom: 16,
+        gap: 26,
+        fontFamily: pangeaFont,
       }}
     >
-      <Link href="/library" className={`${breadcrumbTextClass} hover:opacity-80`}>
+      <Link href="/library" className={breadcrumbTextClass} style={breadcrumbTextStyle}>
         Library
       </Link>
       <LibraryBreadcrumbChevron />
       <Link
         href="/library/categories/book-section"
-        className={`${breadcrumbTextClass} hover:opacity-80`}
+        className={breadcrumbTextClass}
+        style={breadcrumbTextStyle}
       >
         Books
       </Link>
       <LibraryBreadcrumbChevron />
-      <span className={breadcrumbTextClass}>{bookTitle}</span>
+      <span className="opacity-60" style={breadcrumbTextStyle}>
+        {bookTitle}
+      </span>
     </nav>
   );
-});
-
-LibraryBookBreadcrumb.displayName = "LibraryBookBreadcrumb";
+}

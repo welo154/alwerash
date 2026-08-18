@@ -46,14 +46,13 @@ export function LibraryBookGridBox({
   } as const;
 
   return (
-    <div className="relative shrink-0" style={bookSizeStyle}>
+    <div className="relative shrink-0 overflow-hidden" style={bookSizeStyle}>
       <Image
         src={imageSrc}
         alt={imageAlt}
-        width={width}
-        height={Math.round(height)}
-        className="block"
-        style={bookSizeStyle}
+        fill
+        sizes={`${width}px`}
+        className="object-cover"
         draggable={false}
         unoptimized
       />

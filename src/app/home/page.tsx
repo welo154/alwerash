@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
+import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
@@ -58,7 +59,10 @@ export default async function LoggedInHomePage() {
         console.warn("[home] track explorer unavailable", err instanceof Error ? err.message : err);
         return EMPTY_TRACK_EXPLORER;
       }),
-      getWeeklyActivitySummary(userId, now),
+      getWeeklyActivitySummary(userId, now).catch((err) => {
+        console.warn("[home] weekly activity unavailable", err instanceof Error ? err.message : err);
+        return emptyWeeklyActivitySummary(now);
+      }),
     ]);
 
   return (
