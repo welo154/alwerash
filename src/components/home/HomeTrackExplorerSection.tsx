@@ -24,6 +24,7 @@ import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { LibraryFeaturedBook } from "@/components/library/LibraryFeaturedBook";
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
@@ -530,24 +531,69 @@ export function HomeTrackExplorerSection({
       ) : null}
 
       {showDiscoverCta ? (
-        <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
-          <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
-            <p
-              className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
-              style={bodyTextFont}
-            >
-              Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
-              industry professionals.
-            </p>
-            <Link
-              href="/course"
-              className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
-              style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
-            >
-              Discover
-            </Link>
+        <>
+          <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
+            <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
+              <p
+                className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
+                style={bodyTextFont}
+              >
+                Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
+                industry professionals.
+              </p>
+              <Link
+                href="/course"
+                className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
+              >
+                Discover
+              </Link>
+            </div>
           </div>
-        </div>
+
+          <div className={`${FULL_BLEED} flex justify-center px-4`}>
+            <div
+              className="box-border overflow-visible"
+              style={{
+                marginTop: 56,
+                width: 1359.999,
+                maxWidth: "100%",
+                borderRadius: 55,
+                background: "var(--Dark-Green, #004B3C)",
+                paddingTop: 100,
+                paddingBottom: 100,
+                paddingLeft: 24,
+                paddingRight: 24,
+              }}
+            >
+              <LibraryFeaturedBook embedded />
+
+              <div
+                className="mx-auto flex max-w-full flex-wrap items-center justify-between lg:pl-[92px] lg:pr-[72px]"
+                style={{ marginTop: 25 }}
+              >
+                <p
+                  className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white"
+                  style={{ ...bodyTextFont, marginLeft: 90 }}
+                >
+                  Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
+                  industry professionals.
+                </p>
+                <Link
+                  href="/course"
+                  className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                  style={{
+                    ...pillFont,
+                    backgroundColor: "var(--Blue, #64E1FF)",
+                    marginRight: 65,
+                  }}
+                >
+                  Discover
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
       ) : null}
     </section>
   );

@@ -49,10 +49,12 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   if (isLibrary) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
-        <div className="mx-auto w-full max-w-[1440px] min-w-0">
-          <LibraryHeader compactBottom={pathname.startsWith("/library/books")} />
+        <div className="w-full min-w-0">
+          <div className="mx-auto w-full max-w-[1440px] min-w-0">
+            <LibraryHeader compactBottom={pathname.startsWith("/library/books")} />
+          </div>
         </div>
-        <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
+        <main className="w-full min-w-0 flex-1">{children}</main>
         <ConditionalSiteFooter />
       </div>
     );

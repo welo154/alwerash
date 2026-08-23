@@ -182,21 +182,19 @@ export function ProfileEditModal({
       />
 
       <div
-        className="relative z-10 box-border flex flex-col"
+        className="relative z-10 box-border flex flex-col justify-center"
         style={{
           width: 727,
-          minHeight: 678,
+          height: 678,
           maxWidth: "100%",
-          maxHeight: "90vh",
-          overflowX: "visible",
-          overflowY: "auto",
+          overflow: "hidden",
           borderRadius: 50,
           border: "0.3px solid var(--Black, #000)",
           background: "#FFF",
-          paddingTop: 88,
+          paddingTop: 0,
           paddingLeft: 62,
           paddingRight: 61,
-          paddingBottom: 56,
+          paddingBottom: 0,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -343,7 +341,7 @@ export function ProfileEditModal({
           ) : null}
         </div>
 
-        <div className="mt-auto pt-7">
+        <div className="mt-[25px]">
         <button
           type="button"
           onClick={handleSave}
@@ -352,7 +350,7 @@ export function ProfileEditModal({
           style={{
             width: 196,
             height: 39,
-            marginBottom: 8,
+            marginBottom: 0,
             paddingLeft: 16,
             paddingRight: 16,
             borderRadius: "var(--Radius-MD, 8px)",

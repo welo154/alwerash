@@ -47,7 +47,7 @@ export function getLibraryCategoryBySlug(slug: string): LibraryCategory | undefi
 }
 
 export function buildLibrarySidebarCategories() {
-  return getLibraryCategoriesWithBooks().map((category) => ({
+  return LIBRARY_CATEGORIES.map((category) => ({
     key: category.key,
     label: category.label,
     href: `/library/categories/${category.slug}`,

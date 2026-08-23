@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -21,8 +23,10 @@ type TitleLinePart = {
 
 export type LibraryCategoryCardProps = {
   titleLines: TitleLinePart[][];
-  imageSrc: string;
-  imageAlt: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  href: string;
+  rightVisual?: ReactNode;
 };
 
 function SectionArrowIcon() {
@@ -93,9 +97,11 @@ function LeftBoxContent({ titleLines }: { titleLines: TitleLinePart[][] }) {
 function RightBoxContent({
   imageSrc,
   imageAlt,
+  rightVisual,
 }: {
-  imageSrc: string;
-  imageAlt: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  rightVisual?: ReactNode;
 }) {
   return (
     <div
@@ -107,19 +113,27 @@ function RightBoxContent({
       }}
     >
       <div
-        className="relative h-full w-full"
-        style={{ padding: RIGHT_BOX_IMAGE_PADDING }}
+        className={
+          rightVisual
+            ? "relative h-full w-full overflow-visible"
+            : "relative flex h-full w-full items-center justify-center overflow-visible"
+        }
+        style={{ padding: rightVisual ? 0 : RIGHT_BOX_IMAGE_PADDING }}
       >
-        <div className="relative h-full w-full">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            sizes={`${RIGHT_BOX_HEIGHT}px`}
-            className="object-contain"
-            unoptimized
-          />
-        </div>
+        {rightVisual ? (
+          rightVisual
+        ) : imageSrc ? (
+          <div className="relative h-full w-full">
+            <Image
+              src={imageSrc}
+              alt={imageAlt ?? ""}
+              fill
+              sizes={`${RIGHT_BOX_HEIGHT}px`}
+              className="object-contain"
+              unoptimized
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -129,9 +143,14 @@ export function LibraryCategoryCard({
   titleLines,
   imageSrc,
   imageAlt,
+  href,
+  rightVisual,
 }: LibraryCategoryCardProps) {
   return (
-    <div className="relative flex items-center overflow-visible">
+    <Link
+      href={href}
+      className="relative flex items-center overflow-visible outline-none transition-opacity hover:opacity-90 focus-visible:opacity-90"
+    >
       <div
         className="relative shrink-0 overflow-hidden"
         style={{
@@ -147,7 +166,7 @@ export function LibraryCategoryCard({
         <LeftBoxContent titleLines={titleLines} />
       </div>
       <div
-        className="relative shrink-0 overflow-hidden"
+        className="relative shrink-0 overflow-visible"
         style={{
           width: RIGHT_BOX_WIDTH,
           height: RIGHT_BOX_HEIGHT,
@@ -159,8 +178,12 @@ export function LibraryCategoryCard({
           zIndex: 2,
         }}
       >
-        <RightBoxContent imageSrc={imageSrc} imageAlt={imageAlt} />
+        <RightBoxContent
+          imageSrc={imageSrc}
+          imageAlt={imageAlt}
+          rightVisual={rightVisual}
+        />
       </div>
-    </div>
+    </Link>
   );
 }

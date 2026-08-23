@@ -138,7 +138,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
 
       {open && (
         <div
-          className="absolute right-0 top-full z-2500 mt-2 h-[638px] w-[277px] overflow-hidden rounded-[50px] border-2 border-black bg-white shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
+          className="absolute right-0 top-full z-2500 mt-2 w-[277px] overflow-hidden rounded-[50px] border-2 border-black bg-white shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
           style={{ fontFamily: pangeaFont }}
           role="menu"
         >
@@ -176,10 +176,10 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
                 ) : null}
               </div>
             </div>
-            <div className="mt-[19px] -mx-[30px] h-px w-[277px] bg-black" aria-hidden />
+            <div className="mt-[17px] -mx-[30px] h-px w-[277px] bg-black" aria-hidden />
           </div>
 
-          <nav aria-label="Activity" className="mt-[28px] flex flex-col gap-[20px]">
+          <nav aria-label="Activity" className="mt-[24px] flex flex-col gap-[16px]">
             <MenuRow href="/profile" onClose={close}>
               Profile
             </MenuRow>
@@ -193,9 +193,9 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
             <ComingSoonRow label="Messages" onClose={close} />
           </nav>
 
-          <MenuDivider className="mt-[31px]" />
+          <MenuDivider className="mt-[27px]" />
 
-          <nav aria-label="Account" className="mt-[8px] flex flex-col gap-[20px]">
+          <nav aria-label="Account" className="mt-[5px] flex flex-col gap-[16px]">
             <MenuRow href="/profile?edit=1" onClose={close}>
               Account Settings
             </MenuRow>
@@ -206,9 +206,9 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
             <ComingSoonRow label="Language" onClose={close} />
           </nav>
 
-          <MenuDivider className="mt-[24px]" />
+          <MenuDivider className="mt-[20px]" />
 
-          <div className="pb-[30px] pt-[26px]">
+          <div className="flex flex-col gap-[16px] pb-[26px] pt-[22px]">
             <ComingSoonRow label="Help and Support" onClose={close} />
             <button
               type="button"
@@ -217,7 +217,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
                 setOpen(false);
                 signOut({ callbackUrl: "/?toast=Signed+out" });
               }}
-              className="mt-[20px] flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
+              className="flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
               style={{ fontFamily: pangeaFont }}
             >
               Log Out
