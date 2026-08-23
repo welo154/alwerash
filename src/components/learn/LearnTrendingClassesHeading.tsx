@@ -2,7 +2,7 @@
 
 import { LearnClassesCarouselHeading } from "@/components/learn/LearnClassesCarouselHeading";
 
-export function LearnPopularClassesHeading({
+export function LearnTrendingClassesHeading({
   onNext,
   atEnd = false,
 }: {
@@ -11,11 +11,11 @@ export function LearnPopularClassesHeading({
 }) {
   return (
     <LearnClassesCarouselHeading
-      primary="POPULAR"
-      secondary="CLASSES"
+      primary="RECENTLY"
+      secondary="ADDED"
       onNext={onNext}
       atEnd={atEnd}
-      nextAriaLabel="Next popular class"
+      nextAriaLabel="Next recently added class"
       arrowGapPx={25}
       arrowSize={47}
       className="max-lg:-ml-6 max-lg:pl-[30px] sm:max-lg:-ml-8"

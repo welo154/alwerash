@@ -22,6 +22,7 @@ export function LandingCurrentMostsSection({
   compactVerticalSpacing = false,
   leftInsetPx,
   rightInsetPx,
+  mobileHeadingInsetPx,
   contained = false,
   alignToRight = false,
   alignCardsLeft = false,
@@ -38,6 +39,8 @@ export function LandingCurrentMostsSection({
   compactVerticalSpacing?: boolean;
   leftInsetPx?: number;
   rightInsetPx?: number;
+  /** Mobile heading inset from the section’s left edge (guest landing default 30px). */
+  mobileHeadingInsetPx?: number;
   contained?: boolean;
   /** When true, heading and mentor grid hug the right edge of the section / viewport breakout. */
   alignToRight?: boolean;
@@ -139,8 +142,11 @@ export function LandingCurrentMostsSection({
       >
         <h2
           id="landing-current-mosts-heading-mobile"
-          className="m-0 ml-[30px] w-[269px] text-left uppercase text-black"
-          style={{ fontFamily: pangeaFont }}
+          className="m-0 w-[269px] text-left uppercase text-black"
+          style={{
+            fontFamily: pangeaFont,
+            marginLeft: mobileHeadingInsetPx ?? 30,
+          }}
         >
           <span
             style={{

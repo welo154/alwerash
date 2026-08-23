@@ -1,13 +1,11 @@
-// file: src/server/db/prisma.ts
 import { PrismaClient } from "@prisma/client";
+import { isPoolExhaustedText, silencePoolErrors } from "@/server/db/silence-pool-errors";
 
-const LOCAL_MIN_CONNECTION_LIMIT = 10;
-const POOL_TIMEOUT_SECONDS = 20;
-const isServerless = Boolean(process.env.VERCEL);
+silencePoolErrors();
 
-/**
- * Vercel env values are often pasted with wrapping quotes or a DATABASE_URL= prefix.
- */
+const CONNECTION_LIMIT = 1;
+const isDev = process.env.NODE_ENV !== "production";
+
 function stripEnvValue(raw: string): string {
   let s = raw.trim().replace(/^\uFEFF/, "");
   if (s.startsWith("DATABASE_URL=")) s = s.slice("DATABASE_URL=".length).trim();
@@ -21,129 +19,175 @@ function stripEnvValue(raw: string): string {
   return s;
 }
 
-/**
- * Serverless: one Prisma connection per lambda + Supabase transaction pooler (:6543).
- * Session mode (:5432) with connection_limit=15 exhausts pool_size 15 across lambdas
- * (EMAXCONNSESSION) and the catalog renders empty.
- */
-function applyPoolSettings(
-  connectionString: string,
-  role: "runtime" | "direct",
-): string {
-  const match = connectionString.match(/^(postgres(?:ql)?:\/\/)(.+)$/i);
-  if (!match) return connectionString;
-  const protocol =
-    match[1].toLowerCase() === "postgres://" ? "postgres://" : "postgresql://";
-  try {
-    const url = new URL(`http://${match[2]}`);
-    const isSupabasePooler = url.hostname.includes("pooler.supabase.com");
+function isPoolError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return isPoolExhaustedText(`${error.name} ${error.message} ${error.stack ?? ""}`);
+  }
+  return isPoolExhaustedText(String(error));
+}
 
-    if (role === "runtime" && isServerless) {
-      url.searchParams.set("connection_limit", "1");
-      url.searchParams.set("pool_timeout", String(POOL_TIMEOUT_SECONDS));
-      if (isSupabasePooler && (url.port === "5432" || url.port === "")) {
-        url.port = "6543";
-      }
-      if (url.port === "6543") {
-        url.searchParams.set("pgbouncer", "true");
-      }
-    } else if (role === "runtime") {
-      // Local `next dev` should use the Session pooler (:5432). Transaction
-      // pooler (:6543) is for Vercel lambdas; from home/office networks it
-      // often throws P1001 "Can't reach database server" and Next.js surfaces
-      // that as a fullscreen overlay even when the catalog catch path continues.
-      if (isSupabasePooler && url.port === "6543") {
-        url.port = "5432";
-        url.searchParams.delete("pgbouncer");
-      }
-      const limit = Number(url.searchParams.get("connection_limit") ?? "0");
-      if (!Number.isFinite(limit) || limit < LOCAL_MIN_CONNECTION_LIMIT) {
-        url.searchParams.set("connection_limit", String(LOCAL_MIN_CONNECTION_LIMIT));
-      }
-      url.searchParams.set("pool_timeout", "30");
-      if (url.port === "5432") {
-        url.searchParams.delete("pgbouncer");
-      }
-    } else {
-      url.searchParams.delete("pgbouncer");
-      url.searchParams.set("connection_limit", "1");
-    }
-
-    if (isSupabasePooler && !url.searchParams.get("sslmode")) {
-      url.searchParams.set("sslmode", "require");
-    }
-    if (!url.searchParams.get("connect_timeout")) {
-      url.searchParams.set("connect_timeout", "10");
-    }
-
-    const rest = url.toString().replace(/^http:\/\//, "");
-    return `${protocol}${rest}`;
-  } catch {
-    return connectionString;
+function emptyQueryResult(operation: string): unknown {
+  switch (operation) {
+    case "findMany":
+    case "$queryRaw":
+    case "$queryRawUnsafe":
+      return [];
+    case "count":
+    case "$executeRaw":
+    case "$executeRawUnsafe":
+      return 0;
+    case "aggregate":
+    case "groupBy":
+      return {};
+    default:
+      return null;
   }
 }
 
-function firstPostgresUrl(
-  role: "runtime" | "direct",
-  ...candidates: Array<string | undefined>
-): string | null {
+/** Avoid `new URL()` — passwords with `@` / `#` make that parser fail and skip pool settings. */
+function rewriteRuntimeUrl(connectionString: string): string {
+  const protoEnd = connectionString.indexOf("://");
+  if (protoEnd < 0) return connectionString;
+  const protocol = connectionString.slice(0, protoEnd + 3);
+  const after = connectionString.slice(protoEnd + 3);
+  const slash = after.indexOf("/");
+  const hostPart = slash === -1 ? after : after.slice(0, slash);
+  const pathAndQuery = slash === -1 ? "" : after.slice(slash);
+
+  const at = hostPart.lastIndexOf("@");
+  const userinfo = at === -1 ? "" : hostPart.slice(0, at + 1);
+  const hostPort = at === -1 ? hostPart : hostPart.slice(at + 1);
+
+  let host = hostPort;
+  let port = "";
+  const colon = hostPort.lastIndexOf(":");
+  if (colon !== -1 && !hostPort.endsWith("]")) {
+    host = hostPort.slice(0, colon);
+    port = hostPort.slice(colon + 1);
+  }
+
+  const isPooler = host.includes("pooler.supabase.com");
+  if (isPooler) {
+    port = "6543";
+  } else if (!port) {
+    port = "5432";
+  }
+
+  const qIndex = pathAndQuery.indexOf("?");
+  const path = qIndex === -1 ? pathAndQuery || "/postgres" : pathAndQuery.slice(0, qIndex);
+  const query = qIndex === -1 ? "" : pathAndQuery.slice(qIndex + 1);
+  const params = new URLSearchParams(query);
+  params.set("connection_limit", String(CONNECTION_LIMIT));
+  params.set("pool_timeout", "20");
+  if (port === "6543") {
+    params.set("pgbouncer", "true");
+  }
+  if (isPooler && !params.get("sslmode")) {
+    params.set("sslmode", "require");
+  }
+  if (!params.get("connect_timeout")) {
+    params.set("connect_timeout", "10");
+  }
+
+  return `${protocol}${userinfo}${host}:${port}${path}?${params.toString()}`;
+}
+
+function rewriteDirectUrl(connectionString: string): string {
+  const protoEnd = connectionString.indexOf("://");
+  if (protoEnd < 0) return connectionString;
+  const protocol = connectionString.slice(0, protoEnd + 3);
+  const after = connectionString.slice(protoEnd + 3);
+  const slash = after.indexOf("/");
+  const hostPart = slash === -1 ? after : after.slice(0, slash);
+  const pathAndQuery = slash === -1 ? "" : after.slice(slash);
+  const qIndex = pathAndQuery.indexOf("?");
+  const path = qIndex === -1 ? pathAndQuery : pathAndQuery.slice(0, qIndex);
+  const query = qIndex === -1 ? "" : pathAndQuery.slice(qIndex + 1);
+  const params = new URLSearchParams(query);
+  params.delete("pgbouncer");
+  params.set("connection_limit", "1");
+  return `${protocol}${hostPart}${path}?${params.toString()}`;
+}
+
+function firstPostgresUrl(...candidates: Array<string | undefined>): string | null {
   for (const candidate of candidates) {
     if (!candidate) continue;
     const cleaned = stripEnvValue(candidate);
-    if (/^postgres(?:ql)?:\/\//i.test(cleaned)) {
-      return applyPoolSettings(cleaned, role);
-    }
+    if (/^postgres(?:ql)?:\/\//i.test(cleaned)) return cleaned;
   }
   return null;
 }
 
 function resolveDatabaseUrl(): string | null {
-  return firstPostgresUrl(
-    "runtime",
+  const raw = firstPostgresUrl(
     process.env.DATABASE_URL,
     process.env.POSTGRES_PRISMA_URL,
     process.env.POSTGRES_URL,
     process.env.DIRECT_URL,
     process.env.POSTGRES_URL_NON_POOLING,
   );
+  return raw ? rewriteRuntimeUrl(raw) : null;
 }
 
 function resolveDirectUrl(databaseUrl: string): string {
-  return (
-    firstPostgresUrl(
-      "direct",
-      process.env.DIRECT_URL,
-      process.env.POSTGRES_URL_NON_POOLING,
-      process.env.DATABASE_URL,
-    ) ?? databaseUrl
+  const raw = firstPostgresUrl(
+    process.env.DIRECT_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+    process.env.DATABASE_URL,
   );
+  return raw ? rewriteDirectUrl(raw) : databaseUrl;
 }
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+  prismaPoolBroken?: boolean;
+};
 
-function getClient(): PrismaClient {
-  if (globalForPrisma.prisma) return globalForPrisma.prisma;
-
+function createClient(): PrismaClient {
   const url = resolveDatabaseUrl();
   if (!url) {
     const sample = stripEnvValue(process.env.DATABASE_URL ?? "").slice(0, 24);
     throw new Error(
-      `DATABASE_URL must start with postgresql:// (got ${sample ? JSON.stringify(sample) : "empty"}). In Vercel → Settings → Environment Variables, paste the Supabase pooler URI with no quotes, then Redeploy.`,
+      `DATABASE_URL must start with postgresql:// (got ${sample ? JSON.stringify(sample) : "empty"}).`,
     );
   }
 
   process.env.DATABASE_URL = url;
   process.env.DIRECT_URL = resolveDirectUrl(url);
 
-  const client = new PrismaClient({
+  const base = new PrismaClient({
     datasources: { db: { url } },
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    errorFormat: "minimal",
+    log: [{ emit: "event", level: "error" }],
   });
+
+  const extended = base.$extends({
+    query: {
+      async $allOperations({ operation, args, query }) {
+        if (globalForPrisma.prismaPoolBroken) {
+          return emptyQueryResult(operation);
+        }
+        try {
+          return await query(args);
+        } catch (error) {
+          if (!isPoolError(error)) throw error;
+          globalForPrisma.prismaPoolBroken = true;
+          return emptyQueryResult(operation);
+        }
+      },
+    },
+  });
+
+  return extended as unknown as PrismaClient;
+}
+
+function getClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
+  const client = createClient();
   globalForPrisma.prisma = client;
   return client;
 }
 
-/** Lazy Prisma client — constructed on first query, not at import. */
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop, receiver) {
     const client = getClient();
@@ -151,3 +195,7 @@ export const prisma = new Proxy({} as PrismaClient, {
     return typeof value === "function" ? value.bind(client) : value;
   },
 });
+
+if (isDev) {
+  getClient();
+}

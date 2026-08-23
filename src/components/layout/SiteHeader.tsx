@@ -64,7 +64,10 @@ export function SiteHeader() {
   }
 
   if (session?.user) {
-    const flushBottom = pathname === "/profile" || pathname.startsWith("/profile/");
+    const flushBottom =
+      pathname === "/course" ||
+      pathname === "/profile" ||
+      pathname.startsWith("/profile/");
     return (
       <LoggedInAppHeader
         user={session.user}
@@ -74,5 +77,5 @@ export function SiteHeader() {
     );
   }
 
-  return <GuestSiteHeader />;
+  return <GuestSiteHeader flushBottom={pathname === "/course"} />;
 }

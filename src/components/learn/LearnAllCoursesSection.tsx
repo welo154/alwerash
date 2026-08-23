@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
 import "swiper/css";
 import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import { LearnAllCoursesHeading } from "@/components/learn/LearnAllCoursesHeading";
 import {
   learnCarouselMousewheel,
   learnCarouselSwiperBehavior,
@@ -13,10 +15,8 @@ import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewp
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import {
   LearnPopularFigmaTile,
-  LEARN_POPULAR_FIGMA_TILE_H,
   LEARN_POPULAR_FIGMA_TILE_W,
 } from "@/components/learn/LearnPopularFigmaTile";
-import { LearnClassesCarouselHeading } from "@/components/learn/LearnClassesCarouselHeading";
 import type {
   LearnAllCourseItem,
   LearnCourseTrackOption,
@@ -25,6 +25,24 @@ import type {
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+
+const MOBILE_COURSE_CAROUSEL_CARD_W = 315;
+const MOBILE_COURSE_CAROUSEL_GAP = 20;
+const MOBILE_COURSE_CAROUSEL_INSET_PX = 30;
+
+function useIsLgUp() {
+  const [isLgUp, setIsLgUp] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLgUp(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return isLgUp;
+}
 
 const DEEP_DIVE_MIN_LESSONS = 3;
 const DEEP_DIVE_MIN_MINUTES = 45;
@@ -134,26 +152,6 @@ function AllCoursesFilterDropdown({
   );
 }
 
-function LearnAllCoursesHeading({
-  onNext,
-  atEnd,
-}: {
-  onNext: () => void;
-  atEnd: boolean;
-}) {
-  return (
-    <LearnClassesCarouselHeading
-      primary="ALL"
-      secondary="COURSES"
-      onNext={onNext}
-      atEnd={atEnd}
-      nextAriaLabel="Next courses"
-      arrowGapPx={25}
-      arrowSize={47}
-    />
-  );
-}
-
 function normalizeSlug(slug: string | null | undefined): string {
   return slug?.trim().toLowerCase() ?? "";
 }
@@ -206,11 +204,15 @@ export default function LearnAllCoursesSection({
    * `"right"` — keep the left edge, bleed to the viewport’s right edge (no white gutter).
    */
   fullBleed = "right",
+  hideNavOnMobile = false,
 }: {
   courses: LearnAllCourseItem[];
   tracks: LearnCourseTrackOption[];
   fullBleed?: boolean | "right";
+  hideNavOnMobile?: boolean;
 }) {
+  const isLgUp = useIsLgUp();
+  const searchParams = useSearchParams();
   const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
   const [openFilter, setOpenFilter] = useState<OpenFilter>(null);
@@ -218,6 +220,10 @@ export default function LearnAllCoursesSection({
   const bleedWrapRef = useRef<HTMLDivElement | null>(null);
   const bleedRight = fullBleed === "right";
   const bleedWidth = useBleedRightToViewport(bleedWrapRef, bleedRight);
+
+  const slideW = isLgUp ? LEARN_POPULAR_FIGMA_TILE_W : MOBILE_COURSE_CAROUSEL_CARD_W;
+  const slideGap = isLgUp ? learnCarouselSwiperBehavior.spaceBetween : MOBILE_COURSE_CAROUSEL_GAP;
+  const slidesOffsetBefore = isLgUp ? 0 : MOBILE_COURSE_CAROUSEL_INSET_PX;
 
   const {
     scrollAreaRef,
@@ -257,6 +263,19 @@ export default function LearnAllCoursesSection({
   }, [courses, trackSlug, typeFilter]);
 
   useEffect(() => {
+    const typeParam = searchParams.get("type");
+    if (typeParam === "all" || typeParam === "topRated" || typeParam === "deepDive") {
+      setTypeFilter(typeParam);
+    } else if (typeParam == null) {
+      setTypeFilter("all");
+    }
+
+    const trackParam = searchParams.get("track");
+    if (trackParam) setTrackSlug(trackParam);
+    else setTrackSlug("all");
+  }, [searchParams]);
+
+  useEffect(() => {
     if (!openFilter) return;
     const onPointerDown = (e: PointerEvent) => {
       if (!filtersRef.current?.contains(e.target as Node)) setOpenFilter(null);
@@ -278,15 +297,25 @@ export default function LearnAllCoursesSection({
     fullBleed === true
       ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
       : bleedRight
-        ? "relative mt-8 max-w-none overflow-x-clip overflow-y-visible"
+        ? "relative max-lg:-ml-6 max-lg:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-lg:-ml-8 lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
         : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
+  const bleedWrapStyle =
+    bleedRight && bleedWidth != null ? { width: bleedWidth } : undefined;
+
   return (
-    <section aria-label="All courses" className="relative z-0 min-w-0 w-full max-w-full">
+    <section
+      id="all-courses"
+      aria-label="All courses"
+      className="relative z-0 min-w-0 w-full max-w-full scroll-mt-8"
+    >
       <div className="flex flex-wrap items-start justify-between gap-6">
         <LearnAllCoursesHeading onNext={slideNext} atEnd={atEnd} />
 
-        <div ref={filtersRef} className="relative z-40 flex shrink-0 flex-wrap items-center gap-3 pr-6 sm:pr-8 lg:pr-10">
+        <div
+          ref={filtersRef}
+          className="relative z-40 hidden shrink-0 flex-wrap items-center gap-3 pr-6 sm:pr-8 lg:flex lg:pr-10"
+        >
           <AllCoursesFilterDropdown
             id="learn-all-courses-track-filter"
             label="Filter by track"
@@ -328,14 +357,13 @@ export default function LearnAllCoursesSection({
         <div
           ref={bleedWrapRef}
           className={trackWrapClass}
-          style={bleedRight ? { width: bleedWidth ?? "100%" } : undefined}
+          style={bleedWrapStyle}
         >
           <div
             key={`${trackSlug}-${typeFilter}`}
             ref={scrollAreaRef}
-            className="relative w-full min-w-0 shrink-0 overflow-x-clip overflow-y-visible"
+            className="relative w-full min-w-0 shrink-0 overflow-x-clip overflow-y-visible max-lg:overflow-x-visible"
             style={{
-              minHeight: LEARN_POPULAR_FIGMA_TILE_H,
               clipPath:
                 fullBleed === false
                   ? "inset(-200px 0 -200px 0)"
@@ -346,8 +374,10 @@ export default function LearnAllCoursesSection({
               dir="ltr"
               modules={[Mousewheel]}
               {...learnCarouselSwiperBehavior}
+              spaceBetween={slideGap}
+              slidesOffsetBefore={slidesOffsetBefore}
               mousewheel={learnCarouselMousewheel}
-              className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
+              className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full max-lg:max-w-none"
               onSwiper={handleSwiper}
               onSlideChange={handleNavSync}
               onSlidesUpdated={handleNavSync}
@@ -357,7 +387,7 @@ export default function LearnAllCoursesSection({
                 <SwiperSlide
                   key={course.id}
                   className="h-auto! shrink-0 overflow-visible!"
-                  style={{ width: LEARN_POPULAR_FIGMA_TILE_W }}
+                  style={{ width: slideW }}
                 >
                   <LearnPopularFigmaTile {...course} />
                 </SwiperSlide>
@@ -371,6 +401,7 @@ export default function LearnAllCoursesSection({
               onNext={slideNext}
               prevLabel="Previous courses"
               nextLabel="Next courses"
+              hideNavOnMobile={hideNavOnMobile}
             />
           </div>
         </div>

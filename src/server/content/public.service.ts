@@ -1,4 +1,5 @@
 // file: src/server/content/public.service.ts
+import { cache } from "react";
 import {
   catalogShowcasePropsFromTrackAggregate,
   type CatalogShowcaseCardProps,
@@ -49,13 +50,40 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
+function catalogErrorText(e: unknown): string {
+  if (e == null) return "";
+  if (typeof e === "string") return e;
+  if (e instanceof Error) {
+    const extra = e as Error & { cause?: unknown };
+    return `${e.name} ${e.message} ${e.stack ?? ""} ${catalogErrorText(extra.cause)}`;
+  }
+  try {
+    return JSON.stringify(e);
+  } catch {
+    return String(e);
+  }
+}
+
+function isPrismaPoolExhaustedError(e: unknown): boolean {
+  const msg = catalogErrorText(e);
+  return (
+    msg.includes("PrismaClientUnknownRequestError") ||
+    msg.includes("max clients reached") ||
+    msg.includes("EMAXCONNSESSION") ||
+    msg.includes("pool_size") ||
+    msg.includes("session mode") ||
+    msg.includes("Timed out fetching a new connection from the connection pool")
+  );
+}
+
 function isUnreachableDatabaseError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
   return (
     msg.includes("Can't reach database server") ||
     msg.includes("P1001") ||
     msg.includes("Timed out fetching a new connection") ||
-    msg.includes("Connection terminated unexpectedly")
+    msg.includes("Connection terminated unexpectedly") ||
+    isPrismaPoolExhaustedError(e)
   );
 }
 
@@ -72,14 +100,12 @@ function logCatalogError(scope: string, e: unknown) {
   console.warn(`[catalog] ${scope}:`, msg);
 }
 
-async function catalogRequiresPublished(): Promise<boolean> {
+const catalogRequiresPublished = cache(async (): Promise<boolean> => {
   try {
-    const [pubTracks, tracks, pubCourses, courses] = await Promise.all([
-      prisma.track.count({ where: { published: true } }),
-      prisma.track.count(),
-      prisma.course.count({ where: { published: true } }),
-      prisma.course.count(),
-    ]);
+    const pubTracks = await prisma.track.count({ where: { published: true } });
+    const tracks = await prisma.track.count();
+    const pubCourses = await prisma.course.count({ where: { published: true } });
+    const courses = await prisma.course.count();
     const hasRows = tracks + courses > 0;
     const hasPublished = pubTracks + pubCourses > 0;
     if (hasRows && !hasPublished) {
@@ -92,7 +118,7 @@ async function catalogRequiresPublished(): Promise<boolean> {
     logCatalogError("catalogRequiresPublished", e);
     return true;
   }
-}
+});
 
 function publishedWhere(requirePublished: boolean): { published: true } | Record<string, never> {
   return requirePublished ? { published: true } : {};
@@ -218,8 +244,18 @@ async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
     });
   } catch (e) {
     logCatalogError("fetchPublishedTracksWithCourses", e);
-    if (!isPrismaMissingColumnError(e)) throw e;
-    return fetchTracksWithCoursesFallback(requirePublished);
+    if (isPrismaPoolExhaustedError(e) || isUnreachableDatabaseError(e)) {
+      return [];
+    }
+    if (isPrismaMissingColumnError(e)) {
+      try {
+        return await fetchTracksWithCoursesFallback(requirePublished);
+      } catch (fallbackError) {
+        logCatalogError("fetchPublishedTracksWithCourses(fallback)", fallbackError);
+        return [];
+      }
+    }
+    return [];
   }
 }
 
@@ -347,30 +383,6 @@ type PublicTrackListItem = {
   order: number;
 };
 
-async function publicListTracksRawSafe(requirePublished = true): Promise<PublicTrackListItem[]> {
-  const sql = requirePublished
-    ? `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
-    : `SELECT id, title, slug, description, "order" FROM tracks ORDER BY "order" ASC, created_at ASC`;
-  const rows = await prisma.$queryRawUnsafe<
-    {
-      id: string;
-      title: string;
-      slug: string;
-      description: string | null;
-      order: number;
-    }[]
-  >(sql);
-
-  return rows.map((row) => ({
-    id: row.id,
-    title: row.title,
-    slug: row.slug,
-    description: row.description,
-    coverImage: null,
-    order: row.order,
-  }));
-}
-
 export async function publicListTracks(): Promise<PublicTrackListItem[]> {
   const requirePublished = await catalogRequiresPublished();
   const where = publishedWhere(requirePublished);
@@ -393,14 +405,7 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
     }));
   } catch (e) {
     logCatalogError("publicListTracks", e);
-    if (isPrismaMissingColumnError(e)) {
-      const rows = await publicListTracksRawSafe(requirePublished);
-      return rows.map((row) => ({
-        ...row,
-        coverImage: resolveTrackCoverImage(null, row.slug),
-      }));
-    }
-    throw e;
+    return [];
   }
 }
 
@@ -441,52 +446,57 @@ function isSoftwareIntroCourse(title: string) {
 
 /** Header mega-menu: only tracks/courses that exist and have a real destination. */
 export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
-  const requirePublished = await catalogRequiresPublished();
-  const visibility = publishedWhere(requirePublished);
+  try {
+    const requirePublished = await catalogRequiresPublished();
+    const visibility = publishedWhere(requirePublished);
 
-  const tracks = await prisma.track.findMany({
-    where: {
-      ...visibility,
-      NOT: { slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" } },
-      courses: { some: visibility },
-    },
-    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-    select: { title: true, slug: true },
-  });
-
-  const allCourses = tracks
-    .filter((track) => !EXCLUDED_MENU_TRACK_SLUGS.has(track.slug.toLowerCase()))
-    .slice(0, COURSES_MENU_MAX_ITEMS)
-    .map((track) => ({
-      label: trackMenuLabel(track.title),
-      href: `/tracks/${track.slug}`,
-    }));
-
-  const softwareTrack = await prisma.track.findFirst({
-    where: {
-      ...visibility,
-      slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" },
-    },
-    select: {
-      courses: {
-        where: visibility,
-        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-        select: { id: true, title: true },
+    const tracks = await prisma.track.findMany({
+      where: {
+        ...visibility,
+        NOT: { slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" } },
+        courses: { some: visibility },
       },
-    },
-  });
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: { title: true, slug: true },
+    });
 
-  const software = (softwareTrack?.courses ?? [])
-    .filter((course) => !isSoftwareIntroCourse(course.title))
-    .slice(0, COURSES_MENU_MAX_ITEMS)
-    .map((course) => ({
-      label:
-        SOFTWARE_MENU_LABEL_BY_TITLE[course.title] ??
-        trackMenuLabel(course.title),
-      href: `/course/${course.id}`,
-    }));
+    const allCourses = tracks
+      .filter((track) => !EXCLUDED_MENU_TRACK_SLUGS.has(track.slug.toLowerCase()))
+      .slice(0, COURSES_MENU_MAX_ITEMS)
+      .map((track) => ({
+        label: trackMenuLabel(track.title),
+        href: `/tracks/${track.slug}`,
+      }));
 
-  return { allCourses, software };
+    const softwareTrack = await prisma.track.findFirst({
+      where: {
+        ...visibility,
+        slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" },
+      },
+      select: {
+        courses: {
+          where: visibility,
+          orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+          select: { id: true, title: true },
+        },
+      },
+    });
+
+    const software = (softwareTrack?.courses ?? [])
+      .filter((course) => !isSoftwareIntroCourse(course.title))
+      .slice(0, COURSES_MENU_MAX_ITEMS)
+      .map((course) => ({
+        label:
+          SOFTWARE_MENU_LABEL_BY_TITLE[course.title] ??
+          trackMenuLabel(course.title),
+        href: `/course/${course.id}`,
+      }));
+
+    return { allCourses, software };
+  } catch (e) {
+    logCatalogError("publicGetCoursesMenu", e);
+    return { allCourses: [], software: [] };
+  }
 }
 
 /**
@@ -1194,3 +1204,38 @@ export async function publicListLandingMostsMentors(
     return [];
   }
 }
+
+/** Serialized catalog fetch for `/course` — avoids bursting the Supabase session pool. */
+export const loadCoursePageCatalog = cache(async () => {
+  const empty = {
+    popularClassCourses: [] as CourseForCard[],
+    trendingCourses: [] as CourseForCard[],
+    allCourses: [] as CourseForCard[],
+    tracks: [] as Awaited<ReturnType<typeof publicListTracks>>,
+    trackShowcaseSlides: [] as LandingShowcaseSlide[],
+    featuredMentors: [] as LandingMostsMentorCardDto[],
+  };
+
+  try {
+    await catalogRequiresPublished();
+
+    const popularClassCourses = await publicListPopularClassCourses(40);
+    const trendingCourses = await publicListTrendingCourses();
+    const allCourses = await publicListAllPublishedCourses();
+    const tracks = await publicListTracks();
+    const trackShowcaseSlides = await publicListTrackShowcaseSlides();
+    const featuredMentors = await publicListFeaturedMentors();
+
+    return {
+      popularClassCourses,
+      trendingCourses,
+      allCourses,
+      tracks,
+      trackShowcaseSlides,
+      featuredMentors,
+    };
+  } catch (e) {
+    logCatalogError("loadCoursePageCatalog", e);
+    return empty;
+  }
+});

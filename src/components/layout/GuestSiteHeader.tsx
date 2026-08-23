@@ -3,6 +3,6 @@
 import { LoggedInAppHeader } from "./LoggedInAppHeader";
 
 /** Guest marketing pages — same green app shell as signed-in users, with Log in / Sign up. */
-export function GuestSiteHeader() {
-  return <LoggedInAppHeader />;
+export function GuestSiteHeader({ flushBottom = false }: { flushBottom?: boolean }) {
+  return <LoggedInAppHeader flushBottom={flushBottom} />;
 }

@@ -4,7 +4,7 @@ import { LearnCoursesSidebarAside } from "./LearnCoursesSidebarAside";
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
-const sidebarCourseFilters = [
+export const LEARN_SIDEBAR_COURSE_FILTERS = [
   "All Couses",
   "Guided Courses",
   "Deep Dive",
@@ -14,6 +14,8 @@ const sidebarCourseFilters = [
   "Top Rated",
   "Popular Courses",
 ] as const;
+
+const sidebarCourseFilters = LEARN_SIDEBAR_COURSE_FILTERS;
 
 const sidebarSoftware = [
   "Adobe Photoshop",
@@ -25,7 +27,7 @@ const sidebarSoftware = [
   "+ See More",
 ] as const;
 
-const sidebarExtraCategories = [
+export const LEARN_SIDEBAR_EXTRA_CATEGORIES = [
   { key: "extra-fashion", label: "Fashion courses" },
   { key: "extra-web-app-design", label: "Web & App Design courses" },
   { key: "extra-calligraphy-typography", label: "Calligraphy & Typography courses" },
@@ -35,6 +37,8 @@ const sidebarExtraCategories = [
   { key: "extra-wellness", label: "Wellness courses" },
   { key: "extra-how-to-become", label: "How to become courses" },
 ] as const;
+
+const sidebarExtraCategories = LEARN_SIDEBAR_EXTRA_CATEGORIES;
 
 export type LearnCoursesSidebarCategory = {
   key: string;

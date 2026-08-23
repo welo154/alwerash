@@ -7,6 +7,7 @@ type LearnCarouselEdgeNavProps = {
   onNext: () => void;
   prevLabel: string;
   nextLabel: string;
+  hideNavOnMobile?: boolean;
 };
 
 export function LearnCarouselEdgeNav({
@@ -16,12 +17,15 @@ export function LearnCarouselEdgeNav({
   onNext,
   prevLabel,
   nextLabel,
+  hideNavOnMobile = false,
 }: LearnCarouselEdgeNavProps) {
+  const mobileHiddenClass = hideNavOnMobile ? "max-lg:hidden" : "";
+
   return (
     <>
       <button
         type="button"
-        className="absolute top-1/2 left-0 z-20 flex h-[43px] w-[43px] -translate-y-1/2 items-center justify-center rounded-full border-0 bg-white/90 p-0 shadow-sm transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-35"
+        className={`absolute top-1/2 left-0 z-20 flex h-[43px] w-[43px] -translate-y-1/2 items-center justify-center rounded-full border-0 bg-white/90 p-0 shadow-sm transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-35 ${mobileHiddenClass}`}
         aria-label={prevLabel}
         disabled={atBeginning}
         suppressHydrationWarning
@@ -44,7 +48,7 @@ export function LearnCarouselEdgeNav({
 
       <button
         type="button"
-        className="absolute top-1/2 right-0 z-20 flex h-[43px] w-[43px] -translate-y-1/2 items-center justify-center rounded-full border-0 bg-white/90 p-0 shadow-sm transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-35"
+        className={`absolute top-1/2 right-0 z-20 flex h-[43px] w-[43px] -translate-y-1/2 items-center justify-center rounded-full border-0 bg-white/90 p-0 shadow-sm transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-35 ${mobileHiddenClass}`}
         aria-label={nextLabel}
         disabled={atEnd}
         suppressHydrationWarning
