@@ -161,7 +161,7 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
     contentLeftPx != null ? "max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px]" : "";
 
   return (
-    <div className="mt-[60px] lg:mt-[72px]">
+    <div className="mt-[60px] -mb-[70px] lg:mt-[72px]">
       <div
         className={`flex items-center gap-[13px] lg:gap-[26px] ${contentInsetClass}`}
       >

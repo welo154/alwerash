@@ -146,7 +146,7 @@ export function LandingCurrentMostsSection({
             style={{
               color: "#000",
               fontFamily: pangeaFont,
-              fontSize: "36px",
+              fontSize: "24px",
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "120%",
@@ -158,7 +158,7 @@ export function LandingCurrentMostsSection({
             style={{
               color: "#000",
               fontFamily: pangeaFont,
-              fontSize: "36px",
+              fontSize: "24px",
               fontStyle: "italic",
               fontWeight: 700,
               lineHeight: "120%",

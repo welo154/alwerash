@@ -4,7 +4,6 @@ import Link from "next/link";
 import { HomeTrackExplorerSection } from "@/components/home/HomeTrackExplorerSection";
 import { ContinueLearningSection } from "@/components/home/ContinueLearningSection";
 import { TrackActivitySection } from "@/components/home/TrackActivitySection";
-import { LandingCurrentMostsSection } from "@/components/landing";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import type { WeeklyActivitySummary } from "@/lib/learning-activity";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
@@ -333,21 +332,8 @@ export function LoggedInHome({
           pillGapPx={15}
           maxPills={8}
           showWhatToLearnNextHeading
+          landingMostsMentors={landingMostsMentors}
         />
-        {landingMostsMentors.length > 0 ? (
-          <div className="lg:pl-[120px] lg:pr-6">
-            <LandingCurrentMostsSection
-              mentors={landingMostsMentors}
-              mentorCardWidthPx={383}
-              mentorCardHeightPx={357}
-              contained
-              alignCardsLeft
-              headingSizePx={36}
-              cardsTopGapPx={58}
-              className="mt-[68px] lg:mt-0"
-            />
-          </div>
-        ) : null}
       </section>
     </div>
   );

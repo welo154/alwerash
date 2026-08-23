@@ -668,6 +668,23 @@ export function HomeTrackExplorerSection({
         <LibraryPopularsSection contentLeftPx={contentLeftPx} />
       ) : null}
 
+      {showWhatToLearnNextHeading && landingMostsMentors.length > 0 ? (
+        <div
+          className={`mt-[55px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
+        >
+          <LandingCurrentMostsSection
+            mentors={landingMostsMentors}
+            mentorCardWidthPx={383}
+            mentorCardHeightPx={357}
+            contained
+            alignCardsLeft
+            compactVerticalSpacing
+            headingSizePx={36}
+            cardsTopGapPx={58}
+          />
+        </div>
+      ) : null}
+
       {showViewMoreCourses && trackPillSelectsCourses ? (
         <div className="mt-10 flex justify-center">
           <Link
