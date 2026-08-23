@@ -175,7 +175,7 @@ export function LandingCurrentMostsSection({
         </h2>
 
         {visibleMentors.length > 0 ? (
-          <div className="mt-[40px] flex flex-col items-center gap-y-[40px]">
+          <div className="relative left-1/2 mt-[40px] flex w-screen max-w-[100vw] -translate-x-1/2 flex-col items-center gap-y-[40px] px-4">
             {visibleMentors.map((m) => (
               <LandingMentorCard
                 key={m.id}

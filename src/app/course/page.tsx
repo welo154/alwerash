@@ -117,7 +117,7 @@ export default async function LearnPage() {
 
           {featuredMentors.length > 0 ? (
             <div
-              className={`pr-6 sm:pr-8 lg:pr-10 ${
+              className={`max-lg:pr-0 lg:pr-10 ${
                 hasCarouselSections || allCourseItems.length > 0 ? "mt-[45px]" : ""
               } max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)]`}
             >

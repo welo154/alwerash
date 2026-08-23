@@ -48,8 +48,8 @@ export function LandingMentorCard({
   layout = "desktop",
 }: LandingMentorCardProps) {
   const isMobile = layout === "mobile";
-  const cardWidth = widthPx ?? (isMobile ? MOBILE_CARD_WIDTH : 383);
-  const cardHeight = heightPx ?? (isMobile ? MOBILE_CARD_HEIGHT : 357);
+  const cardWidth = isMobile ? MOBILE_CARD_WIDTH : (widthPx ?? 383);
+  const cardHeight = isMobile ? MOBILE_CARD_HEIGHT : (heightPx ?? 357);
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
@@ -86,7 +86,7 @@ export function LandingMentorCard({
 
   const card = (
     <article
-      className={`group relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : " ml-0"}`}
+      className={`group relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : isMobile ? " mx-auto" : " ml-0"}`}
       style={sizeStyle}
       aria-hidden={isInteractive ? true : undefined}
       aria-label={isInteractive ? undefined : `${name}, ${profession}. ${badge}`}
