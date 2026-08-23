@@ -40,11 +40,13 @@ export function ProfileSectionTabs({
   continueLearningCourses,
   weeklyActivity,
   activityHighlightDayIndex,
+  learningProgressPercent,
 }: {
   initialTab?: ProfileTab;
   continueLearningCourses: ContinueLearningCardDto[];
   weeklyActivity: WeeklyActivitySummary;
   activityHighlightDayIndex: number;
+  learningProgressPercent: number;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -130,6 +132,7 @@ export function ProfileSectionTabs({
         <TrackActivitySection
           weeklyActivity={weeklyActivity}
           activityHighlightDayIndex={activityHighlightDayIndex}
+          learningProgressPercent={learningProgressPercent}
           className="mt-[67px] pb-16"
         />
       ) : null}

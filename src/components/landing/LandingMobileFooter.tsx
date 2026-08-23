@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -23,14 +22,149 @@ const MOBILE_FOOTER_SOCIALS = [
   },
 ] as const;
 
+const categoriesLinks: { label: string; href: string }[] = [
+  { label: "Illustration courses", href: "/course" },
+  { label: "Craft courses", href: "/course" },
+  { label: "Marketing & Business courses", href: "/course" },
+  { label: "Photography & Video courses", href: "/course" },
+  { label: "Design courses", href: "/course" },
+  { label: "3D & Animation courses", href: "/course" },
+  { label: "Architecture & Spaces courses", href: "/course" },
+  { label: "Writing courses", href: "/course" },
+  { label: "Fashion courses", href: "/course" },
+];
+
+const softwareLinks: { label: string; href: string }[] = [
+  { label: "Adobe Photoshop courses", href: "/course" },
+  { label: "Adobe Illustrator courses", href: "/course" },
+  { label: "Procreate courses", href: "/course" },
+  { label: "Adobe After Effects courses", href: "/course" },
+  { label: "Adobe Lightroom courses", href: "/course" },
+  { label: "Cinema 4D courses", href: "/course" },
+  { label: "Adobe InDesign courses", href: "/course" },
+  { label: "ChatGPT courses", href: "/course" },
+  { label: "Adobe Premiere courses", href: "/course" },
+];
+
+const discoverLinks: { label: string; href: string }[] = [
+  { label: "Teach on ElWerash", href: "/register" },
+  { label: "Plans and Pricing", href: "/subscription" },
+  { label: "Help and Support", href: "/subscription" },
+];
+
+const sectionLinks: { label: string; href: string }[] = [
+  { label: "About Us", href: "/" },
+  { label: "Courses", href: "/course" },
+  { label: "Library", href: "/library" },
+  { label: "Events", href: "/events" },
+  { label: "Creatives", href: "/mentors" },
+  { label: "Tracks", href: "/course" },
+  { label: "Blog", href: "/" },
+];
+
+const mobileFooterTitleStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: 700,
+  lineHeight: "120%",
+} as const;
+
+const mobileFooterSubtitleStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: "161%",
+} as const;
+
+const mobileFooterViewMoreStyle = {
+  ...mobileFooterSubtitleStyle,
+  textDecorationLine: "underline",
+  textDecorationStyle: "solid",
+  textDecorationSkipInk: "auto",
+} as const;
+
+const mobileFooterLegalTextStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "12px",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: "120%",
+  opacity: 0.6,
+} as const;
+
+function MobileFooterLegalDot() {
+  return (
+    <span
+      className="inline-block size-[3px] shrink-0 rounded-full bg-black opacity-60"
+      aria-hidden
+    />
+  );
+}
+
+const MAX_FOOTER_COLUMN_LINKS = 4;
+
+function MobileFooterColumn({
+  title,
+  links,
+  viewMoreHref = "/course",
+  viewMoreLabel = "View more",
+}: {
+  title: string;
+  links: { label: string; href: string }[];
+  viewMoreHref?: string;
+  viewMoreLabel?: string;
+}) {
+  const visibleLinks = links.slice(0, MAX_FOOTER_COLUMN_LINKS);
+  const showViewMore = links.length > MAX_FOOTER_COLUMN_LINKS;
+
+  return (
+    <div className="min-w-0">
+      <h3 className="m-0 uppercase" style={mobileFooterTitleStyle}>
+        {title}
+      </h3>
+      <ul className="mt-3 space-y-0">
+        {visibleLinks.map((item) => (
+          <li key={item.label}>
+            <Link
+              href={item.href}
+              className="transition-opacity hover:opacity-70"
+              style={mobileFooterSubtitleStyle}
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+        {showViewMore ? (
+          <li>
+            <Link
+              href={viewMoreHref}
+              className="transition-opacity hover:opacity-70"
+              style={mobileFooterViewMoreStyle}
+            >
+              {viewMoreLabel}
+            </Link>
+          </li>
+        ) : null}
+      </ul>
+    </div>
+  );
+}
+
 export function LandingMobileFooter() {
+  const year = new Date().getFullYear();
+
   return (
     <footer
-      className="mx-auto mt-[44px] mb-[-32px] box-border overflow-hidden rounded-[55px] px-[24px] pt-[25px]"
+      className="relative z-10 mx-auto mt-[44px] box-border flex flex-col overflow-hidden rounded-[55px] px-[24px] pt-[25px] pb-[28px]"
       style={{
         width: 382,
-        height: 884,
         background: "var(--Bright-Green, #89F496)",
+        transform: "translateY(35px)",
       }}
       aria-label="Site footer"
     >
@@ -76,16 +210,80 @@ export function LandingMobileFooter() {
 
           <button
             type="button"
-            className="ml-[10px] inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] border border-black bg-transparent p-0 text-black"
+            className="relative ml-[10px] inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center bg-transparent p-0"
             aria-label="Language"
             suppressHydrationWarning
           >
-            <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={28}
+              height={28}
+              viewBox="0 0 29 29"
+              fill="none"
+              className="absolute inset-0"
+              aria-hidden
+            >
+              <path
+                d="M14.1504 28.1504C21.8824 28.1504 28.1504 21.8824 28.1504 14.1504C28.1504 6.4184 21.8824 0.150391 14.1504 0.150391C6.4184 0.150391 0.150391 6.4184 0.150391 14.1504C0.150391 21.8824 6.4184 28.1504 14.1504 28.1504Z"
+                stroke="var(--Black, #000)"
+                strokeWidth={0.3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span
+              className="relative z-10 text-center text-[14px] font-normal leading-[120%] text-black"
+              style={{ fontFamily: pangeaFont }}
+            >
+              EN
+            </span>
           </button>
         </div>
       </div>
 
-      <hr className="mt-[15px] border-0 bg-black" style={{ height: "0.3px" }} />
+      <hr
+        className="relative left-1/2 mt-[15px] -translate-x-1/2 border-0 bg-black"
+        style={{ width: 356, height: "0.3px" }}
+      />
+
+      <div className="mt-[22px] flex flex-col gap-[20px]">
+        <MobileFooterColumn title="Categories" links={categoriesLinks} />
+        <MobileFooterColumn title="Software" links={softwareLinks} />
+        <MobileFooterColumn title="Discover" links={discoverLinks} />
+        <MobileFooterColumn title="Sections" links={sectionLinks} viewMoreHref="/" />
+      </div>
+
+      <div className="mt-[16px] -translate-y-[40px] pt-0">
+        <Link href="/" className="-ml-[24px] inline-block max-w-[calc(100%+24px)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/alwerash-logo-hero.png"
+            alt="Alwerash"
+            width={677}
+            height={240}
+            className="block h-auto w-[382px] max-w-none object-contain object-left"
+          />
+        </Link>
+
+        <div className="-mt-[10px] flex flex-col items-center gap-[8px] text-center">
+          <p className="m-0 whitespace-nowrap" style={mobileFooterLegalTextStyle} suppressHydrationWarning>
+            © {year} AlWerash. All rights reserved.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-[8px] gap-y-1">
+            <Link href="/" className="whitespace-nowrap transition-opacity hover:opacity-80" style={mobileFooterLegalTextStyle}>
+              Terms of use
+            </Link>
+            <MobileFooterLegalDot />
+            <Link href="/" className="whitespace-nowrap transition-opacity hover:opacity-80" style={mobileFooterLegalTextStyle}>
+              Privacy policy
+            </Link>
+            <MobileFooterLegalDot />
+            <Link href="/" className="whitespace-nowrap transition-opacity hover:opacity-80" style={mobileFooterLegalTextStyle}>
+              Cookies policy
+            </Link>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 }

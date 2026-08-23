@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
 import { CoursesMegaMenuPanel } from "./CoursesMegaMenu";
+import { MobileSiteNavBar } from "./MobileSiteNavBar";
 
 export type LoggedInAppHeaderProps = {
   user?: { name?: string | null; email?: string | null; image?: string | null } | null;
@@ -26,16 +27,29 @@ export function LoggedInAppHeader({
   flushBottom = false,
 }: LoggedInAppHeaderProps) {
   const isGuest = !user;
+  const homeHref = isGuest ? "/" : "/home";
 
   return (
-    <header
-      className={
-        homeLayout || flushBottom
-          ? "relative z-50 mb-0 w-full px-[40px] pt-[35px]"
-          : "relative z-50 mb-[50px] w-full px-[40px] pt-[35px]"
-      }
-      aria-label={isGuest ? "Site header" : "Logged in header"}
-    >
+    <>
+      <header
+        className={
+          homeLayout || flushBottom
+            ? "relative z-50 mb-0 w-full bg-white pt-[37px] lg:hidden"
+            : "relative z-50 mb-[24px] w-full bg-white pt-[37px] lg:hidden"
+        }
+        aria-label={isGuest ? "Site header" : "Logged in header"}
+      >
+        <MobileSiteNavBar homeHref={homeHref} />
+      </header>
+
+      <header
+        className={
+          homeLayout || flushBottom
+            ? "relative z-50 mb-0 hidden w-full px-[40px] pt-[35px] lg:block"
+            : "relative z-50 mb-[50px] hidden w-full px-[40px] pt-[35px] lg:block"
+        }
+        aria-label={isGuest ? "Site header" : "Logged in header"}
+      >
       <div
         className={
           homeLayout
@@ -242,7 +256,8 @@ export function LoggedInAppHeader({
           </div>
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
+import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
@@ -45,7 +46,7 @@ export default async function LoggedInHomePage() {
 
   const now = new Date();
 
-  const [continueLearningCourses, landingMostsMentors, trackBundle, weeklyActivity] =
+  const [continueLearningCourses, landingMostsMentors, trackBundle, weeklyActivity, learningProgressPercent] =
     await Promise.all([
       getContinueLearningCardsForUser(userId, 3).catch((err) => {
         console.warn("[home] continue learning unavailable", err instanceof Error ? err.message : err);
@@ -63,6 +64,10 @@ export default async function LoggedInHomePage() {
         console.warn("[home] weekly activity unavailable", err instanceof Error ? err.message : err);
         return emptyWeeklyActivitySummary(now);
       }),
+      getUserAggregateLearningProgressPercent(userId).catch((err) => {
+        console.warn("[home] learning progress unavailable", err instanceof Error ? err.message : err);
+        return 0;
+      }),
     ]);
 
   return (
@@ -75,6 +80,7 @@ export default async function LoggedInHomePage() {
       trackExplorer={trackBundle}
       weeklyActivity={weeklyActivity}
       activityHighlightDayIndex={now.getUTCDay()}
+      learningProgressPercent={learningProgressPercent}
     />
   );
 }

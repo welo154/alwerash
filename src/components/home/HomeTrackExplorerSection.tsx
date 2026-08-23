@@ -28,10 +28,46 @@ import { LibraryFeaturedBook } from "@/components/library/LibraryFeaturedBook";
 import { LibraryArticleCardVisual } from "@/components/library/LibraryArticleCardVisual";
 import { LandingEverythingInOneSection } from "@/components/landing/LandingEverythingInOneSection";
 import { LandingCurrentMostsSection } from "@/components/landing/LandingCurrentMostsSection";
+import { LibraryPopularsSection } from "@/components/home/LibraryPopularsSection";
 import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
 import { LandingFaqSection } from "@/components/landing/LandingFaqSection";
 import { LandingGetStartedCtaSection } from "@/components/landing/LandingGetStartedCtaSection";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+
+/** Same card gap as Continue Learning mobile swiper. */
+const MOBILE_SWIPER_CARD_GAP_PX = 20;
+const DESKTOP_SWIPER_CARD_GAP_PX = 27;
+const MOBILE_SECTION_INSET_PX = 30;
+
+function useSwiperCardGap() {
+  const [gap, setGap] = useState(MOBILE_SWIPER_CARD_GAP_PX);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => {
+      setGap(media.matches ? DESKTOP_SWIPER_CARD_GAP_PX : MOBILE_SWIPER_CARD_GAP_PX);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return gap;
+}
+
+function useMobileSwiperInset() {
+  const [inset, setInset] = useState(MOBILE_SECTION_INSET_PX);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setInset(media.matches ? 0 : MOBILE_SECTION_INSET_PX);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return inset;
+}
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
@@ -298,6 +334,8 @@ export function HomeTrackExplorerSection({
     slideNext,
     slidePrev,
   } = useLearnCarouselSwiper();
+  const swiperCardGap = useSwiperCardGap();
+  const mobileSwiperInset = useMobileSwiperInset();
 
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
@@ -344,15 +382,18 @@ export function HomeTrackExplorerSection({
 
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
 
+  const contentInsetClass =
+    contentLeftPx != null ? "max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px]" : "";
+  const pillRowGapClass =
+    contentLeftPx != null ? "max-lg:gap-[9px] lg:gap-[15px]" : "gap-[25px]";
   const pillRowClass =
     contentLeftPx != null
-      ? "flex flex-wrap gap-[25px] pr-[160px]"
+      ? `flex flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass}`
       : `${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`;
   const pillRowStyle =
-    contentLeftPx != null || pillGapPx != null
+    pillGapPx != null && contentLeftPx == null
       ? {
-          paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
-          gap: pillGapPx != null ? `${pillGapPx}px` : undefined,
+          gap: `${pillGapPx}px`,
         }
       : undefined;
 
@@ -406,25 +447,20 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading ? (
         <div
-          className="mt-[76px] flex items-center gap-[26px]"
-          style={{
-            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
-          }}
+          className={`mt-[60px] flex items-center gap-[13px] lg:mt-[76px] lg:gap-[26px] ${contentInsetClass}`}
         >
           <h2
-            className="m-0 text-[36px] font-normal leading-[120%] text-black"
+            className="m-0 text-[24px] font-normal leading-[120%] text-black lg:text-[36px]"
             style={{ fontFamily: pangeaFontFamily }}
           >
             WHAT TO LEARN NEXT
           </h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="43"
-            height="43"
             viewBox="0 0 45 45"
             fill="none"
             aria-hidden
-            className="shrink-0"
+            className="size-[28px] shrink-0 lg:size-[43px]"
           >
             <path
               d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -444,10 +480,9 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading ? (
         <p
-          className="m-0 mt-[5px] text-[18px] font-normal leading-[127%] text-black"
+          className={`m-0 mt-[2px] text-[16px] font-normal leading-[127%] text-black lg:mt-[5px] lg:text-[18px] ${contentInsetClass}`}
           style={{
             fontFamily: pangeaFontFamily,
-            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
           }}
         >
           Recommended for you
@@ -457,11 +492,9 @@ export function HomeTrackExplorerSection({
       {showWhatToLearnNextHeading ? (
         <div
           key={cardGridKey}
-          className="home-learn-next-track relative left-1/2 mt-[67px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip overflow-y-visible"
-          style={{
-            paddingLeft: contentLeftPx != null ? `${contentLeftPx}px` : undefined,
-            paddingRight: 24,
-          }}
+          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
+            contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : "pr-6"
+          }`}
         >
           <div
             ref={scrollAreaRef}
@@ -490,8 +523,9 @@ export function HomeTrackExplorerSection({
                   dir="ltr"
                   modules={[Mousewheel]}
                   slidesPerView="auto"
-                  spaceBetween={27}
+                  spaceBetween={swiperCardGap}
                   slidesPerGroup={1}
+                  slidesOffsetBefore={mobileSwiperInset}
                   speed={400}
                   grabCursor
                   allowTouchMove
@@ -510,7 +544,7 @@ export function HomeTrackExplorerSection({
                     ? visibleCourseTiles.map((tile) => (
                         <SwiperSlide
                           key={`${cardGridKey}-${tile.id}`}
-                          className="h-auto! w-[346px]! shrink-0 overflow-visible!"
+                          className="h-auto! w-[315px]! shrink-0 overflow-visible! lg:w-[346px]!"
                         >
                           <LearnPopularFigmaTile {...tile} />
                         </SwiperSlide>
@@ -529,14 +563,16 @@ export function HomeTrackExplorerSection({
                       ))}
                 </Swiper>
 
-                <LearnCarouselEdgeNav
-                  atBeginning={atBeginning}
-                  atEnd={atEnd}
-                  onPrev={slidePrev}
-                  onNext={slideNext}
-                  prevLabel="Previous course"
-                  nextLabel="Next course"
-                />
+                <div className="hidden lg:contents">
+                  <LearnCarouselEdgeNav
+                    atBeginning={atBeginning}
+                    atEnd={atEnd}
+                    onPrev={slidePrev}
+                    onNext={slideNext}
+                    prevLabel="Previous course"
+                    nextLabel="Next course"
+                  />
+                </div>
               </>
             )}
           </div>
@@ -544,15 +580,16 @@ export function HomeTrackExplorerSection({
       ) : (
       <div
         key={cardGridKey}
-        className={`${FULL_BLEED} relative mt-[50px] overflow-hidden lg:mt-[64px]`}
+        className={`${FULL_BLEED} relative mt-[50px] overflow-x-clip overflow-y-visible lg:mt-[64px]`}
       >
         <div
           ref={scrollAreaRef}
-          className="relative w-full min-w-0"
+          className="home-learn-next-track relative w-full min-w-0 overflow-x-visible overflow-y-visible"
           style={{
             minHeight: trackPillSelectsCourses
               ? LEARN_POPULAR_FIGMA_TILE_H
               : CATALOG_SHOWCASE_CARD_H,
+            clipPath: "inset(-160px -320px -160px 0)",
           }}
         >
           {isEmpty ? (
@@ -571,8 +608,9 @@ export function HomeTrackExplorerSection({
                 dir="ltr"
                 modules={[Mousewheel]}
                 slidesPerView="auto"
-                spaceBetween={27}
+                spaceBetween={swiperCardGap}
                 slidesPerGroup={1}
+                slidesOffsetBefore={mobileSwiperInset}
                 speed={400}
                 grabCursor
                 allowTouchMove
@@ -580,10 +618,8 @@ export function HomeTrackExplorerSection({
                 observer
                 observeParents
                 watchOverflow
-                slidesOffsetBefore={24}
-                slidesOffsetAfter={24}
                 mousewheel={learnCarouselMousewheel}
-                className="learn-popular-swiper learn-popular-swiper--cards w-full min-w-0 max-w-full"
+                className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
                 onSwiper={handleSwiper}
                 onSlideChange={handleNavSync}
                 onSlidesUpdated={handleNavSync}
@@ -593,7 +629,7 @@ export function HomeTrackExplorerSection({
                   ? visibleCourseTiles.map((tile) => (
                       <SwiperSlide
                         key={`${cardGridKey}-${tile.id}`}
-                        className="h-auto! w-[315px]! shrink-0 lg:w-[346px]!"
+                        className="h-auto! w-[315px]! shrink-0 overflow-visible! lg:w-[346px]!"
                       >
                         <LearnPopularFigmaTile {...tile} />
                       </SwiperSlide>
@@ -601,7 +637,7 @@ export function HomeTrackExplorerSection({
                   : trackSlides.map(({ slug, cardProps }) => (
                       <SwiperSlide
                         key={`${cardGridKey}-${slug}`}
-                        className="h-auto! shrink-0"
+                        className="h-auto! shrink-0 overflow-visible!"
                         style={{ width: CATALOG_SHOWCASE_CARD_W }}
                       >
                         <CatalogShowcaseCard
@@ -612,7 +648,7 @@ export function HomeTrackExplorerSection({
                     ))}
               </Swiper>
 
-              <div className="max-lg:hidden">
+              <div className="hidden lg:contents">
                 <LearnCarouselEdgeNav
                   atBeginning={atBeginning}
                   atEnd={atEnd}
@@ -628,6 +664,10 @@ export function HomeTrackExplorerSection({
       </div>
       )}
 
+      {showWhatToLearnNextHeading ? (
+        <LibraryPopularsSection contentLeftPx={contentLeftPx} />
+      ) : null}
+
       {showViewMoreCourses && trackPillSelectsCourses ? (
         <div className="mt-10 flex justify-center">
           <Link
@@ -642,10 +682,11 @@ export function HomeTrackExplorerSection({
 
       {showDiscoverCta ? (
         <>
-          <MobileDiscoverCta className="mt-[45px] pl-[31px] lg:hidden" />
+          <div className="lg:hidden">
+          <MobileDiscoverCta className="mt-[45px] pl-[31px]" />
 
           <div
-            className="relative mx-auto mt-[45px] box-border overflow-hidden lg:hidden"
+            className="relative mx-auto mt-[45px] box-border overflow-hidden"
             style={{
               width: 393,
               height: 1386.999,
@@ -905,7 +946,7 @@ export function HomeTrackExplorerSection({
             </div>
 
             <MobileDiscoverCta
-              className="absolute left-[31px] top-[1170px] lg:hidden"
+              className="absolute left-[31px] top-[1170px]"
               textClassName="text-white"
             />
           </div>
@@ -913,31 +954,31 @@ export function HomeTrackExplorerSection({
           <LandingEverythingInOneSection
             variant="mobile"
             showDecoBoxes={false}
-            className="mt-[64px] lg:hidden"
+            className="mt-[64px]"
           />
 
           {landingMostsMentors.length > 0 ? (
             <LandingCurrentMostsSection
-              variant="mobile"
               mentors={landingMostsMentors}
-              className="mt-[68px] lg:hidden"
+              className="mt-[68px]"
             />
           ) : null}
 
           <StudentsRatingWorkSection
             variant="mobile"
-            sectionClassName="mt-[75px] lg:hidden"
+            sectionClassName="mt-[75px]"
           />
 
           <LandingFaqSection
             variant="mobile"
-            className="mt-[100px] lg:hidden"
+            className="mt-[100px]"
           />
 
           <LandingGetStartedCtaSection
             variant="mobile"
-            className="mt-[96px] lg:hidden"
+            className="mt-[96px]"
           />
+          </div>
 
           <div className="max-lg:hidden">
           <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>

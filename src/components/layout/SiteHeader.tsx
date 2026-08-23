@@ -26,11 +26,18 @@ export function SiteHeader() {
   if (pathname === "/home") {
     if (status === "loading") {
       return (
-        <div
-          className="sticky top-0 z-50 mb-0 h-[112px] w-full animate-pulse bg-neutral-100"
-          aria-busy
-          aria-label="Loading header"
-        />
+        <>
+          <div
+            className="sticky top-0 z-50 mb-0 h-[84px] w-full animate-pulse bg-neutral-100 lg:hidden"
+            aria-busy
+            aria-label="Loading header"
+          />
+          <div
+            className="sticky top-0 z-50 mb-0 hidden h-[112px] w-full animate-pulse bg-neutral-100 lg:block"
+            aria-busy
+            aria-label="Loading header"
+          />
+        </>
       );
     }
     if (session?.user) {
@@ -41,11 +48,18 @@ export function SiteHeader() {
 
   if (status === "loading") {
     return (
-      <div
-        className="sticky top-0 z-50 mb-[50px] h-[147px] w-full animate-pulse bg-neutral-100"
-        aria-busy
-        aria-label="Loading header"
-      />
+      <>
+        <div
+          className="sticky top-0 z-50 mb-[24px] h-[84px] w-full animate-pulse bg-neutral-100 lg:hidden"
+          aria-busy
+          aria-label="Loading header"
+        />
+        <div
+          className="sticky top-0 z-50 mb-[50px] hidden h-[147px] w-full animate-pulse bg-neutral-100 lg:block"
+          aria-busy
+          aria-label="Loading header"
+        />
+      </>
     );
   }
 

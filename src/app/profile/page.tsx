@@ -5,6 +5,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileSectionTabs } from "@/components/profile/ProfileSectionTabs";
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
+import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { readUserProfileFromDb } from "@/server/user/readProfile";
 
@@ -56,11 +57,12 @@ export default async function ProfilePage({
       : "Learning";
 
   const now = new Date();
-  const [continueLearningCourses, weeklyActivity] = await Promise.all([
+  const [continueLearningCourses, weeklyActivity, learningProgressPercent] = await Promise.all([
     getContinueLearningCardsForUser(userId, 3).catch(() => []),
     getWeeklyActivitySummary(userId, now).catch(() =>
       emptyWeeklyActivitySummary(now)
     ),
+    getUserAggregateLearningProgressPercent(userId).catch(() => 0),
   ]);
 
   return (
@@ -80,6 +82,7 @@ export default async function ProfilePage({
           continueLearningCourses={continueLearningCourses}
           weeklyActivity={weeklyActivity}
           activityHighlightDayIndex={now.getUTCDay()}
+          learningProgressPercent={learningProgressPercent}
         />
       </Suspense>
     </div>

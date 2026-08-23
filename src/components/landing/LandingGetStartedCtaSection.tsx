@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
-import { LandingMobileFooter } from "./LandingMobileFooter";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -10,9 +9,9 @@ const CTA_BUTTON_TEXT = "#141413";
 /** Inline headline logo — 104:31, larger than previous 208×62 */
 const CTA_INLINE_LOGO_W = 260;
 const CTA_INLINE_LOGO_H = 78;
-/** Mobile stacked logo under the headline. */
-const CTA_MOBILE_LOGO_W = 160;
-const CTA_MOBILE_LOGO_H = 48;
+/** Mobile stacked logo under the headline — matches hero wordmark width. */
+const CTA_MOBILE_LOGO_W = 220;
+const CTA_MOBILE_LOGO_H = 66;
 
 /**
  * Bottom-of-landing CTA: headline with inline logo, primary button, social row.
@@ -28,10 +27,10 @@ export function LandingGetStartedCtaSection({
   if (variant === "mobile") {
     return (
       <section
-        className={`bg-white pb-[32px] ${className ?? "mt-[96px]"}`}
+        className={`overflow-hidden bg-white pb-0 ${className ?? "mt-[96px]"}`}
         aria-labelledby="landing-get-started-heading-mobile"
       >
-        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0">
+        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center overflow-x-hidden px-0">
           <h2
             id="landing-get-started-heading-mobile"
             className="m-0 w-[358px] max-w-full uppercase"
@@ -99,8 +98,6 @@ export function LandingGetStartedCtaSection({
           </p>
 
           <LandingSocialSignInRow variant="mobileCta" className="mt-[18px]" />
-
-          <LandingMobileFooter />
         </div>
       </section>
     );

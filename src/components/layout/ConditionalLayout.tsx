@@ -41,9 +41,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip bg-white">
         <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
-        <div className="max-lg:hidden">
-          <ConditionalSiteFooter />
-        </div>
+        <ConditionalSiteFooter />
       </div>
     );
   }

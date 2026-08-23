@@ -892,6 +892,199 @@ function ActivityScheduleModal({
   );
 }
 
+const MOBILE_SCHEDULE_TIMES = ["8:00 am", "9:00 am", "10:00 am", "11:00 am"] as const;
+
+const MOBILE_SCHEDULE_LAYOUT = {
+  dayTop: 22,
+  dayLeft: 35,
+  monthTop: 35,
+  monthRight: 34,
+  hrTop: 72,
+  timesTop: 102,
+  timesLeft: 35,
+  timeGap: 27,
+  eventRight: 34,
+  eventWidth: 147,
+  eventHeight: 74,
+} as const;
+
+function formatMobileScheduleDay(date: Date): string {
+  const day = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date).toUpperCase();
+  return `${day} ${date.getDate()}`;
+}
+
+function formatMobileScheduleMonthYear(date: Date): string {
+  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date).toUpperCase();
+  return `${month} ${date.getFullYear()}`;
+}
+
+function pickScheduleSlotForDate(date: Date): ScheduleSlot {
+  const dayIndex = date.getDay();
+  return (
+    SCHEDULE_SLOTS.find((slot) => slot.dayIndex === dayIndex) ??
+    SCHEDULE_SLOTS.find((slot) => slot.dayIndex > dayIndex) ??
+    SCHEDULE_SLOTS[0]!
+  );
+}
+
+function mobileEventTitle(slot: ScheduleSlot): string {
+  const primary = slot.title.split("\n")[0]?.trim() ?? slot.title;
+  if (slot.hourIndex === 0) return "WHAT'S FIGMA?";
+  return primary.replace(/\.\.$/, "").toUpperCase();
+}
+
+function mobileEventDuration(slot: ScheduleSlot): string {
+  return slot.hourIndex === 0 ? "40mins" : "45mins";
+}
+
+function mobileEventTopPx(hourIndex: number): number {
+  const { timesTop, timeGap } = MOBILE_SCHEDULE_LAYOUT;
+  const timeLinePx = 18;
+  return timesTop + hourIndex * (timeLinePx + timeGap);
+}
+
+export function ActivityScheduleMobileCard() {
+  const [open, setOpen] = useState(false);
+  const [today, setToday] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setToday(new Date());
+  }, []);
+
+  const scheduleDate = today ?? new Date();
+  const dayHeading = formatMobileScheduleDay(scheduleDate);
+  const monthHeading = formatMobileScheduleMonthYear(scheduleDate);
+  const activeSlot = pickScheduleSlotForDate(scheduleDate);
+  const eventTop = Math.min(
+    mobileEventTopPx(activeSlot.hourIndex),
+    305 - MOBILE_SCHEDULE_LAYOUT.eventHeight - 8
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="relative box-border h-[305px] w-[315px] max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] border-[0.3px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
+        aria-label="Activity schedule"
+      >
+        <p
+          className="absolute m-0"
+          style={{
+            top: MOBILE_SCHEDULE_LAYOUT.dayTop,
+            left: MOBILE_SCHEDULE_LAYOUT.dayLeft,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: "32px",
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "120%",
+          }}
+          suppressHydrationWarning
+        >
+          {dayHeading}
+        </p>
+
+        <p
+          className="absolute m-0 text-center"
+          style={{
+            top: MOBILE_SCHEDULE_LAYOUT.monthTop,
+            right: MOBILE_SCHEDULE_LAYOUT.monthRight,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: "18px",
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "normal",
+            opacity: 0.6,
+          }}
+          suppressHydrationWarning
+        >
+          {monthHeading}
+        </p>
+
+        <hr
+          className="absolute left-0 m-0 border-0 bg-black"
+          style={{
+            top: MOBILE_SCHEDULE_LAYOUT.hrTop,
+            width: 315,
+            height: "0.2px",
+          }}
+          aria-hidden
+        />
+
+        <div
+          className="absolute"
+          style={{
+            top: MOBILE_SCHEDULE_LAYOUT.timesTop,
+            left: MOBILE_SCHEDULE_LAYOUT.timesLeft,
+          }}
+        >
+          {MOBILE_SCHEDULE_TIMES.map((time, index) => (
+            <p
+              key={time}
+              className="m-0"
+              style={{
+                marginTop: index === 0 ? 0 : MOBILE_SCHEDULE_LAYOUT.timeGap,
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "18px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+              }}
+            >
+              {time}
+            </p>
+          ))}
+        </div>
+
+        <div
+          className="absolute box-border flex flex-col items-center justify-center border-[0.3px] border-[var(--Black,#000)]"
+          style={{
+            top: eventTop,
+            right: MOBILE_SCHEDULE_LAYOUT.eventRight,
+            width: MOBILE_SCHEDULE_LAYOUT.eventWidth,
+            height: MOBILE_SCHEDULE_LAYOUT.eventHeight,
+            padding: "0 16px",
+            borderRadius: 24,
+            background: "var(--Purple, #FF8CFF)",
+          }}
+        >
+          <p
+            className="m-0 w-[118px] text-center"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "16px",
+              fontStyle: "normal",
+              fontWeight: 500,
+              lineHeight: "23px",
+            }}
+          >
+            {mobileEventTitle(activeSlot)}
+          </p>
+          <p
+            className="m-0"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "14px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "23px",
+            }}
+          >
+            {mobileEventDuration(activeSlot)}
+          </p>
+        </div>
+      </button>
+
+      <ActivityScheduleModal open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
 export function ActivityScheduleCard() {
   const [open, setOpen] = useState(false);
 

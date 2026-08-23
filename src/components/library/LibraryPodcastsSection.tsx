@@ -33,9 +33,9 @@ const COVER_SHAPE_PATH =
 const COVER_SVG_WIDTH = PODCAST_CARD_WIDTH + COVER_SVG_EXTRA_WIDTH_PX;
 const COVER_SVG_HEIGHT = PODCAST_CARD_HEIGHT + COVER_SVG_EXTRA_HEIGHT_PX;
 const GREEN_SVG_HEIGHT = PODCAST_CARD_HEIGHT - GREEN_SVG_SHRINK_HEIGHT_PX;
-const PODCAST_CARD_FRAME_WIDTH =
+export const PODCAST_CARD_FRAME_WIDTH =
   COVER_SVG_WIDTH + COVER_OFFSET_X + COVER_BOX_NUDGE_X_PX;
-const PODCAST_CARD_FRAME_HEIGHT = COVER_SVG_HEIGHT + COVER_OFFSET_Y;
+export const PODCAST_CARD_FRAME_HEIGHT = COVER_SVG_HEIGHT + COVER_OFFSET_Y;
 
 const COVER_TEXT_INSET_LEFT_PX = 32;
 const COVER_TEXT_INSET_BOTTOM_PX = 36;
@@ -56,7 +56,7 @@ const COVER_IMAGE_FILL = {
   height: COVER_SHAPE_BOUNDS.height * 1.38,
 } as const;
 
-type PodcastCardData = {
+export type PodcastCardData = {
   id: string;
   title: string;
   priceLabel: string;
@@ -65,7 +65,7 @@ type PodcastCardData = {
   imageSrc: string;
 };
 
-const PODCAST_CARDS: PodcastCardData[] = [
+export const PODCAST_CARDS: PodcastCardData[] = [
   {
     id: "secret-lives-of-color",
     title: "The Secret Lives of Color",
@@ -330,7 +330,13 @@ function PodcastCardMeta({
   );
 }
 
-function LibraryPodcastCard({ card }: { card: PodcastCardData }) {
+export function LibraryPodcastCard({
+  card,
+  showMeta = true,
+}: {
+  card: PodcastCardData;
+  showMeta?: boolean;
+}) {
   return (
     <article className="w-fit shrink-0">
       <div
@@ -345,7 +351,9 @@ function LibraryPodcastCard({ card }: { card: PodcastCardData }) {
         <PodcastCardCover cardId={card.id} imageSrc={card.imageSrc} />
         <PodcastCardCoverText hosts={card.hosts} role={card.role} />
       </div>
-      <PodcastCardMeta title={card.title} priceLabel={card.priceLabel} />
+      {showMeta ? (
+        <PodcastCardMeta title={card.title} priceLabel={card.priceLabel} />
+      ) : null}
     </article>
   );
 }

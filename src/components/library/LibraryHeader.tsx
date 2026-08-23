@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { LibrarySearchForm } from "./LibrarySearchForm";
+import { MobileSiteNavBar } from "@/components/layout/MobileSiteNavBar";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -36,59 +37,72 @@ export function LibraryHeader({ compactBottom = false }: { compactBottom?: boole
   const homeHref = session?.user ? "/home" : "/";
 
   return (
-    <header
-      className={`relative z-50 w-full bg-white pt-[10px] ${compactBottom ? "pb-0" : "pb-8"}`}
-      aria-label="Library header"
-      style={{ fontFamily: pangeaFont }}
-    >
-      <div className="flex min-w-0 items-center">
-        <nav
-          className="ml-[226px] flex shrink-0 items-center gap-[40px]"
-          aria-label="Library navigation"
-        >
-          <Link
-            id="library-nav-home"
-            href={homeHref}
-            className={`relative z-10 ${navLinkClass}`}
+    <>
+      <header
+        className={`relative z-50 w-full bg-white pt-[37px] lg:hidden ${
+          compactBottom ? "pb-0" : "pb-6"
+        }`}
+        aria-label="Library header"
+      >
+        <MobileSiteNavBar homeHref={homeHref} />
+      </header>
+
+      <header
+        className={`relative z-50 hidden w-full bg-white pt-[10px] lg:block ${
+          compactBottom ? "pb-0" : "pb-8"
+        }`}
+        aria-label="Library header"
+        style={{ fontFamily: pangeaFont }}
+      >
+        <div className="flex min-w-0 items-center">
+          <nav
+            className="ml-[226px] flex shrink-0 items-center gap-[40px]"
+            aria-label="Library navigation"
           >
-            Home
-          </Link>
-
-          <Link
-            href="/library/categories"
-            className={`inline-flex items-center gap-1 ${navLinkClass}`}
-          >
-            Categories
-            <CategoriesDropdownArrow />
-          </Link>
-
-          <Link href="/events" className={navLinkClass}>
-            Events
-          </Link>
-        </nav>
-
-        <div className="ml-[80px] flex min-w-0 items-center gap-[60px]">
-          <div className="flex w-[220px] shrink-0 flex-col items-center justify-center">
-            <Link href="/library" aria-label="Go to library home">
-              <Image
-                src="/brand/alwerash-logo.png"
-                alt="Alwerash"
-                width={220}
-                height={96}
-                className="h-[96px] w-[220px] object-contain"
-                style={{ aspectRatio: "55 / 24" }}
-                unoptimized
-                priority
-              />
+            <Link
+              id="library-nav-home"
+              href={homeHref}
+              className={`relative z-10 ${navLinkClass}`}
+            >
+              Home
             </Link>
-            <h1 className="-mt-6 w-full text-center text-[48px] font-normal not-italic leading-[120%] text-black">
-              LIBRARY
-            </h1>
-          </div>
 
-          <LibrarySearchForm />
+            <Link
+              href="/library/categories"
+              className={`inline-flex items-center gap-1 ${navLinkClass}`}
+            >
+              Categories
+              <CategoriesDropdownArrow />
+            </Link>
+
+            <Link href="/events" className={navLinkClass}>
+              Events
+            </Link>
+          </nav>
+
+          <div className="ml-[80px] flex min-w-0 items-center gap-[60px]">
+            <div className="flex w-[220px] shrink-0 flex-col items-center justify-center">
+              <Link href="/library" aria-label="Go to library home">
+                <Image
+                  src="/brand/alwerash-logo.png"
+                  alt="Alwerash"
+                  width={220}
+                  height={96}
+                  className="h-[96px] w-[220px] object-contain"
+                  style={{ aspectRatio: "55 / 24" }}
+                  unoptimized
+                  priority
+                />
+              </Link>
+              <h1 className="-mt-6 w-full text-center text-[48px] font-normal not-italic leading-[120%] text-black">
+                LIBRARY
+              </h1>
+            </div>
+
+            <LibrarySearchForm />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

@@ -5,16 +5,25 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 const pangeaFont = pangeaFontFamily;
 
 const HIGHLIGHT = "#8AF396";
-const BAR_MAX_PX = 202;
-const MIN_SCALE_SECONDS = 3600;
 
 type Props = {
   summary: WeeklyActivitySummary;
   /** 0 = Sunday … 6 = Saturday (UTC), usually `new Date().getUTCDay()`. */
   highlightDayIndex: number;
+  variant?: "desktop" | "mobile";
 };
 
-export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
+export function WeeklyActivityBarCard({
+  summary,
+  highlightDayIndex,
+  variant = "desktop",
+}: Props) {
+  const isMobile = variant === "mobile";
+  const BAR_MAX_PX = isMobile ? 122 : 202;
+  const MIN_SCALE_SECONDS = 3600;
+  const barColWidth = isMobile ? 34 : 49;
+  const barGap = isMobile ? 5 : 6;
+
   const maxSeconds = Math.max(
     MIN_SCALE_SECONDS,
     ...summary.days.map((d) => d.watchSeconds)
@@ -25,7 +34,11 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
 
   return (
     <div
-      className="relative box-border flex h-[401px] w-[445px] max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] border border-[var(--Black,#000)] pt-[31px] px-[31px] pb-[21px] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
+      className={`relative box-border flex max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] border-[var(--Black,#000)] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
+        isMobile
+          ? "h-[305px] w-[315px] border-[0.3px] pt-[23px] pr-[24px] pb-[15px] pl-[24px]"
+          : "h-[401px] w-[445px] border pt-[31px] px-[31px] pb-[21px]"
+      }`}
       style={{ background: "var(--White, #FFF)" }}
       aria-label="Weekly activity"
     >
@@ -35,7 +48,7 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "32px",
+            fontSize: isMobile ? "24px" : "32px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
@@ -49,7 +62,7 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "16px",
+            fontSize: isMobile ? "14px" : "16px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -60,7 +73,7 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           Learnt this week
         </p>
         <p
-          className="m-0 mt-[5px]"
+          className={`m-0 ${isMobile ? "mt-[4px]" : "mt-[5px]"}`}
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -77,25 +90,33 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
 
       <div className="relative mt-auto flex min-h-0 flex-1 flex-col justify-end">
         <div
-          className="flex items-end gap-[6px]"
-          style={{ height: `${BAR_MAX_PX + 52}px` }}
+          className="flex items-end"
+          style={{
+            gap: `${barGap}px`,
+            height: `${BAR_MAX_PX + (isMobile ? 36 : 52)}px`,
+          }}
         >
           {summary.days.map((d, i) => {
             const isHi = i === highlightDayIndex;
             const ratio = d.watchSeconds / maxSeconds;
-            const barH = Math.max(10, Math.round(ratio * BAR_MAX_PX));
+            const barH = Math.max(8, Math.round(ratio * BAR_MAX_PX));
             return (
               <div
                 key={d.dateKey}
-                className="relative flex w-[49px] shrink-0 flex-col items-center justify-end"
-                style={{ height: BAR_MAX_PX + 44 }}
+                className="relative flex shrink-0 flex-col items-center justify-end"
+                style={{
+                  width: barColWidth,
+                  height: BAR_MAX_PX + (isMobile ? 32 : 44),
+                }}
               >
                 {isHi ? (
                   <div
-                    className="absolute flex h-[44px] w-[62px] items-center justify-center rounded-[50px] border-[0.3px] border-[var(--Black,#000)]"
+                    className="absolute flex items-center justify-center rounded-[50px] border-[0.3px] border-[var(--Black,#000)]"
                     style={{
                       background: "var(--Green, #8AF396)",
-                      bottom: barH + 8,
+                      bottom: barH + (isMobile ? 6 : 8),
+                      height: isMobile ? 28 : 44,
+                      width: isMobile ? 44 : 62,
                     }}
                   >
                     <p
@@ -103,7 +124,7 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily: pangeaFont,
-                        fontSize: "16px",
+                        fontSize: isMobile ? "10px" : "16px",
                         fontStyle: "normal",
                         fontWeight: 400,
                         lineHeight: "normal",
@@ -127,15 +148,22 @@ export function WeeklyActivityBarCard({ summary, highlightDayIndex }: Props) {
           })}
         </div>
 
-        <div className="mt-[8px] flex gap-[6px]">
+        <div
+          className="flex"
+          style={{
+            marginTop: isMobile ? "8px" : "8px",
+            gap: `${barGap}px`,
+          }}
+        >
           {summary.days.map((d) => (
             <p
               key={`${d.dateKey}-lab`}
-              className="m-0 w-[49px] text-center"
+              className="m-0 text-center"
               style={{
+                width: barColWidth,
                 color: "var(--Black, #000)",
                 fontFamily: pangeaFont,
-                fontSize: "16px",
+                fontSize: isMobile ? "12px" : "16px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",

@@ -1,10 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
 
+const DESKTOP_CARD_WIDTH_PX = 321;
+const MOBILE_CARD_WIDTH_PX = 315;
+const MOBILE_SWIPER_GAP_PX = 20;
+const MOBILE_SECTION_INSET_PX = 30;
 /** Overlap so the bottom card (260px) keeps 64px unintersected below the top card. */
 const COURSE_CARD_STACK_OVERLAP_PX = 260 - 64;
 
@@ -59,70 +67,30 @@ function ContinueCourseChevronIcon() {
   );
 }
 
-function ViewAllCoursesLink() {
-  return (
-    <Link
-      href="/course"
-      className="ml-auto flex shrink-0 items-center gap-[21px] transition-opacity hover:opacity-80"
-    >
-      <span
-        style={{
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: "18px",
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "120%",
-          fontVariationSettings: '"wght" 400',
-        }}
-      >
-        VIEW ALL
-      </span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={45}
-        height={45}
-        viewBox="0 0 46 46"
-        fill="none"
-        className="shrink-0"
-        aria-hidden
-      >
-        <path
-          d="M23 45.5C35.4264 45.5 45.5 35.4264 45.5 23C45.5 10.5736 35.4264 0.5 23 0.5C10.5736 0.5 0.5 10.5736 0.5 23C0.5 35.4264 10.5736 45.5 23 45.5Z"
-          fill="var(--White, #FFF)"
-        />
-        <path d="M23 32L32 23L23 14" fill="var(--White, #FFF)" />
-        <path
-          d="M23 14L32 23L23 32M32 23L14 23M45.5 23C45.5 35.4264 35.4264 45.5 23 45.5C10.5736 45.5 0.5 35.4264 0.5 23C0.5 10.5736 10.5736 0.5 23 0.5C35.4264 0.5 45.5 10.5736 45.5 23Z"
-          stroke="var(--Black, #000)"
-          strokeWidth={1}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </Link>
-  );
-}
-
 function CourseStackCard({
   titleInstructorLine,
   lectureLine,
   topicTitle,
   continueHref,
-}: ContinueLearningCardDto) {
+  widthPx = DESKTOP_CARD_WIDTH_PX,
+}: ContinueLearningCardDto & { widthPx?: number }) {
+  const scale = widthPx / DESKTOP_CARD_WIDTH_PX;
+  const topHeightPx = Math.round(350 * scale);
+  const bottomHeightPx = Math.round(260 * scale);
+  const overlapPx = Math.round(COURSE_CARD_STACK_OVERLAP_PX * scale);
+
   const cardBase =
-    "box-border w-full max-w-[321px] rounded-[50px] border border-[var(--Black,#000)]";
+    "box-border w-full rounded-[50px] border border-[var(--Black,#000)]";
 
   return (
-    <div className="relative w-[321px] max-w-full shrink-0">
+    <div className="relative shrink-0" style={{ width: widthPx }}>
       <div
         className={`relative z-1 ${cardBase}`}
         style={{
-          height: "350px",
+          height: topHeightPx,
           background: "var(--Grey, #E9E9E9)",
         }}
-      >
-        <div
+      >        <div
           className="absolute left-1/2 -translate-x-1/2"
           style={{ top: "48px", width: "78px", height: "78px" }}
           aria-hidden
@@ -152,13 +120,13 @@ function CourseStackCard({
         </div>
       </div>
       <div
-        className={`relative z-2 flex h-[260px] w-[321px] max-w-full flex-col overflow-hidden ${cardBase}`}
+        className={`relative z-2 flex w-full flex-col overflow-hidden ${cardBase}`}
         style={{
-          marginTop: `-${COURSE_CARD_STACK_OVERLAP_PX}px`,
+          height: bottomHeightPx,
+          marginTop: `-${overlapPx}px`,
           background: "var(--White, #FFF)",
         }}
-      >
-        <div className="flex min-h-0 flex-1 flex-col pt-[35px] pr-[35px] pl-[35px]">
+      >        <div className="flex min-h-0 flex-1 flex-col pt-[35px] pr-[35px] pl-[35px]">
           <p className="m-0 whitespace-pre-line" style={courseCardMetaMuted}>
             {titleInstructorLine}
           </p>
@@ -207,8 +175,7 @@ function CourseStackCard({
   );
 }
 
-export function ContinueLearningSection({
-  courses,
+export function ContinueLearningSection({  courses,
   /** When false, skip the full-bleed rule above the heading (profile already has section rules). */
   showTopRule = true,
   className = "",
@@ -223,14 +190,43 @@ export function ContinueLearningSection({
     <div className={className}>
       {showTopRule ? (
         <div
-          className="relative left-1/2 mt-[31px] h-px w-screen max-w-[100vw] -translate-x-1/2 bg-black"
+          className="relative left-1/2 mt-[31px] hidden h-px w-screen max-w-[100vw] -translate-x-1/2 bg-black lg:block"
           aria-hidden
         />
       ) : null}
 
-      <div className="pl-[120px] pr-[69px]">
+      <div className="max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]">
         <h2
-          className={`${showTopRule ? "mt-[40px]" : ""} w-full uppercase`}
+          className={`${showTopRule ? "max-lg:mt-0 lg:mt-[40px]" : ""} m-0 w-full uppercase lg:hidden`}
+        >
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            CONTINUE{" "}
+          </span>
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            LEARNING
+          </span>
+        </h2>
+
+        <h2
+          className={`${showTopRule ? "mt-[40px]" : ""} hidden w-full uppercase lg:block`}
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -256,14 +252,33 @@ export function ContinueLearningSection({
             LEARNING
           </span>
         </h2>
+      </div>
 
-        <div className="mt-[34px] flex w-full flex-wrap items-center justify-start gap-y-6">
-          <div className="flex flex-wrap gap-[30px]">
-            {courses.map((course) => (
-              <CourseStackCard key={course.continueHref} {...course} />
-            ))}
-          </div>
-          <ViewAllCoursesLink />
+      <div className="relative left-1/2 mt-[31px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip lg:hidden">
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={MOBILE_SWIPER_GAP_PX}
+          slidesPerGroup={1}
+          slidesOffsetBefore={MOBILE_SECTION_INSET_PX}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          className="overflow-visible!"
+        >
+          {courses.map((course) => (
+            <SwiperSlide key={course.continueHref} className="w-[315px]!">
+              <CourseStackCard {...course} widthPx={MOBILE_CARD_WIDTH_PX} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+
+      <div className="lg:pl-[120px] lg:pr-[69px]">
+        <div className="mt-[34px] hidden flex-wrap gap-[30px] lg:flex">
+          {courses.map((course) => (
+            <CourseStackCard key={course.continueHref} {...course} />
+          ))}
         </div>
       </div>
     </div>

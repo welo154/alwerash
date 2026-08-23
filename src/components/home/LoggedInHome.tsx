@@ -14,6 +14,10 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 const pangeaFont = pangeaFontFamily;
 
 const PURPLE = "#FF8CFF";
+/** Mobile nav: 37px top padding + 47px bar — user info sits at 100px from page top. */
+const MOBILE_HEADER_HEIGHT_PX = 84;
+const MOBILE_USER_INFO_TOP_PX = 100;
+const MOBILE_USER_INFO_HR_TOP_PX = 167;
 
 export type LoggedInHomeProps = {
   userName: string;
@@ -29,6 +33,8 @@ export type LoggedInHomeProps = {
   weeklyActivity: WeeklyActivitySummary;
   /** 0 = Sunday … 6 = Saturday (UTC). */
   activityHighlightDayIndex: number;
+  /** Aggregate completed-lesson progress across started courses (0–100). */
+  learningProgressPercent: number;
 };
 
 export function LoggedInHome({
@@ -40,6 +46,7 @@ export function LoggedInHome({
   trackExplorer,
   weeklyActivity,
   activityHighlightDayIndex,
+  learningProgressPercent,
 }: LoggedInHomeProps) {
   const initials = userName
     .split(" ")
@@ -51,11 +58,108 @@ export function LoggedInHome({
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <section
-        className="bg-white"
-        style={{ paddingTop: "58px", fontFamily: pangeaFont }}
-      >
-        <div className="flex items-center gap-[17px] pl-[71px] pr-6">
+      <section className="relative bg-white lg:pt-[58px]" style={{ fontFamily: pangeaFont }}>
+        <div
+          className="flex items-center gap-[10px] pl-[30px] lg:hidden"
+          style={{ paddingTop: MOBILE_USER_INFO_TOP_PX - MOBILE_HEADER_HEIGHT_PX }}
+        >
+          <div className="relative h-[45px] w-[45px] shrink-0 overflow-hidden rounded-full border-2 border-black">
+            {userImage ? (
+              <Image
+                src={userImage}
+                alt={userName}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center bg-white text-[16px] font-bold text-black"
+                style={{ fontVariationSettings: '"wght" 700' }}
+              >
+                {initials}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <h1 className="m-0 uppercase">
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "20px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                WELCOME BACK,{" "}
+              </span>
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "20px",
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  lineHeight: "120%",
+                }}
+              >
+                {firstName.toUpperCase()}!
+              </span>
+            </h1>
+
+            <p className="m-0 flex flex-wrap items-baseline gap-x-[8px]">
+              {subtitleLeftOfEdit ? (
+                <span
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: "16px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                    opacity: 0.6,
+                  }}
+                >
+                  {subtitleLeftOfEdit}
+                </span>
+              ) : null}
+              <Link
+                href="/profile"
+                className="transition-opacity hover:opacity-80"
+                style={{
+                  color: "var(--Purple, #FF8CFF)",
+                  fontFamily: pangeaFont,
+                  fontSize: "14px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                  textDecorationLine: "underline",
+                  textDecorationStyle: "solid",
+                  textDecorationSkipInk: "auto",
+                }}
+              >
+                Edit
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        <hr
+          className="absolute left-1/2 border-0 bg-black lg:hidden"
+          style={{
+            top: MOBILE_USER_INFO_HR_TOP_PX - MOBILE_HEADER_HEIGHT_PX,
+            width: "100vw",
+            maxWidth: "100vw",
+            height: "0.3px",
+            transform: "translateX(-50%)",
+          }}
+          aria-hidden
+        />
+
+        <div className="hidden items-center gap-[17px] pl-[71px] pr-6 lg:flex">
           <div className="relative h-[82px] w-[82px] shrink-0 overflow-hidden rounded-full border-2 border-black">
             {userImage ? (
               <Image
@@ -144,18 +248,53 @@ export function LoggedInHome({
           </div>
         </div>
 
-        <ContinueLearningSection courses={continueLearningCourses} />
+        <ContinueLearningSection
+          courses={continueLearningCourses}
+          className="max-lg:mt-[62px]"
+        />
 
         <TrackActivitySection
           weeklyActivity={weeklyActivity}
           activityHighlightDayIndex={activityHighlightDayIndex}
+          learningProgressPercent={learningProgressPercent}
           className={
-            continueLearningCourses.length > 0 ? "mt-[101px]" : "mt-[48px]"
+            continueLearningCourses.length > 0
+              ? "max-lg:mt-[60px] lg:mt-[101px]"
+              : "mt-[48px]"
           }
         />
 
+        <h2 className="m-0 max-lg:mt-[60px] max-lg:pl-[30px] uppercase lg:hidden">
+          <span
+            className="block"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            TOPICS RECOMMENDED
+          </span>
+          <span
+            className="block"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            FOR YOU
+          </span>
+        </h2>
+
         <h2
-          className="mt-[67px] pl-[120px] pr-6 uppercase"
+          className="mt-[67px] hidden pl-[120px] pr-6 uppercase lg:block"
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -189,14 +328,14 @@ export function LoggedInHome({
           trackPillSelectsCourses
           courseTilesByTrackSlug={trackExplorer.courseTilesByTrackSlug}
           showDiscoverCta={false}
-          sectionClassName="mt-[24px]"
+          sectionClassName="max-lg:mt-[18px] lg:mt-[24px]"
           contentLeftPx={120}
           pillGapPx={15}
           maxPills={8}
           showWhatToLearnNextHeading
         />
         {landingMostsMentors.length > 0 ? (
-          <div className="pl-[120px] pr-6">
+          <div className="lg:pl-[120px] lg:pr-6">
             <LandingCurrentMostsSection
               mentors={landingMostsMentors}
               mentorCardWidthPx={383}
@@ -205,6 +344,7 @@ export function LoggedInHome({
               alignCardsLeft
               headingSizePx={36}
               cardsTopGapPx={58}
+              className="mt-[68px] lg:mt-0"
             />
           </div>
         ) : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { LandingMobileFooter } from "@/components/landing/LandingMobileFooter";
 import { SiteFooter } from "./SiteFooter";
 
 /** Hide global footer on auth flows (login, sign-up, register sub-routes). */
@@ -11,5 +12,16 @@ export function ConditionalSiteFooter() {
     return null;
   }
 
-  return <SiteFooter />;
+  return (
+    <>
+      <div className="overflow-x-clip bg-white lg:hidden">
+        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0 pb-0">
+          <LandingMobileFooter />
+        </div>
+      </div>
+      <div className="max-lg:hidden">
+        <SiteFooter />
+      </div>
+    </>
+  );
 }

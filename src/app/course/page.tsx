@@ -138,6 +138,7 @@ export default async function LearnPage() {
                 compactVerticalSpacing
                 contained
                 headingSizePx={36}
+                className="mt-[68px] lg:mt-0"
               />
             </div>
           ) : null}

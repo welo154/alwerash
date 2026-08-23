@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 import { CoursesMegaMenuPanel } from "@/components/layout/CoursesMegaMenu";
+import { MobileSiteNavActions, MobileSiteNavLogo } from "@/components/layout/MobileSiteNavBar";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
 export type HeroTrack = { id: string; title: string; slug: string };
@@ -48,23 +49,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
             <path d={HERO_SHELL_MOBILE_PATH} fill={GUEST_SHELL_GREEN} />
           </svg>
 
-          <Link
-            href="/"
-            className="absolute left-[-16px] top-0 z-40 block"
-            style={{ width: 160, height: 47, aspectRatio: "99 / 29" }}
-            aria-label="Go to home"
-          >
-            <Image
-              src="/brand/alwerash-logo-hero.png"
-              alt="Alwerash"
-              width={160}
-              height={47}
-              className="block h-[47px] w-[160px] max-w-none object-contain"
-              style={{ aspectRatio: "99 / 29" }}
-              unoptimized
-              priority
-            />
-          </Link>
+          <MobileSiteNavLogo homeHref="/" />
 
           {/* Figma 1181:6295 — 110px below green SVG top */}
           <div
@@ -142,48 +127,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
           </div>
         </div>
 
-        <div className="absolute right-[22px] top-[14px] z-40 flex items-center">
-          <button type="button" aria-label="Search" className="flex h-[19px] w-[19px] items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="19"
-              height="19"
-              viewBox="0 0 21 21"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M19.75 19.75L15.1583 15.1583M17.6389 9.19444C17.6389 13.8582 13.8582 17.6389 9.19444 17.6389C4.53071 17.6389 0.75 13.8582 0.75 9.19444C0.75 4.53071 4.53071 0.75 9.19444 0.75C13.8582 0.75 17.6389 4.53071 17.6389 9.19444Z"
-                stroke="#1E1E1E"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="ml-[8px] flex h-[15px] w-[23px] items-center justify-center"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="23"
-              height="15"
-              viewBox="0 0 25 17"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M23.75 5.75H0.75M23.75 0.75H0.75M23.75 10.75H0.75M23.75 15.75H0.75"
-                stroke="#000"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
+        <MobileSiteNavActions />
       </div>
 
       {/* Desktop shell */}
