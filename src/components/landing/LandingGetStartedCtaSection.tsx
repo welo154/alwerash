@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
+import { LandingMobileFooter } from "./LandingMobileFooter";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -9,12 +10,102 @@ const CTA_BUTTON_TEXT = "#141413";
 /** Inline headline logo — 104:31, larger than previous 208×62 */
 const CTA_INLINE_LOGO_W = 260;
 const CTA_INLINE_LOGO_H = 78;
+/** Mobile stacked logo under the headline. */
+const CTA_MOBILE_LOGO_W = 160;
+const CTA_MOBILE_LOGO_H = 48;
 
 /**
  * Bottom-of-landing CTA: headline with inline logo, primary button, social row.
  * Social icons match `HeroSection` (same assets as the guest hero strip).
  */
-export function LandingGetStartedCtaSection() {
+export function LandingGetStartedCtaSection({
+  variant = "desktop",
+  className,
+}: {
+  variant?: "desktop" | "mobile";
+  className?: string;
+} = {}) {
+  if (variant === "mobile") {
+    return (
+      <section
+        className={`bg-white pb-[32px] ${className ?? "mt-[96px]"}`}
+        aria-labelledby="landing-get-started-heading-mobile"
+      >
+        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0">
+          <h2
+            id="landing-get-started-heading-mobile"
+            className="m-0 w-[358px] max-w-full uppercase"
+            style={{
+              color: "#000",
+              textAlign: "center",
+              fontFamily: pangeaFont,
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            MASTER NEW SKILLS, BUILD A PROFESSIONAL PORTFOLIO, AND LEARN FROM THE
+            BEST IN THE INDUSTRY. ONLY AT
+          </h2>
+
+          <div
+            className="mt-[6px] shrink-0"
+            style={{
+              width: CTA_MOBILE_LOGO_W,
+              height: CTA_MOBILE_LOGO_H,
+              aspectRatio: "104 / 31",
+            }}
+          >
+            <Image
+              src="/brand/alwerash-logo.png"
+              alt="Alwerash"
+              width={CTA_MOBILE_LOGO_W}
+              height={CTA_MOBILE_LOGO_H}
+              className="block size-full object-contain object-center"
+              unoptimized
+            />
+          </div>
+
+          <Link
+            href="/register"
+            className="mt-[53px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] border-black px-4 no-underline transition-opacity hover:opacity-90"
+            style={{
+              background: "var(--Green, #8AF396)",
+              color: "var(--Text-Primary, #141413)",
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "19.6px",
+            }}
+          >
+            GET STARTED
+          </Link>
+
+          <p
+            className="m-0 mt-[20px]"
+            style={{
+              color: "#000",
+              textAlign: "center",
+              fontFamily: pangeaFont,
+              fontSize: "18px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            Or continue with
+          </p>
+
+          <LandingSocialSignInRow variant="mobileCta" className="mt-[18px]" />
+
+          <LandingMobileFooter />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className="bg-white pt-[170px] pb-[120px]"

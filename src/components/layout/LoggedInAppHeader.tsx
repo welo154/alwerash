@@ -144,13 +144,13 @@ export function LoggedInAppHeader({
               </Link>
             </nav>
 
-            <div className="ml-[30px] flex h-10 w-[350px] shrink-0 items-center justify-center px-3">
+            <div className="ml-[30px] hidden h-10 w-[350px] shrink-0 items-center justify-center px-3 lg:flex">
               <SearchBar variant="toolbar" />
             </div>
             <button
               type="button"
               aria-label="Search"
-              className="ml-[15px] flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+              className="ml-[15px] hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 lg:flex"
             >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -196,7 +196,7 @@ export function LoggedInAppHeader({
             </Link>
             <Link
               href="/course"
-              className="mr-[5px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10"
+              className="mr-[5px] hidden h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10 lg:flex"
               aria-label="Favorites"
             >
               <svg
@@ -217,7 +217,7 @@ export function LoggedInAppHeader({
             </Link>
             <button
               type="button"
-              className="mr-[20px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10"
+              className="mr-[20px] hidden h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10 lg:flex"
               aria-label="Notifications"
             >
               <svg

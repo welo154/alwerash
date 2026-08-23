@@ -29,9 +29,12 @@ export type LandingMentorCardProps = {
   heightPx?: number;
   /** Fill grid cell width; height follows {@link MENTOR_CARD_ASPECT}. */
   fillWidth?: boolean;
+  layout?: "desktop" | "mobile";
 };
 
 const MENTOR_CARD_ASPECT = 383 / 357;
+const MOBILE_CARD_WIDTH = 329;
+const MOBILE_CARD_HEIGHT = 341;
 
 export function LandingMentorCard({
   variant,
@@ -39,10 +42,14 @@ export function LandingMentorCard({
   profession,
   href,
   onOpen,
-  widthPx = 383,
-  heightPx = 357,
+  widthPx,
+  heightPx,
   fillWidth = false,
+  layout = "desktop",
 }: LandingMentorCardProps) {
+  const isMobile = layout === "mobile";
+  const cardWidth = widthPx ?? (isMobile ? MOBILE_CARD_WIDTH : 383);
+  const cardHeight = heightPx ?? (isMobile ? MOBILE_CARD_HEIGHT : 357);
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
   const rawId = useId().replace(/:/g, "");
   const maskId = `mentor-card-mask-${rawId}`;
@@ -51,7 +58,31 @@ export function LandingMentorCard({
 
   const sizeStyle = fillWidth
     ? ({ width: "100%", aspectRatio: `${MENTOR_CARD_ASPECT}` } as const)
-    : ({ width: `${widthPx}px`, height: `${heightPx}px` } as const);
+    : ({ width: `${cardWidth}px`, height: `${cardHeight}px` } as const);
+
+  const scaleX = cardWidth / 383;
+  const scaleY = cardHeight / 357;
+  const badgeLabel = variant === "popular" ? "POPULAR" : "WATCHED";
+  const badgeSecondWordStyle = isMobile
+    ? {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: "20px",
+        fontStyle: "italic" as const,
+        fontWeight: 700,
+        lineHeight: "99%",
+      }
+    : { fontStyle: "italic" as const };
+  const badgeFirstWordStyle = isMobile
+    ? {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: "20px",
+        fontStyle: "normal" as const,
+        fontWeight: 700,
+        lineHeight: "99%",
+      }
+    : { fontStyle: "normal" as const };
 
   const card = (
     <article
@@ -127,52 +158,57 @@ export function LandingMentorCard({
           />
         </g>
 
-        <foreignObject x="24" y="10" width="131" height="52">
+        <foreignObject
+          x={24 * scaleX + (isMobile && variant === "watched" ? 20 : 0)}
+          y={10 * scaleY}
+          width={131 * scaleX}
+          height={52 * scaleY}
+        >
           <div
             className="text-black transition-colors duration-200 group-hover:text-[#004B3C]"
             style={{
               fontFamily: pangeaFont,
-              fontSize: "24px",
+              fontSize: isMobile ? "20px" : "24px",
               fontWeight: 700,
               lineHeight: "99%",
-              width: "131px",
-              maxWidth: "131px",
+              width: isMobile ? "112px" : "131px",
+              maxWidth: isMobile ? "112px" : "131px",
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "flex-start",
               textAlign: "left",
+              ...(isMobile ? { color: "var(--Black, #000)" } : {}),
             }}
           >
-            <span style={{ fontStyle: "normal" }}>MOST </span>
-            <span style={{ fontStyle: "italic" }}>
-              {variant === "popular" ? "POPULAR" : "WATCHED"}
-            </span>
+            <span style={badgeFirstWordStyle}>MOST </span>
+            <span style={badgeSecondWordStyle}>{badgeLabel}</span>
           </div>
         </foreignObject>
 
-        <foreignObject x="27" y="0" width="356" height="357">
+        <foreignObject x={27 * scaleX} y={0} width={356 * scaleX} height={cardHeight}>
           <div
             style={{
               boxSizing: "border-box",
               height: "100%",
-              paddingBottom: 38,
+              paddingBottom: isMobile ? 24 : 38 * scaleY,
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-end",
               alignItems: "flex-start",
-              maxWidth: "356px",
+              maxWidth: `${356 * scaleX}px`,
             }}
           >
             <div
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
                 fontFamily: pangeaFont,
-                fontSize: "24px",
+                fontSize: isMobile ? "20px" : "24px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
                 opacity: 0.6,
-                marginBottom: 6,
+                marginBottom: isMobile ? 6 * scaleY : 6,
+                ...(isMobile ? { color: "var(--White, #FFF)" } : {}),
               }}
             >
               MEET
@@ -181,13 +217,14 @@ export function LandingMentorCard({
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
                 fontFamily: pangeaFont,
-                fontSize: "32px",
+                fontSize: isMobile ? "24px" : "32px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
-                width: 250,
-                maxWidth: 250,
+                width: isMobile ? 214 : 250,
+                maxWidth: isMobile ? 214 : 250,
                 overflowWrap: "break-word",
+                ...(isMobile ? { color: "var(--White, #FFF)" } : {}),
               }}
             >
               {name}
@@ -196,10 +233,11 @@ export function LandingMentorCard({
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
                 fontFamily: pangeaFont,
-                fontSize: "24px",
+                fontSize: isMobile ? "20px" : "24px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                ...(isMobile ? { color: "var(--White, #FFF)", marginTop: 3 } : {}),
               }}
             >
               {profession}

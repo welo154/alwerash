@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -170,9 +170,22 @@ const FEATURES: FeatureRow[] = [
   },
 ];
 
-function FeatureCheckGlyph({ className }: { className?: string }) {
+function FeatureCheckGlyph({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" className={className} aria-hidden>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 40 40"
+      fill="none"
+      className={className}
+      style={style}
+      aria-hidden
+    >
       <circle cx="20" cy="20" r="19" stroke="#FF8CFF" strokeWidth={2} />
       <path
         d="M30 14L15.5625 28L9 21.6364"
@@ -185,23 +198,114 @@ function FeatureCheckGlyph({ className }: { className?: string }) {
   );
 }
 
-function FeatureCheck() {
-  return <FeatureCheckGlyph className="h-10 w-10 shrink-0" />;
+function FeatureCheck({ size = 40 }: { size?: number }) {
+  return <FeatureCheckGlyph className="shrink-0" style={{ width: size, height: size }} />;
 }
 
-export function LandingEverythingInOneSection() {
+const mobileFeatureTitleStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "20px",
+  fontStyle: "normal",
+  fontWeight: 600,
+  lineHeight: "127%",
+} as const;
+
+const mobileFeatureBodyStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: "127%",
+} as const;
+
+export function LandingEverythingInOneSection({
+  showDecoBoxes = true,
+  variant = "desktop",
+  className,
+}: {
+  showDecoBoxes?: boolean;
+  variant?: "desktop" | "mobile";
+  className?: string;
+} = {}) {
+  if (variant === "mobile") {
+    return (
+      <section
+        className={`w-full pl-[30px] pr-4 ${className ?? ""}`}
+        data-gsap-reveal
+        aria-labelledby="everything-in-one-place-heading-mobile"
+      >
+        <h2
+          id="everything-in-one-place-heading-mobile"
+          className="m-0 w-[269px] text-left text-black"
+          style={{ fontFamily: pangeaFont }}
+        >
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            EVERYTHING
+          </span>
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            {" "}
+            IN ONE PLACE
+          </span>
+        </h2>
+
+        <ul className="mt-[37px] mb-0 flex list-none flex-col gap-[35px] p-0">
+          {FEATURES.map(({ title, body, Icon }) => (
+            <li key={title} className="flex items-center">
+              <span className="flex shrink-0 items-center justify-center">
+                <Icon className="h-[24px] w-[26px] shrink-0" />
+              </span>
+              <div className="ml-[21px] w-[221px] shrink-0">
+                <h3 className="m-0" style={mobileFeatureTitleStyle}>
+                  {title}
+                </h3>
+                <p className="m-0 mt-2" style={mobileFeatureBodyStyle}>
+                  {body}
+                </p>
+              </div>
+              <span className="ml-[33px] shrink-0">
+                <FeatureCheck size={33.171} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
+
   return (
     <section
-      className="mt-[125px] w-full overflow-x-hidden px-4 sm:px-6 lg:px-8"
+      className={`w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 ${className ?? "mt-[125px]"}`}
       data-gsap-reveal
       aria-labelledby="everything-in-one-place-heading"
     >
       <div className="mx-auto flex max-w-[1600px] items-start justify-center gap-6 lg:gap-10 xl:justify-between">
-        <div className="mt-[29px] hidden w-[312px] shrink-0 flex-col xl:flex">
-          <DecoBox className="ml-[178px]" />
-          <DecoBox className="ml-[101px] mt-[68px]" />
-          <DecoBox className="ml-[59px] mt-[68px]" />
-        </div>
+        {showDecoBoxes ? (
+          <div className="mt-[29px] hidden w-[312px] shrink-0 flex-col xl:flex">
+            <DecoBox className="ml-[178px]" />
+            <DecoBox className="ml-[101px] mt-[68px]" />
+            <DecoBox className="ml-[59px] mt-[68px]" />
+          </div>
+        ) : null}
 
         <div className="min-w-0 w-full max-w-[640px] flex-1 xl:max-w-none xl:px-4">
           <h2
@@ -230,17 +334,21 @@ export function LandingEverythingInOneSection() {
                     {body}
                   </p>
                 </div>
-                <FeatureCheck />
+                <span className="-translate-x-[40px] shrink-0">
+                  <FeatureCheck />
+                </span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mt-[29px] hidden w-[312px] shrink-0 flex-col items-end xl:flex">
-          <DecoBox className="mr-[178px]" />
-          <DecoBox className="mr-[101px] mt-[68px]" />
-          <DecoBox className="mr-[59px] mt-[68px]" />
-        </div>
+        {showDecoBoxes ? (
+          <div className="mt-[29px] hidden w-[312px] shrink-0 flex-col items-end xl:flex">
+            <DecoBox className="mr-[178px]" />
+            <DecoBox className="mr-[101px] mt-[68px]" />
+            <DecoBox className="mr-[59px] mt-[68px]" />
+          </div>
+        ) : null}
       </div>
     </section>
   );

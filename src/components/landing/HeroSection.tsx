@@ -18,18 +18,177 @@ const HERO_SHELL_PATH =
   "M1246 0C1276.38 1.22409e-05 1301 24.6243 1301 55V707C1301 737.376 1276.38 762 1246 762H55C24.6244 762 0 737.376 0 707V132.636C0 105.022 22.3858 82.6357 50 82.6357H176.023C200.324 82.6357 220.023 62.9363 220.023 38.6357C220.023 17.2978 237.321 0 258.659 0H1246Z";
 
 const HERO_SHELL = { width: 1301, height: 762 } as const;
+const HERO_SHELL_MOBILE = { width: 382, height: 801 } as const;
 
 /** Rest mosaic: TL 282×357, TR 197×272, BL 282×224, BR 197×308; gaps 18×16. */
 const HERO_MOSAIC_FRAME = { width: 497, height: 597 } as const;
 const mosaicAnim = (name: string) => `${name} 8000ms linear infinite`;
 
-export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
+const HERO_SHELL_MOBILE_PATH =
+  "M320 0C324.564 5.83965e-07 324.08 4 319.516 4H319C314.582 4 311 7.58172 311 12V34C311 38.4183 314.582 42 319 42H358.341C370.516 42 382 49.8245 382 62V739C382 773.242 354.242 801 320 801H62C27.7584 801 6.12127e-07 773.242 0 739V62C2.17657e-07 49.8245 11.4839 42 23.6594 42H102.338C113.107 42 121.838 33.2696 121.838 22.5V13.7569C121.838 7.81601 117.022 3 111.081 3H62.3134C58.8228 3 58.5094 1.32994e-07 62 0H320Z";
 
+export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
   return (
-    <section className={`${pangeaVar.className} bg-white px-4 pb-0 pt-[32px] sm:px-6 lg:px-8`}>
-      {/* Guest shell — page top padding 32px; header row 28px below green top */}
+    <section className={`${pangeaVar.className} bg-white px-0 pb-0 pt-[37px] sm:px-6 lg:px-8 lg:pt-[32px]`}>
+      {/* Mobile shell — 382px centered in ~393 viewport */}
+      <div className="relative mx-auto w-full max-w-[393px] lg:hidden">
+        <div
+          className="relative mx-auto overflow-visible"
+          style={{ width: HERO_SHELL_MOBILE.width, height: HERO_SHELL_MOBILE.height }}
+        >
+          <svg
+            className="pointer-events-none absolute inset-0 z-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width={HERO_SHELL_MOBILE.width}
+            height={HERO_SHELL_MOBILE.height}
+            viewBox="0 0 382 801"
+            fill="none"
+            aria-hidden
+          >
+            <path d={HERO_SHELL_MOBILE_PATH} fill={GUEST_SHELL_GREEN} />
+          </svg>
+
+          <Link
+            href="/"
+            className="absolute left-[-16px] top-0 z-40 block"
+            style={{ width: 160, height: 47, aspectRatio: "99 / 29" }}
+            aria-label="Go to home"
+          >
+            <Image
+              src="/brand/alwerash-logo-hero.png"
+              alt="Alwerash"
+              width={160}
+              height={47}
+              className="block h-[47px] w-[160px] max-w-none object-contain"
+              style={{ aspectRatio: "99 / 29" }}
+              unoptimized
+              priority
+            />
+          </Link>
+
+          {/* Figma 1181:6295 — 110px below green SVG top */}
+          <div
+            className="absolute left-[25px] top-[110px] z-20 w-[323px]"
+            style={{ fontFamily: pangeaFont }}
+          >
+            <div className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4">
+              <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
+              <span className="text-center text-[14px] font-normal leading-[19.6px] text-[#141413] whitespace-nowrap">
+                CREATIVITY STARTS HERE
+              </span>
+            </div>
+
+            <h1
+              className="m-0 mt-[30px] w-[323px] uppercase text-black"
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "40px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }}
+            >
+              Discover your next{" "}
+              <em
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "40px",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: "120%",
+                }}
+              >
+                creative
+              </em>{" "}
+              obsession.
+              <br />
+              From beginner to pro at your own time.
+            </h1>
+
+            <p
+              className="m-0 mt-[30px] w-[284px] text-black"
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "18px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "127%",
+              }}
+            >
+              Explore thousands of online classes in design, typography, illustration,
+              photography, and more. Taught by industry professionals.
+            </p>
+
+            <Link
+              href="/register"
+              className="mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] border-black bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
+              style={{ fontFamily: pangeaFont }}
+            >
+              GET STARTED
+            </Link>
+
+            <div className="mt-[17px] flex items-center">
+              <p
+                className="m-0 text-center text-[18px] font-normal leading-[120%] text-black"
+                style={{ fontFamily: pangeaFont }}
+              >
+                Or continue with
+              </p>
+              <LandingSocialSignInRow variant="mobileHero" className="ml-[8px]" />
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-[22px] top-[14px] z-40 flex items-center">
+          <button type="button" aria-label="Search" className="flex h-[19px] w-[19px] items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="19"
+              height="19"
+              viewBox="0 0 21 21"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M19.75 19.75L15.1583 15.1583M17.6389 9.19444C17.6389 13.8582 13.8582 17.6389 9.19444 17.6389C4.53071 17.6389 0.75 13.8582 0.75 9.19444C0.75 4.53071 4.53071 0.75 9.19444 0.75C13.8582 0.75 17.6389 4.53071 17.6389 9.19444Z"
+                stroke="#1E1E1E"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Open menu"
+            className="ml-[8px] flex h-[15px] w-[23px] items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="23"
+              height="15"
+              viewBox="0 0 25 17"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M23.75 5.75H0.75M23.75 0.75H0.75M23.75 10.75H0.75M23.75 15.75H0.75"
+                stroke="#000"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop shell */}
       <div
-        className="relative mx-auto flex max-w-full flex-col overflow-visible"
+        className="relative mx-auto hidden max-w-full flex-col overflow-visible lg:flex"
         style={{ width: HERO_SHELL.width, height: HERO_SHELL.height }}
       >
         <svg
@@ -61,7 +220,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
           <div className="relative z-[3000] flex items-stretch">
             <div className="relative z-30 flex flex-1 items-center justify-end pb-5 pl-0 pr-8 pt-[28px]">
               <nav
-                className="hidden items-center gap-[30px] text-[18px] font-normal text-black md:flex"
+                className="hidden items-center gap-[30px] text-[18px] font-normal text-black lg:flex"
                 style={{ fontFamily: pangeaFont }}
               >
                 <div className="group relative">
@@ -100,7 +259,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 <Link href="/events" className="transition-opacity hover:opacity-75">Events</Link>
               </nav>
 
-              <div className="ml-[30px] flex flex-wrap items-center">
+              <div className="ml-[30px] hidden flex-wrap items-center lg:flex">
                 <div className="flex items-center gap-[15px]">
                   <div className="flex h-10 w-[350px] items-center rounded-[8px] border border-black bg-white px-3">
                     <input
@@ -153,7 +312,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
             className="z-20"
             style={{
               position: "absolute",
-              top: 151, // header (28+40+20) + 63px gap below header
+              top: 151,
               left: 50,
               width: 612,
               maxWidth: "calc(100% - 50px)",
@@ -228,6 +387,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
               right: 39,
               bottom: 31,
             }}
+            aria-hidden
           >
             <div
               className="relative"
@@ -256,8 +416,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
             </div>
           </div>
         </div>
-
-      </div>{/* end green container */}
+      </div>
     </section>
   );
 }
@@ -270,14 +429,3 @@ function ArrowRightIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -31,22 +31,25 @@ export async function GuestLanding() {
         maxVisibleCourses={3}
         showDiscoverCta
         marqueeTrackPills
-        sectionClassName="mt-[63px]"
+        sectionClassName="mt-[50px] lg:mt-[63px]"
+        landingMostsMentors={landingMostsMentors}
       />
-      <LandingEverythingInOneSection />
-      {landingMostsMentors.length > 0 ? (
-        <LandingCurrentMostsSection
-          mentors={landingMostsMentors}
-          mentorCardWidthPx={383}
-          mentorCardHeightPx={357}
-        />
-      ) : null}
-      <div className="mb-0 w-full px-10">
-        <StudentsRatingWorkSection sectionClassName="py-0" />
+      <div className="max-lg:hidden">
+        <LandingEverythingInOneSection />
+        {landingMostsMentors.length > 0 ? (
+          <LandingCurrentMostsSection
+            mentors={landingMostsMentors}
+            mentorCardWidthPx={383}
+            mentorCardHeightPx={357}
+          />
+        ) : null}
+        <div className="mb-0 w-full px-10">
+          <StudentsRatingWorkSection sectionClassName="py-0" />
+        </div>
+        <LandingFaqSection />
+        <LandingGetStartedCtaSection />
+        <GsapAnimationLayer />
       </div>
-      <LandingFaqSection />
-      <LandingGetStartedCtaSection />
-      <GsapAnimationLayer />
     </div>
   );
 }

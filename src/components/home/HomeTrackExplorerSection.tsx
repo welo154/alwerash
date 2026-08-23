@@ -25,13 +25,19 @@ import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwipe
 import type { HomeTrackMetaFilter, HomeTrackPill } from "@/types/home-track-explorer";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { LibraryFeaturedBook } from "@/components/library/LibraryFeaturedBook";
+import { LibraryArticleCardVisual } from "@/components/library/LibraryArticleCardVisual";
+import { LandingEverythingInOneSection } from "@/components/landing/LandingEverythingInOneSection";
+import { LandingCurrentMostsSection } from "@/components/landing/LandingCurrentMostsSection";
+import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
+import { LandingFaqSection } from "@/components/landing/LandingFaqSection";
+import { LandingGetStartedCtaSection } from "@/components/landing/LandingGetStartedCtaSection";
+import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
 /** Same continuous drift as LearnTrendingClassesSection. */
 const MARQUEE_PIXELS_PER_SECOND = 47;
-const PILL_GAP_PX = 25;
 
 const pillFont = {
   fontFamily: pangeaFontFamily,
@@ -42,11 +48,57 @@ const bodyTextFont = {
   fontFamily: pangeaFontFamily,
 } as const;
 
+const sectionLabelFont = {
+  color: "var(--White, #FFF)",
+  fontFamily: pangeaFontFamily,
+  fontSize: "18px",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: "normal",
+} as const;
+
+function SectionLabelUnderline({ width }: { width: number }) {
+  return (
+    <div
+      className="shrink-0 bg-[#FFF]"
+      style={{ width, height: "1.2px", minHeight: "1.2px", maxHeight: "1.2px" }}
+      aria-hidden
+    />
+  );
+}
+
+function MobileDiscoverCta({
+  className,
+  textClassName = "text-black",
+}: {
+  className?: string;
+  textClassName?: string;
+}) {
+  return (
+    <div className={`flex flex-col ${className ?? ""}`}>
+      <p
+        className={`m-0 w-[315px] text-[20px] font-normal leading-[127%] ${textClassName}`}
+        style={bodyTextFont}
+      >
+        Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
+        industry professionals.
+      </p>
+      <Link
+        href="/course"
+        className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[8px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90"
+        style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
+      >
+        Discover
+      </Link>
+    </div>
+  );
+}
+
 function TrackLinkPill({ pill }: { pill: HomeTrackPill }) {
   return (
     <Link
       href={`/tracks/${encodeURIComponent(pill.slug)}`}
-      className="inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black bg-white px-4 text-center text-[24px] font-bold text-black no-underline transition-colors hover:bg-slate-50"
+      className="inline-flex h-[27px] w-fit shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 lg:h-[45px] lg:border lg:text-[24px]"
       style={{ ...pillFont, lineHeight: "19.6px" }}
     >
       {pill.label}
@@ -68,7 +120,7 @@ function TrackSelectPill({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`inline-flex h-[45px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[24px] font-bold text-black transition-colors ${
+      className={`inline-flex h-[27px] w-fit shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors lg:h-[45px] lg:border lg:text-[24px] ${
         pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"
       }`}
       style={{ ...pillFont, lineHeight: "19.6px" }}
@@ -184,8 +236,7 @@ function TrackPillsMarqueeRow({
     >
       <div
         ref={trackRef}
-        className="flex w-max will-change-transform pl-6 sm:pl-8"
-        style={{ gap: PILL_GAP_PX }}
+        className="flex w-max will-change-transform gap-[9px] pl-6 sm:pl-8 lg:gap-[25px]"
       >
         {marqueePills.map((pill) => (
           <div key={pill.loopKey} className="shrink-0">
@@ -218,6 +269,8 @@ export type HomeTrackExplorerSectionProps = {
   maxPills?: number;
   /** "WHAT TO LEARN NEXT" heading between the pills and the cards (logged-in `/home`). */
   showWhatToLearnNextHeading?: boolean;
+  /** Mentors for mobile guest landing “Current Mosts” strip. */
+  landingMostsMentors?: LandingMostsMentorCardDto[];
 };
 
 export function HomeTrackExplorerSection({
@@ -234,6 +287,7 @@ export function HomeTrackExplorerSection({
   pillGapPx,
   maxPills,
   showWhatToLearnNextHeading = false,
+  landingMostsMentors = [],
 }: HomeTrackExplorerSectionProps) {
   const {
     scrollAreaRef,
@@ -326,7 +380,7 @@ export function HomeTrackExplorerSection({
             <TrackPillsMarqueeRow
               pills={trackPillRow2}
               renderPill={(pill, key) => renderTrackPill(pill, key)}
-              className="mt-[11px]"
+              className="mt-[10px] lg:mt-[11px]"
               reverse
             />
           ) : null}
@@ -490,31 +544,87 @@ export function HomeTrackExplorerSection({
       ) : (
       <div
         key={cardGridKey}
-        className="mt-[64px] mx-auto flex w-full max-w-full flex-wrap justify-center gap-x-[27px] gap-y-6 px-4 sm:px-6"
-        style={{
-          minHeight: trackPillSelectsCourses ? undefined : CATALOG_SHOWCASE_CARD_H,
-        }}
+        className={`${FULL_BLEED} relative mt-[50px] overflow-hidden lg:mt-[64px]`}
       >
-        {isEmpty ? (
-          <p
-            className="text-center text-[20px] text-black/60"
-            style={pillFont}
-          >
-            {trackPillSelectsCourses && activeTrackSlug
-              ? "No published courses in this track yet."
-              : "No tracks to show."}
-          </p>
-        ) : trackPillSelectsCourses ? (
-          <>
-            {visibleCourseTiles.map((tile) => (
-              <LearnPopularFigmaTile key={`${cardGridKey}-${tile.id}`} {...tile} />
-            ))}
-          </>
-        ) : (
-          trackSlides.map(({ slug, cardProps }) => (
-            <CatalogShowcaseCard key={`${cardGridKey}-${slug}`} {...cardProps} showcaseSlug={slug} />
-          ))
-        )}
+        <div
+          ref={scrollAreaRef}
+          className="relative w-full min-w-0"
+          style={{
+            minHeight: trackPillSelectsCourses
+              ? LEARN_POPULAR_FIGMA_TILE_H
+              : CATALOG_SHOWCASE_CARD_H,
+          }}
+        >
+          {isEmpty ? (
+            <p
+              className="px-6 text-center text-[20px] text-black/60 sm:px-8"
+              style={pillFont}
+            >
+              {trackPillSelectsCourses && activeTrackSlug
+                ? "No published courses in this track yet."
+                : "No tracks to show."}
+            </p>
+          ) : (
+            <>
+              <Swiper
+                key={cardGridKey}
+                dir="ltr"
+                modules={[Mousewheel]}
+                slidesPerView="auto"
+                spaceBetween={27}
+                slidesPerGroup={1}
+                speed={400}
+                grabCursor
+                allowTouchMove
+                simulateTouch
+                observer
+                observeParents
+                watchOverflow
+                slidesOffsetBefore={24}
+                slidesOffsetAfter={24}
+                mousewheel={learnCarouselMousewheel}
+                className="learn-popular-swiper learn-popular-swiper--cards w-full min-w-0 max-w-full"
+                onSwiper={handleSwiper}
+                onSlideChange={handleNavSync}
+                onSlidesUpdated={handleNavSync}
+                onResize={handleNavSync}
+              >
+                {trackPillSelectsCourses
+                  ? visibleCourseTiles.map((tile) => (
+                      <SwiperSlide
+                        key={`${cardGridKey}-${tile.id}`}
+                        className="h-auto! w-[315px]! shrink-0 lg:w-[346px]!"
+                      >
+                        <LearnPopularFigmaTile {...tile} />
+                      </SwiperSlide>
+                    ))
+                  : trackSlides.map(({ slug, cardProps }) => (
+                      <SwiperSlide
+                        key={`${cardGridKey}-${slug}`}
+                        className="h-auto! shrink-0"
+                        style={{ width: CATALOG_SHOWCASE_CARD_W }}
+                      >
+                        <CatalogShowcaseCard
+                          {...cardProps}
+                          showcaseSlug={slug}
+                        />
+                      </SwiperSlide>
+                    ))}
+              </Swiper>
+
+              <div className="max-lg:hidden">
+                <LearnCarouselEdgeNav
+                  atBeginning={atBeginning}
+                  atEnd={atEnd}
+                  onPrev={slidePrev}
+                  onNext={slideNext}
+                  prevLabel="Previous course"
+                  nextLabel="Next course"
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
       )}
 
@@ -532,6 +642,304 @@ export function HomeTrackExplorerSection({
 
       {showDiscoverCta ? (
         <>
+          <MobileDiscoverCta className="mt-[45px] pl-[31px] lg:hidden" />
+
+          <div
+            className="relative mx-auto mt-[45px] box-border overflow-hidden lg:hidden"
+            style={{
+              width: 393,
+              height: 1386.999,
+              borderRadius: 55,
+              background: "var(--Dark-Green, #004B3C)",
+            }}
+          >
+            {/* Figma 1181:6349 — WORK book */}
+            <div
+              className="absolute left-[32px] top-[40px] flex h-[298.201px] w-[210.303px] items-center justify-center"
+            >
+              <div className="flex-none" style={{ transform: "rotate(-4.96deg)" }}>
+                <div
+                  className="relative h-[283.146px] w-[186.543px] overflow-hidden rounded-br-[20px] rounded-tr-[20px] shadow-[16px_16px_11px_0_rgba(0,0,0,0.1)]"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/library/books/book-work-mobile.png"
+                    alt="Work book cover"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_-3px_0_5px_0_rgba(0,0,0,0.25)]"
+                    aria-hidden
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              className="pointer-events-none absolute left-[54px] top-[53px] flex h-[282px] w-[24.5px] items-center justify-center"
+              aria-hidden
+            >
+              <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/library/books/book-work-mobile-line-a.png"
+                  alt=""
+                  width={283}
+                  height={1}
+                  className="block max-w-none"
+                />
+              </div>
+            </div>
+            <div
+              className="pointer-events-none absolute left-[53px] top-[53px] flex h-[282px] w-[24.5px] items-center justify-center"
+              aria-hidden
+            >
+              <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/library/books/book-work-mobile-line-b.png"
+                  alt=""
+                  width={283}
+                  height={1}
+                  className="block max-w-none"
+                />
+              </div>
+            </div>
+
+            {/* Books label */}
+            <div className="absolute left-[265px] top-[142px] inline-flex flex-col">
+              <div className="flex items-center gap-[4px]">
+                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
+                  BOOKS
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  className="shrink-0"
+                  aria-hidden
+                >
+                  <path
+                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <SectionLabelUnderline width={77} />
+            </div>
+
+            {/* Articles label */}
+            <div className="absolute left-[49px] top-[421px] inline-flex flex-col">
+              <div className="flex items-center gap-[4px]">
+                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
+                  ARTICLES
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  className="shrink-0"
+                  aria-hidden
+                >
+                  <path
+                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <SectionLabelUnderline width={95} />
+            </div>
+
+            {/* References & Materials label */}
+            <div className="absolute left-[241px] top-[667px] inline-flex flex-col">
+              <div className="inline-flex flex-col">
+                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
+                  REFERENCES &
+                </p>
+                <SectionLabelUnderline width={125} />
+              </div>
+              <div className="inline-flex flex-col">
+                <div className="flex items-center gap-[4px]">
+                  <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
+                    MATERIALS
+                  </p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    className="shrink-0"
+                    aria-hidden
+                  >
+                    <path
+                      d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <SectionLabelUnderline width={108} />
+              </div>
+            </div>
+
+            <div className="absolute right-[26px] top-[295px] z-20 origin-center" style={{ transform: "rotate(5deg)" }}>
+              <LibraryArticleCardVisual clipId="mobile-landing-article" />
+            </div>
+
+            {/* Blue day film book — same size as WORK book */}
+            <div className="absolute left-[31px] top-[558px] z-10 flex h-[298.201px] w-[210.303px] items-center justify-center">
+              <div className="flex-none" style={{ transform: "rotate(-4.96deg)" }}>
+                <div className="relative h-[283.146px] w-[186.543px] overflow-hidden rounded-br-[20px] rounded-tr-[20px] shadow-[16px_16px_11px_0_rgba(0,0,0,0.1)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/library/books/book-blue-day-mobile.png"
+                    alt="Blue day film book cover"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_-3px_0_5px_0_rgba(0,0,0,0.25)]"
+                    aria-hidden
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              className="pointer-events-none absolute left-[53px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center"
+              aria-hidden
+            >
+              <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/library/books/book-work-mobile-line-a.png"
+                  alt=""
+                  width={283}
+                  height={1}
+                  className="block max-w-none"
+                />
+              </div>
+            </div>
+            <div
+              className="pointer-events-none absolute left-[52px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center"
+              aria-hidden
+            >
+              <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/library/books/book-work-mobile-line-b.png"
+                  alt=""
+                  width={283}
+                  height={1}
+                  className="block max-w-none"
+                />
+              </div>
+            </div>
+
+            <div
+              className="absolute left-[170px] top-[813px] z-[9] origin-center overflow-visible"
+              style={{ width: 173.605, height: 278.075, transform: "rotate(5deg)" }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={164.754}
+                height={291.643}
+                viewBox="0 0 150 265"
+                fill="none"
+                aria-hidden
+                className="absolute"
+                style={{ zIndex: 0, left: 33.145, top: 29.668 }}
+              >
+                <path
+                  d="M148.786 250.232C150.933 259.222 143.194 268.125 138.556 262.003L112.816 228.025C105.146 232.813 96.0859 235.584 86.3778 235.584L24.163 235.584C15.3991 235.583 7.16316 233.326 0.000842263 229.365C4.47034 230.675 9.19933 231.378 14.0926 231.378L81.6034 231.379C109.218 231.379 131.603 208.993 131.603 181.379L131.603 15.4937C131.603 10.0855 130.745 4.87787 129.156 -0.000398477C133.739 7.55331 136.378 16.4174 136.378 25.898L136.378 185.584C136.378 188.715 136.088 191.78 135.537 194.753L148.786 250.232Z"
+                  fill="#89F496"
+                />
+              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/library/podcasts/podcasts-section-portrait.png"
+                alt="Podcast host portrait"
+                width={173.605}
+                height={278.075}
+                className="absolute left-0 top-0 h-full w-full object-cover"
+                style={{ zIndex: 1 }}
+                draggable={false}
+              />
+            </div>
+
+            {/* Podcasts label */}
+            <div className="absolute left-[44px] top-[946px] inline-flex flex-col">
+              <div className="flex items-center gap-[4px]">
+                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
+                  PODCASTS
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  className="shrink-0"
+                  aria-hidden
+                >
+                  <path
+                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <SectionLabelUnderline width={108} />
+            </div>
+
+            <MobileDiscoverCta
+              className="absolute left-[31px] top-[1170px] lg:hidden"
+              textClassName="text-white"
+            />
+          </div>
+
+          <LandingEverythingInOneSection
+            variant="mobile"
+            showDecoBoxes={false}
+            className="mt-[64px] lg:hidden"
+          />
+
+          {landingMostsMentors.length > 0 ? (
+            <LandingCurrentMostsSection
+              variant="mobile"
+              mentors={landingMostsMentors}
+              className="mt-[68px] lg:hidden"
+            />
+          ) : null}
+
+          <StudentsRatingWorkSection
+            variant="mobile"
+            sectionClassName="mt-[75px] lg:hidden"
+          />
+
+          <LandingFaqSection
+            variant="mobile"
+            className="mt-[100px] lg:hidden"
+          />
+
+          <LandingGetStartedCtaSection
+            variant="mobile"
+            className="mt-[96px] lg:hidden"
+          />
+
+          <div className="max-lg:hidden">
           <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
             <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
               <p
@@ -593,6 +1001,7 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
           </div>
+        </div>
         </>
       ) : null}
     </section>

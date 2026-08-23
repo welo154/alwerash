@@ -324,7 +324,7 @@ export function LearnPopularFigmaTile(
         className={
           isGrid
             ? `relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
-            : `relative flex w-[346px] shrink-0 flex-col overflow-visible no-underline ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
+            : `relative flex w-[315px] shrink-0 flex-col overflow-visible no-underline lg:w-[346px] ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
         }
         onMouseLeave={
           isGrid ? undefined : (e: MouseEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)
@@ -603,7 +603,7 @@ export function LearnPopularFigmaTile(
         style={
           isGrid
             ? { width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }
-            : { width: LEARN_POPULAR_FIGMA_TILE_W, height: GRAY_H }
+            : { width: "100%", height: GRAY_H }
         }
         aria-hidden
       >
@@ -629,7 +629,7 @@ export function LearnPopularFigmaTile(
               }
             : {
                 marginTop: -WHITE_PULL_UP,
-                width: LEARN_POPULAR_FIGMA_TILE_W,
+                width: "100%",
                 paddingTop: WHITE_INNER_PT,
                 paddingBottom: 26,
                 paddingLeft: 37,

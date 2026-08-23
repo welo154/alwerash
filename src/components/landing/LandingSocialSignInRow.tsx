@@ -11,7 +11,9 @@ const LANDING_SOCIAL_ICONS = [
 
 const SIZE_PRESETS = {
   hero: { icon: 46, gap: 13 },
+  mobileHero: { icon: 26, gap: 8 },
   cta: { icon: 64, gap: 18.5 },
+  mobileCta: { icon: 32, gap: 10 },
 } as const;
 
 export function LandingSocialSignInRow({

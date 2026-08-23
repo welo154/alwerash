@@ -30,6 +30,8 @@ export function LandingCurrentMostsSection({
   cardsTopGapPx,
   mentorCardWidthPx,
   mentorCardHeightPx,
+  variant = "desktop",
+  className,
 }: {
   mentors: LandingMostsMentorCardDto[];
   forceTwoPerRow?: boolean;
@@ -49,13 +51,77 @@ export function LandingCurrentMostsSection({
   cardsTopGapPx?: number;
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
+  variant?: "desktop" | "mobile";
+  className?: string;
 }) {
   const [selectedMentor, setSelectedMentor] =
     useState<LandingMostsMentorCardDto | null>(null);
 
+  const visibleMentors = mentors.slice(0, (mentorsPerRow ?? (forceTwoPerRow ? 2 : 3)) * 2);
+
+  if (variant === "mobile") {
+    return (
+      <section
+        className={`w-full ${className ?? ""}`}
+        data-gsap-reveal
+        aria-labelledby="landing-current-mosts-heading-mobile"
+      >
+        <h2
+          id="landing-current-mosts-heading-mobile"
+          className="m-0 ml-[30px] w-[269px] text-left uppercase text-black"
+          style={{ fontFamily: pangeaFont }}
+        >
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            THE CURRENT{" "}
+          </span>
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            MOSTS
+          </span>
+        </h2>
+
+        {visibleMentors.length > 0 ? (
+          <div className="mt-[40px] flex flex-col items-center gap-y-[40px]">
+            {visibleMentors.map((m) => (
+              <LandingMentorCard
+                key={m.id}
+                layout="mobile"
+                variant={m.variant}
+                name={m.name}
+                profession={m.profession}
+                onOpen={() => setSelectedMentor(m)}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        <LandingMentorModal
+          mentor={selectedMentor}
+          open={selectedMentor != null}
+          onClose={() => setSelectedMentor(null)}
+        />
+      </section>
+    );
+  }
+
   const columnCount = mentorsPerRow ?? (forceTwoPerRow ? 2 : 3);
-  /** Hard cap: 2 rows × up to 3 columns. */
-  const visibleMentors = mentors.slice(0, columnCount * 2);
   const useFluidCards = mentorsPerRow != null && mentorsPerRow >= 4;
   const gapX = "gap-x-[26px]";
   const gapY = "gap-y-[40px]";

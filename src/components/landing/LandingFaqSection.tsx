@@ -33,12 +33,12 @@ const FAQ_ITEMS: readonly { question: string; answer: string }[] = [
   },
 ];
 
-function FaqExpandIcon({ open }: { open: boolean }) {
+function FaqExpandIcon({ open, size = 50 }: { open: boolean; size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={50}
-      height={50}
+      width={size}
+      height={size}
       viewBox="0 0 53 53"
       fill="none"
       className="shrink-0 transition-transform duration-200"
@@ -56,12 +56,160 @@ function FaqExpandIcon({ open }: { open: boolean }) {
   );
 }
 
+function FaqAccordionList({
+  baseId,
+  openIndex,
+  setOpenIndex,
+  layout = "desktop",
+}: {
+  baseId: string;
+  openIndex: number | null;
+  setOpenIndex: (index: number | null) => void;
+  layout?: "desktop" | "mobile";
+}) {
+  const isMobile = layout === "mobile";
+
+  return (
+    <>
+      {FAQ_ITEMS.map((item, index) => {
+        const isOpen = openIndex === index;
+        const panelId = `landing-faq-panel-${baseId}-${index}`;
+        const buttonId = `landing-faq-trigger-${baseId}-${index}`;
+        return (
+          <div key={item.question} className={isMobile ? undefined : "border-b border-black"}>
+            {isMobile ? <FaqMobileRule /> : null}
+            <button
+              id={buttonId}
+              type="button"
+              className={
+                isMobile
+                  ? "mt-[18px] flex w-full shrink-0 items-center justify-between gap-4 pl-[30px] pr-[30px] text-left transition-colors hover:bg-black/[0.02]"
+                  : "flex h-[90px] w-full shrink-0 items-center justify-between gap-4 pl-[53px] pr-[164px] text-left transition-colors hover:bg-black/[0.02]"
+              }
+              style={{ fontFamily: pangeaFont }}
+              aria-expanded={isOpen}
+              aria-controls={panelId}
+              onClick={() => setOpenIndex(isOpen ? null : index)}
+              suppressHydrationWarning
+            >
+              <span
+                className={isMobile ? "min-w-0 flex-1 font-bold" : "font-bold"}
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: isMobile ? "20px" : "32px",
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
+                  lineHeight: "normal",
+                }}
+              >
+                {item.question}
+              </span>
+              <FaqExpandIcon open={isOpen} size={isMobile ? 30.735 : 50} />
+            </button>
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={buttonId}
+              aria-hidden={!isOpen}
+              className={`grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+            >
+              <div
+                className={
+                  isMobile
+                    ? "min-h-0 overflow-hidden pl-[30px] pr-[30px]"
+                    : "min-h-0 overflow-hidden pl-[53px] pr-[164px]"
+                }
+              >
+                <p
+                  className="pb-6 text-[16px] font-normal leading-[150%] text-black/85 sm:text-[17px]"
+                  style={{ fontFamily: pangeaFont }}
+                >
+                  {item.answer}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      {isMobile ? <FaqMobileRule /> : null}
+    </>
+  );
+}
+
+const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
+
+function FaqMobileRule() {
+  return (
+    <div className={`${FULL_BLEED} mt-[21px]`} aria-hidden>
+      <div className="bg-black" style={{ height: "0.3px" }} />
+    </div>
+  );
+}
+
 /**
  * FAQ accordion — below “Why students love”, with 145px top offset from that section.
  */
-export function LandingFaqSection() {
+export function LandingFaqSection({
+  variant = "desktop",
+  className,
+}: {
+  variant?: "desktop" | "mobile";
+  className?: string;
+} = {}) {
   const baseId = useId().replace(/:/g, "");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  if (variant === "mobile") {
+    return (
+      <section
+        className={`w-full bg-white ${className ?? "mt-[100px]"}`}
+        aria-labelledby="landing-faq-heading-mobile"
+        data-gsap-reveal
+      >
+        <h2
+          id="landing-faq-heading-mobile"
+          className="m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black"
+          style={{ fontFamily: pangeaFont }}
+        >
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            FREQUENTLY{" "}
+          </span>
+          <span
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "36px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            ASKED QUESTIONS
+          </span>
+        </h2>
+
+        <div className={FULL_BLEED}>
+          <FaqAccordionList
+            baseId={baseId}
+            openIndex={openIndex}
+            setOpenIndex={setOpenIndex}
+            layout="mobile"
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -98,57 +246,11 @@ export function LandingFaqSection() {
         </h2>
 
         <div className="mx-auto mt-[53px] w-[1228px] max-w-full border-t border-black">
-          {FAQ_ITEMS.map((item, index) => {
-            const isOpen = openIndex === index;
-            const panelId = `landing-faq-panel-${baseId}-${index}`;
-            const buttonId = `landing-faq-trigger-${baseId}-${index}`;
-            return (
-              <div key={item.question} className="border-b border-black">
-                <button
-                  id={buttonId}
-                  type="button"
-                  className="flex h-[90px] w-full shrink-0 items-center justify-between gap-4 pl-[53px] pr-[164px] text-left transition-colors hover:bg-black/[0.02]"
-                  style={{ fontFamily: pangeaFont }}
-                  aria-expanded={isOpen}
-                  aria-controls={panelId}
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  suppressHydrationWarning
-                >
-                  <span
-                    className="font-bold"
-                    style={{
-                      color: "var(--Black, #000)",
-                      fontFamily: pangeaFont,
-                      fontSize: "32px",
-                      fontStyle: "normal",
-                      fontWeight: 700,
-                      fontVariationSettings: '"wght" 700',
-                      lineHeight: "normal",
-                    }}
-                  >
-                    {item.question}
-                  </span>
-                  <FaqExpandIcon open={isOpen} />
-                </button>
-                <div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  aria-hidden={!isOpen}
-                  className={`grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
-                >
-                  <div className="min-h-0 overflow-hidden pl-[53px] pr-[164px]">
-                    <p
-                      className="pb-6 text-[16px] font-normal leading-[150%] text-black/85 sm:text-[17px]"
-                      style={{ fontFamily: pangeaFont }}
-                    >
-                      {item.answer}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          <FaqAccordionList
+            baseId={baseId}
+            openIndex={openIndex}
+            setOpenIndex={setOpenIndex}
+          />
         </div>
       </div>
     </section>
