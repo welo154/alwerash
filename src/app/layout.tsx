@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { auth } from "@/auth";
 import { SessionProvider } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/Toast";
 import { ToastFromUrl } from "@/components/ToastFromUrl";
@@ -8,9 +7,6 @@ import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { LenisProvider } from "@/components/providers/LenisProvider";
 import { pangeaVar } from "@/lib/fonts/pangea";
 import "./globals.css";
-
-/** Avoid querying the database during `next build` on Vercel. */
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: {
@@ -34,17 +30,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
   return (
     <html lang="en" suppressHydrationWarning className={`${pangeaVar.variable} ${pangeaVar.className}`}>
       <body suppressHydrationWarning className="font-sans antialiased">
-        <MicrosoftClarity userId={session?.user?.id} />
         <ToastProvider>
           <Suspense fallback={null}>
             <ToastFromUrl />
           </Suspense>
-          <SessionProvider session={session}>
+          <SessionProvider>
+            <MicrosoftClarity />
             <LenisProvider>
               <ConditionalLayout>{children}</ConditionalLayout>
             </LenisProvider>

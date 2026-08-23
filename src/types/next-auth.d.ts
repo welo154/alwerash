@@ -19,5 +19,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     sub?: string;
     roles?: Role[];
+    country?: string | null;
+    profession?: string | null;
   }
 }

@@ -1,5 +1,7 @@
 // file: src/server/content/public.service.ts
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { PUBLIC_CATALOG_CACHE_TAG } from "@/server/content/revalidate-public-paths";
 import {
   catalogShowcasePropsFromTrackAggregate,
   type CatalogShowcaseCardProps,
@@ -447,6 +449,15 @@ function isSoftwareIntroCourse(title: string) {
 /** Header mega-menu: only tracks/courses that exist and have a real destination. */
 export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
   try {
+    return await getCachedCoursesMenu();
+  } catch (e) {
+    logCatalogError("publicGetCoursesMenu", e);
+    return { allCourses: [], software: [] };
+  }
+}
+
+const getCachedCoursesMenu = unstable_cache(
+  async (): Promise<CoursesMenuPayload> => {
     const requirePublished = await catalogRequiresPublished();
     const visibility = publishedWhere(requirePublished);
 
@@ -493,11 +504,10 @@ export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
       }));
 
     return { allCourses, software };
-  } catch (e) {
-    logCatalogError("publicGetCoursesMenu", e);
-    return { allCourses: [], software: [] };
-  }
-}
+  },
+  ["public-get-courses-menu"],
+  { revalidate: 60, tags: [PUBLIC_CATALOG_CACHE_TAG] }
+);
 
 /**
  * Published track whose slug matches a landing showcase tile (case-insensitive).
@@ -1205,18 +1215,8 @@ export async function publicListLandingMostsMentors(
   }
 }
 
-/** Serialized catalog fetch for `/course` — avoids bursting the Supabase session pool. */
-export const loadCoursePageCatalog = cache(async () => {
-  const empty = {
-    popularClassCourses: [] as CourseForCard[],
-    trendingCourses: [] as CourseForCard[],
-    allCourses: [] as CourseForCard[],
-    tracks: [] as Awaited<ReturnType<typeof publicListTracks>>,
-    trackShowcaseSlides: [] as LandingShowcaseSlide[],
-    featuredMentors: [] as LandingMostsMentorCardDto[],
-  };
-
-  try {
+const getCachedCoursePageCatalog = unstable_cache(
+  async () => {
     await catalogRequiresPublished();
 
     const popularClassCourses = await publicListPopularClassCourses(40);
@@ -1234,6 +1234,24 @@ export const loadCoursePageCatalog = cache(async () => {
       trackShowcaseSlides,
       featuredMentors,
     };
+  },
+  ["load-course-page-catalog"],
+  { revalidate: 60, tags: [PUBLIC_CATALOG_CACHE_TAG] }
+);
+
+/** Serialized catalog fetch for `/course` — avoids bursting the Supabase session pool. */
+export const loadCoursePageCatalog = cache(async () => {
+  const empty = {
+    popularClassCourses: [] as CourseForCard[],
+    trendingCourses: [] as CourseForCard[],
+    allCourses: [] as CourseForCard[],
+    tracks: [] as Awaited<ReturnType<typeof publicListTracks>>,
+    trackShowcaseSlides: [] as LandingShowcaseSlide[],
+    featuredMentors: [] as LandingMostsMentorCardDto[],
+  };
+
+  try {
+    return await getCachedCoursePageCatalog();
   } catch (e) {
     logCatalogError("loadCoursePageCatalog", e);
     return empty;

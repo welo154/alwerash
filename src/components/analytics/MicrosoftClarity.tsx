@@ -1,5 +1,5 @@
 import Script from "next/script";
-import { MicrosoftClarityIdentify } from "./MicrosoftClarityIdentify";
+import { MicrosoftClarityIdentifyFromSession } from "./MicrosoftClarityIdentify";
 
 /** Official Clarity project ID (manual install snippet). */
 const CLARITY_PROJECT_ID = "y32zdmd8vu";
@@ -24,7 +24,7 @@ function shouldLoadClarity(): boolean {
  * Uses project y32zdmd8vu (manual tracking snippet). Off in local `next dev`
  * unless NEXT_PUBLIC_CLARITY_IN_DEV=true.
  */
-export function MicrosoftClarity({ userId }: { userId?: string | null }) {
+export function MicrosoftClarity() {
   const projectId = getClarityProjectId();
   if (!projectId || !shouldLoadClarity()) return null;
 
@@ -37,7 +37,7 @@ export function MicrosoftClarity({ userId }: { userId?: string | null }) {
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "${projectId}");`}
       </Script>
-      {userId ? <MicrosoftClarityIdentify userId={userId} /> : null}
+      <MicrosoftClarityIdentifyFromSession />
     </>
   );
 }

@@ -66,6 +66,8 @@ export function SiteHeader() {
   if (session?.user) {
     const flushBottom =
       pathname === "/course" ||
+      pathname.startsWith("/course/") ||
+      pathname.startsWith("/tracks/") ||
       pathname === "/profile" ||
       pathname.startsWith("/profile/");
     return (
@@ -77,5 +79,13 @@ export function SiteHeader() {
     );
   }
 
-  return <GuestSiteHeader flushBottom={pathname === "/course"} />;
+  return (
+    <GuestSiteHeader
+      flushBottom={
+        pathname === "/course" ||
+        pathname.startsWith("/course/") ||
+        pathname.startsWith("/tracks/")
+      }
+    />
+  );
 }

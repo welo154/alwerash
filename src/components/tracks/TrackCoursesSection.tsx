@@ -15,8 +15,15 @@ export type TrackCourseItem = LearnPopularTile & {
 type RatingsSort = "default" | "high" | "low";
 type PopularSort = "default" | "popular";
 type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
+type MobileCourseSort = "popular" | "watched" | "rated";
 
 type FilterId = "ratings" | "level" | "popular";
+
+const MOBILE_SORT_OPTIONS: { value: MobileCourseSort; label: string }[] = [
+  { value: "popular", label: "Popular" },
+  { value: "watched", label: "Most watched" },
+  { value: "rated", label: "Top rated" },
+];
 
 const FILTER_LABELS: Record<FilterId, string> = {
   ratings: "Ratings",
@@ -66,20 +73,31 @@ function TrackFilterButton({
   );
 }
 
+function sortByPopularOrder(courses: TrackCourseItem[]) {
+  return [...courses].sort((a, b) => {
+    const aOrder = a.popularOrder ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = b.popularOrder ?? Number.MAX_SAFE_INTEGER;
+    return aOrder - bOrder;
+  });
+}
+
 function sortCourses(
   courses: TrackCourseItem[],
   ratingsSort: RatingsSort,
-  popularSort: PopularSort
+  popularSort: PopularSort,
+  mobileSort: MobileCourseSort | null
 ): TrackCourseItem[] {
+  if (mobileSort === "watched" || mobileSort === "popular") {
+    return sortByPopularOrder(courses);
+  }
+  if (mobileSort === "rated") {
+    return [...courses].sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+  }
+
   const items = [...courses];
 
   if (popularSort === "popular") {
-    items.sort((a, b) => {
-      const aOrder = a.popularOrder ?? Number.MAX_SAFE_INTEGER;
-      const bOrder = b.popularOrder ?? Number.MAX_SAFE_INTEGER;
-      if (aOrder !== bOrder) return aOrder - bOrder;
-      return 0;
-    });
+    return sortByPopularOrder(items);
   }
 
   if (ratingsSort === "high") {
@@ -102,12 +120,26 @@ export function TrackCoursesSection({
   const [ratingsSort, setRatingsSort] = useState<RatingsSort>("default");
   const [popularSort, setPopularSort] = useState<PopularSort>("default");
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
+  const [mobileSort, setMobileSort] = useState<MobileCourseSort>("popular");
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const mobileSortRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const visibleCourses = useMemo(
-    () => sortCourses(courses, ratingsSort, popularSort),
-    [courses, ratingsSort, popularSort]
+    () => sortCourses(courses, ratingsSort, popularSort, isDesktop ? null : mobileSort),
+    [courses, ratingsSort, popularSort, isDesktop, mobileSort]
   );
+  const mobileSortLabel =
+    MOBILE_SORT_OPTIONS.find((option) => option.value === mobileSort)?.label ?? "Popular";
 
   const toggleFilter = (id: FilterId) => {
     setOpenFilter((prev) => (prev === id ? null : id));
@@ -116,22 +148,26 @@ export function TrackCoursesSection({
   const closeMenu = () => setOpenFilter(null);
 
   useEffect(() => {
-    if (!openFilter) return;
+    if (!openFilter && !mobileSortOpen) return;
     const onPointerDown = (e: PointerEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) closeMenu();
+      const target = e.target as Node;
+      if (openFilter && !menuRef.current?.contains(target)) closeMenu();
+      if (mobileSortOpen && !mobileSortRef.current?.contains(target)) {
+        setMobileSortOpen(false);
+      }
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [openFilter]);
+  }, [openFilter, mobileSortOpen]);
 
   return (
-    <div className="min-w-0">
-      <div className="flex flex-wrap items-start justify-between gap-6">
+    <div className="min-w-0 max-lg:mt-[15px] lg:mt-0">
+      <div className="max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] max-lg:pl-[30px] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] lg:hidden">
         <h1
-          className="m-0 min-w-0 flex-1 uppercase text-black"
+          className="m-0 min-w-0 text-[24px] font-normal leading-[120%] text-black"
           style={{
+            color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "48px",
             fontWeight: 400,
             lineHeight: "120%",
           }}
@@ -139,7 +175,82 @@ export function TrackCoursesSection({
           {trackTitle}
         </h1>
 
-        <div ref={menuRef} className="relative flex shrink-0 flex-wrap items-center gap-3">
+        <div ref={mobileSortRef} className="relative mt-[11px]">
+          <button
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={mobileSortOpen}
+            onClick={() => setMobileSortOpen((open) => !open)}
+            className="box-border inline-flex h-[22px] min-w-[91px] w-max items-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-black"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "12px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "19.6px",
+            }}
+          >
+            <span className="whitespace-nowrap">{mobileSortLabel}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={11}
+              height={5}
+              viewBox="0 0 12 6"
+              fill="none"
+              aria-hidden
+              className={`ml-[10px] shrink-0 ${mobileSortOpen ? "rotate-180" : ""}`}
+            >
+              <path
+                d="M0.5 0.5L6 5.5L11.5 0.5"
+                stroke="var(--Black, #000)"
+                strokeWidth={1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {mobileSortOpen ? (
+            <ul
+              role="menu"
+              className="absolute left-0 top-[calc(100%+8px)] z-20 min-w-[160px] overflow-hidden rounded-[8px] border border-black bg-white py-1 shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]"
+            >
+              {MOBILE_SORT_OPTIONS.map((option) => (
+                <li key={option.value} role="none">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`block w-full px-4 py-2 text-left text-[12px] text-black hover:bg-[#8AF396] ${
+                      mobileSort === option.value ? "font-medium" : "font-normal"
+                    }`}
+                    style={{ fontFamily: pangeaFont }}
+                    onClick={() => {
+                      setMobileSort(option.value);
+                      setMobileSortOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-6 hidden flex-wrap items-start justify-between gap-6 lg:mt-0 lg:flex">
+        <h1
+          className="m-0 min-w-0 flex-1 uppercase text-black lg:text-[48px]"
+          style={{
+            fontFamily: pangeaFont,
+            fontWeight: 400,
+            lineHeight: "120%",
+          }}
+        >
+          {trackTitle}
+        </h1>
+
+        <div ref={menuRef} className="relative hidden shrink-0 flex-wrap items-center gap-3 lg:flex">
           {(Object.keys(FILTER_LABELS) as FilterId[]).map((id) => (
             <TrackFilterButton
               key={id}
@@ -232,7 +343,7 @@ export function TrackCoursesSection({
         </div>
       </div>
 
-      <div className="mt-[50px] min-w-0">
+      <div className="mt-[35px] min-w-0 max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] max-lg:overflow-hidden sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] lg:mt-[50px] lg:ml-0 lg:w-auto">
         {visibleCourses.length === 0 ? (
           <p
             className="text-center text-[20px] text-black/60"
@@ -242,21 +353,23 @@ export function TrackCoursesSection({
           </p>
         ) : (
           <div
-            className="grid min-w-0 justify-start"
+            className="flex min-w-0 flex-col items-center gap-y-[50px] overflow-hidden lg:grid lg:items-stretch lg:justify-start lg:gap-x-5 lg:gap-y-5 lg:overflow-visible"
             style={{
               gridTemplateColumns: "repeat(auto-fill, 313px)",
-              columnGap: 20,
-              rowGap: 20,
             }}
             data-gsap-stagger-group
           >
             {visibleCourses.map((tile) => (
-              <LearnPopularFigmaTile
+              <div
                 key={tile.id}
-                {...tile}
-                size="grid"
-                className="h-full w-[313px]"
-              />
+                className="w-[334px] max-w-[334px] shrink-0 overflow-hidden lg:w-[313px] lg:max-w-none"
+              >
+                <LearnPopularFigmaTile
+                  {...tile}
+                  size="grid"
+                  className="h-full w-full max-w-full overflow-hidden"
+                />
+              </div>
             ))}
           </div>
         )}

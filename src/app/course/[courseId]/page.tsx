@@ -86,22 +86,15 @@ export default async function PublicCoursePage({
   const fullCourseHref = privateCoursePath(course.id);
 
   return (
-    <main className="mx-auto max-w-[1600px] -mt-[50px] pb-[80px] pl-[55px] pr-[60px] pt-[28px]">
-      <CourseBreadcrumb
-        courseTitle={course.title}
-        fontFamily={pangeaVar.style.fontFamily}
-      />
+    <main className="mx-auto max-w-[1600px] pb-[80px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:-mt-[50px] lg:pl-[55px] lg:pr-[60px] lg:pt-[28px]">
+      <div className="max-lg:pl-[30px]">
+        <CourseBreadcrumb
+          courseTitle={course.title}
+          fontFamily={pangeaVar.style.fontFamily}
+        />
+      </div>
 
-      <hr
-        className="mt-[13px] block border-0 bg-black"
-        style={{
-          width: "1440px",
-          maxWidth: "100%",
-          height: 0,
-          borderTop: "1px solid #000",
-          opacity: 0.6,
-        }}
-      />
+      <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black opacity-30 lg:mt-[13px] lg:w-[1440px] lg:opacity-60" />
 
       <div className="mt-[20px] flex items-start gap-[62px]">
         <section className="w-[843px] shrink-0">

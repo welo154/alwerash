@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 declare global {
   interface Window {
@@ -35,4 +36,11 @@ export function MicrosoftClarityIdentify({ userId }: { userId: string }) {
   }, [userId]);
 
   return null;
+}
+
+export function MicrosoftClarityIdentifyFromSession() {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  if (!userId) return null;
+  return <MicrosoftClarityIdentify userId={userId} />;
 }

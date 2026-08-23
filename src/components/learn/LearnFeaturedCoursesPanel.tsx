@@ -201,10 +201,9 @@ export function LearnFeaturedCoursesPanel({
 
       <div className="pointer-events-none absolute left-0 top-0 z-30 w-full min-w-0">
         <div
-          className="pointer-events-auto absolute inline-flex w-fit items-center gap-[11px] max-lg:left-[30px] lg:left-[57px]"
-          style={{ top: 30 }}
+          className="pointer-events-auto absolute inline-flex w-fit items-center gap-[11px] max-lg:left-[30px] max-lg:top-[30px] lg:left-[57px] lg:top-[10px] lg:gap-[30px]"
         >
-          <div className="inline-flex w-fit shrink-0 items-center rounded-[44px] bg-transparent lg:pl-[22px]">
+          <div className="inline-flex w-fit shrink-0 items-center rounded-[44px] bg-transparent">
             <h1
               className="m-0 w-fit uppercase leading-[120%] text-black"
               style={{ fontFamily: pangeaFont }}
