@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { GuestSiteHeader } from "./GuestSiteHeader";
@@ -19,13 +19,18 @@ export function SiteHeader() {
   const { data: session } = useSession();
   const pathname = usePathname() ?? "";
   const [mounted, setMounted] = useState(false);
+  const lastUserRef = useRef(session?.user);
   const isAdmin = Boolean((session?.user as { roles?: string[] } | undefined)?.roles?.includes("ADMIN"));
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const user = mounted ? session?.user : undefined;
+  if (session?.user) {
+    lastUserRef.current = session.user;
+  }
+
+  const user = mounted ? session?.user ?? lastUserRef.current : undefined;
 
   if (pathname === "/") {
     return null;

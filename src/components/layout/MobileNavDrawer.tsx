@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { signOutToHome } from "@/lib/auth/signOutToHome";
 import { useToast } from "@/components/Toast";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
@@ -186,7 +187,7 @@ export function MobileNavDrawer({
               type="button"
               onClick={() => {
                 onClose();
-                void signOut({ callbackUrl: "/?toast=Signed+out" });
+                void signOutToHome();
               }}
               className={`${linkClass} w-full text-left`}
               style={{ fontFamily: pangeaFont }}

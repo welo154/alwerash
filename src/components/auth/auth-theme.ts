@@ -6,7 +6,7 @@ export const AUTH_PAGE_PADDING = "50px 80px 48px 84px";
 export const AUTH_MAX_WIDTH = 1600;
 export const AUTH_GREEN_PANEL = {
   width: 790,
-  height: 966,
+  height: 676,
   borderRadius: 50,
   padding: "136px 94px 71px 92px",
 } as const;

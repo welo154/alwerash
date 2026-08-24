@@ -30,9 +30,24 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (isStandalone) {
+    const lockViewport = pathname === "/login" || pathname === "/register";
     return (
-      <div className="flex min-h-screen min-w-0 flex-col bg-white">
-        <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1">{children}</main>
+      <div
+        className={
+          lockViewport
+            ? "flex h-dvh max-h-dvh min-w-0 flex-col overflow-hidden bg-white"
+            : "flex min-h-screen min-w-0 flex-col bg-white"
+        }
+      >
+        <main
+          className={
+            lockViewport
+              ? "mx-auto h-full min-h-0 w-full min-w-0 max-w-[1600px] overflow-hidden"
+              : "mx-auto w-full max-w-[1440px] min-w-0 flex-1"
+          }
+        >
+          {children}
+        </main>
       </div>
     );
   }
