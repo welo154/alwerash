@@ -383,6 +383,58 @@ body:has(.auth-page)::-webkit-scrollbar {
 }
 
 @media (max-width: 1023px) {
+  .subscription-page .subscription-title {
+    font-size: 24px !important;
+  }
+
+  .subscription-page .subscription-title-em {
+    font-size: 24px !important;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 120%;
+  }
+
+  .subscription-page .subscription-copy-gap {
+    height: 8px;
+  }
+
+  .subscription-page .subscription-copy {
+    width: 286px;
+    font-size: 14px !important;
+    line-height: 127%;
+    opacity: 0.6;
+  }
+
+  .subscription-page .subscription-panel-gap {
+    height: 28px;
+  }
+
+  .subscription-mobile-swiper {
+    width: 100%;
+    height: auto;
+  }
+
+  .subscription-mobile-swiper .swiper-wrapper {
+    align-items: center;
+  }
+
+  .subscription-mobile-swiper .swiper-slide {
+    height: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .subscription-mobile-choose form {
+    margin: 0;
+    display: block;
+  }
+
+  .subscription-mobile-choose button {
+    margin-top: 0 !important;
+    border-width: 0.3px !important;
+    background: #fff !important;
+  }
+
   .auth-mobile-panel {
     box-sizing: border-box;
     padding: 33px 0 0 25px;

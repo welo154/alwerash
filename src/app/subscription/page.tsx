@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SubscriptionPricingCards } from "@/components/subscription/SubscriptionPricingCard";
+import { SubscriptionMobileCards } from "@/components/subscription/SubscriptionMobileCards";
+import { AUTH_SOCIAL_LINKS } from "@/components/auth/auth-theme";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
 const SUBSCRIPTION_LOGO = "/auth/alwerash-logo.png";
@@ -8,27 +10,25 @@ const SUBSCRIPTION_LOGO = "/auth/alwerash-logo.png";
 export default function SubscriptionPage() {
   return (
     <div
-      className={`${pangeaVar.className} flex min-h-screen flex-col bg-white`}
-      style={{ padding: "35px 48px 35px 48px" }}
+      className={`${pangeaVar.className} subscription-page flex min-h-screen flex-col items-center bg-white max-lg:pt-[64px] max-lg:px-0 lg:items-stretch lg:[padding:35px_48px]`}
     >
       <Link
         href="/"
         aria-label="Alwerash home"
-        className="mx-auto block shrink-0"
-        style={{ width: 198, height: 87, aspectRatio: "66 / 29" }}
+        className="subscription-logo mx-auto block shrink-0 max-lg:h-[36px] max-lg:w-[121px] lg:h-[87px] lg:w-[198px]"
       >
         <Image
           src={SUBSCRIPTION_LOGO}
           alt="alwerash."
           width={198}
           height={87}
-          className="h-[87px] w-[198px] object-contain"
+          className="h-full w-full object-contain"
           priority
           unoptimized
         />
       </Link>
       <h1
-        className="m-0 mx-auto text-center text-black"
+        className="subscription-title m-0 mx-auto mt-[15px] text-center text-black lg:mt-0"
         style={{
           fontFamily: pangeaFontFamily,
           fontSize: 48,
@@ -39,6 +39,7 @@ export default function SubscriptionPage() {
       >
         Subscription{" "}
         <span
+          className="subscription-title-em"
           style={{
             fontFamily: pangeaFontFamily,
             fontSize: 48,
@@ -50,9 +51,9 @@ export default function SubscriptionPage() {
           Pricing
         </span>
       </h1>
-      <div className="h-[18px] shrink-0" aria-hidden />
+      <div className="subscription-copy-gap h-[18px] shrink-0" aria-hidden />
       <p
-        className="m-0 mx-auto w-[485px] max-w-full text-center text-black"
+        className="subscription-copy m-0 mx-auto w-[485px] max-w-full text-center text-black max-lg:w-[286px]"
         style={{
           fontFamily: pangeaFontFamily,
           fontSize: 24,
@@ -64,17 +65,91 @@ export default function SubscriptionPage() {
       >
         Thousands of creative classes. Beginner to pro, watch at your pace and even offline.
       </p>
-      <div className="h-[41px] shrink-0" aria-hidden />
+      <div className="subscription-panel-gap h-[41px] shrink-0" aria-hidden />
       <div
-        className="mx-auto flex w-[1343px] max-w-full shrink-0 items-stretch"
+        className="subscription-panel mx-auto flex w-[1343px] max-w-full shrink-0 items-stretch overflow-hidden max-lg:h-[627px] max-lg:w-[382px] max-lg:p-0 lg:h-[720px] lg:p-[59px_61px]"
         style={{
-          height: 720,
           borderRadius: 50,
           background: "#89F496",
-          padding: "59px 61px",
         }}
       >
-        <SubscriptionPricingCards />
+        <div className="hidden lg:block">
+          <SubscriptionPricingCards />
+        </div>
+        <div className="flex h-full w-full min-w-0 items-center lg:hidden">
+          <SubscriptionMobileCards />
+        </div>
+      </div>
+
+      <p
+        className="m-0 mt-[30px] w-[293px] text-center text-black lg:hidden"
+        style={{
+          fontFamily: pangeaFontFamily,
+          fontSize: 14,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "127%",
+          opacity: 0.6,
+        }}
+      >
+        Thousands of creative classes. Beginner to pro, watch at your pace and even offline.
+      </p>
+      <div className="mt-[22px] mb-[18px] flex shrink-0 items-center justify-center lg:hidden">
+        <div className="flex items-center" style={{ gap: 8 }}>
+          {AUTH_SOCIAL_LINKS.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={item.label}
+              className="shrink-0"
+              style={{
+                width: 35,
+                height: 37,
+                background: `url(${item.image}) transparent 50% / contain no-repeat`,
+              }}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="flex shrink-0 items-center justify-center bg-white text-black"
+          style={{
+            marginLeft: 37,
+            width: 121,
+            height: 34,
+            padding: "0 12px",
+            gap: 10,
+            borderRadius: 8,
+            border: "0.3px solid #000",
+            fontFamily: pangeaFontFamily,
+            fontSize: 14,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "19.6px",
+          }}
+          suppressHydrationWarning
+        >
+          English
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={15}
+            height={7}
+            viewBox="0 0 16 8"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <path
+              d="M0.5 0.5L8 7.5L15.5 0.5"
+              stroke="#1E1E1E"
+              strokeWidth={1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );
