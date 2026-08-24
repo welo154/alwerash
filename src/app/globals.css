@@ -15,6 +15,7 @@ body {
 /* Ensure Tailwind v4 scans app and components (fixes unstyled admin/dynamic routes) */
 @source "./**/*.{js,ts,jsx,tsx}";
 @source "../components/**/*.{js,ts,jsx,tsx}";
+@source "./course-access/[courseId]/**/*.{js,ts,jsx,tsx}";
 
 @theme {
   /* Design font: DM Sans, applied site-wide */
@@ -401,5 +402,33 @@ label:has(input[type="radio"]) {
   .schedule-add-scroll {
     scrollbar-width: thin;
     scrollbar-color: #ffffff #07423c;
+  }
+}
+
+@media (max-width: 1023px) {
+  .course-article-download-icon {
+    width: 26px;
+    height: 24px;
+  }
+
+  /* Course-access intro/lesson gaps — padding so it cannot collapse or get dropped */
+  .fcl-title-rule {
+    padding-bottom: 35px;
+  }
+
+  .fcl-text-title-intro {
+    margin-bottom: 12px;
+  }
+
+  .fcl-text-title-article {
+    margin-bottom: 20px;
+  }
+
+  .fcl-lesson-rule {
+    padding-top: 35px;
+  }
+
+  .fcl-video-block {
+    padding-top: 48px;
   }
 }

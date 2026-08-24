@@ -5,6 +5,7 @@ import { HlsPlayer } from "@/components/video/HlsPlayer";
 import { ProgressTracker } from "@/components/video/ProgressTracker";
 import { probeHlsDuration } from "@/components/video/probeHlsDuration";
 import { CourseBreadcrumb } from "@/app/course/[courseId]/CourseBreadcrumb";
+import { ActivityProgressMobileCard } from "@/components/home/ActivityProgressMobileCard";
 import { completeLessonAndGetProgress } from "./actions";
 
 export type FullAccessLesson = {
@@ -63,11 +64,10 @@ function PlayOverlayButton({
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="120"
-        height="120"
         viewBox="0 0 122 122"
         fill="none"
         aria-hidden
+        className="h-[63px] w-[63px] lg:h-[120px] lg:w-[120px]"
       >
         <circle
           cx="61"
@@ -175,17 +175,56 @@ function LessonCompleteCheckIcon() {
 
 function LessonDivider() {
   return (
-    <hr
-      className="m-0 block border-0"
-      style={{
-        width: "775px",
-        maxWidth: "100%",
-        height: 0,
-        borderTop: "1px solid #000",
-        opacity: 0.6,
-        background: "#000",
-      }}
-    />
+    <div className="fcl-lesson-rule flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:block">
+      <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 lg:w-[775px] lg:max-w-full" />
+    </div>
+  );
+}
+
+function UnitCompleteCheckIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="41"
+      height="41"
+      viewBox="0 0 41 41"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="20.5" cy="20.5" r="19.5" stroke="#FF8CFF" strokeWidth="2" />
+      <path
+        d="M30.7496 14.3496L15.9512 28.6996L9.22461 22.1769"
+        stroke="#FF8CFF"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function NextUnitArrowIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      viewBox="0 0 23 23"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M11.5 22.5C17.5751 22.5 22.5 17.5751 22.5 11.5C22.5 5.42487 17.5751 0.5 11.5 0.5C5.42487 0.5 0.5 5.42487 0.5 11.5C0.5 17.5751 5.42487 22.5 11.5 22.5Z"
+        fill="var(--White, #FFF)"
+      />
+      <path d="M11.5 15.9L15.9 11.5L11.5 7.1" fill="var(--White, #FFF)" />
+      <path
+        d="M11.5 7.1L15.9 11.5L11.5 15.9M15.9 11.5L7.1 11.5M22.5 11.5C22.5 17.5751 17.5751 22.5 11.5 22.5C5.42487 22.5 0.5 17.5751 0.5 11.5C0.5 5.42487 5.42487 0.5 11.5 0.5C17.5751 0.5 22.5 5.42487 22.5 11.5Z"
+        stroke="var(--Purple, #EA83F0)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -206,15 +245,12 @@ function SectionHeader({
   ].filter(Boolean);
 
   return (
-    <header>
+    <header className="max-lg:pl-[30px]">
       <h1
-        className="m-0"
+        className="m-0 w-[334px] max-w-full text-[18px] font-medium lg:w-[755px] lg:text-[32px]"
         style={{
-          width: "755px",
-          maxWidth: "100%",
           color: "var(--Black, #000)",
           fontFamily,
-          fontSize: "32px",
           fontStyle: "normal",
           fontWeight: 500,
           lineHeight: "normal",
@@ -223,21 +259,19 @@ function SectionHeader({
         {courseTitle}
       </h1>
       <p
-        className="m-0 mt-[7px]"
+        className="m-0 mt-[3px] text-[14px] leading-[127%] lg:mt-[7px] lg:text-[18px]"
         style={{
           color: "var(--Black, #000)",
           fontFamily,
-          fontSize: "18px",
           fontStyle: "normal",
           fontWeight: 400,
-          lineHeight: "127%",
           opacity: 0.6,
         }}
       >
         A course by {bylineParts.join(" , ")}
       </p>
-      <div className="mt-[22px]">
-        <LessonDivider />
+      <div className="fcl-title-rule mt-[28px] flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:mt-[22px] lg:block">
+        <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 lg:w-[775px] lg:max-w-full" />
       </div>
     </header>
   );
@@ -274,6 +308,7 @@ function DownloadIcon() {
       viewBox="0 0 29 29"
       fill="none"
       aria-hidden
+      className="course-article-download-icon"
     >
       <path
         d="M28 19V25C28 25.7956 27.6839 26.5587 27.1213 27.1213C26.5587 27.6839 25.7956 28 25 28H4C3.20435 28 2.44129 27.6839 1.87868 27.1213C1.31607 26.5587 1 25.7956 1 25V19M22 11.5L14.5 19L7 11.5M14.5 19V1"
@@ -303,11 +338,8 @@ function TextContentLessonBlock({
     "Content for this lesson is coming soon.";
 
   const textStyle: CSSProperties = {
-    width: "673px",
-    maxWidth: "100%",
     color: "var(--Black, #000)",
     fontFamily,
-    fontSize: "18px",
     fontStyle: "normal",
     fontWeight: 400,
     lineHeight: "normal",
@@ -316,12 +348,16 @@ function TextContentLessonBlock({
 
   return (
     <article id={`lesson-${lesson.id}`}>
+      {variant === "article" ? (
+        <div className="lg:hidden" style={{ height: 35 }} aria-hidden />
+      ) : null}
       <h2
-        className="m-0"
+        className={`m-0 text-[18px] lg:text-[24px] ${
+          variant === "article" ? "fcl-text-title-article" : "fcl-text-title-intro"
+        }`}
         style={{
           color: "var(--Black, #000)",
           fontFamily,
-          fontSize: "24px",
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "normal",
@@ -330,69 +366,70 @@ function TextContentLessonBlock({
         {lesson.title}
       </h2>
 
-      <div className="mt-[22px]">
+      <div className="lg:mt-[22px]">
         {variant === "article" && !expanded ? (
-          <p
-            className="m-0 line-clamp-4"
-            style={textStyle}
-          >
+          <p className="m-0 line-clamp-4 w-[334px] max-w-full text-[16px] lg:w-[673px] lg:text-[18px]" style={textStyle}>
             {body}
           </p>
         ) : (
-          <p className="m-0" style={textStyle}>
+          <p className="m-0 w-[334px] max-w-full text-[16px] lg:w-[673px] lg:text-[18px]" style={textStyle}>
             {body}
           </p>
         )}
       </div>
 
       {variant === "article" ? (
-        <div className="mt-[39px] flex items-center">
-          <button
-            type="button"
-            onClick={() => setExpanded((prev) => !prev)}
-            className="box-border inline-flex items-center justify-center"
-            style={{
-              width: "112px",
-              height: "42px",
-              padding: "0 16px",
-              borderRadius: "8px",
-              border: "1px solid var(--Black, #000)",
-              background: "var(--Purple, #FF8CFF)",
-            }}
-            aria-expanded={expanded}
-          >
-            <span
+        <>
+          <div className="lg:hidden" style={{ height: 38 }} aria-hidden />
+          <div className="hidden lg:block" style={{ height: 39 }} aria-hidden />
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="box-border inline-flex items-center justify-center"
               style={{
-                color: "var(--Black, #000)",
-                textAlign: "center",
-                fontFamily,
-                fontSize: "24px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "19.6px",
+                display: "flex",
+                width: "112px",
+                height: "42px",
+                padding: "0 16px",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: "8px",
+                border: "1px solid var(--Black, #000)",
+                background: "var(--Purple, #FF8CFF)",
               }}
+              aria-expanded={expanded}
             >
-              {expanded ? "LESS" : "VIEW"}
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  textAlign: "center",
+                  fontFamily,
+                  fontSize: "24px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "19.6px",
+                }}
+              >
+                {expanded ? "LESS" : "VIEW"}
+              </span>
+            </button>
+            <span className="inline-flex items-center" style={{ marginLeft: 18 }}>
+              <HeartIcon />
             </span>
-          </button>
-          <span className="ml-[18px] inline-flex items-center">
-            <HeartIcon />
-          </span>
-          <span className="ml-[12px] inline-flex items-center">
-            <DownloadIcon />
-          </span>
-        </div>
+            <span className="inline-flex items-center" style={{ marginLeft: 12 }}>
+              <DownloadIcon />
+            </span>
+          </div>
+        </>
       ) : null}
 
       {!isLast ? (
-        <div
-          style={{
-            marginTop: SPACE_ABOVE_HR_PX,
-            marginBottom: SPACE_BELOW_HR_PX,
-          }}
-        >
+        <>
+          <div className="hidden lg:block" style={{ height: SPACE_ABOVE_HR_PX }} aria-hidden />
           <LessonDivider />
-        </div>
+          <div className="hidden lg:block" style={{ height: SPACE_BELOW_HR_PX }} aria-hidden />
+        </>
       ) : null}
     </article>
   );
@@ -426,17 +463,13 @@ function VideoLessonBlock({
   const hasStream = Boolean(lesson.streamUrl);
 
   return (
-    <article id={`lesson-${lesson.id}`}>
-      <div
-        className="mb-[20px] flex items-center justify-between gap-[16px]"
-        style={{ width: `${VIDEO_WIDTH}px`, maxWidth: "100%" }}
-      >
+    <article id={`lesson-${lesson.id}`} className="fcl-video-block">
+      <div className="mb-[18px] flex w-full max-w-full items-center justify-between gap-[16px] max-lg:pr-[29px] lg:mb-[20px] lg:w-[675px]">
         <h2
-          className="m-0 min-w-0 truncate"
+          className="m-0 min-w-0 truncate text-[18px] lg:text-[24px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
-            fontSize: "24px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -448,15 +481,13 @@ function VideoLessonBlock({
           <div className="inline-flex shrink-0 items-center">
             <ClockIcon />
             <span
-              className="ml-[6px]"
+              className="ml-[6px] text-[14px] lg:text-[16px] lg:opacity-60"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily,
-                fontSize: "16px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
-                opacity: 0.6,
               }}
             >
               {formatDurationLabel(durationSeconds)}
@@ -465,16 +496,9 @@ function VideoLessonBlock({
         ) : null}
       </div>
 
+      <div className="max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center">
       <div
-        className="relative overflow-hidden"
-        style={{
-          width: `${VIDEO_WIDTH}px`,
-          height: `${VIDEO_HEIGHT}px`,
-          maxWidth: "100%",
-          borderRadius: "50px",
-          border: "0.3px solid var(--Black, #000)",
-          background: "var(--Grey, #E9E9E9)",
-        }}
+        className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
       >
         {isPlaying && hasStream && lesson.streamUrl ? (
           <div className="h-full w-full">
@@ -525,16 +549,14 @@ function VideoLessonBlock({
           </>
         )}
       </div>
+      </div>
 
       {lesson.description ? (
         <p
-          className="m-0 mt-[46px]"
+          className="m-0 mt-[20px] w-[334px] max-w-full text-[16px] lg:mt-[46px] lg:w-[673px] lg:text-[18px]"
           style={{
-            width: "673px",
-            maxWidth: "100%",
             color: "var(--Black, #000)",
             fontFamily,
-            fontSize: "18px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -545,14 +567,11 @@ function VideoLessonBlock({
       ) : null}
 
       {!isLast ? (
-        <div
-          style={{
-            marginTop: SPACE_ABOVE_HR_PX,
-            marginBottom: SPACE_BELOW_HR_PX,
-          }}
-        >
+        <>
+          <div className="hidden lg:block" style={{ height: SPACE_ABOVE_HR_PX }} aria-hidden />
           <LessonDivider />
-        </div>
+          <div className="hidden lg:block" style={{ height: SPACE_BELOW_HR_PX }} aria-hidden />
+        </>
       ) : null}
     </article>
   );
@@ -579,9 +598,7 @@ export function FullCourseLearningExperience({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
     firstPlayableVideo?.moduleId ?? firstModule?.id ?? null
   );
-  const [playingLessonId, setPlayingLessonId] = useState<string | null>(
-    firstPlayableVideo?.id ?? null
-  );
+  const [playingLessonId, setPlayingLessonId] = useState<string | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     firstPlayableVideo?.id ?? firstModule?.lessons[0]?.id ?? null
   );
@@ -605,6 +622,11 @@ export function FullCourseLearningExperience({
 
   const selectedModule =
     modules.find((module) => module.id === selectedModuleId) ?? firstModule;
+  const selectedModuleIndex = selectedModule
+    ? modules.findIndex((module) => module.id === selectedModule.id)
+    : -1;
+  const nextModule =
+    selectedModuleIndex >= 0 ? modules[selectedModuleIndex + 1] ?? null : null;
 
   const displayPercent = Math.round(Math.min(100, Math.max(0, progressPercent)));
   const encouragement =
@@ -782,24 +804,35 @@ export function FullCourseLearningExperience({
     [orderedLessons, selectLesson]
   );
 
+  const markCurrentUnitComplete = useCallback(() => {
+    if (!selectedModule) return;
+    selectedModule.lessons.forEach((lesson) => {
+      if (lesson.id.startsWith("demo-")) return;
+      void markArticleComplete(lesson.id);
+    });
+  }, [selectedModule, markArticleComplete]);
+
+  const goToNextUnit = useCallback(() => {
+    if (!nextModule) return;
+    selectModule(nextModule.id);
+    setOpenMap((prev) => ({ ...prev, [nextModule.id]: true }));
+    const firstLesson = nextModule.lessons[0];
+    if (firstLesson) selectLesson(firstLesson);
+  }, [nextModule, selectModule, selectLesson]);
+
   return (
-    <div
-      className="mx-auto max-w-[1600px] -mt-[50px] pb-[80px] pt-[28px]"
-      style={{ paddingLeft: "120px", paddingRight: "117px" }}
-    >
-      <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
+    <div className="mx-auto max-w-[1600px] pb-[80px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
+      <div className="max-lg:pl-[30px]">
+        <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
+      </div>
 
-      <hr
-        className="mt-[13px] block w-full border-0"
-        style={{
-          height: 0,
-          borderTop: "1px solid #000",
-          opacity: 0.6,
-          background: "#000",
-        }}
-      />
+      <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black opacity-30 lg:mt-[13px] lg:w-full lg:opacity-60" />
 
-      <section className="mt-[41px]" aria-label="Course progress">
+      <div className="mt-[27px] flex justify-center lg:hidden">
+        <ActivityProgressMobileCard progressPercent={progressPercent} showTrackTicks />
+      </div>
+
+      <section className="mt-[41px] max-lg:hidden" aria-label="Course progress">
         <div
           className="flex items-baseline justify-between gap-[24px]"
           style={{ width: "1201px", maxWidth: "100%" }}
@@ -881,7 +914,7 @@ export function FullCourseLearningExperience({
         </div>
       </section>
 
-      <div className="mt-[48px] flex items-start gap-[94px]">
+      <div className="mt-[48px] flex flex-col-reverse max-lg:gap-[66px] lg:flex-row lg:items-start lg:gap-[94px]">
         <div className="min-w-0 flex-1" aria-label="Section content">
           {selectedModule ? (
             <div className="flex flex-col">
@@ -891,7 +924,7 @@ export function FullCourseLearningExperience({
                 instructorProfession={instructorProfession}
                 fontFamily={fontFamily}
               />
-              <div style={{ paddingTop: SPACE_BELOW_HR_PX }}>
+              <div className="max-lg:pl-[30px] lg:pt-[24px]">
               {selectedModule.lessons.map((lesson, index) => {
                 const isLast = index === selectedModule.lessons.length - 1;
 
@@ -948,7 +981,7 @@ export function FullCourseLearningExperience({
         </div>
 
         <aside
-          className="sticky top-[28px] flex w-[432px] shrink-0 flex-col gap-[16px]"
+          className="flex w-full shrink-0 flex-col gap-[16px] max-lg:items-center lg:sticky lg:top-[28px] lg:w-[432px]"
           aria-label="Course sections"
         >
           {modules.map((module) => {
@@ -959,11 +992,10 @@ export function FullCourseLearningExperience({
             return (
               <div
                 key={module.id}
-                className={`w-[432px] overflow-hidden rounded-[30px] border border-black ${
+                className={`w-[315px] overflow-hidden rounded-[30px] border border-black lg:w-[432px] ${
                   isOpen || isSelected ? "bg-[#89F496]" : "bg-white"
                 }`}
                 style={{
-                  width: LESSON_ROW_WIDTH,
                   height: isOpen ? `${openHeight}px` : `${LESSON_ROW_HEIGHT}px`,
                   transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
                 }}
@@ -1076,6 +1108,76 @@ export function FullCourseLearningExperience({
             );
           })}
         </aside>
+      </div>
+
+      <div className="hidden lg:block">
+        <div
+          className="mt-[40px] h-0 bg-black opacity-60"
+          style={{
+            width: 1440,
+            maxWidth: "none",
+            marginLeft: -120,
+            borderTop: "1px solid #000",
+          }}
+          aria-hidden
+        />
+        <div className="mt-[45px] flex items-center justify-between">
+          <button
+            type="button"
+            onClick={markCurrentUnitComplete}
+            className="inline-flex items-center bg-transparent p-0 text-left"
+          >
+            <UnitCompleteCheckIcon />
+            <span className="ml-[17px]">
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily,
+                  fontSize: "24px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                }}
+              >
+                MARK THIS UNIT AS{" "}
+              </span>
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily,
+                  fontSize: "24px",
+                  fontStyle: "italic",
+                  fontWeight: 500,
+                  lineHeight: "normal",
+                }}
+              >
+                COMPLETED
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={goToNextUnit}
+            disabled={!nextModule}
+            className="inline-flex items-center bg-transparent p-0 disabled:opacity-40"
+          >
+            <span
+              style={{
+                color: "var(--Purple, #FF8CFF)",
+                fontFamily,
+                fontSize: "18px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }}
+            >
+              NEXT UNIT
+            </span>
+            <span className="ml-[6px] inline-flex h-[22px] w-[22px] items-center justify-center">
+              <NextUnitArrowIcon />
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

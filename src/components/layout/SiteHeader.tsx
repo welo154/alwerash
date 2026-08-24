@@ -67,6 +67,7 @@ export function SiteHeader() {
     const flushBottom =
       pathname === "/course" ||
       pathname.startsWith("/course/") ||
+      pathname.startsWith("/course-access") ||
       pathname.startsWith("/tracks/") ||
       pathname === "/profile" ||
       pathname.startsWith("/profile/");
@@ -84,6 +85,7 @@ export function SiteHeader() {
       flushBottom={
         pathname === "/course" ||
         pathname.startsWith("/course/") ||
+        pathname.startsWith("/course-access") ||
         pathname.startsWith("/tracks/")
       }
     />

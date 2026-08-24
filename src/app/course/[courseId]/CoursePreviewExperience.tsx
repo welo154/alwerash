@@ -42,25 +42,30 @@ function PlayOverlayButton({
       className="flex items-center justify-center transition-opacity hover:opacity-80"
       aria-label={label}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="120"
-        height="120"
-        viewBox="0 0 122 122"
-        fill="none"
-        aria-hidden
-      >
-        <circle
-          cx="61"
-          cy="61"
-          r="60"
-          fill="#89F496"
-          stroke="var(--Black, #000)"
-          strokeWidth="2"
-        />
-        <path d="M49 37L85 61L49 85V37Z" fill="var(--Black, #000)" />
-      </svg>
+      <PlayGlyph />
     </button>
+  );
+}
+
+function PlayGlyph() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 122 122"
+      fill="none"
+      aria-hidden
+      className="h-[63px] w-[63px] lg:h-[120px] lg:w-[120px]"
+    >
+      <circle
+        cx="61"
+        cy="61"
+        r="60"
+        fill="#89F496"
+        stroke="var(--Black, #000)"
+        strokeWidth="2"
+      />
+      <path d="M49 37L85 61L49 85V37Z" fill="var(--Black, #000)" />
+    </svg>
   );
 }
 
@@ -88,7 +93,7 @@ export function CoursePreviewExperience({
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
     firstVideo?.lessonId ?? trials[0]?.lessonId ?? null
   );
-  const [isPlaying, setIsPlaying] = useState(() => Boolean(firstVideo));
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const activeLesson =
     trials.find((trial) => trial.lessonId === activeLessonId) ?? firstVideo ?? trials[0] ?? null;
@@ -124,9 +129,9 @@ export function CoursePreviewExperience({
 
   return (
     <>
+      <div className="max-lg:order-2 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center">
       <div
-        className="relative mt-[39px] overflow-hidden rounded-[50px] border-2 border-black bg-[#E9E9E9]"
-        style={{ width: "843px", height: "557px" }}
+        className="relative mt-[15px] h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] lg:mt-[39px] lg:h-[557px] lg:w-[843px] lg:rounded-[50px] lg:border-2"
         aria-label="Course preview"
       >
         {showingArticle ? (
@@ -187,30 +192,15 @@ export function CoursePreviewExperience({
                   label={`Play free preview: ${activeLesson?.title ?? "lesson"}`}
                 />
               ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="120"
-                  height="120"
-                  viewBox="0 0 122 122"
-                  fill="none"
-                  aria-hidden
-                >
-                  <circle
-                    cx="61"
-                    cy="61"
-                    r="60"
-                    fill="#89F496"
-                    stroke="var(--Black, #000)"
-                    strokeWidth="2"
-                  />
-                  <path d="M49 37L85 61L49 85V37Z" fill="var(--Black, #000)" />
-                </svg>
+                <PlayGlyph />
               )}
             </div>
           </>
         )}
       </div>
+      </div>
 
+      <div className="max-lg:order-6">
       <CourseContentAccordion
         courseId={courseId}
         fontFamily={fontFamily}
@@ -221,6 +211,7 @@ export function CoursePreviewExperience({
         activeFreeLessonId={activeLessonId}
         onSelectFreeLesson={selectFreeLesson}
       />
+      </div>
     </>
   );
 }

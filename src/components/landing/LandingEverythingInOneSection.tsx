@@ -220,22 +220,64 @@ const mobileFeatureBodyStyle = {
   lineHeight: "127%",
 } as const;
 
+const courseFeatureTitleStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "16px",
+  fontStyle: "normal",
+  fontWeight: 600,
+  lineHeight: "127%",
+} as const;
+
+const courseFeatureBodyStyle = {
+  color: "#000",
+  fontFamily: pangeaFont,
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: "127%",
+} as const;
+
 export function LandingEverythingInOneSection({
   showDecoBoxes = true,
   variant = "desktop",
   className,
+  hideChecks = false,
+  mobileHeading,
+  mobileRowLayout = "home",
 }: {
   showDecoBoxes?: boolean;
   variant?: "desktop" | "mobile";
   className?: string;
+  hideChecks?: boolean;
+  mobileHeading?: string;
+  /** Course page uses its own row metrics; home keeps the original mobile sizes. */
+  mobileRowLayout?: "home" | "course";
 } = {}) {
   if (variant === "mobile") {
+    const isCourseRows = mobileRowLayout === "course";
     return (
       <section
         className={`w-full pl-[30px] pr-4 ${className ?? ""}`}
         data-gsap-reveal
         aria-labelledby="everything-in-one-place-heading-mobile"
       >
+        {mobileHeading ? (
+          <h2
+            id="everything-in-one-place-heading-mobile"
+            className="m-0 text-[16px]"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              opacity: 0.6,
+            }}
+          >
+            {mobileHeading}
+          </h2>
+        ) : (
         <h2
           id="everything-in-one-place-heading-mobile"
           className="m-0 w-[269px] text-left text-black"
@@ -267,24 +309,36 @@ export function LandingEverythingInOneSection({
             IN ONE PLACE
           </span>
         </h2>
+        )}
 
-        <ul className="mt-[37px] mb-0 flex list-none flex-col gap-[35px] p-0">
+        <ul
+          className={`flex list-none flex-col p-0 ${
+            isCourseRows ? "mt-[25px] mb-[50px] gap-[25px]" : "mt-[37px] mb-0 gap-[35px]"
+          }`}
+        >
           {FEATURES.map(({ title, body, Icon }) => (
             <li key={title} className="flex items-center">
               <span className="flex shrink-0 items-center justify-center">
-                <Icon className="h-[24px] w-[26px] shrink-0" />
+                <Icon
+                  className={`shrink-0 ${isCourseRows ? "h-[21px] w-[22px]" : "h-[24px] w-[26px]"}`}
+                />
               </span>
-              <div className="ml-[21px] w-[221px] shrink-0">
-                <h3 className="m-0" style={mobileFeatureTitleStyle}>
+              <div className={isCourseRows ? "ml-[14px] min-w-0" : "ml-[21px] w-[221px] shrink-0"}>
+                <h3 className="m-0" style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}>
                   {title}
                 </h3>
-                <p className="m-0 mt-2" style={mobileFeatureBodyStyle}>
+                <p
+                  className={isCourseRows ? "m-0" : "m-0 mt-2"}
+                  style={isCourseRows ? courseFeatureBodyStyle : mobileFeatureBodyStyle}
+                >
                   {body}
                 </p>
               </div>
+              {hideChecks ? null : (
               <span className="ml-[33px] shrink-0">
                 <FeatureCheck size={33.171} />
               </span>
+              )}
             </li>
           ))}
         </ul>

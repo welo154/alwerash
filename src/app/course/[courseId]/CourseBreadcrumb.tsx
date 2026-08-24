@@ -54,7 +54,6 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
     fontFamily,
     fontStyle: "normal" as const,
     fontWeight: 400,
-    lineHeight: "normal",
     opacity: 0.6,
   };
 
@@ -65,7 +64,7 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
     >
       <Link
         href="/course"
-        className="text-[14px] hover:opacity-80 lg:text-[18px]"
+        className="text-[14px] leading-[127%] hover:opacity-80 lg:text-[18px] lg:leading-normal"
         style={textStyle}
       >
         Courses
@@ -73,13 +72,16 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
       <BreadcrumbChevron />
       <Link
         href="/course"
-        className="text-[14px] hover:opacity-80 lg:text-[18px]"
+        className="text-[14px] leading-[127%] hover:opacity-80 lg:text-[18px] lg:leading-normal"
         style={textStyle}
       >
         Classes
       </Link>
       <BreadcrumbChevron />
-      <span className="text-[14px] lg:text-[18px]" style={textStyle}>
+      <span
+        className="text-[14px] leading-[127%] lg:text-[18px] lg:leading-normal"
+        style={textStyle}
+      >
         {courseTitle}
       </span>
     </nav>
