@@ -19,6 +19,10 @@ const TICK_START_DEG = 146.1;
 const TICK_SWEEP_DEG = 247.8;
 const TICK_END_DEG = TICK_START_DEG + TICK_SWEEP_DEG;
 
+function roundCoord(n: number) {
+  return n.toFixed(4);
+}
+
 function arcPoint(deg: number) {
   const rad = (deg * Math.PI) / 180;
   return {
@@ -29,7 +33,7 @@ function arcPoint(deg: number) {
 
 const ARC_START = arcPoint(TICK_START_DEG);
 const ARC_END = arcPoint(TICK_END_DEG);
-const ARC_CENTERLINE = `M ${ARC_START.x} ${ARC_START.y} A ${ARC_MID_RADIUS} ${ARC_MID_RADIUS} 0 1 1 ${ARC_END.x} ${ARC_END.y}`;
+const ARC_CENTERLINE = `M ${roundCoord(ARC_START.x)} ${roundCoord(ARC_START.y)} A ${ARC_MID_RADIUS} ${ARC_MID_RADIUS} 0 1 1 ${roundCoord(ARC_END.x)} ${roundCoord(ARC_END.y)}`;
 
 function arcTickLine(t: number) {
   const deg = TICK_START_DEG + TICK_SWEEP_DEG * t;
@@ -40,10 +44,10 @@ function arcTickLine(t: number) {
   const inner = ARC_MID_RADIUS - half;
   const outer = ARC_MID_RADIUS + half;
   return {
-    x1: ARC_CENTER_X + inner * cos,
-    y1: ARC_CENTER_Y + inner * sin,
-    x2: ARC_CENTER_X + outer * cos,
-    y2: ARC_CENTER_Y + outer * sin,
+    x1: roundCoord(ARC_CENTER_X + inner * cos),
+    y1: roundCoord(ARC_CENTER_Y + inner * sin),
+    x2: roundCoord(ARC_CENTER_X + outer * cos),
+    y2: roundCoord(ARC_CENTER_Y + outer * sin),
   };
 }
 

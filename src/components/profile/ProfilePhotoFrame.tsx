@@ -11,6 +11,100 @@ const PROFILE_PHOTO_PATH =
 const PROFILE_STROKE_PATH =
   "M225 0V-2V-2V0ZM280 55H282V55H280ZM55 286V288V288V286ZM0 231H-2V231H0ZM0 55H-2V55H0ZM225 0V2C254.271 2 278 25.7289 278 55H280H282C282 23.5198 256.48 -2 225 -2V0ZM280 55H278V179H280H282V55H280ZM230 229V227L99 227V229V231L230 231V229ZM99 229V227C83.536 227 71 239.536 71 255H73H75C75 241.745 85.7452 231 99 231V229ZM73 255H71V268H73H75V255H73ZM55 286V284C25.7289 284 2 260.271 2 231H0H-2C-2 262.48 23.5198 288 55 288V286ZM0 231H2L2 55H0H-2L-2 231H0ZM0 55H2C2 25.7289 25.7289 2 55 2V0V-2C23.5198 -2 -2 23.5198 -2 55H0ZM55 0V2L225 2V0V-2L55 -2V0ZM73 268H71C71 276.837 63.8366 284 55 284V286V288C66.0457 288 75 279.046 75 268H73ZM280 179H278C278 205.51 256.51 227 230 227V229V231C258.719 231 282 207.719 282 179H280Z";
 
+const MOBILE_PHOTO_PATH =
+  "M113 0C126.807 1.22409e-06 138 11.1929 138 25L138 264C138 266.514 137.878 269 137.639 271.452C136.784 280.229 128.732 286 119.913 286H86.7813C72.9741 286 61.7813 297.193 61.7813 311L61.7813 330.219C61.7813 335.621 57.402 340 52 340C23.2812 340 1.06317e-06 316.719 0 288L0 25C1.9329e-06 11.1929 11.1929 1.12745e-07 25 0L113 0Z";
+
+const MOBILE_PHOTO_STROKE_PATH =
+  "M113 0V-2V-2V0ZM138 25H140V25H138ZM86.7813 286V284V284V286ZM61.7813 311H59.7813V311H61.7813ZM52 340V342V342V340ZM0 288H-2V288H0ZM0 25H-2V25H0ZM25 0V-2V0ZM137.639 271.452L135.648 271.258L137.639 271.452ZM113 0V2C125.703 2 136 12.2975 136 25H138H140C140 10.0883 127.912 -2 113 -2V0ZM138 25H136L136 264H138H140L140 25H138ZM138 264H136C136 266.449 135.881 268.871 135.648 271.258L137.639 271.452L139.63 271.646C139.875 269.13 140 266.579 140 264H138ZM119.913 286V284H86.7813V286V288H119.913V286ZM86.7813 286V284C71.8696 284 59.7813 296.088 59.7813 311H61.7813H63.7813C63.7813 298.297 74.0787 288 86.7813 288V286ZM61.7813 311H59.7813L59.7813 330.219H61.7813H63.7813L63.7813 311H61.7813ZM52 340V338C24.3858 338 2 315.614 2 288H0H-2C-2 317.823 22.1766 342 52 342V340ZM0 288H2L2 25H0H-2L-2 288H0ZM0 25H2C2 12.2975 12.2975 2 25 2V0V-2C10.0883 -2 -2 10.0883 -2 25H0ZM25 0V2L113 2V0V-2L25 -2V0ZM61.7813 330.219H59.7813C59.7813 334.516 56.2975 338 52 338V340V342C58.5066 342 63.7813 336.725 63.7813 330.219H61.7813ZM137.639 271.452L135.648 271.258C134.917 278.772 127.961 284 119.913 284V286V288C129.502 288 138.652 281.687 139.63 271.646L137.639 271.452Z";
+
+export function ProfilePhotoFrameMobile({
+  photoSrc,
+  profession,
+}: {
+  photoSrc?: string | null;
+  profession?: string | null;
+}) {
+  const rawId = useId().replace(/:/g, "");
+  const clipId = `profile-photo-mobile-clip-${rawId}`;
+  const maskId = `profile-photo-mobile-mask-${rawId}`;
+  const src = photoSrc?.trim() || "";
+  const professionLabel = profession?.trim() || "";
+
+  return (
+    <div className="relative shrink-0" style={{ width: 138, height: 340 }}>
+      <svg width={0} height={0} className="absolute" aria-hidden>
+        <defs>
+          <clipPath id={clipId}>
+            <path d={MOBILE_PHOTO_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
+
+      <div
+        className="absolute inset-0 overflow-hidden bg-[#D3D3D3]"
+        style={{ clipPath: `url(#${clipId})` }}
+      >
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt=""
+            className="absolute max-w-none"
+            style={{
+              width: "168.971%",
+              height: "102.873%",
+              left: -53.179,
+              top: 0.787,
+              objectFit: "cover",
+            }}
+          />
+        ) : null}
+      </div>
+
+      <svg
+        className="pointer-events-none absolute inset-0"
+        xmlns="http://www.w3.org/2000/svg"
+        width={138}
+        height={340}
+        viewBox="0 0 138 340"
+        fill="none"
+        aria-hidden
+      >
+        <defs>
+          <mask id={maskId} fill="white">
+            <path d={MOBILE_PHOTO_PATH} />
+          </mask>
+        </defs>
+        <path
+          d={MOBILE_PHOTO_STROKE_PATH}
+          fill="#89F496"
+          mask={`url(#${maskId})`}
+        />
+      </svg>
+
+      {professionLabel ? (
+        <p
+          className="absolute m-0"
+          style={{
+            top: 302,
+            left: 72,
+            width: 54,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 14,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "100%",
+            opacity: 0.6,
+          }}
+        >
+          {professionLabel}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function ProfilePhotoFrame({
   photoSrc,
   profession,

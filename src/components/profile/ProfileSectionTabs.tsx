@@ -35,6 +35,23 @@ function FullBleedRule({ className = "" }: { className?: string }) {
   );
 }
 
+function MobileRule() {
+  return (
+    <div className="flex w-full justify-center" aria-hidden>
+      <div
+        style={{
+          width: 391,
+          maxWidth: "100%",
+          height: 0,
+          opacity: 0.6,
+          background: "#000",
+          borderTop: "1px solid #000",
+        }}
+      />
+    </div>
+  );
+}
+
 export function ProfileSectionTabs({
   initialTab = "Learning",
   continueLearningCourses,
@@ -76,16 +93,19 @@ export function ProfileSectionTabs({
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }
 
-  return (
-    <div id="profile-sections">
-      <FullBleedRule className="mt-[59px]" />
-
+  function renderTabs(opts: {
+    fontSize: number;
+    gap: number;
+    paddingLeft: number;
+    height: number;
+  }) {
+    return (
       <div
         className="flex items-center"
         style={{
-          height: 65,
-          paddingLeft: 120,
-          gap: 50,
+          height: opts.height,
+          paddingLeft: opts.paddingLeft,
+          gap: opts.gap,
         }}
         role="tablist"
         aria-label="Profile sections"
@@ -105,7 +125,7 @@ export function ProfileSectionTabs({
                   ? "var(--Purple, #FF8CFF)"
                   : "var(--Black, #000)",
                 fontFamily: pangeaFont,
-                fontSize: 24,
+                fontSize: opts.fontSize,
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
@@ -117,14 +137,28 @@ export function ProfileSectionTabs({
           );
         })}
       </div>
+    );
+  }
 
-      <FullBleedRule />
+  return (
+    <div id="profile-sections">
+      <div className="lg:hidden" style={{ marginTop: 23 }}>
+        <MobileRule />
+        {renderTabs({ fontSize: 20, gap: 61, paddingLeft: 30, height: 56 })}
+        <MobileRule />
+      </div>
+
+      <div className="hidden lg:block">
+        <FullBleedRule className="mt-[59px]" />
+        {renderTabs({ fontSize: 24, gap: 50, paddingLeft: 120, height: 65 })}
+        <FullBleedRule />
+      </div>
 
       {selected === "Learning" ? (
         <ContinueLearningSection
           courses={continueLearningCourses}
           showTopRule={false}
-          className="mt-[67px] pb-16"
+          className="max-lg:mt-[40px] max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
         />
       ) : null}
 
@@ -133,12 +167,12 @@ export function ProfileSectionTabs({
           weeklyActivity={weeklyActivity}
           activityHighlightDayIndex={activityHighlightDayIndex}
           learningProgressPercent={learningProgressPercent}
-          className="mt-[67px] pb-16"
+          className="max-lg:mt-[40px] max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
         />
       ) : null}
 
       {selected === "Projects" ? (
-        <ProfileProjectsSection className="mt-[68px] pb-16" />
+        <ProfileProjectsSection className="max-lg:mt-[40px] max-lg:pb-[40px] lg:mt-[68px] lg:pb-16" />
       ) : null}
     </div>
   );

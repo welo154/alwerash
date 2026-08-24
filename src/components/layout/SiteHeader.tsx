@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { GuestSiteHeader } from "./GuestSiteHeader";
@@ -15,55 +16,29 @@ import { LoggedInAppHeader } from "./LoggedInAppHeader";
  * Other routes: green app header (guest Log in / Sign up, or signed-in user menu).
  */
 export function SiteHeader() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const pathname = usePathname() ?? "";
+  const [mounted, setMounted] = useState(false);
   const isAdmin = Boolean((session?.user as { roles?: string[] } | undefined)?.roles?.includes("ADMIN"));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const user = mounted ? session?.user : undefined;
 
   if (pathname === "/") {
     return null;
   }
 
   if (pathname === "/home") {
-    if (status === "loading") {
-      return (
-        <>
-          <div
-            className="sticky top-0 z-50 mb-0 h-[84px] w-full animate-pulse bg-neutral-100 lg:hidden"
-            aria-busy
-            aria-label="Loading header"
-          />
-          <div
-            className="sticky top-0 z-50 mb-0 hidden h-[112px] w-full animate-pulse bg-neutral-100 lg:block"
-            aria-busy
-            aria-label="Loading header"
-          />
-        </>
-      );
-    }
-    if (session?.user) {
-      return <LoggedInAppHeader user={session.user} isAdmin={isAdmin} homeLayout />;
+    if (user) {
+      return <LoggedInAppHeader user={user} isAdmin={isAdmin} homeLayout />;
     }
     return null;
   }
 
-  if (status === "loading") {
-    return (
-      <>
-        <div
-          className="sticky top-0 z-50 mb-[24px] h-[84px] w-full animate-pulse bg-neutral-100 lg:hidden"
-          aria-busy
-          aria-label="Loading header"
-        />
-        <div
-          className="sticky top-0 z-50 mb-[50px] hidden h-[147px] w-full animate-pulse bg-neutral-100 lg:block"
-          aria-busy
-          aria-label="Loading header"
-        />
-      </>
-    );
-  }
-
-  if (session?.user) {
+  if (user) {
     const flushBottom =
       pathname === "/course" ||
       pathname.startsWith("/course/") ||
@@ -73,7 +48,7 @@ export function SiteHeader() {
       pathname.startsWith("/profile/");
     return (
       <LoggedInAppHeader
-        user={session.user}
+        user={user}
         isAdmin={isAdmin}
         flushBottom={flushBottom}
       />

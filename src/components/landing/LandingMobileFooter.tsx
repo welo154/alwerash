@@ -160,7 +160,7 @@ export function LandingMobileFooter() {
 
   return (
     <footer
-      className="relative z-10 mx-auto mt-[44px] box-border flex flex-col overflow-hidden rounded-[55px] px-[24px] pt-[25px] pb-[28px]"
+      className="site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex flex-col overflow-hidden rounded-[55px] px-[24px] pt-[25px] pb-[28px]"
       style={{
         width: 382,
         background: "var(--Bright-Green, #89F496)",

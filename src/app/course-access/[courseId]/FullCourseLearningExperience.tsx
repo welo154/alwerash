@@ -126,6 +126,10 @@ function isArticleLesson(lesson: FullAccessLesson): boolean {
   return type === "ARTICLE" || type === "READING" || type === "RESOURCE";
 }
 
+function isDemoLessonId(lessonId: string): boolean {
+  return lessonId.startsWith("demo-");
+}
+
 function isPlayableVideo(lesson: FullAccessLesson): boolean {
   return isVideoLesson(lesson) && Boolean(lesson.streamUrl);
 }
@@ -181,20 +185,26 @@ function LessonDivider() {
   );
 }
 
-function UnitCompleteCheckIcon() {
+function UnitCompleteCheckIcon({ filled }: { filled?: boolean }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="41"
-      height="41"
       viewBox="0 0 41 41"
       fill="none"
       aria-hidden
+      className="fcl-unit-check block shrink-0"
     >
-      <circle cx="20.5" cy="20.5" r="19.5" stroke="#FF8CFF" strokeWidth="2" />
+      <circle
+        cx="20.5"
+        cy="20.5"
+        r="19.5"
+        fill={filled ? "#FF8CFF" : "none"}
+        stroke="#FF8CFF"
+        strokeWidth="2"
+      />
       <path
         d="M30.7496 14.3496L15.9512 28.6996L9.22461 22.1769"
-        stroke="#FF8CFF"
+        stroke={filled ? "#000" : "#FF8CFF"}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -207,11 +217,12 @@ function NextUnitArrowIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="22"
-      height="22"
+      width="23"
+      height="23"
       viewBox="0 0 23 23"
       fill="none"
       aria-hidden
+      style={{ width: 22, height: 22, display: "block", flexShrink: 0 }}
     >
       <path
         d="M11.5 22.5C17.5751 22.5 22.5 17.5751 22.5 11.5C22.5 5.42487 17.5751 0.5 11.5 0.5C5.42487 0.5 0.5 5.42487 0.5 11.5C0.5 17.5751 5.42487 22.5 11.5 22.5Z"
@@ -221,6 +232,7 @@ function NextUnitArrowIcon() {
       <path
         d="M11.5 7.1L15.9 11.5L11.5 15.9M15.9 11.5L7.1 11.5M22.5 11.5C22.5 17.5751 17.5751 22.5 11.5 22.5C5.42487 22.5 0.5 17.5751 0.5 11.5C0.5 5.42487 5.42487 0.5 11.5 0.5C17.5751 0.5 22.5 5.42487 22.5 11.5Z"
         stroke="var(--Purple, #EA83F0)"
+        strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -606,6 +618,7 @@ export function FullCourseLearningExperience({
   const [completedIds, setCompletedIds] = useState(
     () => new Set(initialCompletedLessonIds)
   );
+  const [unitSaving, setUnitSaving] = useState(false);
   const [durationByLessonId, setDurationByLessonId] = useState<Record<string, number>>(
     {}
   );
@@ -627,6 +640,13 @@ export function FullCourseLearningExperience({
     : -1;
   const nextModule =
     selectedModuleIndex >= 0 ? modules[selectedModuleIndex + 1] ?? null : null;
+  const currentUnitLessonIds = selectedModule?.lessons.map((lesson) => lesson.id) ?? [];
+  const persistableUnitLessonIds = currentUnitLessonIds.filter(
+    (id) => !isDemoLessonId(id)
+  );
+  const isCurrentUnitComplete =
+    persistableUnitLessonIds.length > 0 &&
+    persistableUnitLessonIds.every((id) => completedIds.has(id));
 
   const displayPercent = Math.round(Math.min(100, Math.max(0, progressPercent)));
   const encouragement =
@@ -804,13 +824,41 @@ export function FullCourseLearningExperience({
     [orderedLessons, selectLesson]
   );
 
-  const markCurrentUnitComplete = useCallback(() => {
-    if (!selectedModule) return;
-    selectedModule.lessons.forEach((lesson) => {
-      if (lesson.id.startsWith("demo-")) return;
-      void markArticleComplete(lesson.id);
+  const markCurrentUnitComplete = useCallback(async () => {
+    if (!selectedModule || unitSaving || isCurrentUnitComplete) return;
+    const previousIds = new Set(completedIds);
+    const previousPercent = progressPercent;
+    setUnitSaving(true);
+    setCompletedIds((prev) => {
+      const next = new Set(prev);
+      for (const id of currentUnitLessonIds) next.add(id);
+      return next;
     });
-  }, [selectedModule, markArticleComplete]);
+    try {
+      let latestPercent = progressPercent;
+      for (const lessonId of persistableUnitLessonIds) {
+        const result = await completeLessonAndGetProgress(lessonId, courseId);
+        if (result) latestPercent = result.progressPercent;
+      }
+      setProgressPercent(latestPercent);
+      await refreshCourseProgress();
+    } catch {
+      setCompletedIds(previousIds);
+      setProgressPercent(previousPercent);
+    } finally {
+      setUnitSaving(false);
+    }
+  }, [
+    selectedModule,
+    unitSaving,
+    isCurrentUnitComplete,
+    completedIds,
+    currentUnitLessonIds,
+    persistableUnitLessonIds,
+    progressPercent,
+    courseId,
+    refreshCourseProgress,
+  ]);
 
   const goToNextUnit = useCallback(() => {
     if (!nextModule) return;
@@ -821,7 +869,7 @@ export function FullCourseLearningExperience({
   }, [nextModule, selectModule, selectLesson]);
 
   return (
-    <div className="mx-auto max-w-[1600px] pb-[80px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
+    <div className="fcl-page mx-auto max-w-[1600px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
       <div className="max-lg:pl-[30px]">
         <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
       </div>
@@ -915,7 +963,7 @@ export function FullCourseLearningExperience({
       </section>
 
       <div className="mt-[48px] flex flex-col-reverse max-lg:gap-[66px] lg:flex-row lg:items-start lg:gap-[94px]">
-        <div className="min-w-0 flex-1" aria-label="Section content">
+        <div className="min-w-0 max-lg:flex-none lg:flex-1" aria-label="Section content">
           {selectedModule ? (
             <div className="flex flex-col">
               <SectionHeader
@@ -1110,9 +1158,9 @@ export function FullCourseLearningExperience({
         </aside>
       </div>
 
-      <div className="hidden lg:block">
+      <div className="fcl-unit-complete-wrap">
         <div
-          className="mt-[40px] h-0 bg-black opacity-60"
+          className="mt-[40px] hidden h-0 bg-black opacity-60 lg:block"
           style={{
             width: 1440,
             maxWidth: "none",
@@ -1121,19 +1169,28 @@ export function FullCourseLearningExperience({
           }}
           aria-hidden
         />
-        <div className="mt-[45px] flex items-center justify-between">
+        <div
+          className="flex w-full justify-center lg:hidden"
+          style={{ paddingTop: 35 }}
+          aria-hidden
+        >
+          <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
+        </div>
+        <div className="fcl-unit-complete-row flex items-center justify-between lg:mt-[45px]">
           <button
             type="button"
-            onClick={markCurrentUnitComplete}
-            className="inline-flex items-center bg-transparent p-0 text-left"
+            onClick={() => void markCurrentUnitComplete()}
+            disabled={unitSaving || isCurrentUnitComplete || persistableUnitLessonIds.length === 0}
+            aria-pressed={isCurrentUnitComplete}
+            className="inline-flex items-center bg-transparent p-0 text-left disabled:cursor-default"
           >
-            <UnitCompleteCheckIcon />
-            <span className="ml-[17px]">
+            <UnitCompleteCheckIcon filled={isCurrentUnitComplete} />
+            <span className="fcl-unit-check-gap">
               <span
+                className="fcl-unit-label"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily,
-                  fontSize: "24px",
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "normal",
@@ -1142,10 +1199,10 @@ export function FullCourseLearningExperience({
                 MARK THIS UNIT AS{" "}
               </span>
               <span
+                className="fcl-unit-label"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily,
-                  fontSize: "24px",
                   fontStyle: "italic",
                   fontWeight: 500,
                   lineHeight: "normal",
@@ -1159,7 +1216,7 @@ export function FullCourseLearningExperience({
             type="button"
             onClick={goToNextUnit}
             disabled={!nextModule}
-            className="inline-flex items-center bg-transparent p-0 disabled:opacity-40"
+            className="fcl-next-unit items-center bg-transparent p-0 disabled:opacity-40 lg:inline-flex"
           >
             <span
               style={{
@@ -1173,7 +1230,10 @@ export function FullCourseLearningExperience({
             >
               NEXT UNIT
             </span>
-            <span className="ml-[6px] inline-flex h-[22px] w-[22px] items-center justify-center">
+            <span
+              className="inline-flex items-center justify-center"
+              style={{ marginLeft: 6, width: 22, height: 22 }}
+            >
               <NextUnitArrowIcon />
             </span>
           </button>
