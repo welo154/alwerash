@@ -249,9 +249,7 @@ export async function getCourseForLearning(courseId: string) {
               title: true,
               type: true,
               order: true,
-              video: {
-                select: { muxPlaybackId: true },
-              },
+              video: { select: { lessonId: true } },
             },
           },
         },
@@ -272,7 +270,7 @@ export async function getCourseForLearning(courseId: string) {
       title: l.title,
       type: String(l.type),
       order: l.order,
-      video: l.video ? { muxPlaybackId: l.video.muxPlaybackId } : null,
+      video: l.video ? { hasVideo: true } : null,
     })),
   }));
 
@@ -308,7 +306,7 @@ export async function getLessonForLearning(lessonId: string, courseId: string) {
       type: true,
       order: true,
       moduleId: true,
-      video: { select: { muxPlaybackId: true } },
+      video: { select: { lessonId: true } },
       article: { select: { body: true } },
       module: {
         select: {

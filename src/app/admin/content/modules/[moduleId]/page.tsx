@@ -377,7 +377,6 @@ export default async function AdminModuleDetail({
                   <AdminVideoPreview
                     lessonId={l.id}
                     lessonTitle={l.title}
-                    playbackId={l.video.muxPlaybackId}
                   />
                 </div>
               )}

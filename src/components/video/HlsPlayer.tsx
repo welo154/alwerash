@@ -18,6 +18,8 @@ export type HlsPlayerProps = {
   onProgress?: (currentTime: number, duration: number) => void;
   /** Called when playback reaches the end (e.g. auto-advance to next lesson). */
   onEnded?: () => void;
+  /** Called on a fatal media/network error (e.g. expired Mux token). */
+  onError?: () => void;
 };
 
 type LevelInfo = { height: number; width: number; index: number };
@@ -50,6 +52,7 @@ export function HlsPlayer({
   fill = false,
   onProgress,
   onEnded,
+  onError,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -65,6 +68,8 @@ export function HlsPlayer({
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<"speed" | "quality" | null>(null);
   const [mounted, setMounted] = useState(false);
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   // Video elements are often modified by browser extensions before hydration; render after mount.
   useEffect(() => {
@@ -78,7 +83,9 @@ export function HlsPlayer({
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
-      return;
+      const onNativeError = () => onErrorRef.current?.();
+      video.addEventListener("error", onNativeError);
+      return () => video.removeEventListener("error", onNativeError);
     }
 
     if (Hls.isSupported()) {
@@ -103,6 +110,9 @@ export function HlsPlayer({
       });
       hls.on(Hls.Events.LEVEL_LOADED, () => updateLevels());
       hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => setCurrentLevel(data.level));
+      hls.on(Hls.Events.ERROR, (_e, data) => {
+        if (data?.fatal) onErrorRef.current?.();
+      });
 
       return () => {
         hls.destroy();

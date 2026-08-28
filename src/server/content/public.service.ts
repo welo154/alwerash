@@ -679,7 +679,7 @@ export async function publicGetPreviewLesson(courseId: string, lessonId: string)
       id: true,
       title: true,
       type: true,
-      video: { select: { muxPlaybackId: true } },
+      video: { select: { lessonId: true } },
       module: {
         select: {
           course: { select: { id: true, title: true } },
@@ -696,7 +696,7 @@ export type PublicFreePreviewVideo = {
   lessonId: string;
   title: string;
   type: string;
-  streamUrl: string | null;
+  hasVideo: boolean;
   posterUrl: string | null;
   articleBody: string | null;
 };
@@ -719,7 +719,7 @@ export async function publicGetFreePreviewVideos(
       id: true,
       title: true,
       type: true,
-      video: { select: { muxPlaybackId: true } },
+      video: { select: { lessonId: true } },
       article: { select: { body: true } },
     },
   });
@@ -730,16 +730,14 @@ export async function publicGetFreePreviewVideos(
     const lesson = byId.get(lessonId);
     if (!lesson) return [];
 
-    const playbackId = lesson.video?.muxPlaybackId ?? null;
+    const hasVideo = Boolean(lesson.video);
     return [
       {
         lessonId,
         title: lesson.title,
         type: lesson.type,
-        streamUrl: playbackId ? `https://stream.mux.com/${playbackId}.m3u8` : null,
-        posterUrl: playbackId
-          ? `https://image.mux.com/${playbackId}/thumbnail.jpg?width=1280&height=720&fit_mode=smartcrop`
-          : null,
+        hasVideo,
+        posterUrl: null,
         articleBody: lesson.article?.body?.trim() || null,
       },
     ];

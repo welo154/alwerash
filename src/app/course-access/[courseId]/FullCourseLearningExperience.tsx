@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { HlsPlayer } from "@/components/video/HlsPlayer";
+import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
 import { ProgressTracker } from "@/components/video/ProgressTracker";
-import { probeHlsDuration } from "@/components/video/probeHlsDuration";
 import { CourseBreadcrumb } from "@/app/course/[courseId]/CourseBreadcrumb";
 import { ActivityProgressMobileCard } from "@/components/home/ActivityProgressMobileCard";
 import { completeLessonAndGetProgress } from "./actions";
@@ -14,7 +13,7 @@ export type FullAccessLesson = {
   type: string;
   moduleId: string;
   moduleTitle: string;
-  streamUrl: string | null;
+  hasVideo: boolean;
   posterUrl: string | null;
   articleBody: string | null;
   description: string | null;
@@ -131,7 +130,7 @@ function isDemoLessonId(lessonId: string): boolean {
 }
 
 function isPlayableVideo(lesson: FullAccessLesson): boolean {
-  return isVideoLesson(lesson) && Boolean(lesson.streamUrl);
+  return isVideoLesson(lesson) && lesson.hasVideo;
 }
 
 function findFirstPlayableVideo(modules: FullAccessModule[]): FullAccessLesson | null {
@@ -472,7 +471,7 @@ function VideoLessonBlock({
 }) {
   const isPlaying = playingLessonId === lesson.id;
   const posterSrc = lesson.posterUrl || coverImage || null;
-  const hasStream = Boolean(lesson.streamUrl);
+  const hasStream = lesson.hasVideo;
 
   return (
     <article id={`lesson-${lesson.id}`} className="fcl-video-block">
@@ -512,7 +511,7 @@ function VideoLessonBlock({
       <div
         className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
       >
-        {isPlaying && hasStream && lesson.streamUrl ? (
+        {isPlaying && hasStream ? (
           <div className="h-full w-full">
             <ProgressTracker
               lessonId={lesson.id}
@@ -523,9 +522,9 @@ function VideoLessonBlock({
                 onVideoProgress(lesson.id, currentTime, duration);
               }}
             >
-              <HlsPlayer
+              <AuthorizedHlsPlayer
                 key={lesson.id}
-                src={lesson.streamUrl}
+                lessonId={lesson.id}
                 poster={lesson.posterUrl ?? undefined}
                 autoPlay
                 fill
@@ -720,29 +719,7 @@ export function FullCourseLearningExperience({
     );
   }, []);
 
-  // Prefetch durations so the clock label shows before the user presses play.
-  useEffect(() => {
-    if (!selectedModule) return;
-    let cancelled = false;
-
-    const videos = selectedModule.lessons.filter(
-      (lesson) => isVideoLesson(lesson) && lesson.streamUrl
-    );
-
-    videos.forEach((lesson) => {
-      const src = lesson.streamUrl;
-      if (!src) return;
-
-      void probeHlsDuration(src).then((duration) => {
-        if (cancelled || duration == null) return;
-        handleDuration(lesson.id, duration);
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedModule, handleDuration]);
+  // Durations are filled from the player after play starts (signed URLs are not prefetched).
 
   const handleVideoProgress = useCallback(
     (lessonId: string, currentTime: number, duration: number) => {

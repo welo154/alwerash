@@ -33,8 +33,17 @@ export function playbackUrl(playbackId: string, token: string) {
   return `https://stream.mux.com/${playbackId}.m3u8?token=${token}`;
 }
 
+/**
+ * Mux JWT expiration. Prefers MUX_SIGNED_PLAYBACK_TTL_SECONDS (e.g. 3600),
+ * else MUX_PLAYBACK_TOKEN_TTL (Mux duration string, default 1h).
+ */
 export function playbackTTL(): string {
-  return process.env.MUX_PLAYBACK_TOKEN_TTL ?? "2h";
+  const secondsRaw = process.env.MUX_SIGNED_PLAYBACK_TTL_SECONDS?.trim();
+  if (secondsRaw && /^\d+$/.test(secondsRaw)) {
+    const seconds = Number(secondsRaw);
+    if (seconds > 0) return `${seconds}s`;
+  }
+  return process.env.MUX_PLAYBACK_TOKEN_TTL ?? "1h";
 }
 
 export function uploadCorsOrigin(): string {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { HlsPlayer } from "@/components/video/HlsPlayer";
+import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
 import {
   CourseContentAccordion,
   type CourseAccordionModule,
@@ -12,7 +12,7 @@ export type CourseTrialLesson = {
   lessonId: string;
   title: string;
   type: string;
-  streamUrl: string | null;
+  hasVideo: boolean;
   posterUrl: string | null;
   articleBody: string | null;
 };
@@ -70,7 +70,7 @@ function PlayGlyph() {
 }
 
 function isVideoLesson(lesson: CourseTrialLesson): boolean {
-  return lesson.type.toUpperCase() === "VIDEO" && Boolean(lesson.streamUrl);
+  return lesson.type.toUpperCase() === "VIDEO" && lesson.hasVideo;
 }
 
 function isArticleLesson(lesson: CourseTrialLesson): boolean {
@@ -155,11 +155,11 @@ export function CoursePreviewExperience({
               </p>
             )}
           </div>
-        ) : isPlaying && showingVideo && activeLesson?.streamUrl ? (
+        ) : isPlaying && showingVideo && activeLesson?.hasVideo ? (
           <div className="h-full w-full">
-            <HlsPlayer
+            <AuthorizedHlsPlayer
               key={activeLesson.lessonId}
-              src={activeLesson.streamUrl}
+              lessonId={activeLesson.lessonId}
               poster={activeLesson.posterUrl ?? undefined}
               autoPlay
               fill
@@ -168,7 +168,7 @@ export function CoursePreviewExperience({
               onEnded={handleVideoEnded}
             />
           </div>
-        ) : activeLesson && activeLesson.type.toUpperCase() === "VIDEO" && !activeLesson.streamUrl ? (
+        ) : activeLesson && activeLesson.type.toUpperCase() === "VIDEO" && !activeLesson.hasVideo ? (
           <div className="flex h-full w-full items-center justify-center bg-[#E9E9E9] px-10 text-center">
             <p className="m-0 text-[20px] text-black/60" style={{ fontFamily }}>
               Video is not available for this lesson yet.

@@ -45,7 +45,6 @@ export async function middleware(req: NextRequest) {
   const isInstructorApi = pathname.startsWith("/api/instructor");
   const isMentorPath = pathname.startsWith("/mentor");
   const isMentorApi = pathname.startsWith("/api/mentor");
-  const isPlaybackApi = pathname.startsWith("/api/video/playback/");
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
@@ -123,13 +122,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect video playback API: require login
-  if (isPlaybackApi) {
-    if (!token?.sub) {
-      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-    }
-    return NextResponse.next();
-  }
+  // Playback tokens are authorized in the route handler (guests may play free previews).
 
   // Instructor portal + APIs: INSTRUCTOR or ADMIN
   if (isInstructorPath || isInstructorApi) {
