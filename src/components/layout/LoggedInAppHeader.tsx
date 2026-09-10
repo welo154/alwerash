@@ -39,7 +39,7 @@ export function LoggedInAppHeader({
         }
         aria-label={isGuest ? "Site header" : "Logged in header"}
       >
-        <MobileSiteNavBar homeHref={homeHref} user={user} />
+        <MobileSiteNavBar homeHref={homeHref} />
       </header>
 
       <header

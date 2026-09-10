@@ -26,13 +26,13 @@ const HERO_MOSAIC_FRAME = { width: 497, height: 597 } as const;
 const mosaicAnim = (name: string) => `${name} 8000ms linear infinite`;
 
 const HERO_SHELL_MOBILE_PATH =
-  "M320 0C324.564 5.83965e-07 324.08 4 319.516 4H319C314.582 4 311 7.58172 311 12V34C311 38.4183 314.582 42 319 42H358.341C370.516 42 382 49.8245 382 62V739C382 773.242 354.242 801 320 801H62C27.7584 801 6.12127e-07 773.242 0 739V62C2.17657e-07 49.8245 11.4839 42 23.6594 42H102.338C113.107 42 121.838 33.2696 121.838 22.5V13.7569C121.838 7.81601 117.022 3 111.081 3H62.3134C58.8228 3 58.5094 1.32994e-07 62 0H320Z";
+  "M320 0C324.564 5.83965e-07 324.08 4 319.516 4H296C291.582 4 288 7.58172 288 12V34C288 38.4183 291.582 42 296 42H358.341C370.516 42 382 49.8245 382 62V739C382 773.242 354.242 801 320 801H62C27.7584 801 6.12127e-07 773.242 0 739V62C2.17657e-07 49.8245 11.4839 42 23.6594 42H102.338C113.107 42 121.838 33.2696 121.838 22.5V13.7569C121.838 7.81601 117.022 3 111.081 3H62.3134C58.8228 3 58.5094 1.32994e-07 62 0H320Z";
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
   return (
     <section className={`${pangeaVar.className} bg-white px-0 pb-0 pt-[37px] sm:px-6 lg:px-8 lg:pt-[32px]`}>
       {/* Mobile shell — 382px centered in ~393 viewport */}
-      <div className="relative mx-auto w-full max-w-[393px] lg:hidden">
+      <div className="relative w-full lg:hidden">
         <div
           className="relative mx-auto overflow-visible"
           style={{ width: HERO_SHELL_MOBILE.width, height: HERO_SHELL_MOBILE.height }}
@@ -50,6 +50,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
           </svg>
 
           <MobileSiteNavLogo homeHref="/" />
+          <MobileSiteNavActions />
 
           {/* Figma 1181:6295 — 110px below green SVG top */}
           <div
@@ -126,8 +127,6 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
             </div>
           </div>
         </div>
-
-        <MobileSiteNavActions />
       </div>
 
       {/* Desktop shell */}

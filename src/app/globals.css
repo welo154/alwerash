@@ -89,20 +89,20 @@ label:has(input[type="radio"]) {
   text-align: left;
 }
 
-html:has(.auth-page),
-body:has(.auth-page) {
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
-  scrollbar-width: none;
-}
-
-html:has(.auth-page)::-webkit-scrollbar,
-body:has(.auth-page)::-webkit-scrollbar {
-  display: none;
-}
-
 @media (min-width: 1024px) {
+  html:has(.auth-page),
+  body:has(.auth-page) {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    scrollbar-width: none;
+  }
+
+  html:has(.auth-page)::-webkit-scrollbar,
+  body:has(.auth-page)::-webkit-scrollbar {
+    display: none;
+  }
+
   .auth-page {
     box-sizing: border-box;
     height: 100%;
@@ -115,24 +115,15 @@ body:has(.auth-page)::-webkit-scrollbar {
 }
 
 .auth-green-panel {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .auth-green-panel-scroll {
-  height: 100%;
+  height: auto;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.auth-green-panel-scroll::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
+  overflow: visible;
+  overscroll-behavior: auto;
+  touch-action: pan-y;
 }
 
 @media (min-width: 1024px) {
@@ -141,6 +132,23 @@ body:has(.auth-page)::-webkit-scrollbar {
     height: 676px !important;
     max-height: 676px !important;
     overflow: hidden;
+  }
+
+  .auth-green-panel-scroll {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: auto;
+  }
+
+  .auth-green-panel-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 }
 

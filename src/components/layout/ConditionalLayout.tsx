@@ -35,14 +35,14 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
       <div
         className={
           lockViewport
-            ? "flex h-dvh max-h-dvh min-w-0 flex-col overflow-hidden bg-white"
+            ? "flex min-h-dvh min-w-0 flex-col overflow-x-hidden overflow-y-auto bg-white lg:h-dvh lg:max-h-dvh lg:overflow-hidden"
             : "flex min-h-screen min-w-0 flex-col bg-white"
         }
       >
         <main
           className={
             lockViewport
-              ? "mx-auto h-full min-h-0 w-full min-w-0 max-w-[1600px] overflow-hidden"
+              ? "mx-auto min-h-0 w-full min-w-0 max-w-[1600px] lg:h-full lg:overflow-hidden"
               : "mx-auto w-full max-w-[1440px] min-w-0 flex-1"
           }
         >

@@ -36,7 +36,11 @@ export function AuthGreenPanel({
     const el = ref.current;
     if (!el) return;
 
+    const desktop = window.matchMedia("(min-width: 1024px)");
+
     const onWheel = (event: WheelEvent) => {
+      if (!desktop.matches) return;
+
       pausedRef.current = true;
       const max = el.scrollHeight - el.clientHeight;
       if (max <= 0) return;
@@ -60,6 +64,9 @@ export function AuthGreenPanel({
 
     const el = ref.current;
     if (!el) return;
+
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    if (!desktop.matches) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
@@ -97,11 +104,10 @@ export function AuthGreenPanel({
     <div className={className} style={style}>
       <div
         ref={ref}
-        className="auth-green-panel-scroll h-full min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain"
+        className="auth-green-panel-scroll min-h-0 max-lg:h-auto max-lg:overflow-visible max-lg:overscroll-auto max-lg:touch-pan-y lg:h-full lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
         onMouseEnter={pause}
         onMouseLeave={resume}
         onPointerDown={pause}
-        onTouchStart={pause}
         onFocusCapture={pause}
       >
         {innerClassName ? <div className={innerClassName}>{children}</div> : children}

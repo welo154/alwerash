@@ -135,8 +135,8 @@ export function AuthPageShell({
   const mobileChrome = Boolean(mobileLayout);
   const mobileGreenHeightClass =
     mobileLayout === "register"
-      ? "max-lg:max-h-[902px]"
-      : "max-lg:max-h-[534px]";
+      ? "max-lg:h-[902px] max-lg:shrink-0"
+      : "max-lg:h-[534px] max-lg:shrink-0";
   const desktopGreenClass = "lg:mt-0 lg:h-[676px] lg:w-[790px] lg:shrink-0 lg:p-0";
   const desktopInnerPadClass =
     mobileLayout === "login"
@@ -147,14 +147,16 @@ export function AuthPageShell({
     <div
       className={`${pangeaVar.className} auth-page h-full bg-white ${
         mobileChrome
-          ? "max-lg:flex max-lg:h-full max-lg:flex-col max-lg:items-center max-lg:overflow-hidden max-lg:pt-[56px] max-lg:px-0"
+          ? "max-lg:flex max-lg:min-h-dvh max-lg:flex-col max-lg:items-center max-lg:overflow-visible max-lg:pt-[56px] max-lg:px-0 lg:h-full"
           : ""
       }`}
       style={mobileChrome ? undefined : { padding: AUTH_PAGE_PADDING }}
     >
       <div
-        className={`mx-auto h-full w-full ${
-          mobileChrome ? "max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:items-center" : "lg:flex lg:h-full lg:min-h-0 lg:items-center"
+        className={`mx-auto w-full ${
+          mobileChrome
+            ? "max-lg:flex max-lg:flex-col max-lg:items-center lg:h-full lg:min-h-0 lg:flex lg:items-center"
+            : "lg:flex lg:h-full lg:min-h-0 lg:items-center"
         }`}
         style={{ maxWidth: AUTH_MAX_WIDTH }}
       >
@@ -162,7 +164,7 @@ export function AuthPageShell({
 
         <div
           className={`flex w-full items-center justify-between ${
-            mobileChrome ? "max-lg:flex-1 max-lg:flex-col max-lg:justify-start" : ""
+            mobileChrome ? "max-lg:flex-none max-lg:flex-col max-lg:justify-start" : ""
           }`}
         >
           <div className={mobileChrome ? "hidden lg:block" : ""}>
@@ -172,7 +174,7 @@ export function AuthPageShell({
             autoScroll={mobileLayout === "register"}
             className={`box-border ${
               mobileChrome
-                ? `auth-green-panel max-lg:mt-[22px] max-lg:min-h-0 max-lg:flex-1 max-lg:w-[382px] max-lg:max-w-full max-lg:p-0 ${mobileGreenHeightClass} ${desktopGreenClass}`
+                ? `auth-green-panel max-lg:mt-[22px] max-lg:w-[382px] max-lg:max-w-full max-lg:p-0 ${mobileGreenHeightClass} ${desktopGreenClass}`
                 : ""
             }`}
             innerClassName={mobileChrome ? desktopInnerPadClass : undefined}

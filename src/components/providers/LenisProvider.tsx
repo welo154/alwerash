@@ -14,6 +14,14 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    if (
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/register/")
+    ) {
+      return;
+    }
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -46,7 +54,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [pathname]);
 
   // Reset scroll on App Router navigations (keeps Lenis in sync; skip hash targets)
   useEffect(() => {

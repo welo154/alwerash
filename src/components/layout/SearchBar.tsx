@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 type SearchResult = {
   tracks: { id: string; title: string; slug: string }[];
@@ -37,19 +38,28 @@ function ArrowRightIcon({ className }: { className?: string }) {
   );
 }
 
-export type SearchBarVariant = "default" | "toolbar";
+export type SearchBarVariant = "default" | "toolbar" | "mobileHeader";
 
 type SearchBarProps = {
   /** Green logged-in header: white field + circular arrow, no magnifier */
   variant?: SearchBarVariant;
+  autoFocus?: boolean;
+  expanded?: boolean;
+  outlined?: boolean;
 };
 
-export function SearchBar({ variant = "default" }: SearchBarProps) {
+export function SearchBar({
+  variant = "default",
+  autoFocus = false,
+  expanded = false,
+  outlined = false,
+}: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const requestIdRef = useRef(0);
 
   const fetchResults = useCallback(async (q: string) => {
@@ -89,6 +99,10 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
   }, [query, fetchResults]);
 
   useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
+
+  useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -108,7 +122,106 @@ export function SearchBar({ variant = "default" }: SearchBarProps) {
   const hasResults = results && (results.tracks.length > 0 || results.courses.length > 0);
   const showDropdown = open && query.trim() !== "";
 
-  const inputId = variant === "toolbar" ? "header-search-toolbar" : "header-search";
+  const inputId =
+    variant === "toolbar"
+      ? "header-search-toolbar"
+      : variant === "mobileHeader"
+        ? "header-search-mobile"
+        : "header-search";
+
+  if (variant === "mobileHeader") {
+    const mobileBarWidth = outlined ? 192 : 206;
+    return (
+      <div
+        ref={containerRef}
+        className="relative h-[38px]"
+        style={{ width: mobileBarWidth, pointerEvents: expanded ? "auto" : "none" }}
+      >
+        <label htmlFor={inputId} className="sr-only">
+          Search for courses
+        </label>
+        <div
+          className="flex h-[38px] shrink-0 items-center"
+          style={{
+            width: mobileBarWidth,
+            borderRadius: "8px 8px 8px 18px",
+            border: outlined ? "0.3px solid #000" : "0 solid #000",
+            background: "#FFF",
+            padding: "12px",
+          }}
+        >
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="search"
+            placeholder="Search for courses"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => query.trim() && setOpen(true)}
+            autoFocus={autoFocus}
+            tabIndex={expanded ? 0 : -1}
+            className="min-w-0 flex-1 bg-transparent text-black outline-none placeholder:text-black/60"
+            style={{
+              flex: "1 0 0",
+              color: "#000",
+              fontFamily: pangeaFontFamily,
+              fontSize: 14,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "19.6px",
+            }}
+            aria-label="Search for courses"
+            role="combobox"
+            aria-expanded={showDropdown}
+            aria-controls="search-results-listbox-mobile"
+            aria-haspopup="listbox"
+            autoComplete="off"
+          />
+        </div>
+        {showDropdown && expanded ? (
+          <div
+            id="search-results-listbox-mobile"
+            role="listbox"
+            className="absolute left-0 right-0 top-full z-[100] mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
+          >
+            {!results ? (
+              <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-slate-500">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
+                Searching...
+              </div>
+            ) : !hasResults ? (
+              <div className="px-3 py-6 text-center text-sm text-slate-500">
+                No tracks or courses found for &quot;{query.trim()}&quot;
+              </div>
+            ) : (
+              <div className="max-h-[min(50vh,280px)] overflow-y-auto py-1">
+                {results.tracks.map((track) => (
+                  <Link
+                    key={track.id}
+                    href={`/tracks/${track.slug}`}
+                    className="block px-3 py-2 text-sm text-slate-800 hover:bg-blue-50"
+                    onClick={() => setOpen(false)}
+                  >
+                    {track.title}
+                  </Link>
+                ))}
+                {results.courses.map((course) => (
+                  <Link
+                    key={course.id}
+                    href={`/course/${course.id}`}
+                    className="block px-3 py-2 text-sm text-slate-800 hover:bg-blue-50"
+                    onClick={() => setOpen(false)}
+                  >
+                    {course.title}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   if (variant === "toolbar") {
     return (
