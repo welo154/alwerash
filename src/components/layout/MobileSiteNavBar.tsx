@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { MobileNavDrawer } from "./MobileNavDrawer";
 
 const MOBILE_LOGO = { width: 160, height: 47 } as const;
 const MOBILE_SHELL_WIDTH = 382;
@@ -32,7 +34,13 @@ export function MobileSiteNavLogo({ homeHref = "/" }: { homeHref?: string }) {
   );
 }
 
-export function MobileSiteNavActions() {
+export function MobileSiteNavActions({
+  onOpenMenu,
+  menuOpen,
+}: {
+  onOpenMenu: () => void;
+  menuOpen: boolean;
+}) {
   return (
     <div className="absolute right-[22px] top-[14px] z-40 flex items-center">
       <button type="button" aria-label="Search" className="flex h-[19px] w-[19px] items-center justify-center">
@@ -56,6 +64,9 @@ export function MobileSiteNavActions() {
       <button
         type="button"
         aria-label="Open menu"
+        aria-expanded={menuOpen}
+        aria-controls="mobile-nav-drawer"
+        onClick={onOpenMenu}
         className="ml-[8px] flex h-[15px] w-[23px] items-center justify-center"
       >
         <svg
@@ -83,16 +94,21 @@ export function MobileSiteNavActions() {
 export function MobileSiteNavBar({
   homeHref = "/",
   className,
+  user,
 }: {
   homeHref?: string;
   className?: string;
+  user?: { name?: string | null; email?: string | null } | null;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className={`relative mx-auto w-full max-w-[393px] ${className ?? ""}`}>
       <div className="relative mx-auto" style={{ width: MOBILE_SHELL_WIDTH, height: MOBILE_LOGO.height }}>
         <MobileSiteNavLogo homeHref={homeHref} />
       </div>
-      <MobileSiteNavActions />
+      <MobileSiteNavActions onOpenMenu={() => setMenuOpen(true)} menuOpen={menuOpen} />
+      <MobileNavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} user={user ?? null} />
     </div>
   );
 }

@@ -57,7 +57,7 @@ export function LoggedInHome({
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      <section className="relative bg-white lg:pt-[58px]" style={{ fontFamily: pangeaFont }}>
+      <section className="relative bg-white lg:pt-[60px]" style={{ fontFamily: pangeaFont }}>
         <div
           className="flex items-center gap-[10px] pl-[30px] lg:hidden"
           style={{ paddingTop: MOBILE_USER_INFO_TOP_PX - MOBILE_HEADER_HEIGHT_PX }}

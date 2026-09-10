@@ -77,7 +77,10 @@ export function TrackActivitySection({
           className="overflow-visible!"
         >
           <SwiperSlide className="w-[315px]!">
-            <ActivityProgressMobileCard progressPercent={learningProgressPercent} />
+            <ActivityProgressMobileCard
+              progressPercent={learningProgressPercent}
+              showTrackTicks
+            />
           </SwiperSlide>
           <SwiperSlide className="w-[315px]!">
             <WeeklyActivityBarCard

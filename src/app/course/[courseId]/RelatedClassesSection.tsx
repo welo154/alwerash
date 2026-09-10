@@ -40,10 +40,10 @@ function ContinueCourseChevronIcon() {
 }
 
 function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continueHref, fontFamily }: RelatedCourseCard & { fontFamily: string }) {
-  const cardBase = "box-border w-full max-w-[347px] rounded-[50px] border border-[var(--Black,#000)]";
+  const cardBase = "box-border w-full rounded-[50px] border border-[var(--Black,#000)]";
 
   return (
-    <div className="relative w-[347px] max-w-full shrink-0">
+    <div className="relative w-[315px] max-w-full shrink-0 lg:w-[347px]">
       <div
         className={`relative z-1 ${cardBase}`}
         style={{
@@ -109,22 +109,15 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
   if (cards.length === 0) return null;
 
   return (
-    <section className="mt-[70px] w-full">
-      <div className="flex items-center">
+    <section className="mt-[70px] w-full max-lg:mt-[65px]">
+      <div className="flex items-center max-lg:pl-[30px]">
         <h2
-          className="m-0"
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily,
-            fontSize: "48px",
-            fontStyle: "italic",
-            fontWeight: 600,
-            lineHeight: "120%",
-          }}
+          className="m-0 text-[24px] font-semibold italic leading-[120%] text-[var(--Black,#000)] lg:text-[48px]"
+          style={{ fontFamily }}
         >
-          RELATED <span style={{ fontStyle: "normal", fontWeight: 400 }}>CLASSES</span>
+          RELATED <span className="font-normal not-italic">CLASSES</span>
         </h2>
-        <svg className="ml-[27px]" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
+        <svg className="ml-[27px] max-lg:hidden" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
           <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
           <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
           <path
@@ -137,10 +130,15 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
         </svg>
       </div>
 
-      <div className="relative left-1/2 mt-[50px] w-screen -translate-x-1/2 overflow-hidden pl-[55px] pr-[60px]">
+      <div className="relative mt-[35px] max-lg:pl-[30px] lg:left-1/2 lg:mt-[50px] lg:w-screen lg:max-w-[100vw] lg:-translate-x-1/2 lg:overflow-hidden lg:pl-[55px] lg:pr-[60px]">
         <Swiper
           slidesPerView="auto"
-          spaceBetween={30}
+          spaceBetween={20}
+          breakpoints={{
+            1024: {
+              spaceBetween: 30,
+            },
+          }}
           slidesPerGroup={1}
           speed={450}
           grabCursor
@@ -162,7 +160,7 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
           }}
         >
           {cards.map((card) => (
-            <SwiperSlide key={card.continueHref} className="w-[347px]!">
+            <SwiperSlide key={card.continueHref} className="w-[315px]! lg:w-[347px]!">
               <CourseStackCard {...card} fontFamily={fontFamily} />
             </SwiperSlide>
           ))}
@@ -173,7 +171,7 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
           aria-label="Previous related classes"
           disabled={atBeginning}
           onClick={() => swiperRef.current?.slidePrev(450)}
-          className="absolute left-[8px] top-1/2 z-20 -translate-y-1/2 disabled:opacity-40"
+          className="absolute left-[8px] top-1/2 z-20 hidden -translate-y-1/2 disabled:opacity-40 lg:block"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden className="scale-x-[-1]">
             <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="white" />
@@ -193,7 +191,7 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
           aria-label="Next related classes"
           disabled={atEnd}
           onClick={() => swiperRef.current?.slideNext(450)}
-          className="absolute right-[8px] top-1/2 z-20 -translate-y-1/2 disabled:opacity-40"
+          className="absolute right-[8px] top-1/2 z-20 hidden -translate-y-1/2 disabled:opacity-40 lg:block"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
             <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="white" />

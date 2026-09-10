@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+import { signOutToHome } from "@/lib/auth/signOutToHome";
 import { useRef, useEffect, useState, type ReactNode } from "react";
 import { useToast } from "@/components/Toast";
 
@@ -215,7 +215,7 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
               role="menuitem"
               onClick={() => {
                 setOpen(false);
-                signOut({ callbackUrl: "/?toast=Signed+out" });
+                void signOutToHome();
               }}
               className="flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
               style={{ fontFamily: pangeaFont }}

@@ -2,33 +2,33 @@
 
 ## What’s in place
 
-- **Config** (`config.ts`): reads `MUX_*` env vars; API and optional webhook/signed playback.
-- **Service** (`mux.service.ts`):
-  - `createDirectUpload(lessonId)` – create a direct upload URL and pass `lessonId` as passthrough for the webhook.
-  - `getPlaybackIdForAsset(assetId)` – get HLS playback ID for an asset.
-  - `linkVideoToLesson(lessonId, muxAssetId, muxPlaybackId)` – create/update `LessonVideo` for a lesson.
-- **Webhook** `POST /api/webhooks/mux`: on `video.asset.ready`, creates `LessonVideo` using passthrough `lessonId` and the asset’s playback ID.
-- **Admin upload** `POST /api/admin/lessons/[lessonId]/upload`: returns `{ uploadId, url }` for direct upload. Used by `MuxUploadButton` on the module page.
+- **Config** (`config.ts`): reads `MUX_*` env vars.
+- **Lesson uploads** (`mux.service.ts` `createDirectUpload`): Mux direct upload with **signed** playback policy. Used by `POST /api/admin/lessons/[lessonId]/upload`.
+- **Course intro uploads**: still **public** (catalog thumbnails via `image.mux.com`, not paid lesson content).
+- **Signed playback** (`GET /api/video/playback/[lessonId]`): authz in the route handler, then a short-lived Mux JWT. Learner/admin players fetch this URL instead of building `stream.mux.com/{id}.m3u8`.
 
-## Flow
+## Lesson flow
 
-1. Admin opens a module, sees VIDEO lessons. For lessons without a video, “Upload video” is shown.
-2. Admin clicks “Upload video” and selects a file. Client calls `POST /api/admin/lessons/:lessonId/upload`, gets `url`, then `PUT`s the file to that URL (direct to Mux).
-3. Mux processes the file and sends a `video.asset.ready` webhook to your app.
-4. Webhook handler creates `LessonVideo` with `muxAssetId` and `muxPlaybackId`.
-5. Learn page streams via `https://stream.mux.com/{playbackId}.m3u8` (public playback).
+1. Admin uploads a VIDEO lesson → Mux creates a **signed** asset.
+2. Webhook / sync stores `LessonVideo.muxAssetId` and `muxPlaybackId` (prefers a signed playback ID).
+3. Player requests `/api/video/playback/{lessonId}`.
+4. Server checks access (free first-module preview **or** subscriber/admin/instructor) and returns `playbackUrl` with `?token=`.
+5. Token expires (`MUX_SIGNED_PLAYBACK_TTL_SECONDS` or `MUX_PLAYBACK_TOKEN_TTL`).
 
-## Webhook URL to set in Mux
+## Existing public assets
 
-In [Mux Dashboard → Settings → Webhooks](https://dashboard.mux.com/settings/webhooks), add:
+Changing upload code does **not** convert assets already created as public. Run:
 
-- **URL**: `https://your-domain.com/api/webhooks/mux`  
-  Local: use a tunnel (e.g. ngrok) and put that URL in Mux.
-- **Events**: enable `video.asset.ready`.
-- Copy the **Signing secret** into `.env` as `MUX_WEBHOOK_SECRET`.
+```bash
+npx tsx scripts/migrate-mux-lesson-playback-to-signed.ts
+```
 
-Until the webhook is configured, uploads will complete to Mux but `LessonVideo` won’t be created automatically; you can still create/link videos via API or DB if needed.
+See that script’s comments for Mux dashboard fallback steps.
 
-## Optional: signed playback
+## Webhook URL
 
-If you set `MUX_SIGNING_KEY_ID` and `MUX_PRIVATE_KEY`, you can add an API that returns a signed playback token (JWT) and use it with Mux signed playback so streams aren’t public. The current learn page uses public HLS URLs.
+In Mux Dashboard → Settings → Webhooks:
+
+- **URL**: `https://your-domain.com/api/webhooks/mux`
+- **Events**: `video.asset.ready` (and upload events if used)
+- **Signing secret** → `MUX_WEBHOOK_SECRET`

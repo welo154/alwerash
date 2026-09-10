@@ -265,7 +265,7 @@ export function SubscriptionPricingCard({
   );
 }
 
-const PRICING_FEATURES = [
+export const PRICING_FEATURES = [
   "Thousands of creative classes. Beginner to pro.",
   "Curated, sequential classes to help you meet a goal.",
   "Book time for personalized feedback with a teacher.",

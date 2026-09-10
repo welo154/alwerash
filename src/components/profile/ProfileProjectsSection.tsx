@@ -1,4 +1,5 @@
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { MobileStudentRatingCard } from "@/components/students/StudentsRatingWorkSection";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -110,11 +111,26 @@ export function ProfileProjectsSection({
 
   return (
     <div
-      className={`pl-[120px] pr-[120px] ${className}`.trim()}
+      className={`max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px] lg:pr-[120px] ${className}`.trim()}
       aria-label="Projects"
     >
       <h2
-        className="m-0"
+        className="m-0 uppercase lg:hidden"
+        style={{
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 24,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+        }}
+      >
+        YOUR{" "}
+        <span style={{ fontStyle: "italic", fontWeight: 700 }}>PROJECTS</span>
+      </h2>
+
+      <h2
+        className="m-0 hidden uppercase lg:block"
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -128,8 +144,14 @@ export function ProfileProjectsSection({
         <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
       </h2>
 
+      <div className="mt-[27px] flex flex-col items-center gap-[30px] pr-[30px] lg:hidden">
+        {visible.map((card, idx) => (
+          <MobileStudentRatingCard key={`${card.name}-${idx}`} card={card} />
+        ))}
+      </div>
+
       <div
-        className="mt-[45px] flex flex-nowrap items-start"
+        className="mt-[45px] hidden flex-nowrap items-start lg:flex"
         style={{ gap: 31 }}
       >
         {visible.map((card, idx) => (

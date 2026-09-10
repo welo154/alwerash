@@ -10,12 +10,60 @@ const ARC_PATH =
 
 const ARC_VIEW_WIDTH = 286;
 const ARC_VIEW_HEIGHT = 230;
+const ARC_CENTER_X = 143;
+const ARC_CENTER_Y = 142.7;
+const ARC_MID_RADIUS = 122.15;
+const ARC_STROKE_WIDTH = 41.4;
+const TICK_LENGTH = 13.076;
+const TICK_START_DEG = 146.1;
+const TICK_SWEEP_DEG = 247.8;
+const TICK_END_DEG = TICK_START_DEG + TICK_SWEEP_DEG;
 
-function ActivityProgressArc({ progressPercent }: { progressPercent: number }) {
+function roundCoord(n: number) {
+  return n.toFixed(4);
+}
+
+function arcPoint(deg: number) {
+  const rad = (deg * Math.PI) / 180;
+  return {
+    x: ARC_CENTER_X + ARC_MID_RADIUS * Math.cos(rad),
+    y: ARC_CENTER_Y + ARC_MID_RADIUS * Math.sin(rad),
+  };
+}
+
+const ARC_START = arcPoint(TICK_START_DEG);
+const ARC_END = arcPoint(TICK_END_DEG);
+const ARC_CENTERLINE = `M ${roundCoord(ARC_START.x)} ${roundCoord(ARC_START.y)} A ${ARC_MID_RADIUS} ${ARC_MID_RADIUS} 0 1 1 ${roundCoord(ARC_END.x)} ${roundCoord(ARC_END.y)}`;
+
+function arcTickLine(t: number) {
+  const deg = TICK_START_DEG + TICK_SWEEP_DEG * t;
+  const rad = (deg * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const half = TICK_LENGTH / 2;
+  const inner = ARC_MID_RADIUS - half;
+  const outer = ARC_MID_RADIUS + half;
+  return {
+    x1: roundCoord(ARC_CENTER_X + inner * cos),
+    y1: roundCoord(ARC_CENTER_Y + inner * sin),
+    x2: roundCoord(ARC_CENTER_X + outer * cos),
+    y2: roundCoord(ARC_CENTER_Y + outer * sin),
+  };
+}
+
+function ActivityProgressArc({
+  progressPercent,
+  showTrackTicks = false,
+}: {
+  progressPercent: number;
+  showTrackTicks?: boolean;
+}) {
   const clipId = useId();
+  const trackClipId = useId();
   const gradientId = useId();
   const clamped = Math.min(100, Math.max(0, progressPercent));
   const fillWidth = (clamped / 100) * ARC_VIEW_WIDTH;
+  const ticks = Array.from({ length: 9 }, (_, index) => arcTickLine((index + 1) / 10));
 
   return (
     <svg
@@ -28,31 +76,73 @@ function ActivityProgressArc({ progressPercent }: { progressPercent: number }) {
       aria-hidden
     >
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="286" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="var(--Blue, #66E0F2)" />
-          <stop offset="100%" stopColor="var(--Bright-Green, #89F496)" />
+        <linearGradient
+          id={gradientId}
+          x1="0"
+          y1="119"
+          x2="286"
+          y2="119"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#66E0F2" />
+          <stop offset="1" stopColor="#89F496" />
         </linearGradient>
         <clipPath id={clipId}>
           <rect x={0} y={0} width={fillWidth} height={ARC_VIEW_HEIGHT} />
         </clipPath>
+        <clipPath id={trackClipId}>
+          <path d={ARC_PATH} />
+        </clipPath>
       </defs>
       <path d={ARC_PATH} fill="#FFF" stroke="#000" strokeWidth={0.2} />
-      <path
-        d={ARC_PATH}
-        fill={`url(#${gradientId})`}
-        stroke="#000"
-        strokeWidth={0.2}
-        clipPath={`url(#${clipId})`}
-      />
+      {showTrackTicks ? (
+        clamped > 0 ? (
+          <path
+            d={ARC_CENTERLINE}
+            fill="none"
+            stroke={`url(#${gradientId})`}
+            strokeWidth={ARC_STROKE_WIDTH}
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray={`${clamped} 100`}
+            clipPath={`url(#${trackClipId})`}
+          />
+        ) : null
+      ) : (
+        <path
+          d={ARC_PATH}
+          fill={`url(#${gradientId})`}
+          stroke="#000"
+          strokeWidth={0.2}
+          clipPath={`url(#${clipId})`}
+        />
+      )}
+      {showTrackTicks
+        ? ticks.map((tick) => (
+            <line
+              key={`${tick.x1}-${tick.y1}`}
+              x1={tick.x1}
+              y1={tick.y1}
+              x2={tick.x2}
+              y2={tick.y2}
+              stroke="#000"
+              strokeWidth={0.2}
+            />
+          ))
+        : null}
     </svg>
   );
 }
 
 type Props = {
   progressPercent: number;
+  showTrackTicks?: boolean;
 };
 
-export function ActivityProgressMobileCard({ progressPercent }: Props) {
+export function ActivityProgressMobileCard({
+  progressPercent,
+  showTrackTicks = false,
+}: Props) {
   const displayPercent = Math.min(100, Math.max(0, Math.round(progressPercent)));
 
   return (
@@ -62,7 +152,10 @@ export function ActivityProgressMobileCard({ progressPercent }: Props) {
       aria-label={`Learning progress ${displayPercent} percent`}
     >
       <div className="absolute left-1/2 top-[21px] -translate-x-1/2">
-        <ActivityProgressArc progressPercent={displayPercent} />
+        <ActivityProgressArc
+          progressPercent={displayPercent}
+          showTrackTicks={showTrackTicks}
+        />
       </div>
 
       <p

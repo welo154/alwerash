@@ -29,7 +29,8 @@
     "scripts:import-motion": "tsx scripts/import-motion.ts",
     "scripts:import-catalog-tracks-4-17": "tsx scripts/import-catalog-tracks-4-17.ts",
     "scripts:apply-catalog-covers": "tsx scripts/apply-catalog-covers.ts",
-    "scripts:mark-popular-class-tracks": "tsx scripts/mark-popular-class-tracks.ts"
+    "scripts:mark-popular-class-tracks": "tsx scripts/mark-popular-class-tracks.ts",
+    "scripts:migrate-mux-signed-playback": "tsx scripts/migrate-mux-lesson-playback-to-signed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2",

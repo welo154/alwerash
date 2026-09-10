@@ -66,7 +66,7 @@ export default async function ProfilePage({
   ]);
 
   return (
-    <div className="relative w-full" style={{ paddingTop: 51 }}>
+    <div className="profile-page relative w-full max-lg:pt-0 lg:pt-[51px]">
       <ProfileHeader
         photoSrc="/profile/profile-photo.png"
         initialName={dbName}

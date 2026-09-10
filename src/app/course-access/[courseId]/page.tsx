@@ -55,7 +55,7 @@ function withTestTextLessons(
       type: "INTRO",
       moduleId: first.id,
       moduleTitle: first.title,
-      streamUrl: null,
+      hasVideo: false,
       posterUrl: null,
       articleBody: body,
       description: null,
@@ -69,7 +69,7 @@ function withTestTextLessons(
       type: "ARTICLE",
       moduleId: first.id,
       moduleTitle: first.title,
-      streamUrl: null,
+      hasVideo: false,
       posterUrl: null,
       articleBody: body,
       description: null,
@@ -108,22 +108,17 @@ export default async function PrivateCoursePage({
   const modulesBase: FullAccessModule[] = course.modules.map((module) => ({
     id: module.id,
     title: module.title,
-    lessons: module.lessons.map((lesson) => {
-      const playbackId = lesson.video?.muxPlaybackId ?? null;
-      return {
-        id: lesson.id,
-        title: lesson.title,
-        type: lesson.type,
-        moduleId: module.id,
-        moduleTitle: module.title,
-        streamUrl: playbackId ? `https://stream.mux.com/${playbackId}.m3u8` : null,
-        posterUrl: playbackId
-          ? `https://image.mux.com/${playbackId}/thumbnail.jpg?width=1280&height=720&fit_mode=smartcrop`
-          : null,
-        articleBody: articleBodies.get(lesson.id) ?? null,
-        description: course.summary?.trim() || null,
-      };
-    }),
+    lessons: module.lessons.map((lesson) => ({
+      id: lesson.id,
+      title: lesson.title,
+      type: lesson.type,
+      moduleId: module.id,
+      moduleTitle: module.title,
+      hasVideo: Boolean(lesson.video),
+      posterUrl: course.coverImage,
+      articleBody: articleBodies.get(lesson.id) ?? null,
+      description: course.summary?.trim() || null,
+    })),
   }));
 
   const modules = withTestTextLessons(modulesBase, course.summary);

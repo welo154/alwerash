@@ -5,6 +5,7 @@
 import Mux from "@mux/mux-node";
 import { prisma } from "@/server/db/prisma";
 import { getMuxConfigFresh, isMuxApiConfigured } from "./config";
+import { pickMuxPlaybackId } from "./playback-id";
 
 let muxClient: Mux | null = null;
 
@@ -36,7 +37,7 @@ export async function createDirectUpload(lessonId: string): Promise<CreateDirect
   const upload = await mux.video.uploads.create({
     cors_origin: config.uploadCorsOrigin,
     new_asset_settings: {
-      playback_policy: ["public"],
+      playback_policy: ["signed"],
       passthrough: lessonId,
     },
   });
@@ -66,9 +67,7 @@ export async function createDirectUpload(lessonId: string): Promise<CreateDirect
 export async function getPlaybackIdForAsset(assetId: string): Promise<string | null> {
   const mux = getMux();
   const asset = await mux.video.assets.retrieve(assetId);
-  const playbackIds = asset?.playback_ids;
-  if (!playbackIds?.length) return null;
-  return playbackIds[0].id ?? null;
+  return pickMuxPlaybackId(asset?.playback_ids);
 }
 
 /**

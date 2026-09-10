@@ -31,10 +31,10 @@ function AuthLogoBlock() {
 function AuthHeadlineBlock() {
   return (
     <p
-      className="m-0 w-[430px] max-w-full text-black"
+      className="m-0 w-[415px] max-w-full text-black"
       style={{
         fontFamily: pangeaFont,
-        fontSize: 48,
+        fontSize: 36,
         fontStyle: "normal",
         fontWeight: 400,
         lineHeight: "120%",
@@ -45,7 +45,7 @@ function AuthHeadlineBlock() {
         style={{
           color: "#000",
           fontFamily: pangeaFont,
-          fontSize: 48,
+          fontSize: 36,
           fontStyle: "italic",
           fontWeight: 700,
           lineHeight: "120%",

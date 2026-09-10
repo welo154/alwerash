@@ -1,9 +1,8 @@
-// file: src/app/lessons/[lessonId]/page.tsx
 import { requireSubscription } from "@/server/subscription/require-subscription";
-import { getSignedPlaybackForLesson } from "@/server/video/video.service";
 import { getLessonProgress } from "@/server/learning/progress.service";
-import { HlsPlayer } from "@/components/video/HlsPlayer";
-import { WatermarkOverlay } from "@/components/video/WatermarkOverlay";
+import { prisma } from "@/server/db/prisma";
+import { notFound } from "next/navigation";
+import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
 import { ProgressTracker } from "@/components/video/ProgressTracker";
 
 export const dynamic = "force-dynamic";
@@ -16,24 +15,22 @@ export default async function LessonWatchPage({
   const session = await requireSubscription();
   const { lessonId } = await params;
 
-  const [playback, progress] = await Promise.all([
-    getSignedPlaybackForLesson({
-      lessonId,
-      viewer: {
-        userId: session.user.id,
-        email: session.user.email ?? null,
-        roles: session.user.roles ?? [],
-      },
+  const [lesson, progress] = await Promise.all([
+    prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { id: true, title: true },
     }),
     getLessonProgress(session.user.id, lessonId),
   ]);
+
+  if (!lesson) notFound();
 
   const initialLastPositionSeconds = progress?.lastPositionSeconds ?? 0;
   const initialWatchSeconds = progress?.watchSeconds ?? 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 p-6">
-      <h1 className="text-2xl font-semibold">{playback.title}</h1>
+      <h1 className="text-2xl font-semibold">{lesson.title}</h1>
 
       <div className="relative">
         <ProgressTracker
@@ -41,13 +38,8 @@ export default async function LessonWatchPage({
           initialLastPositionSeconds={initialLastPositionSeconds > 0 ? initialLastPositionSeconds : undefined}
           initialWatchSeconds={initialWatchSeconds > 0 ? initialWatchSeconds : undefined}
         >
-          <HlsPlayer src={playback.playbackUrl} showQualitySelector />
+          <AuthorizedHlsPlayer lessonId={lessonId} showQualitySelector />
         </ProgressTracker>
-        <WatermarkOverlay text={playback.watermarkText} />
-      </div>
-
-      <div className="text-sm opacity-70">
-        Signed playback URL is short-lived. Week 6 will add entitlement gating.
       </div>
     </div>
   );

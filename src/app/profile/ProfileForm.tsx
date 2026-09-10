@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
 import { AvatarCropModal } from "./AvatarCropModal";
 import { RenewalCountdown } from "./RenewalCountdown";
@@ -37,6 +37,7 @@ type ProfileFormProps = {
 
 export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormProps) {
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const [name, setName] = useState(user.name ?? "");
   const [profession, setProfession] = useState(user.profession ?? "");
   const [country, setCountry] = useState(user.country ?? "");
@@ -109,7 +110,14 @@ export function ProfileForm({ user, subscription, favoritCourses }: ProfileFormP
       setPhotoFile(null);
       setMessage({ type: "ok", text: "Profile updated." });
       setEditModalOpen(false);
-      await getSession();
+      await updateSession({
+        user: {
+          name: name.trim() || null,
+          profession: profession.trim() || null,
+          country: country.trim() || null,
+          ...(typeof imageUrl === "string" ? { image: imageUrl } : {}),
+        },
+      });
       router.refresh();
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong." });

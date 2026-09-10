@@ -113,11 +113,11 @@ export function AuthLoginPanel() {
   }
 
   return (
-    <div className="flex w-full flex-col">
-      <h1 className="m-0 text-black" style={authHeadingStyle}>
+    <div className="auth-mobile-panel auth-login-panel flex w-full flex-col">
+      <h1 className="auth-login-title m-0 text-black" style={authHeadingStyle}>
         LOG IN
       </h1>
-      <div className="h-[74px] shrink-0" aria-hidden />
+      <div className="auth-login-title-gap h-[74px] shrink-0" aria-hidden />
 
       <form onSubmit={handleSubmit} className="flex flex-col">
         {verified && (
@@ -151,7 +151,7 @@ export function AuthLoginPanel() {
             clearFieldError("email");
           }}
         />
-        <div className="h-[18px] shrink-0" aria-hidden />
+        <div className="auth-login-password-gap h-[18px] shrink-0" aria-hidden />
 
         <AuthPasswordField
           showPassword={showPassword}
@@ -161,40 +161,40 @@ export function AuthLoginPanel() {
           errorId="login-password-error"
           onValueChange={() => clearFieldError("password")}
         />
-        <div className="h-[18px] shrink-0" aria-hidden />
+        <div className="auth-login-forgot-gap h-[18px] shrink-0" aria-hidden />
 
-        <p className="m-0 w-full text-right" style={authText24}>
+        <p className="auth-login-forgot m-0 w-full text-right" style={authText24}>
           <Link href="/login" className="text-black">
             Forgot Password?
           </Link>
         </p>
-        <div className="h-[31px] shrink-0" aria-hidden />
+        <div className="auth-login-join-gap h-[31px] shrink-0" aria-hidden />
 
-        <p className="m-0 mx-auto h-[29px] w-[372px] text-center text-black" style={authText24}>
+        <div className="auth-login-centered flex flex-col">
+        <p className="auth-login-join m-0 mx-auto h-[29px] w-[372px] text-center text-black" style={authText24}>
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-black underline">
+          <Link href="/register" className="auth-login-join-link text-black underline">
             Join for Free
           </Link>
         </p>
-        <div className="h-[32px] shrink-0" aria-hidden />
+        <div className="auth-login-submit-gap h-[32px] shrink-0" aria-hidden />
 
         <button
           type="submit"
           disabled={loading}
-          className="mx-auto flex items-center justify-center border border-black bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white disabled:cursor-not-allowed disabled:opacity-50"
           style={authSubmitButtonStyle}
         >
           {loading ? "Signing in..." : "GET STARTED"}
         </button>
-      </form>
 
       <AuthOAuthSection
         onOAuthSignIn={(providerId) => signIn(providerId, { callbackUrl: oauthCallbackUrl })}
       />
 
-      <div className="h-[68px] shrink-0" aria-hidden />
+      <div className="auth-login-resend-gap h-[68px] shrink-0" aria-hidden />
 
-      <p className="m-0 mx-auto w-[477px] text-center text-black" style={authText24}>
+      <p className="auth-login-resend m-0 mx-auto w-[477px] text-center text-black" style={authText24}>
         If you haven&apos;t received the confirmation email, you can{" "}
         <Link
           href={
@@ -202,12 +202,15 @@ export function AuthLoginPanel() {
               ? `/register?checkEmail=${encodeURIComponent(emailDraft.trim())}`
               : "/register?checkEmail="
           }
-          className="text-black underline"
+          className="auth-login-resend-link text-black underline"
         >
           resend it
         </Link>
         .
       </p>
+      <div className="auth-login-bottom-gap shrink-0" aria-hidden />
+        </div>
+      </form>
     </div>
   );
 }

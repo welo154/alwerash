@@ -3,10 +3,10 @@ import { privateCoursePath } from "@/lib/course-access";
 /** Whether a published lesson can be opened in the course player. */
 export function isLessonLearnable(lesson: {
   type: string;
-  video?: { muxPlaybackId: string } | null;
+  video?: { muxPlaybackId?: string; hasVideo?: boolean } | null;
 }): boolean {
   if (lesson.type === "VIDEO") {
-    return Boolean(lesson.video?.muxPlaybackId);
+    return Boolean(lesson.video?.hasVideo ?? lesson.video?.muxPlaybackId);
   }
   if (lesson.type === "ARTICLE" || lesson.type === "RESOURCE") {
     return true;
@@ -17,7 +17,7 @@ export function isLessonLearnable(lesson: {
 /** Href into the private full-course page (optionally anchored to a lesson). */
 export function lessonLearnHref(
   courseId: string,
-  lesson: { id: string; type: string; video?: { muxPlaybackId: string } | null }
+  lesson: { id: string; type: string; video?: { muxPlaybackId?: string; hasVideo?: boolean } | null }
 ): string | undefined {
   if (!isLessonLearnable(lesson)) return undefined;
   return `${privateCoursePath(courseId)}#${encodeURIComponent(lesson.id)}`;

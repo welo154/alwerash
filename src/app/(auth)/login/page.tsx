@@ -5,6 +5,7 @@ import { AuthLoginPanel } from "@/components/auth/AuthLoginPanel";
 export default function LoginPage() {
   return (
     <AuthPageShell
+      mobileLayout="login"
       panel={
         <Suspense fallback={null}>
           <AuthLoginPanel />

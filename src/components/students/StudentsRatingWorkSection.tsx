@@ -170,7 +170,7 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
   );
 }
 
-function MobileStudentRatingCard({ card }: { card: StudentRatingCard }) {
+export function MobileStudentRatingCard({ card }: { card: StudentRatingCard }) {
   return (
     <div
       className="mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pt-[25px] pr-[25px]"

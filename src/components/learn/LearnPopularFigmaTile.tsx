@@ -599,7 +599,7 @@ export function LearnPopularFigmaTile(
       ) : null}
 
       <div
-        className={`relative shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
+        className={`relative isolate shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
         style={
           isGrid
             ? { width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }
@@ -611,7 +611,7 @@ export function LearnPopularFigmaTile(
         <img
           src={grayCoverSrc}
           alt=""
-          className="h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full max-w-none object-cover"
           style={{ objectPosition: POPULAR_COVER_OBJECT_POSITION }}
         />
       </div>

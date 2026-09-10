@@ -93,7 +93,7 @@ export function PasswordEyeIcon() {
       viewBox="0 0 30 22"
       fill="none"
       aria-hidden
-      className="shrink-0"
+      className="auth-password-eye shrink-0"
     >
       <path
         d="M1 11C1 11 6.09091 1 15 1C23.9091 1 29 11 29 11C29 11 23.9091 21 15 21C6.09091 21 1 11 1 11Z"
@@ -123,6 +123,8 @@ export function AuthTextField({
   error,
   errorId,
   onValueChange,
+  className,
+  inputMode,
 }: {
   id: string;
   name: string;
@@ -133,17 +135,20 @@ export function AuthTextField({
   error?: string | null;
   errorId?: string;
   onValueChange?: () => void;
+  className?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   const describedBy = error && errorId ? errorId : undefined;
 
   return (
-    <div className="flex w-[604px] max-w-full flex-col">
-      <div style={authFieldStyle}>
+    <div className={`auth-field-wrap flex w-[604px] max-w-full flex-col${className ? ` ${className}` : ""}`}>
+      <div className="auth-field-box" style={authFieldStyle}>
         <input
           id={id}
           name={name}
           type={type}
           autoComplete={autoComplete}
+          inputMode={inputMode}
           placeholder={placeholder}
           required={required}
           aria-invalid={error ? true : undefined}
@@ -178,8 +183,8 @@ export function AuthPasswordField({
   const describedBy = error ? errorId : undefined;
 
   return (
-    <div className="flex w-[604px] max-w-full flex-col">
-      <div style={authFieldStyle}>
+    <div className="auth-field-wrap flex w-[604px] max-w-full flex-col">
+      <div className="auth-field-box" style={authFieldStyle}>
         <input
           id="password"
           name="password"
@@ -221,12 +226,12 @@ export function AuthOAuthSection({
 }) {
   return (
     <>
-      <div className="h-[17px] shrink-0" aria-hidden />
-      <p className="m-0 text-center text-black" style={authText24}>
+      <div className="auth-oauth-label-gap h-[17px] shrink-0" aria-hidden />
+      <p className="auth-oauth-label m-0 text-center text-black" style={authText24}>
         Or continue with
       </p>
-      <div className="h-[18px] shrink-0" aria-hidden />
-      <div className="flex items-center justify-center gap-[12px]">
+      <div className="auth-oauth-icons-gap h-[18px] shrink-0" aria-hidden />
+      <div className="auth-oauth-icons flex items-center justify-center gap-[12px]">
         {AUTH_OAUTH_ICONS.map((item) => (
           <button
             key={item.label}
@@ -239,7 +244,7 @@ export function AuthOAuthSection({
                 ? () => onOAuthSignIn(item.providerId)
                 : undefined
             }
-            className={`shrink-0 border-none bg-transparent p-0 ${
+            className={`auth-oauth-icon shrink-0 border-none bg-transparent p-0 ${
               item.enabled ? "cursor-pointer" : "cursor-not-allowed opacity-40"
             }`}
             style={{

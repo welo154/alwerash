@@ -1,4 +1,5 @@
 import { SiteHeader } from "./SiteHeader";
+import { SiteMain } from "./SiteMain";
 import { ConditionalSiteFooter } from "./ConditionalSiteFooter";
 
 /**
@@ -11,7 +12,7 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
       <div className="mx-auto w-full max-w-[1440px] min-w-0">
         <SiteHeader />
       </div>
-      <main className="mx-auto w-full max-w-[1440px] min-w-0 flex-1 overflow-x-visible">{children}</main>
+      <SiteMain>{children}</SiteMain>
       <ConditionalSiteFooter />
     </div>
   );

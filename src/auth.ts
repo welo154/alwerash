@@ -68,44 +68,61 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user?.id) {
         token.sub = user.id;
-        delete (token as { roles?: string[] }).roles;
+        delete token.roles;
       }
-      if (token.sub && !token.roles) {
+
+      if (trigger === "update" && session && typeof session === "object") {
+        const patch = "user" in session && session.user && typeof session.user === "object"
+          ? (session.user as Record<string, unknown>)
+          : (session as Record<string, unknown>);
+        if ("name" in patch) token.name = (patch.name as string | null | undefined) ?? token.name;
+        if ("email" in patch) token.email = (patch.email as string | null | undefined) ?? token.email;
+        if ("image" in patch) token.picture = (patch.image as string | null | undefined) ?? token.picture;
+        if ("country" in patch) token.country = (patch.country as string | null | undefined) ?? null;
+        if ("profession" in patch) token.profession = (patch.profession as string | null | undefined) ?? null;
+        return token;
+      }
+
+      // Hydrate from DB only on sign-in or once for older cookies — never on every request.
+      if (token.sub && token.roles == null) {
         try {
-          const roles = await prisma.userRole.findMany({
-            where: { userId: token.sub },
-            select: { role: true },
-          });
-          (token as { roles?: string[] }).roles = roles.map((r) => r.role);
+          const [roles, dbUser, profession] = await Promise.all([
+            prisma.userRole.findMany({
+              where: { userId: token.sub },
+              select: { role: true },
+            }),
+            prisma.user.findUnique({
+              where: { id: token.sub },
+              select: { name: true, image: true, email: true, country: true },
+            }),
+            readUserProfessionFromDb(token.sub),
+          ]);
+          token.roles = roles.map((r) => r.role);
+          if (dbUser) {
+            token.name = dbUser.name ?? token.name;
+            token.email = dbUser.email ?? token.email;
+            token.picture = dbUser.image ?? token.picture;
+            token.country = dbUser.country ?? null;
+          }
+          token.profession = profession;
         } catch {
-          (token as { roles?: string[] }).roles = [];
+          token.roles = [];
         }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
-        (session.user as { id: string; roles: string[] }).id = token.sub;
-        (session.user as { id: string; roles: string[] }).roles = ((token.roles as string[] | undefined) ?? []) as import("@prisma/client").Role[];
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: { name: true, image: true, email: true, country: true },
-          });
-          if (dbUser) {
-            session.user.name = dbUser.name ?? session.user.name ?? null;
-            session.user.email = dbUser.email;
-            (session.user as { image?: string | null }).image = dbUser.image ?? null;
-            (session.user as { country?: string | null }).country = dbUser.country ?? null;
-            const profession = await readUserProfessionFromDb(token.sub);
-            (session.user as { profession?: string | null }).profession = profession;
-          }
-        } catch {
-          // DB may be missing columns (migration not applied); keep session from token
-        }
+        session.user.id = token.sub;
+        session.user.roles = token.roles ?? [];
+        session.user.name = token.name ?? session.user.name ?? null;
+        session.user.email = token.email ?? session.user.email ?? null;
+        session.user.image = token.picture ?? session.user.image ?? null;
+        session.user.country = token.country ?? null;
+        session.user.profession = token.profession ?? null;
       }
       return session;
     },

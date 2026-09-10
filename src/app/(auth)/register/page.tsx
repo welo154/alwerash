@@ -45,6 +45,7 @@ export default function RegisterPage() {
 
   return (
     <AuthPageShell
+      mobileLayout="register"
       panel={
         <Suspense fallback={null}>
           <AuthRegisterPanel action={action} />

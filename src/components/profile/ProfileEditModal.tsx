@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -79,6 +79,7 @@ export function ProfileEditModal({
     () => initialSkills ?? DEFAULT_SELECTED_SKILLS
   );
   const [saving, setSaving] = useState(false);
+  const { update: updateSession } = useSession();
   const [error, setError] = useState<string | null>(null);
 
   const initialsRef = useRef({
@@ -155,7 +156,12 @@ export function ProfileEditModal({
           typeof data.error === "string" ? data.error : "Failed to save changes"
         );
       }
-      await getSession();
+      await updateSession({
+        user: {
+          name: next.name,
+          profession: next.profession || null,
+        },
+      });
       onSaved?.(next);
       onClose();
     } catch (err) {

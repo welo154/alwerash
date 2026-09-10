@@ -184,7 +184,7 @@ export function ContinueLearningSection({  courses,
   showTopRule?: boolean;
   className?: string;
 }) {
-  if (courses.length === 0) return null;
+  if (courses.length === 0 && showTopRule) return null;
 
   return (
     <div className={className}>

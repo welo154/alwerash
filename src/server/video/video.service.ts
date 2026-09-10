@@ -3,6 +3,9 @@ import crypto from "crypto";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import { mux, playbackTTL, playbackUrl, uploadCorsOrigin } from "./mux";
+import { isSignedPlaybackConfigured } from "@/server/mux/config";
+import { pickMuxPlaybackId } from "@/server/mux/playback-id";
+import { assertCanAccessLessonPlayback } from "./playback-access";
 
 function parseLessonIdFromPassthrough(passthrough?: string | null): string | null {
   if (!passthrough) return null;
@@ -57,52 +60,35 @@ export async function adminCreateMuxDirectUploadForLesson(lessonId: string) {
 
 export async function getSignedPlaybackForLesson(params: {
   lessonId: string;
-  viewer: { userId: string; email?: string | null; roles: string[] };
+  viewer: { userId: string | null; email?: string | null; roles: string[] };
 }) {
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: params.lessonId },
-    select: {
-      id: true,
-      title: true,
-      published: true,
-      video: { select: { muxPlaybackId: true } },
-      module: {
-        select: {
-          course: {
-            select: {
-              published: true,
-              track: { select: { published: true } },
-            },
-          },
-        },
-      },
-    },
-  });
+  const access = await assertCanAccessLessonPlayback(params.lessonId, params.viewer);
 
-  if (!lesson) throw new AppError("NOT_FOUND", 404, "Lesson not found");
-  if (!lesson.video?.muxPlaybackId) throw new AppError("NOT_FOUND", 404, "Video not ready");
-
-  const isPrivileged = params.viewer.roles.includes("ADMIN") || params.viewer.roles.includes("INSTRUCTOR");
-
-  // Unpublished lesson: only ADMIN/INSTRUCTOR
-  if (!lesson.published && !isPrivileged) throw new AppError("FORBIDDEN", 403, "Forbidden");
-
-  // If parent course/track unpublished: also restrict (track may be null)
-  const trackPublished = lesson.module.course.track?.published ?? true;
-  if ((!lesson.module.course.published || !trackPublished) && !isPrivileged) {
-    throw new AppError("FORBIDDEN", 403, "Forbidden");
+  if (!isSignedPlaybackConfigured()) {
+    throw new AppError(
+      "UNAVAILABLE",
+      503,
+      "Signed playback is not configured (MUX_SIGNING_KEY_ID / MUX_PRIVATE_KEY)"
+    );
   }
 
-  // Sign playback (Mux JWT with keyId/keySecret)
-  const token = await mux.jwt.signPlaybackId(lesson.video.muxPlaybackId, {
+  const token = await mux.jwt.signPlaybackId(access.muxPlaybackId, {
     keyId: process.env.MUX_SIGNING_KEY_ID!,
     keySecret: process.env.MUX_PRIVATE_KEY!,
     expiration: playbackTTL(),
   });
 
-  const url = playbackUrl(lesson.video.muxPlaybackId, token);
-  const watermarkText = `${params.viewer.email ?? "user"} • ${params.viewer.userId} • ${new Date().toISOString()}`;
-  return { lessonId: lesson.id, title: lesson.title, playbackUrl: url, watermarkText };
+  const url = playbackUrl(access.muxPlaybackId, token);
+  const watermarkText = params.viewer.userId
+    ? `${params.viewer.email ?? "user"} • ${params.viewer.userId}`
+    : null;
+  return {
+    lessonId: access.lessonId,
+    title: access.title,
+    playbackUrl: url,
+    watermarkText,
+    isFreePreview: access.isFreePreview,
+  };
 }
 
 export async function handleMuxWebhook(event: {
@@ -146,12 +132,14 @@ export async function handleMuxWebhook(event: {
     if (type === "video.asset.ready") {
       const assetId = data?.id as string | undefined;
       const passthrough = data?.passthrough as string | undefined;
-      let playbackId = (data?.playback_ids as { id?: string }[] | undefined)?.[0]?.id;
+      let playbackId = pickMuxPlaybackId(
+        data?.playback_ids as { id?: string; policy?: string }[] | undefined
+      );
 
       if (!assetId) throw new AppError("BAD_REQUEST", 400, "Missing asset id");
       if (!playbackId) {
         const asset = await mux.video.assets.retrieve(assetId);
-        playbackId = (asset?.playback_ids?.[0] as { id?: string } | undefined)?.id ?? undefined;
+        playbackId = pickMuxPlaybackId(asset?.playback_ids);
       }
       if (!playbackId) throw new AppError("BAD_REQUEST", 400, "Missing playback id");
 

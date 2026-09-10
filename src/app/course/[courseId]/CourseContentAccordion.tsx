@@ -142,23 +142,28 @@ export function CourseContentAccordion({
   if (sections.length === 0) {
     return (
       <p
-        className="mt-[46px] m-0 opacity-60"
-        style={{ fontFamily, fontSize: "24px", fontWeight: 400 }}
+        className="mt-[35px] m-0 text-[24px] lg:mt-[46px] lg:text-[36px]"
+        style={{
+          color: "var(--Black, #000)",
+          fontFamily,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "normal",
+        }}
       >
-        Course content will be available soon.
+        COURSE <span style={{ fontStyle: "italic", fontWeight: 600 }}>CONTENT</span>
       </p>
     );
   }
 
   return (
     <>
-      <div className="mt-[46px] flex items-center justify-between">
+      <div className="mt-[35px] flex items-center justify-between lg:mt-[46px]">
         <p
-          className="m-0"
+          className="m-0 text-[24px] lg:text-[36px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
-            fontSize: "36px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -167,7 +172,7 @@ export function CourseContentAccordion({
           COURSE <span style={{ fontStyle: "italic", fontWeight: 600 }}>CONTENT</span>
         </p>
 
-        <div className="flex items-center">
+        <div className="hidden items-center lg:flex">
           <span
             style={{
               color: "var(--Black, #000)",
@@ -205,13 +210,12 @@ export function CourseContentAccordion({
         </div>
       </div>
 
-      <div className="mt-[26px] flex items-center justify-between">
+      <div className="mt-[5px] flex items-center justify-between max-lg:pr-[29px] lg:mt-[26px]">
         <p
-          className="m-0"
+          className="m-0 text-[14px] lg:text-[24px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
-            fontSize: "24px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -221,6 +225,42 @@ export function CourseContentAccordion({
           {sections.length} {sections.length === 1 ? "Section" : "Sections"} - {lessonCount}{" "}
           {lessonCount === 1 ? "Lecture" : "Lectures"}
         </p>
+        <div className="flex items-center lg:hidden">
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily,
+              fontSize: "14px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {lessonCount} {lessonCount === 1 ? "Lesson" : "Lessons"}
+          </span>
+          <svg className="ml-[12px]" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 27 27" fill="none" aria-hidden>
+            <path
+              d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
+              stroke="var(--Black, #000)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span
+            className="ml-[12px]"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily,
+              fontSize: "14px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {durationLabel}
+          </span>
+        </div>
         <button
           type="button"
           onClick={() =>
@@ -232,7 +272,7 @@ export function CourseContentAccordion({
               return next;
             })
           }
-          className="flex flex-col items-start bg-transparent p-0 text-left"
+          className="hidden flex-col items-start bg-transparent p-0 text-left lg:flex"
         >
           <span
             style={{
@@ -252,7 +292,7 @@ export function CourseContentAccordion({
 
       {freeLessonIds.length > 0 ? (
         <p
-          className="m-0 mt-[14px]"
+          className="m-0 mt-[14px] max-lg:hidden"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
@@ -267,26 +307,27 @@ export function CourseContentAccordion({
         </p>
       ) : null}
 
-      <div className="mt-[20px] flex w-[843px] flex-col gap-[22px]">
+      <div className="mt-[20px] flex w-[843px] max-w-full flex-col gap-[17px] max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:max-w-none max-lg:items-center lg:gap-[22px]">
         {sections.map((section) => {
           const isOpen = !!openMap[section.id];
-          const openHeight = 74 + section.lessons.length * 74;
+          const openHeightMobile = 54 + section.lessons.length * 74;
+          const openHeightDesktop = 74 + section.lessons.length * 74;
           return (
             <div
               key={section.id}
-              className={`w-full overflow-hidden rounded-[30px] border border-black ${
+              className={`h-[var(--h-sm)] w-[334px] overflow-hidden rounded-[30px] border border-black max-lg:mx-auto lg:h-[var(--h-lg)] lg:w-full ${
                 isOpen ? "bg-[#89F496]" : "bg-white"
               }`}
               style={{
-                height: isOpen ? `${openHeight}px` : "74px",
+                ["--h-sm" as string]: isOpen ? `${openHeightMobile}px` : "54px",
+                ["--h-lg" as string]: isOpen ? `${openHeightDesktop}px` : "74px",
                 transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
               }}
             >
               <div
-                className={`flex w-full items-center px-[38px] transition-[height,background-color] duration-300 ease-in-out ${
+                className={`flex h-[54px] w-full items-center px-4 transition-[height,background-color] duration-300 ease-in-out lg:h-[74px] lg:px-[38px] ${
                   isOpen ? "bg-[#89F496]" : "bg-white"
                 }`}
-                style={{ height: "74px" }}
               >
                 <button
                   type="button"
@@ -315,11 +356,10 @@ export function CourseContentAccordion({
                   aria-label={`Start ${section.title}`}
                 >
                   <span
-                    className="truncate"
+                    className="truncate text-[16px] font-medium lg:text-[24px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily,
-                      fontSize: "24px",
                       fontStyle: "normal",
                       fontWeight: 500,
                       lineHeight: "normal",
@@ -336,7 +376,7 @@ export function CourseContentAccordion({
                 }`}
               >
                 {section.lessons.map((lesson, lessonIndex) => {
-                  const rowClassName = `flex h-[74px] w-full items-center justify-between border-t border-black bg-white pl-[34px] pr-[38px] text-left transition-colors duration-200 ${
+                  const rowClassName = `flex h-[74px] w-full items-center justify-between border-t border-black bg-white px-4 text-left transition-colors duration-200 lg:pl-[34px] lg:pr-[38px] ${
                     lesson.isFree
                       ? activeFreeLessonId === lesson.id
                         ? "bg-[#64E1FF] hover:bg-[#64E1FF]"
@@ -347,7 +387,6 @@ export function CourseContentAccordion({
                   const labelStyle = {
                     color: "var(--Black, #000)",
                     fontFamily,
-                    fontSize: "24px",
                     fontStyle: "normal" as const,
                     fontWeight: 400,
                     lineHeight: "normal",
@@ -356,19 +395,18 @@ export function CourseContentAccordion({
                   const badgeStyle = {
                     color: "var(--Black, #000)",
                     fontFamily,
-                    fontSize: "18px",
                     fontStyle: "normal" as const,
                     fontWeight: 400,
                     lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
                   };
 
                   const badgeClassName = lesson.isFree
-                    ? "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-[#FF8CFF] px-[16px]"
-                    : "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-white px-[16px]";
+                    ? "box-border inline-flex h-[24px] w-[55px] shrink-0 items-center justify-center rounded-[8px] border border-black bg-[#FF8CFF] px-4 text-[14px] lg:h-[31px] lg:w-auto lg:text-[18px]"
+                    : "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-white px-[16px] text-[18px]";
 
                   const rowContent = (
                     <>
-                      <p className="m-0 truncate" style={labelStyle}>
+                      <p className="m-0 truncate text-[16px] lg:text-[24px]" style={labelStyle}>
                         {lesson.name}
                       </p>
                       {lesson.isAction ? (
@@ -376,7 +414,7 @@ export function CourseContentAccordion({
                           {lesson.right}
                         </span>
                       ) : (
-                        <p className="m-0" style={labelStyle}>
+                        <p className="m-0 text-[16px] lg:text-[24px]" style={labelStyle}>
                           {lesson.right}
                         </p>
                       )}
