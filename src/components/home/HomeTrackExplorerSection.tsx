@@ -670,7 +670,7 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading && landingMostsMentors.length > 0 ? (
         <div
-          className={`mt-[55px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
+          className={`mt-[55px] lg:mb-[120px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
         >
           <LandingCurrentMostsSection
             mentors={landingMostsMentors}
