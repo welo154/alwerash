@@ -46,6 +46,8 @@ type SearchBarProps = {
   autoFocus?: boolean;
   expanded?: boolean;
   outlined?: boolean;
+  /** iPad guest header search field */
+  layout?: "mobile" | "tablet";
 };
 
 export function SearchBar({
@@ -53,6 +55,7 @@ export function SearchBar({
   autoFocus = false,
   expanded = false,
   outlined = false,
+  layout = "mobile",
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
@@ -130,24 +133,36 @@ export function SearchBar({
         : "header-search";
 
   if (variant === "mobileHeader") {
-    const mobileBarWidth = outlined ? 192 : 206;
+    const isTablet = layout === "tablet";
+    const barWidth = isTablet ? 491 : outlined ? 192 : 206;
+    const barHeight = isTablet ? 66 : 38;
     return (
       <div
         ref={containerRef}
-        className="relative h-[38px]"
-        style={{ width: mobileBarWidth, pointerEvents: expanded ? "auto" : "none" }}
+        className="relative"
+        style={{
+          width: barWidth,
+          height: barHeight,
+          pointerEvents: expanded ? "auto" : "none",
+        }}
       >
         <label htmlFor={inputId} className="sr-only">
           Search for courses
         </label>
         <div
-          className="flex h-[38px] shrink-0 items-center"
+          className="flex shrink-0 items-center justify-center"
           style={{
-            width: mobileBarWidth,
-            borderRadius: "8px 8px 8px 18px",
-            border: outlined ? "0.3px solid #000" : "0 solid #000",
-            background: "#FFF",
-            padding: "12px",
+            display: "flex",
+            width: barWidth,
+            height: barHeight,
+            padding: "0 12px",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 10,
+            borderRadius: isTablet ? "14px 8px 8px 28px" : "8px 8px 8px 18px",
+            border: outlined ? "0.3px solid var(--Black, #000)" : "0 solid var(--Black, #000)",
+            background: "var(--White, #FFF)",
+            boxSizing: "border-box",
           }}
         >
           <input

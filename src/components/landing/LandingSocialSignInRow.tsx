@@ -10,10 +10,11 @@ const LANDING_SOCIAL_ICONS = [
 ] as const;
 
 const SIZE_PRESETS = {
-  hero: { icon: 46, gap: 13 },
-  mobileHero: { icon: 26, gap: 8 },
-  cta: { icon: 64, gap: 18.5 },
-  mobileCta: { icon: 32, gap: 10 },
+  hero: { width: 46, height: 46, gap: 13 },
+  mobileHero: { width: 26, height: 26, gap: 8 },
+  tabletHero: { width: 44, height: 43, gap: 12 },
+  cta: { width: 64, height: 64, gap: 18.5 },
+  mobileCta: { width: 32, height: 32, gap: 10 },
 } as const;
 
 export function LandingSocialSignInRow({
@@ -23,7 +24,7 @@ export function LandingSocialSignInRow({
   variant?: keyof typeof SIZE_PRESETS;
   className?: string;
 }) {
-  const { icon, gap } = SIZE_PRESETS[variant];
+  const { width, height, gap } = SIZE_PRESETS[variant];
   const oauthCallbackUrl = buildOAuthCallbackUrl();
 
   return (
@@ -52,10 +53,10 @@ export function LandingSocialSignInRow({
             <Image
               src={item.image}
               alt=""
-              width={icon}
-              height={icon}
+              width={width}
+              height={height}
               className="block"
-              style={{ width: icon, height: icon }}
+              style={{ width, height }}
               unoptimized
             />
           </button>

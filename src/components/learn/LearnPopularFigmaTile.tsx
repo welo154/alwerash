@@ -116,12 +116,14 @@ function LearnPopularLearnerAvatar({
 
 /** Figma `167:1726` — Rectangle 53: 346×377, #e9e9e9, border, rounded-[50px]. */
 const GRAY_H = 377;
-/** Pixels to pull the white panel up so its top sits at 166px (377 − 166). */
-const WHITE_PULL_UP = GRAY_H - 166;
+/** Visible photo above the white panel, excluding the overlap. */
+const VISIBLE_UPPER_H = 166;
+/** Pixels the white panel covers on the photo (377 − 166). */
+const WHITE_PULL_UP = GRAY_H - VISIBLE_UPPER_H;
 
 export const LEARN_POPULAR_FIGMA_TILE_W = 346;
 /** Legacy fixed height (≈447); slides use `height: auto` — kept for callers that need a minimum. */
-export const LEARN_POPULAR_FIGMA_TILE_H = 166 + 281;
+export const LEARN_POPULAR_FIGMA_TILE_H = VISIBLE_UPPER_H + 281;
 
 /** Overlap between image and white panel as a fraction of card width (211px at 346px wide). */
 const GRID_PANEL_OVERLAP = `-${(WHITE_PULL_UP / LEARN_POPULAR_FIGMA_TILE_W) * 100}%`;
@@ -324,7 +326,7 @@ export function LearnPopularFigmaTile(
         className={
           isGrid
             ? `relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
-            : `relative flex w-[315px] shrink-0 flex-col overflow-visible no-underline lg:w-[346px] ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
+            : `relative flex w-[315px] shrink-0 flex-col overflow-visible no-underline min-[744px]:w-[346px] ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
         }
         onMouseLeave={
           isGrid ? undefined : (e: MouseEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)
@@ -598,13 +600,10 @@ export function LearnPopularFigmaTile(
         </div>
       ) : null}
 
+      {isGrid ? (
       <div
         className={`relative isolate shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
-        style={
-          isGrid
-            ? { width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }
-            : { width: "100%", height: GRAY_H }
-        }
+        style={{ width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }}
         aria-hidden
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -615,6 +614,26 @@ export function LearnPopularFigmaTile(
           style={{ objectPosition: POPULAR_COVER_OBJECT_POSITION }}
         />
       </div>
+      ) : (
+      <div
+        className={`relative isolate shrink-0${isStartHovered ? " opacity-0" : ""}`}
+        style={{ width: "100%", height: VISIBLE_UPPER_H }}
+        aria-hidden
+      >
+        <div
+          className="absolute inset-x-0 top-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]"
+          style={{ height: GRAY_H }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={grayCoverSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full max-w-none object-cover"
+            style={{ objectPosition: POPULAR_COVER_OBJECT_POSITION }}
+          />
+        </div>
+      </div>
+      )}
       <div
         className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black bg-white${isGrid ? " flex-1" : ""}${isStartHovered ? " opacity-0" : ""}`}
         style={
@@ -628,7 +647,7 @@ export function LearnPopularFigmaTile(
                 fontFamily: pangeaFont,
               }
             : {
-                marginTop: -WHITE_PULL_UP,
+                marginTop: 0,
                 width: "100%",
                 paddingTop: WHITE_INNER_PT,
                 paddingBottom: 26,

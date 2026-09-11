@@ -34,8 +34,8 @@ export function LoggedInAppHeader({
       <header
         className={
           homeLayout || flushBottom
-            ? "relative z-50 mb-0 w-full bg-white pt-[37px] lg:hidden"
-            : "relative z-50 mb-[24px] w-full bg-white pt-[37px] lg:hidden"
+            ? "relative z-50 mb-0 w-full bg-white pt-[37px] min-[744px]:pt-[7px] lg:hidden"
+            : "relative z-50 mb-[24px] w-full bg-white pt-[37px] min-[744px]:pt-[7px] lg:hidden"
         }
         aria-label={isGuest ? "Site header" : "Logged in header"}
       >

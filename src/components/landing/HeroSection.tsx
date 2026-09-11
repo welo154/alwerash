@@ -20,6 +20,7 @@ const HERO_SHELL_PATH =
 
 const HERO_SHELL = { width: 1301, height: 762 } as const;
 const HERO_SHELL_MOBILE = { width: 382, height: 801 } as const;
+const HERO_SHELL_TABLET = { width: 732, height: 1049 } as const;
 
 /** Rest mosaic: TL 282×357, TR 197×272, BL 282×224, BR 197×308; gaps 18×16. */
 const HERO_MOSAIC_FRAME = { width: 497, height: 597 } as const;
@@ -28,11 +29,15 @@ const mosaicAnim = (name: string) => `${name} 8000ms linear infinite`;
 const HERO_SHELL_MOBILE_PATH =
   "M320 0C324.564 5.83965e-07 324.08 4 319.516 4H296C291.582 4 288 7.58172 288 12V34C288 38.4183 291.582 42 296 42H358.341C370.516 42 382 49.8245 382 62V739C382 773.242 354.242 801 320 801H62C27.7584 801 6.12127e-07 773.242 0 739V62C2.17657e-07 49.8245 11.4839 42 23.6594 42H102.338C113.107 42 121.838 33.2696 121.838 22.5V13.7569C121.838 7.81601 117.022 3 111.081 3H62.3134C58.8228 3 58.5094 1.32994e-07 62 0H320Z";
 
+/** iPad / 744px viewport — viewBox 732×1049. */
+const HERO_SHELL_TABLET_PATH =
+  "M670 0C673.491 0 673.177 3 669.687 3H645C632.85 3 623 12.8497 623 25V41C623 56.464 635.536 69 651 69H682C709.614 69 732 91.3858 732 119V987C732 1021.24 704.242 1049 670 1049H62C27.7583 1049 0 1021.24 0 987V118C0 90.3857 22.3858 68 50 68H129.5C147.449 68 162 53.4493 162 35.5V19.2294C162 10.2662 154.734 3 145.771 3H62.3134C58.8228 3 58.5094 0 62 0H670Z";
+
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
   return (
-    <section className={`${pangeaVar.className} bg-white px-0 pb-0 pt-[37px] sm:px-6 lg:px-8 lg:pt-[32px]`}>
+    <section className={`${pangeaVar.className} bg-white px-0 pb-0 pt-[37px] max-[743px]:sm:px-6 min-[744px]:pt-[7px] lg:px-8 lg:pt-[32px]`}>
       {/* Mobile shell — 382px centered in ~393 viewport */}
-      <div className="relative w-full lg:hidden">
+      <div className="relative w-full min-[744px]:hidden">
         <div
           className="relative mx-auto overflow-visible"
           style={{ width: HERO_SHELL_MOBILE.width, height: HERO_SHELL_MOBILE.height }}
@@ -51,81 +56,31 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 
           <MobileSiteNavLogo homeHref="/" />
           <MobileSiteNavActions />
+          <GuestHeroMobileCopy />
+        </div>
+      </div>
 
-          {/* Figma 1181:6295 — 110px below green SVG top */}
-          <div
-            className="absolute left-[25px] top-[110px] z-20 w-[323px]"
-            style={{ fontFamily: pangeaFont }}
+      {/* iPad shell — 732px centered, 7px from page top */}
+      <div className="relative hidden w-full min-[744px]:flex min-[744px]:justify-center lg:hidden">
+        <div
+          className="relative shrink-0 overflow-visible"
+          style={{ width: HERO_SHELL_TABLET.width, height: HERO_SHELL_TABLET.height }}
+        >
+          <svg
+            className="pointer-events-none absolute inset-0 z-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width={HERO_SHELL_TABLET.width}
+            height={HERO_SHELL_TABLET.height}
+            viewBox={`0 0 ${HERO_SHELL_TABLET.width} ${HERO_SHELL_TABLET.height}`}
+            fill="none"
+            aria-hidden
           >
-            <div className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4">
-              <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
-              <span className="text-center text-[14px] font-normal leading-[19.6px] text-[#141413] whitespace-nowrap">
-                CREATIVITY STARTS HERE
-              </span>
-            </div>
+            <path d={HERO_SHELL_TABLET_PATH} fill="var(--Green, #8AF396)" />
+          </svg>
 
-            <h1
-              className="m-0 mt-[30px] w-[323px] uppercase text-black"
-              style={{
-                color: "#000",
-                fontFamily: pangeaFont,
-                fontSize: "40px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "120%",
-              }}
-            >
-              Discover your next{" "}
-              <em
-                style={{
-                  color: "#000",
-                  fontFamily: pangeaFont,
-                  fontSize: "40px",
-                  fontStyle: "italic",
-                  fontWeight: 700,
-                  lineHeight: "120%",
-                }}
-              >
-                creative
-              </em>{" "}
-              obsession.
-              <br />
-              From beginner to pro at your own time.
-            </h1>
-
-            <p
-              className="m-0 mt-[30px] w-[284px] text-black"
-              style={{
-                color: "#000",
-                fontFamily: pangeaFont,
-                fontSize: "18px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "127%",
-              }}
-            >
-              Explore thousands of online classes in design, typography, illustration,
-              photography, and more. Taught by industry professionals.
-            </p>
-
-            <Link
-              href="/register"
-              className="mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] border-black bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
-              style={{ fontFamily: pangeaFont }}
-            >
-              GET STARTED
-            </Link>
-
-            <div className="mt-[17px] flex items-center">
-              <p
-                className="m-0 text-center text-[18px] font-normal leading-[120%] text-black"
-                style={{ fontFamily: pangeaFont }}
-              >
-                Or continue with
-              </p>
-              <LandingSocialSignInRow variant="mobileHero" className="ml-[8px]" />
-            </div>
-          </div>
+          <MobileSiteNavLogo homeHref="/" variant="tablet" />
+          <MobileSiteNavActions variant="tablet" />
+          <GuestHeroMobileCopy variant="tablet" />
         </div>
       </div>
 
@@ -361,6 +316,119 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tablet" }) {
+  const isTablet = variant === "tablet";
+  /** Badge: 55px from SVG left, 166px from page top (header is 7px from page). */
+  const tabletTop = 166 - 7;
+
+  return (
+    <div
+      className={`absolute z-20 ${isTablet ? "w-[601px]" : "left-[25px] top-[110px] w-[323px]"}`}
+      style={{
+        fontFamily: pangeaFont,
+        ...(isTablet ? { left: 55, top: tabletTop } : {}),
+      }}
+    >
+      <div className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4">
+        <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
+        <span className="text-center text-[14px] font-normal leading-[19.6px] text-[#141413] whitespace-nowrap">
+          CREATIVITY STARTS HERE
+        </span>
+      </div>
+
+      <h1
+        className={`m-0 mt-[30px] uppercase text-black ${isTablet ? "" : "w-[323px]"}`}
+        style={{
+          color: "#000",
+          fontFamily: pangeaFont,
+          fontSize: isTablet ? "60px" : "40px",
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+          ...(isTablet ? { width: 601, maxWidth: 601 } : {}),
+        }}
+      >
+        Discover your next{" "}
+        <em
+          style={{
+            color: "#000",
+            fontFamily: pangeaFont,
+            fontSize: isTablet ? "60px" : "40px",
+            fontStyle: "italic",
+            fontWeight: 700,
+            lineHeight: "120%",
+          }}
+        >
+          creative
+        </em>{" "}
+        obsession.
+        {isTablet ? " " : <br />}
+        From beginner to pro at your own time.
+      </h1>
+
+      <p
+        className={`m-0 mt-[30px] text-black ${isTablet ? "w-[554px]" : "w-[284px]"}`}
+        style={{
+          color: "#000",
+          fontFamily: pangeaFont,
+          fontSize: isTablet ? "24px" : "18px",
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "127%",
+        }}
+      >
+        Explore thousands of online classes in design, typography, illustration,
+        photography, and more. Taught by industry professionals.
+      </p>
+
+      <Link
+        href="/register"
+        className={
+          isTablet
+            ? "mt-[61px] flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]"
+            : "mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] border-black bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
+        }
+        style={{
+          fontFamily: pangeaFont,
+          ...(isTablet
+            ? {
+                borderRadius: "var(--Radius-MD, 8px)",
+                border: "0.3px solid var(--Black, #000)",
+                background: "var(--White, #FFF)",
+                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                padding: "0 16px",
+              }
+            : {}),
+        }}
+      >
+        GET STARTED
+      </Link>
+
+      {isTablet ? (
+        <>
+          <p
+            className="m-0 mt-[19px] w-[300px] text-center text-[24px] font-normal leading-[120%] text-black"
+            style={{ fontFamily: pangeaFont }}
+          >
+            Or continue with
+          </p>
+          <LandingSocialSignInRow variant="tabletHero" className="mt-[23px] w-[300px]" />
+        </>
+      ) : (
+        <div className="mt-[17px] flex items-center">
+          <p
+            className="m-0 text-center text-[18px] font-normal leading-[120%] text-black"
+            style={{ fontFamily: pangeaFont }}
+          >
+            Or continue with
+          </p>
+          <LandingSocialSignInRow variant="mobileHero" className="ml-[8px]" />
+        </div>
+      )}
+    </div>
   );
 }
 

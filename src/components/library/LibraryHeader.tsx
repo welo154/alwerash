@@ -39,7 +39,7 @@ export function LibraryHeader({ compactBottom = false }: { compactBottom?: boole
   return (
     <>
       <header
-        className={`relative z-50 w-full bg-white pt-[37px] lg:hidden ${
+        className={`relative z-50 w-full bg-white pt-[37px] min-[744px]:pt-[7px] lg:hidden ${
           compactBottom ? "pb-0" : "pb-6"
         }`}
         aria-label="Library header"

@@ -11,16 +11,42 @@ const SEARCH_BAR_HEIGHT = 38;
 const SEARCH_ICON_SIZE = 23;
 const MENU_ICON_HEIGHT = 19;
 const MOBILE_LOGO = { width: 160, height: 47 } as const;
+const TABLET_LOGO = { width: 135 * 1.6, height: 41 * 1.6 } as const;
+const TABLET_NAV_WIDTH = 732;
+const TABLET_LOGO_TOP = 3;
 const MOBILE_SHELL_WIDTH = 382;
+const TABLET_SEARCH_ICON = 26;
+/** 31px from the page top; header itself is 7px from the page. */
+const TABLET_SEARCH_TOP = 31 - 7;
+const TABLET_SEARCH_RIGHT = 74;
+const TABLET_SEARCH_OPEN_RIGHT = 28;
+const TABLET_SEARCH_BAR = { width: 491, height: 66 } as const;
+const TABLET_SEARCH_BAR_GAP = 10;
+const TABLET_MENU_GAP = 21;
+const TABLET_MENU = { width: 31, height: 21 } as const;
+const TABLET_MENU_RIGHT = TABLET_SEARCH_RIGHT - TABLET_MENU_GAP - TABLET_MENU.width;
 
-export function MobileSiteNavLogo({ homeHref = "/" }: { homeHref?: string }) {
+export function MobileSiteNavLogo({
+  homeHref = "/",
+  variant = "mobile",
+}: {
+  homeHref?: string;
+  variant?: "mobile" | "tablet";
+}) {
+  const isTablet = variant === "tablet";
+  const size = isTablet ? TABLET_LOGO : MOBILE_LOGO;
+
   return (
     <Link
       href={homeHref}
-      className="absolute left-[-16px] top-[-2px] z-40 block"
+      className={
+        isTablet
+          ? "absolute left-[7px] top-[3px] z-40 block"
+          : "absolute left-[-16px] top-[-2px] z-40 block"
+      }
       style={{
-        width: MOBILE_LOGO.width,
-        height: MOBILE_LOGO.height,
+        width: size.width,
+        height: size.height,
         aspectRatio: "99 / 29",
       }}
       aria-label="Go to home"
@@ -28,9 +54,11 @@ export function MobileSiteNavLogo({ homeHref = "/" }: { homeHref?: string }) {
       <Image
         src="/brand/alwerash-logo-hero.png"
         alt="Alwerash"
-        width={MOBILE_LOGO.width}
-        height={MOBILE_LOGO.height}
-        className="block h-[47px] w-[160px] max-w-none object-contain"
+        width={size.width}
+        height={size.height}
+        className={`block h-full w-full max-w-none object-contain ${
+          isTablet ? "object-left" : ""
+        }`}
         style={{ aspectRatio: "99 / 29" }}
         unoptimized
         priority
@@ -41,8 +69,10 @@ export function MobileSiteNavLogo({ homeHref = "/" }: { homeHref?: string }) {
 
 export function MobileSiteNavActions({
   outlinedSearch = false,
+  variant = "mobile",
 }: {
   outlinedSearch?: boolean;
+  variant?: "mobile" | "tablet";
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,42 +99,60 @@ export function MobileSiteNavActions({
     };
   }, [searchOpen]);
 
-  const searchIconSize = SEARCH_ICON_SIZE;
-  // Inner pages (`outlinedSearch`): open state is from the screen edge, not the 382px shell.
-  const searchIconRight = searchOpen
-    ? outlinedSearch
+  const isTablet = variant === "tablet";
+  const searchIconSize = isTablet ? TABLET_SEARCH_ICON : SEARCH_ICON_SIZE;
+  const searchIconClosedRight = isTablet ? TABLET_SEARCH_RIGHT : 58;
+  const searchIconOpenRight = isTablet
+    ? TABLET_SEARCH_OPEN_RIGHT
+    : outlinedSearch
       ? "calc(22px - (100vw - 382px) / 2)"
-      : 17
-    : 58;
+      : 17;
+  const searchIconRight = searchOpen ? searchIconOpenRight : searchIconClosedRight;
+  const tabletBarRight = TABLET_SEARCH_OPEN_RIGHT + searchIconSize + TABLET_SEARCH_BAR_GAP;
   const searchBarRight = searchOpen
-    ? outlinedSearch
-      ? "calc(22px - (100vw - 382px) / 2 + 41px)"
-      : 17 + searchIconSize + 4
-    : 58 + searchIconSize + 4;
-  const searchBarWidth = outlinedSearch ? 192 : 206;
-  const searchIconTop = SEARCH_BAR_TOP + (SEARCH_BAR_HEIGHT - SEARCH_ICON_SIZE) / 2;
-  const menuIconTop = SEARCH_BAR_TOP + (SEARCH_BAR_HEIGHT - MENU_ICON_HEIGHT) / 2;
+    ? isTablet
+      ? tabletBarRight
+      : outlinedSearch
+        ? "calc(22px - (100vw - 382px) / 2 + 41px)"
+        : 17 + searchIconSize + 4
+    : searchIconClosedRight + searchIconSize + 4;
+  const searchBarWidth = isTablet
+    ? TABLET_SEARCH_BAR.width
+    : outlinedSearch
+      ? 192
+      : 206;
+  const searchBarHeight = isTablet ? TABLET_SEARCH_BAR.height : SEARCH_BAR_HEIGHT;
+  const searchBarTop = isTablet
+    ? TABLET_SEARCH_TOP + (TABLET_SEARCH_ICON - TABLET_SEARCH_BAR.height) / 2 - 1
+    : SEARCH_BAR_TOP;
+  const searchIconTop = isTablet
+    ? TABLET_SEARCH_TOP
+    : SEARCH_BAR_TOP + (SEARCH_BAR_HEIGHT - SEARCH_ICON_SIZE) / 2;
+  const menuIconTop = isTablet
+    ? TABLET_SEARCH_TOP + (TABLET_SEARCH_ICON - TABLET_MENU.height) / 2
+    : SEARCH_BAR_TOP + (SEARCH_BAR_HEIGHT - MENU_ICON_HEIGHT) / 2;
 
   return (
     <div ref={actionsRef} className="pointer-events-none absolute inset-0 z-[80] overflow-visible">
       <div
         className="absolute z-[90] overflow-hidden"
         style={{
-          top: SEARCH_BAR_TOP,
+          top: searchBarTop,
           right: searchBarRight,
           width: searchOpen ? searchBarWidth : 0,
-          height: SEARCH_BAR_HEIGHT,
+          height: searchBarHeight,
           minWidth: 0,
           pointerEvents: searchOpen ? "auto" : "none",
           transition: "width 300ms ease-out, right 300ms ease-out",
         }}
       >
         <div
-          className="absolute top-0 right-0 h-[38px]"
-          style={{ width: searchBarWidth }}
+          className="absolute top-0 right-0"
+          style={{ width: searchBarWidth, height: searchBarHeight }}
         >
           <SearchBar
             variant="mobileHeader"
+            layout={isTablet ? "tablet" : "mobile"}
             autoFocus={searchOpen}
             expanded={searchOpen}
             outlined={outlinedSearch}
@@ -116,7 +164,9 @@ export function MobileSiteNavActions({
         aria-label={searchOpen ? "Close search" : "Search"}
         aria-expanded={searchOpen}
         onClick={() => setSearchOpen((open) => !open)}
-        className="pointer-events-auto absolute z-[100] flex h-[23px] w-[23px] items-center justify-center"
+        className={`pointer-events-auto absolute z-[100] flex items-center justify-center ${
+          isTablet ? "h-[26px] w-[26px]" : "h-[23px] w-[23px]"
+        }`}
         style={{
           top: searchIconTop,
           right: searchIconRight,
@@ -125,8 +175,8 @@ export function MobileSiteNavActions({
       >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="23"
-              height="23"
+              width={isTablet ? 26 : 23}
+              height={isTablet ? 26 : 23}
               viewBox="0 0 21 21"
               fill="none"
               aria-hidden
@@ -151,26 +201,28 @@ export function MobileSiteNavActions({
           setSearchOpen(false);
           setMenuOpen(true);
         }}
-        className="pointer-events-auto absolute z-[100] flex h-[19px] w-[28px] items-center justify-center"
+        className={`pointer-events-auto absolute z-[100] flex items-center justify-center ${
+          isTablet ? "h-[21px] w-[31px]" : "h-[19px] w-[28px]"
+        }`}
         style={{
           top: menuIconTop,
-          right: 11,
+          right: isTablet ? TABLET_MENU_RIGHT : 11,
           visibility: searchOpen ? "hidden" : "visible",
           pointerEvents: searchOpen ? "none" : "auto",
         }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="19"
+          width={isTablet ? 31 : 28}
+          height={isTablet ? 21 : 19}
           viewBox="0 0 25 17"
           fill="none"
           aria-hidden
         >
           <path
             d="M23.75 5.75H0.75M23.75 0.75H0.75M23.75 10.75H0.75M23.75 15.75H0.75"
-            stroke="#000"
-            strokeWidth="1.5"
+            stroke="var(--Black, #000)"
+            strokeWidth={isTablet ? 2 : 1.5}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -191,9 +243,22 @@ export function MobileSiteNavBar({
 }) {
   return (
     <div className={`relative w-full ${className ?? ""}`}>
-      <div className="relative mx-auto" style={{ width: MOBILE_SHELL_WIDTH, height: MOBILE_LOGO.height }}>
+      <div
+        className="relative mx-auto min-[744px]:hidden"
+        style={{ width: MOBILE_SHELL_WIDTH, height: MOBILE_LOGO.height }}
+      >
         <MobileSiteNavLogo homeHref={homeHref} />
         <MobileSiteNavActions outlinedSearch />
+      </div>
+      <div
+        className="relative mx-auto hidden min-[744px]:block"
+        style={{
+          width: TABLET_NAV_WIDTH,
+          height: TABLET_LOGO_TOP + TABLET_LOGO.height,
+        }}
+      >
+        <MobileSiteNavLogo homeHref={homeHref} variant="tablet" />
+        <MobileSiteNavActions variant="tablet" />
       </div>
     </div>
   );

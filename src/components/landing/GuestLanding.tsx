@@ -31,7 +31,7 @@ export async function GuestLanding() {
         maxVisibleCourses={3}
         showDiscoverCta
         marqueeTrackPills
-        sectionClassName="mt-[50px] lg:mt-[63px]"
+        sectionClassName="mt-[50px] min-[744px]:mt-[60px] lg:mt-[63px]"
         landingMostsMentors={landingMostsMentors}
       />
       <div className="max-lg:hidden">
