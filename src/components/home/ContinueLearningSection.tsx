@@ -13,6 +13,9 @@ const DESKTOP_CARD_WIDTH_PX = 321;
 const MOBILE_CARD_WIDTH_PX = 315;
 const MOBILE_SWIPER_GAP_PX = 20;
 const MOBILE_SECTION_INSET_PX = 30;
+const TABLET_CARD_WIDTH_PX = 345;
+const TABLET_SWIPER_GAP_PX = 33;
+const TABLET_SECTION_INSET_PX = 61;
 /** Overlap so the bottom card (260px) keeps 64px unintersected below the top card. */
 const COURSE_CARD_STACK_OVERLAP_PX = 260 - 64;
 
@@ -195,9 +198,9 @@ export function ContinueLearningSection({  courses,
         />
       ) : null}
 
-      <div className="max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]">
+      <div className="max-[743px]:pl-[30px] max-[743px]:pr-0 min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]">
         <h2
-          className={`${showTopRule ? "max-lg:mt-0 lg:mt-[40px]" : ""} m-0 w-full uppercase lg:hidden`}
+          className={`${showTopRule ? "max-lg:mt-0 lg:mt-[40px]" : ""} m-0 w-full uppercase min-[744px]:hidden`}
         >
           <span
             style={{
@@ -216,6 +219,35 @@ export function ContinueLearningSection({  courses,
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
               fontSize: "24px",
+              fontStyle: "italic",
+              fontWeight: 700,
+              lineHeight: "120%",
+            }}
+          >
+            LEARNING
+          </span>
+        </h2>
+
+        <h2
+          className={`${showTopRule ? "max-lg:mt-0" : ""} m-0 hidden w-full uppercase min-[744px]:block lg:hidden`}
+        >
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 32,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+            }}
+          >
+            CONTINUE{" "}
+          </span>
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 32,
               fontStyle: "italic",
               fontWeight: 700,
               lineHeight: "120%",
@@ -254,7 +286,7 @@ export function ContinueLearningSection({  courses,
         </h2>
       </div>
 
-      <div className="relative left-1/2 mt-[31px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip lg:hidden">
+      <div className="relative left-1/2 mt-[31px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:hidden">
         <Swiper
           slidesPerView="auto"
           spaceBetween={MOBILE_SWIPER_GAP_PX}
@@ -269,6 +301,26 @@ export function ContinueLearningSection({  courses,
           {courses.map((course) => (
             <SwiperSlide key={course.continueHref} className="w-[315px]!">
               <CourseStackCard {...course} widthPx={MOBILE_CARD_WIDTH_PX} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+
+      <div className="relative left-1/2 mt-[48px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:block lg:hidden">
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={TABLET_SWIPER_GAP_PX}
+          slidesPerGroup={1}
+          slidesOffsetBefore={TABLET_SECTION_INSET_PX}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          className="overflow-visible!"
+        >
+          {courses.map((course) => (
+            <SwiperSlide key={`tablet-${course.continueHref}`} className="w-[345px]!">
+              <CourseStackCard {...course} widthPx={TABLET_CARD_WIDTH_PX} />
             </SwiperSlide>
           ))}
         </Swiper>

@@ -416,6 +416,7 @@ export function ProfileEditModal({
 
 type ProfileEditButtonProps = {
   className?: string;
+  variant?: "button" | "icon";
   initialName?: string;
   initialProfession?: string;
   initialBio?: string;
@@ -430,6 +431,7 @@ type ProfileEditButtonProps = {
 
 export function ProfileEditButton({
   className = "",
+  variant = "button",
   initialName,
   initialProfession,
   initialBio,
@@ -452,6 +454,46 @@ export function ProfileEditButton({
 
   return (
     <>
+      {variant === "icon" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={`absolute box-border border-0 bg-transparent p-0 ${className}`.trim()}
+          style={{
+            top: 26,
+            right: 27,
+            width: 39,
+            height: 39,
+            cursor: "pointer",
+          }}
+          aria-label="Edit profile"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={39}
+            height={38.464}
+            viewBox="0 0 39 38"
+            fill="none"
+            aria-hidden
+            className="block"
+          >
+            <path
+              d="M19.1504 37.6143C29.6438 37.6143 38.1504 29.2277 38.1504 18.8823C38.1504 8.53696 29.6438 0.150391 19.1504 0.150391C8.65698 0.150391 0.150391 8.53696 0.150391 18.8823C0.150391 29.2277 8.65698 37.6143 19.1504 37.6143Z"
+              fill="white"
+              stroke="black"
+              strokeWidth="0.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M19.1504 26.8895H28.1504M23.6504 10.6223C24.0482 10.2301 24.5878 10.0098 25.1504 10.0098C25.429 10.0098 25.7048 10.0639 25.9622 10.169C26.2196 10.2741 26.4534 10.4281 26.6504 10.6223C26.8474 10.8165 27.0036 11.0471 27.1102 11.3008C27.2168 11.5546 27.2717 11.8265 27.2717 12.1012C27.2717 12.3758 27.2168 12.6478 27.1102 12.9015C27.0036 13.1552 26.8474 13.3858 26.6504 13.58L14.1504 25.9036L10.1504 26.8895L11.1504 22.946L23.6504 10.6223Z"
+              stroke="#1E1E1E"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      ) : (
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -513,6 +555,7 @@ export function ProfileEditButton({
           EDIT
         </span>
       </button>
+      )}
 
       <ProfileEditModal
         open={open}

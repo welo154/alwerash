@@ -14,8 +14,8 @@ export function ConditionalSiteFooter() {
 
   return (
     <>
-      <div className="overflow-x-clip bg-white lg:hidden">
-        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0 pb-0">
+      <div className="overflow-x-clip bg-white lg:hidden min-[744px]:overflow-hidden">
+        <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0 pb-0 min-[744px]:max-w-[744px]">
           <LandingMobileFooter />
         </div>
       </div>

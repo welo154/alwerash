@@ -127,7 +127,7 @@ export function TrackCoursesSection({
   const mobileSortRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
+    const media = window.matchMedia("(min-width: 1036px)");
     const update = () => setIsDesktop(media.matches);
     update();
     media.addEventListener("change", update);
@@ -162,9 +162,9 @@ export function TrackCoursesSection({
 
   return (
     <div className="min-w-0 max-lg:mt-[15px] lg:mt-0">
-      <div className="max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] max-lg:pl-[30px] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] lg:hidden">
+      <div className="max-[743px]:-ml-6 max-[743px]:w-[calc(100%+1.5rem)] max-[743px]:pl-[30px] sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:flex min-[744px]:max-lg:w-[calc(100%+2rem)] min-[744px]:max-lg:items-center min-[744px]:max-lg:justify-between min-[744px]:max-lg:pl-[63px] min-[744px]:max-lg:pr-[63px] lg:hidden">
         <h1
-          className="m-0 min-w-0 text-[24px] font-normal leading-[120%] text-black"
+          className="m-0 min-w-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -175,23 +175,19 @@ export function TrackCoursesSection({
           {trackTitle}
         </h1>
 
-        <div ref={mobileSortRef} className="relative mt-[11px]">
+        <div ref={mobileSortRef} className="relative mt-[11px] min-[744px]:max-lg:mt-0">
           <button
             type="button"
             aria-haspopup="menu"
             aria-expanded={mobileSortOpen}
             onClick={() => setMobileSortOpen((open) => !open)}
-            className="box-border inline-flex h-[22px] min-w-[91px] w-max items-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-black"
+            className="box-border inline-flex h-[22px] min-w-[91px] w-max items-center rounded-[8px] border-[0.3px] border-[color:var(--Black,#000)] bg-[color:var(--White,#FFF)] px-4 text-center text-[12px] font-normal leading-[19.6px] text-[color:var(--Black,#000)] min-[744px]:max-lg:h-[32px] min-[744px]:max-lg:w-[110px] min-[744px]:max-lg:min-w-[110px] min-[744px]:max-lg:justify-between min-[744px]:max-lg:text-[16px]"
             style={{
-              color: "var(--Black, #000)",
               fontFamily: pangeaFont,
-              fontSize: "12px",
               fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "19.6px",
             }}
           >
-            <span className="whitespace-nowrap">{mobileSortLabel}</span>
+            <span className="whitespace-nowrap text-center">{mobileSortLabel}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={11}
@@ -343,7 +339,7 @@ export function TrackCoursesSection({
         </div>
       </div>
 
-      <div className="mt-[35px] min-w-0 max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] max-lg:overflow-hidden sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] lg:mt-[50px] lg:ml-0 lg:w-auto">
+      <div className="mt-[35px] min-w-0 max-[743px]:-ml-6 max-[743px]:w-[calc(100%+1.5rem)] max-[743px]:overflow-hidden sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:w-[calc(100%+2rem)] min-[744px]:max-lg:overflow-visible lg:mt-[50px] lg:ml-0 lg:w-auto">
         {visibleCourses.length === 0 ? (
           <p
             className="text-center text-[20px] text-black/60"
@@ -353,16 +349,13 @@ export function TrackCoursesSection({
           </p>
         ) : (
           <div
-            className="flex min-w-0 flex-col items-center gap-y-[50px] overflow-hidden lg:grid lg:items-stretch lg:justify-start lg:gap-x-5 lg:gap-y-5 lg:overflow-visible"
-            style={{
-              gridTemplateColumns: "repeat(auto-fill, 313px)",
-            }}
+            className="flex min-w-0 flex-col items-center gap-y-[50px] overflow-hidden min-[744px]:max-lg:mx-auto min-[744px]:max-lg:grid min-[744px]:max-lg:w-[646px] min-[744px]:max-lg:grid-cols-[repeat(2,313px)] min-[744px]:max-lg:justify-items-start min-[744px]:max-lg:gap-x-5 min-[744px]:max-lg:gap-y-[30px] min-[744px]:max-lg:overflow-visible lg:grid lg:items-stretch lg:justify-start lg:gap-x-5 lg:gap-y-5 lg:overflow-visible lg:[grid-template-columns:repeat(auto-fill,313px)]"
             data-gsap-stagger-group
           >
             {visibleCourses.map((tile) => (
               <div
                 key={tile.id}
-                className="w-[334px] max-w-[334px] shrink-0 overflow-hidden lg:w-[313px] lg:max-w-none"
+                className="w-[334px] max-w-[334px] shrink-0 overflow-hidden min-[744px]:max-lg:w-[313px] min-[744px]:max-lg:max-w-[313px] lg:w-[313px] lg:max-w-none"
               >
                 <LearnPopularFigmaTile
                   {...tile}

@@ -3,8 +3,8 @@ import { isPoolExhaustedText, silencePoolErrors } from "@/server/db/silence-pool
 
 silencePoolErrors();
 
-const CONNECTION_LIMIT = 1;
 const isDev = process.env.NODE_ENV !== "production";
+const CONNECTION_LIMIT = isDev ? 5 : 1;
 
 function stripEnvValue(raw: string): string {
   let s = raw.trim().replace(/^\uFEFF/, "");
@@ -28,18 +28,6 @@ function errorText(error: unknown): string {
 
 function isPoolError(error: unknown): boolean {
   return isPoolExhaustedText(errorText(error));
-}
-
-function isUnreachableDbError(error: unknown): boolean {
-  const text = errorText(error);
-  return (
-    isPoolError(error) ||
-    text.includes("Can't reach database server") ||
-    text.includes("P1001") ||
-    text.includes("P1002") ||
-    text.includes("Timed out fetching a new connection") ||
-    text.includes("Connection terminated unexpectedly")
-  );
 }
 
 function emptyQueryResult(operation: string): unknown {
@@ -94,7 +82,7 @@ function rewriteRuntimeUrl(connectionString: string): string {
   const query = qIndex === -1 ? "" : pathAndQuery.slice(qIndex + 1);
   const params = new URLSearchParams(query);
   params.set("connection_limit", String(CONNECTION_LIMIT));
-  params.set("pool_timeout", isDev ? "3" : "20");
+  params.set("pool_timeout", "20");
   if (port === "6543") {
     params.set("pgbouncer", "true");
   }
@@ -102,7 +90,7 @@ function rewriteRuntimeUrl(connectionString: string): string {
     params.set("sslmode", "require");
   }
   if (!params.get("connect_timeout")) {
-    params.set("connect_timeout", isDev ? "3" : "10");
+    params.set("connect_timeout", "10");
   }
 
   return `${protocol}${userinfo}${host}:${port}${path}?${params.toString()}`;
@@ -186,7 +174,7 @@ function createClient(): PrismaClient {
         try {
           return await query(args);
         } catch (error) {
-          if (!isUnreachableDbError(error)) throw error;
+          if (!isPoolError(error)) throw error;
           globalForPrisma.prismaPoolBroken = true;
           return emptyQueryResult(operation);
         }

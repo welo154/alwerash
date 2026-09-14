@@ -20,7 +20,8 @@ const TABLET_SEARCH_ICON = 26;
 const TABLET_SEARCH_TOP = 31 - 7;
 const TABLET_SEARCH_RIGHT = 74;
 const TABLET_SEARCH_OPEN_RIGHT = 28;
-const TABLET_SEARCH_BAR = { width: 491, height: 66 } as const;
+const TABLET_SEARCH_BAR_HOME = { width: 491, height: 54 } as const;
+const TABLET_SEARCH_BAR_SITE = { width: 491, height: 54 } as const;
 const TABLET_SEARCH_BAR_GAP = 10;
 const TABLET_MENU_GAP = 21;
 const TABLET_MENU = { width: 31, height: 21 } as const;
@@ -70,13 +71,26 @@ export function MobileSiteNavLogo({
 export function MobileSiteNavActions({
   outlinedSearch = false,
   variant = "mobile",
+  tabletSearch = "home",
 }: {
   outlinedSearch?: boolean;
   variant?: "mobile" | "tablet";
+  tabletSearch?: "home" | "site";
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  /** Keep the field clipped until the width tween finishes so open matches close. */
+  const [searchClipDone, setSearchClipDone] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!searchOpen) {
+      setSearchClipDone(false);
+      return;
+    }
+    const id = window.setTimeout(() => setSearchClipDone(true), 300);
+    return () => window.clearTimeout(id);
+  }, [searchOpen]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -100,6 +114,7 @@ export function MobileSiteNavActions({
   }, [searchOpen]);
 
   const isTablet = variant === "tablet";
+  const tabletBar = tabletSearch === "site" ? TABLET_SEARCH_BAR_SITE : TABLET_SEARCH_BAR_HOME;
   const searchIconSize = isTablet ? TABLET_SEARCH_ICON : SEARCH_ICON_SIZE;
   const searchIconClosedRight = isTablet ? TABLET_SEARCH_RIGHT : 58;
   const searchIconOpenRight = isTablet
@@ -117,13 +132,13 @@ export function MobileSiteNavActions({
         : 17 + searchIconSize + 4
     : searchIconClosedRight + searchIconSize + 4;
   const searchBarWidth = isTablet
-    ? TABLET_SEARCH_BAR.width
+    ? tabletBar.width
     : outlinedSearch
       ? 192
       : 206;
-  const searchBarHeight = isTablet ? TABLET_SEARCH_BAR.height : SEARCH_BAR_HEIGHT;
+  const searchBarHeight = isTablet ? tabletBar.height : SEARCH_BAR_HEIGHT;
   const searchBarTop = isTablet
-    ? TABLET_SEARCH_TOP + (TABLET_SEARCH_ICON - TABLET_SEARCH_BAR.height) / 2 - 1
+    ? TABLET_SEARCH_TOP + (TABLET_SEARCH_ICON - tabletBar.height) / 2 - 1
     : SEARCH_BAR_TOP;
   const searchIconTop = isTablet
     ? TABLET_SEARCH_TOP
@@ -135,7 +150,9 @@ export function MobileSiteNavActions({
   return (
     <div ref={actionsRef} className="pointer-events-none absolute inset-0 z-[80] overflow-visible">
       <div
-        className="absolute z-[90] overflow-hidden"
+        className={`absolute z-[90] ${
+          isTablet && searchOpen && searchClipDone ? "overflow-visible" : "overflow-hidden"
+        }`}
         style={{
           top: searchBarTop,
           right: searchBarRight,
@@ -153,6 +170,7 @@ export function MobileSiteNavActions({
           <SearchBar
             variant="mobileHeader"
             layout={isTablet ? "tablet" : "mobile"}
+            tabletSearch={tabletSearch}
             autoFocus={searchOpen}
             expanded={searchOpen}
             outlined={outlinedSearch}
@@ -237,9 +255,11 @@ export function MobileSiteNavActions({
 export function MobileSiteNavBar({
   homeHref = "/",
   className,
+  tabletSearch = "site",
 }: {
   homeHref?: string;
   className?: string;
+  tabletSearch?: "home" | "site";
 }) {
   return (
     <div className={`relative w-full ${className ?? ""}`}>
@@ -258,7 +278,7 @@ export function MobileSiteNavBar({
         }}
       >
         <MobileSiteNavLogo homeHref={homeHref} variant="tablet" />
-        <MobileSiteNavActions variant="tablet" />
+        <MobileSiteNavActions variant="tablet" tabletSearch={tabletSearch} />
       </div>
     </div>
   );

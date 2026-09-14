@@ -32,17 +32,15 @@ function FilterChevron({ open }: { open: boolean }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="13"
-      height="6"
-      viewBox="0 0 15 8"
+      viewBox="0 0 17 8"
       fill="none"
       aria-hidden
-      className={`shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+      className={`shrink-0 w-[13px] h-[6px] min-[744px]:max-lg:h-[8px] min-[744px]:max-lg:w-[17px] transition-transform duration-150 ${open ? "rotate-180" : ""}`}
     >
       <path
-        d="M0.599609 0.599609L7.09961 6.59961L13.5996 0.599609"
-        stroke="black"
-        strokeWidth="1.2"
+        d="M1 1L8.5 7L16 1"
+        className="stroke-[1.2px] min-[744px]:max-lg:stroke-[1.5px]"
+        stroke="var(--Black, #000)"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -68,14 +66,8 @@ function FilterPill({
       aria-haspopup="menu"
       aria-expanded={open}
       onClick={onToggle}
-      className="box-border inline-flex h-[26px] min-w-[101px] items-center justify-center gap-[7px] rounded-[8px] border-[0.3px] border-black bg-white px-4 text-black"
-      style={{
-        fontFamily: pangeaFont,
-        fontSize: "14px",
-        fontStyle: "normal",
-        fontWeight: 400,
-        lineHeight: "19.6px",
-      }}
+      className="box-border inline-flex h-[26px] min-w-[101px] items-center justify-center gap-[7px] rounded-[8px] border-[0.3px] border-[color:var(--Black,#000)] bg-[color:var(--White,#FFF)] px-4 text-center text-[14px] font-normal leading-[19.6px] text-[color:var(--Black,#000)] min-[744px]:max-lg:h-[32px] min-[744px]:max-lg:w-[200px] min-[744px]:max-lg:min-w-[200px] min-[744px]:max-lg:justify-between min-[744px]:max-lg:gap-0 min-[744px]:max-lg:px-4 min-[744px]:max-lg:text-[16px]"
+      style={{ fontFamily: pangeaFont }}
     >
       <span className="text-center">{label}</span>
       <FilterChevron open={open} />
@@ -154,7 +146,7 @@ export function LearnCoursesPageFilterBar({
     "absolute top-[calc(100%+8px)] z-50 max-h-[280px] min-w-[220px] overflow-y-auto rounded-[8px] border border-black bg-white py-2 shadow-[4px_4px_10px_0_rgba(0,0,0,0.25)]";
 
   return (
-    <div ref={rootRef} className="flex justify-center gap-[10px]">
+    <div ref={rootRef} className="flex justify-center gap-[10px] min-[744px]:max-lg:gap-[11px]">
       <div className="relative">
         <FilterPill
           label="Courses"

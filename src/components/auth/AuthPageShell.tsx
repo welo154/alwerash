@@ -15,27 +15,43 @@ import {
 const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
 
 
+function AuthHeadlineWerash({ fontSize }: { fontSize: number }) {
+  return (
+    <span
+      style={{
+        color: "#000",
+        fontFamily: pangeaFont,
+        fontSize,
+        fontStyle: "italic",
+        fontWeight: 700,
+        lineHeight: "120%",
+      }}
+    >
+      Werash
+    </span>
+  );
+}
+
 function AuthLoginMobileBrand() {
   return (
     <div className="flex w-full shrink-0 flex-col items-center lg:hidden">
       <Link
         href="/"
         aria-label="Alwerash home"
-        className="block shrink-0"
-        style={{ width: 121, height: 36 }}
+        className="block h-[36px] w-[121px] shrink-0 min-[744px]:h-[65.6px] min-[744px]:w-[216px]"
       >
         <Image
           src={AUTH_LOGO_IMAGE}
           alt="alwerash."
-          width={121}
-          height={36}
-          className="h-[36px] w-[121px] object-contain"
+          width={216}
+          height={66}
+          className="h-full w-full object-contain"
           priority
           unoptimized
         />
       </Link>
       <p
-        className="m-0 mt-[20px] w-[334px] max-w-full text-center text-black"
+        className="m-0 mt-[20px] w-[334px] max-w-full text-center text-black min-[744px]:hidden"
         style={{
           fontFamily: pangeaFont,
           fontSize: 20,
@@ -46,18 +62,22 @@ function AuthLoginMobileBrand() {
       >
         Master new skills, build a professional portfolio, and learn from the best in the
         industry. Only at Al
-        <span
-          style={{
-            color: "#000",
-            fontFamily: pangeaFont,
-            fontSize: 20,
-            fontStyle: "italic",
-            fontWeight: 700,
-            lineHeight: "120%",
-          }}
-        >
-          Werash
-        </span>
+        <AuthHeadlineWerash fontSize={20} />
+      </p>
+      <p
+        className="m-0 mt-[20px] hidden w-[622px] max-w-full text-center text-black min-[744px]:block"
+        style={{
+          color: "#000",
+          fontFamily: pangeaFont,
+          fontSize: 32,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+        }}
+      >
+        Master new skills, build a professional portfolio, and learn from the best in the
+        industry. Only at Al
+        <AuthHeadlineWerash fontSize={32} />
       </p>
     </div>
   );
@@ -65,8 +85,8 @@ function AuthLoginMobileBrand() {
 
 function AuthLoginMobileSocialRow() {
   return (
-    <div className="mt-[22px] mb-[18px] flex shrink-0 items-center justify-center lg:hidden">
-      <div className="flex items-center" style={{ gap: 8 }}>
+    <div className="auth-login-social-row mt-[22px] mb-[18px] flex shrink-0 items-center justify-center lg:hidden">
+      <div className="auth-login-social-icons flex items-center" style={{ gap: 8 }}>
         {AUTH_SOCIAL_LINKS.map((item) => (
           <a
             key={item.label}
@@ -74,7 +94,7 @@ function AuthLoginMobileSocialRow() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={item.label}
-            className="shrink-0"
+            className="auth-login-social-icon shrink-0"
             style={{
               width: 35,
               height: 37,
@@ -85,7 +105,7 @@ function AuthLoginMobileSocialRow() {
       </div>
       <button
         type="button"
-        className="flex shrink-0 items-center justify-center bg-white text-black"
+        className="auth-login-lang flex shrink-0 items-center justify-center bg-white text-black"
         style={{
           marginLeft: 37,
           width: 121,
@@ -135,8 +155,8 @@ export function AuthPageShell({
   const mobileChrome = Boolean(mobileLayout);
   const mobileGreenHeightClass =
     mobileLayout === "register"
-      ? "max-lg:h-[902px] max-lg:shrink-0"
-      : "max-lg:h-[534px] max-lg:shrink-0";
+      ? "max-[743px]:h-[902px] min-[744px]:max-lg:h-[1112px] max-lg:shrink-0"
+      : "max-[743px]:h-[534px] min-[744px]:max-lg:h-[763px] max-lg:shrink-0";
   const desktopGreenClass = "lg:mt-0 lg:h-[676px] lg:w-[790px] lg:shrink-0 lg:p-0";
   const desktopInnerPadClass =
     mobileLayout === "login"
@@ -174,7 +194,7 @@ export function AuthPageShell({
             autoScroll={mobileLayout === "register"}
             className={`box-border ${
               mobileChrome
-                ? `auth-green-panel max-lg:mt-[22px] max-lg:w-[382px] max-lg:max-w-full max-lg:p-0 ${mobileGreenHeightClass} ${desktopGreenClass}`
+                ? `auth-green-panel max-lg:max-w-full max-[743px]:mt-[22px] max-[743px]:w-[382px] max-[743px]:p-0 min-[744px]:max-lg:mt-[52px] min-[744px]:max-lg:w-[732px] min-[744px]:max-lg:px-[59px] min-[744px]:max-lg:py-[49px] ${mobileGreenHeightClass} ${desktopGreenClass}`
                 : ""
             }`}
             innerClassName={mobileChrome ? desktopInnerPadClass : undefined}
@@ -199,7 +219,7 @@ export function AuthPageShell({
 
         {mobileChrome ? (
           <p
-            className="m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
+            className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
             style={{
               fontFamily: pangeaFont,
               fontSize: 14,

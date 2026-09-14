@@ -34,26 +34,47 @@ const MOBILE_SVG_W = 473;
 const MOBILE_SVG_LEFT_PX = 6;
 const MOBILE_FEATURED_CARD_W = 307;
 
+/** iPad green shell on `/course` — 1126×646, bleeds past the right edge. */
+const TABLET_PANEL_W = 1126;
+const TABLET_PANEL_H = 646;
+const TABLET_SVG_LEFT_PX = 6;
+const TABLET_CARD_W = 323;
+const TABLET_CARD_GAP_PX = 30;
+
 const MOBILE_SHELL_PATH =
   "M418 0C448.376 0 473 24.6243 473 55V619C473 649.376 448.376 674 418 674H55C24.6243 674 0 649.376 0 619V122.967C0 95.3526 22.3858 72.9668 50 72.9668H265.41C289.711 72.9668 309.41 53.2673 309.41 28.9668C309.41 12.9689 322.379 0 338.377 0H418Z";
+
+const TABLET_SHELL_PATH =
+  "M1071 0C1101.38 0 1126 24.6243 1126 55V591C1126 621.376 1101.38 646 1071 646H55C24.6243 646 1.44977e-07 621.376 0 591V122.967C0 95.3526 22.3858 72.9668 50 72.9668H414.41C438.711 72.9668 458.41 53.2673 458.41 28.9668C458.41 12.9689 471.379 0 487.377 0H1071Z";
 
 const DESKTOP_SHELL_PATH =
   "M1046 0C1076.38 3.83335e-06 1101 24.6243 1101 55V591C1101 621.376 1076.38 646 1046 646H55C24.6243 646 1.44977e-07 621.376 0 591V122.967C0 95.3526 22.3858 72.9668 50 72.9668H414.41C438.711 72.9668 458.41 53.2673 458.41 28.9668C458.41 12.9689 471.379 0 487.377 0H1046Z";
 
 export type LearnFeaturedSlide = { id: string; cardProps: CatalogShowcaseCardProps };
 
-function useIsLgUp() {
-  const [isLgUp, setIsLgUp] = useState(false);
+type FeaturedBp = "phone" | "tablet" | "desktop";
+
+function useFeaturedBreakpoint() {
+  const [bp, setBp] = useState<FeaturedBp>("phone");
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsLgUp(media.matches);
+    const desktop = window.matchMedia("(min-width: 1036px)");
+    const tablet = window.matchMedia("(min-width: 744px)");
+    const update = () => {
+      if (desktop.matches) setBp("desktop");
+      else if (tablet.matches) setBp("tablet");
+      else setBp("phone");
+    };
     update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    desktop.addEventListener("change", update);
+    tablet.addEventListener("change", update);
+    return () => {
+      desktop.removeEventListener("change", update);
+      tablet.removeEventListener("change", update);
+    };
   }, []);
 
-  return isLgUp;
+  return bp;
 }
 
 export function LearnFeaturedCoursesPanel({
@@ -65,7 +86,9 @@ export function LearnFeaturedCoursesPanel({
 }) {
   const swiperRef = useRef<SwiperType | null>(null);
   const bleedWrapRef = useRef<HTMLDivElement | null>(null);
-  const isLgUp = useIsLgUp();
+  const bp = useFeaturedBreakpoint();
+  const isLgUp = bp === "desktop";
+  const isTablet = bp === "tablet";
   const bleedWidth = useBleedRightToViewport(bleedWrapRef, isLgUp);
   const {
     scrollAreaRef,
@@ -82,12 +105,19 @@ export function LearnFeaturedCoursesPanel({
     if (!swiper) return;
     swiper.update();
     handleNavSync(swiper);
-  }, [handleNavSync, slides.length, bleedWidth, isLgUp]);
+  }, [handleNavSync, slides.length, bleedWidth, bp]);
 
-  const cardW = isLgUp ? CATALOG_SHOWCASE_CARD_W : MOBILE_FEATURED_CARD_W;
+  const cardW = isLgUp
+    ? CATALOG_SHOWCASE_CARD_W
+    : isTablet
+      ? TABLET_CARD_W
+      : MOBILE_FEATURED_CARD_W;
   const cardH = isLgUp
     ? CATALOG_SHOWCASE_CARD_H
-    : CATALOG_SHOWCASE_CARD_H * (MOBILE_FEATURED_CARD_W / CATALOG_SHOWCASE_CARD_W);
+    : isTablet
+      ? CATALOG_SHOWCASE_CARD_H * (TABLET_CARD_W / CATALOG_SHOWCASE_CARD_W)
+      : CATALOG_SHOWCASE_CARD_H * (MOBILE_FEATURED_CARD_W / CATALOG_SHOWCASE_CARD_W);
+  const cardGap = isTablet ? TABLET_CARD_GAP_PX : learnCarouselSwiperBehavior.spaceBetween;
 
   const cardSwiperStyle = {
     ["--landing-showcase-card-w" as string]: `${cardW}px`,
@@ -97,21 +127,21 @@ export function LearnFeaturedCoursesPanel({
   return (
     <div
       ref={bleedWrapRef}
-      className="relative max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] max-lg:h-[674px] max-lg:overflow-x-visible max-lg:overflow-y-visible lg:ml-0 lg:min-w-0 lg:overflow-x-clip"
+      className="relative max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] max-[743px]:h-[674px] min-[744px]:max-lg:h-[646px] max-lg:overflow-x-visible max-lg:overflow-y-visible lg:ml-0 lg:min-w-0 lg:overflow-x-clip"
       style={
         isLgUp && bleedWidth
           ? { width: bleedWidth, height: DESKTOP_PANEL_H }
           : undefined
       }
     >
-      {/* Mobile shell — 6px from viewport left; extends past the right edge. */}
+      {/* Phone shell — 6px from viewport left; extends past the right edge. */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width={MOBILE_SVG_W}
         height={MOBILE_PANEL_H}
         viewBox="0 0 473 674"
         fill="none"
-        className="pointer-events-none absolute top-0 z-0 block lg:hidden"
+        className="pointer-events-none absolute top-0 z-0 hidden max-[743px]:block"
         style={{
           left: MOBILE_SVG_LEFT_PX,
           width: MOBILE_SVG_W,
@@ -120,6 +150,24 @@ export function LearnFeaturedCoursesPanel({
         aria-hidden
       >
         <path d={MOBILE_SHELL_PATH} fill="var(--Green, #8AF396)" />
+      </svg>
+
+      {/* iPad shell — 1126×646, bleeds past the right edge. */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={TABLET_PANEL_W}
+        height={TABLET_PANEL_H}
+        viewBox={`0 0 ${TABLET_PANEL_W} ${TABLET_PANEL_H}`}
+        fill="none"
+        className="pointer-events-none absolute top-0 z-0 hidden min-[744px]:max-lg:block"
+        style={{
+          left: TABLET_SVG_LEFT_PX,
+          width: TABLET_PANEL_W,
+          height: TABLET_PANEL_H,
+        }}
+        aria-hidden
+      >
+        <path d={TABLET_SHELL_PATH} fill="var(--Green, #8AF396)" />
       </svg>
 
       {/* Desktop shell */}
@@ -142,7 +190,7 @@ export function LearnFeaturedCoursesPanel({
       </svg>
 
       <div
-        className="absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-lg:pt-[136px] max-lg:pb-[50px] max-lg:pl-[30px] lg:pt-[116px] lg:pb-[42px] lg:pl-[81px]"
+        className="absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-[743px]:pt-[136px] max-[743px]:pb-[50px] max-[743px]:pl-[30px] min-[744px]:max-lg:justify-end min-[744px]:max-lg:pb-[41px] min-[744px]:max-lg:pl-[48px] lg:pt-[116px] lg:pb-[42px] lg:pl-[81px]"
       >
         <div
           ref={scrollAreaRef}
@@ -159,6 +207,7 @@ export function LearnFeaturedCoursesPanel({
             dir="ltr"
             modules={[Mousewheel]}
             {...learnCarouselSwiperBehavior}
+            spaceBetween={cardGap}
             mousewheel={learnCarouselMousewheel}
             className="learn-featured-swiper landing-showcase-swiper landing-showcase-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
             onSwiper={(swiper) => {
@@ -201,23 +250,22 @@ export function LearnFeaturedCoursesPanel({
 
       <div className="pointer-events-none absolute left-0 top-0 z-30 w-full min-w-0">
         <div
-          className="pointer-events-auto absolute inline-flex w-fit items-center gap-[11px] max-lg:left-[30px] max-lg:top-[30px] lg:left-[57px] lg:top-[10px] lg:gap-[30px]"
+          className="pointer-events-auto absolute inline-flex w-fit flex-row items-center gap-[11px] max-[743px]:left-[30px] max-[743px]:top-[30px] min-[744px]:max-lg:left-[61px] min-[744px]:max-lg:top-[20px] min-[744px]:max-lg:h-[41px] min-[744px]:max-lg:gap-[29px] lg:left-[57px] lg:top-[10px] lg:gap-[30px]"
         >
-          <div className="inline-flex w-fit shrink-0 items-center rounded-[44px] bg-transparent">
-            <h1
-              className="m-0 w-fit uppercase leading-[120%] text-black"
-              style={{ fontFamily: pangeaFont }}
-            >
-              <span className="text-[24px] font-semibold italic lg:text-[36px]">FEATURED</span>
-              <span className="text-[24px] font-normal not-italic lg:text-[36px]">
-                {" "}
-                COURSES
-              </span>
-            </h1>
-          </div>
+          <h1
+            className="m-0 flex w-fit items-center uppercase leading-[120%] text-[color:var(--Black,#000)] min-[744px]:max-lg:h-[41px] min-[744px]:max-lg:leading-none"
+            style={{ fontFamily: pangeaFont }}
+          >
+            <span className="text-[24px] font-semibold italic min-[744px]:max-lg:text-[32px] min-[744px]:max-lg:font-bold lg:text-[36px]">
+              FEATURED
+            </span>
+            <span className="text-[24px] font-normal not-italic min-[744px]:max-lg:text-[32px] lg:text-[36px]">
+              {"\u00A0"}COURSES
+            </span>
+          </h1>
           <button
             type="button"
-            className="inline-flex size-[28px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 lg:size-[46px]"
+            className="inline-flex size-[28px] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 min-[744px]:max-lg:size-[41px] lg:size-[46px]"
             aria-label="Next featured track"
             disabled={atEnd}
             suppressHydrationWarning
@@ -234,7 +282,7 @@ export function LearnFeaturedCoursesPanel({
               viewBox="0 0 48 48"
               fill="none"
               aria-hidden
-              className="block size-[28px] lg:size-full"
+              className="block size-[28px] min-[744px]:max-lg:size-[41px] lg:size-full"
             >
               <path
                 d="M24 47C36.7025 47 47 36.7025 47 24C47 11.2975 36.7025 1 24 1C11.2975 1 1 11.2975 1 24C1 36.7025 11.2975 47 24 47Z"

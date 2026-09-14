@@ -29,7 +29,7 @@ export type LandingMentorCardProps = {
   heightPx?: number;
   /** Fill grid cell width; height follows {@link MENTOR_CARD_ASPECT}. */
   fillWidth?: boolean;
-  layout?: "desktop" | "mobile";
+  layout?: "desktop" | "mobile" | "tablet";
 };
 
 const MENTOR_CARD_ASPECT = 383 / 357;
@@ -48,6 +48,7 @@ export function LandingMentorCard({
   layout = "desktop",
 }: LandingMentorCardProps) {
   const isMobile = layout === "mobile";
+  const isTablet = layout === "tablet";
   const cardWidth = isMobile ? MOBILE_CARD_WIDTH : (widthPx ?? 383);
   const cardHeight = isMobile ? MOBILE_CARD_HEIGHT : (heightPx ?? 357);
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
@@ -63,26 +64,22 @@ export function LandingMentorCard({
   const scaleX = cardWidth / 383;
   const scaleY = cardHeight / 357;
   const badgeLabel = variant === "popular" ? "POPULAR" : "WATCHED";
-  const badgeSecondWordStyle = isMobile
-    ? {
-        color: "var(--Black, #000)",
-        fontFamily: pangeaFont,
-        fontSize: "20px",
-        fontStyle: "italic" as const,
-        fontWeight: 700,
-        lineHeight: "99%",
-      }
-    : { fontStyle: "italic" as const };
-  const badgeFirstWordStyle = isMobile
-    ? {
-        color: "var(--Black, #000)",
-        fontFamily: pangeaFont,
-        fontSize: "20px",
-        fontStyle: "normal" as const,
-        fontWeight: 700,
-        lineHeight: "99%",
-      }
-    : { fontStyle: "normal" as const };
+  const badgeSecondWordStyle = {
+    color: "var(--Black, #000)",
+    fontFamily: pangeaFont,
+    fontSize: 20,
+    fontStyle: "italic" as const,
+    fontWeight: 700,
+    lineHeight: "99%",
+  };
+  const badgeFirstWordStyle = {
+    color: "var(--Black, #000)",
+    fontFamily: pangeaFont,
+    fontSize: 20,
+    fontStyle: "normal" as const,
+    fontWeight: 700,
+    lineHeight: "99%",
+  };
 
   const card = (
     <article
@@ -158,33 +155,7 @@ export function LandingMentorCard({
           />
         </g>
 
-        <foreignObject
-          x={24 * scaleX + (isMobile && variant === "watched" ? 20 : 0)}
-          y={10 * scaleY}
-          width={131 * scaleX}
-          height={52 * scaleY}
-        >
-          <div
-            className="text-black transition-colors duration-200 group-hover:text-[#004B3C]"
-            style={{
-              fontFamily: pangeaFont,
-              fontSize: isMobile ? "20px" : "24px",
-              fontWeight: 700,
-              lineHeight: "99%",
-              width: isMobile ? "112px" : "131px",
-              maxWidth: isMobile ? "112px" : "131px",
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "flex-start",
-              textAlign: "left",
-              ...(isMobile ? { color: "var(--Black, #000)" } : {}),
-            }}
-          >
-            <span style={badgeFirstWordStyle}>MOST </span>
-            <span style={badgeSecondWordStyle}>{badgeLabel}</span>
-          </div>
-        </foreignObject>
-
+        {!isTablet ? (
         <foreignObject x={27 * scaleX} y={0} width={356 * scaleX} height={cardHeight}>
           <div
             style={{
@@ -244,7 +215,75 @@ export function LandingMentorCard({
             </div>
           </div>
         </foreignObject>
+        ) : null}
       </svg>
+
+      <div
+        className="pointer-events-none absolute z-[2] flex flex-col items-start overflow-visible text-left text-black transition-colors duration-200 group-hover:text-[#004B3C]"
+        style={{
+          left: 24 * scaleX,
+          top: 10 * scaleY,
+        }}
+      >
+        <span style={badgeFirstWordStyle}>MOST</span>
+        <span style={badgeSecondWordStyle}>{badgeLabel}</span>
+      </div>
+
+      {isTablet ? (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start"
+          style={{
+            paddingLeft: 27 * scaleX,
+            paddingRight: 16,
+            paddingBottom: 38 * scaleY,
+          }}
+        >
+          <div
+            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            style={{
+              color: "var(--White, #FFF)",
+              fontFamily: pangeaFont,
+              fontSize: 20,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              opacity: 0.6,
+              marginBottom: 4,
+            }}
+          >
+            MEET
+          </div>
+          <div
+            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            style={{
+              color: "var(--White, #FFF)",
+              fontFamily: pangeaFont,
+              fontSize: 24,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              width: 120,
+              marginBottom: 6,
+              overflowWrap: "break-word",
+            }}
+          >
+            {name}
+          </div>
+          <div
+            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            style={{
+              color: "var(--White, #FFF)",
+              fontFamily: pangeaFont,
+              fontSize: 20,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {profession}
+          </div>
+        </div>
+      ) : null}
 
       <span className="sr-only">
         {name}, {profession}.

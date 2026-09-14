@@ -129,6 +129,7 @@ export function ProfileSectionTabs({
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                fontVariationSettings: '"wght" 400',
                 cursor: "pointer",
               }}
             >
@@ -142,10 +143,16 @@ export function ProfileSectionTabs({
 
   return (
     <div id="profile-sections">
-      <div className="lg:hidden" style={{ marginTop: 23 }}>
+      <div className="min-[744px]:hidden" style={{ marginTop: 23 }}>
         <MobileRule />
         {renderTabs({ fontSize: 20, gap: 61, paddingLeft: 30, height: 56 })}
         <MobileRule />
+      </div>
+
+      <div className="mt-[23px] hidden min-[744px]:block lg:hidden">
+        <FullBleedRule />
+        {renderTabs({ fontSize: 24, gap: 61, paddingLeft: 61, height: 56 })}
+        <FullBleedRule />
       </div>
 
       <div className="hidden lg:block">
@@ -158,7 +165,7 @@ export function ProfileSectionTabs({
         <ContinueLearningSection
           courses={continueLearningCourses}
           showTopRule={false}
-          className="max-lg:mt-[40px] max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
+          className="max-[743px]:mt-[40px] max-[743px]:pb-[40px] min-[744px]:max-lg:mt-[48px] min-[744px]:max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
         />
       ) : null}
 
@@ -167,7 +174,7 @@ export function ProfileSectionTabs({
           weeklyActivity={weeklyActivity}
           activityHighlightDayIndex={activityHighlightDayIndex}
           learningProgressPercent={learningProgressPercent}
-          className="max-lg:mt-[40px] max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
+          className="max-[743px]:mt-[40px] max-[743px]:pb-[40px] min-[744px]:max-lg:mt-[48px] min-[744px]:max-lg:pb-[40px] lg:mt-[67px] lg:pb-16"
         />
       ) : null}
 

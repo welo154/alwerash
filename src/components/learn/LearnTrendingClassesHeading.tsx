@@ -18,9 +18,10 @@ export function LearnTrendingClassesHeading({
       nextAriaLabel="Next recently added class"
       arrowGapPx={25}
       arrowSize={47}
-      className="max-lg:-ml-6 max-lg:pl-[30px] sm:max-lg:-ml-8"
+      className="max-[743px]:-ml-6 max-[743px]:pl-[30px] sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:pl-[61px]"
       pillClassName="max-lg:bg-transparent max-lg:px-0 lg:px-[22px]"
-      arrowGapClassName="gap-[17px] lg:gap-[25px]"
+      arrowGapClassName="max-[743px]:gap-[17px] min-[744px]:max-lg:gap-[23px] lg:gap-[25px]"
+      tabletArrowSize={41}
     />
   );
 }

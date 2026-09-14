@@ -906,6 +906,47 @@ const MOBILE_SCHEDULE_LAYOUT = {
   eventRight: 34,
   eventWidth: 147,
   eventHeight: 74,
+  eventTitleWidth: 118,
+  timeLinePx: 18,
+  dayFont: 32,
+  monthFont: 18,
+  timeFont: 18,
+  eventTitleFont: 16,
+  eventMetaFont: 14,
+  eventLineHeight: 23,
+  eventRadius: 24,
+  eventPadX: 16,
+} as const;
+
+const TABLET_SCHEDULE_SX = 445 / 315;
+const TABLET_SCHEDULE_SY = 401 / 305;
+
+function roundPx(n: number) {
+  return Math.round(n * 10) / 10;
+}
+
+const TABLET_SCHEDULE_LAYOUT = {
+  dayTop: roundPx(MOBILE_SCHEDULE_LAYOUT.dayTop * TABLET_SCHEDULE_SY),
+  dayLeft: roundPx(MOBILE_SCHEDULE_LAYOUT.dayLeft * TABLET_SCHEDULE_SX),
+  monthTop: roundPx(MOBILE_SCHEDULE_LAYOUT.monthTop * TABLET_SCHEDULE_SY),
+  monthRight: roundPx(MOBILE_SCHEDULE_LAYOUT.monthRight * TABLET_SCHEDULE_SX),
+  hrTop: roundPx(MOBILE_SCHEDULE_LAYOUT.hrTop * TABLET_SCHEDULE_SY),
+  timesTop: roundPx(MOBILE_SCHEDULE_LAYOUT.timesTop * TABLET_SCHEDULE_SY),
+  timesLeft: roundPx(MOBILE_SCHEDULE_LAYOUT.timesLeft * TABLET_SCHEDULE_SX),
+  timeGap: roundPx(MOBILE_SCHEDULE_LAYOUT.timeGap * TABLET_SCHEDULE_SY),
+  eventRight: roundPx(MOBILE_SCHEDULE_LAYOUT.eventRight * TABLET_SCHEDULE_SX),
+  eventWidth: roundPx(MOBILE_SCHEDULE_LAYOUT.eventWidth * TABLET_SCHEDULE_SX),
+  eventHeight: roundPx(MOBILE_SCHEDULE_LAYOUT.eventHeight * TABLET_SCHEDULE_SY),
+  eventTitleWidth: roundPx(MOBILE_SCHEDULE_LAYOUT.eventTitleWidth * TABLET_SCHEDULE_SX),
+  timeLinePx: roundPx(MOBILE_SCHEDULE_LAYOUT.timeLinePx * TABLET_SCHEDULE_SY),
+  dayFont: roundPx(MOBILE_SCHEDULE_LAYOUT.dayFont * TABLET_SCHEDULE_SY),
+  monthFont: roundPx(MOBILE_SCHEDULE_LAYOUT.monthFont * TABLET_SCHEDULE_SY),
+  timeFont: roundPx(MOBILE_SCHEDULE_LAYOUT.timeFont * TABLET_SCHEDULE_SY),
+  eventTitleFont: roundPx(MOBILE_SCHEDULE_LAYOUT.eventTitleFont * TABLET_SCHEDULE_SY),
+  eventMetaFont: roundPx(MOBILE_SCHEDULE_LAYOUT.eventMetaFont * TABLET_SCHEDULE_SY),
+  eventLineHeight: roundPx(MOBILE_SCHEDULE_LAYOUT.eventLineHeight * TABLET_SCHEDULE_SY),
+  eventRadius: roundPx(MOBILE_SCHEDULE_LAYOUT.eventRadius * TABLET_SCHEDULE_SX),
+  eventPadX: roundPx(MOBILE_SCHEDULE_LAYOUT.eventPadX * TABLET_SCHEDULE_SX),
 } as const;
 
 function formatMobileScheduleDay(date: Date): string {
@@ -937,15 +978,25 @@ function mobileEventDuration(slot: ScheduleSlot): string {
   return slot.hourIndex === 0 ? "40mins" : "45mins";
 }
 
-function mobileEventTopPx(hourIndex: number): number {
-  const { timesTop, timeGap } = MOBILE_SCHEDULE_LAYOUT;
-  const timeLinePx = 18;
+function mobileEventTopPx(
+  hourIndex: number,
+  layout: { timesTop: number; timeGap: number; timeLinePx: number },
+): number {
+  const { timesTop, timeGap, timeLinePx } = layout;
   return timesTop + hourIndex * (timeLinePx + timeGap);
 }
 
-export function ActivityScheduleMobileCard() {
+export function ActivityScheduleMobileCard({
+  variant = "mobile",
+}: {
+  variant?: "mobile" | "tablet";
+}) {
   const [open, setOpen] = useState(false);
   const [today, setToday] = useState<Date | null>(null);
+  const isTablet = variant === "tablet";
+  const cardHeight = isTablet ? 401 : 305;
+  const cardWidth = isTablet ? 445 : 315;
+  const layout = isTablet ? TABLET_SCHEDULE_LAYOUT : MOBILE_SCHEDULE_LAYOUT;
 
   useEffect(() => {
     setToday(new Date());
@@ -956,8 +1007,8 @@ export function ActivityScheduleMobileCard() {
   const monthHeading = formatMobileScheduleMonthYear(scheduleDate);
   const activeSlot = pickScheduleSlotForDate(scheduleDate);
   const eventTop = Math.min(
-    mobileEventTopPx(activeSlot.hourIndex),
-    305 - MOBILE_SCHEDULE_LAYOUT.eventHeight - 8
+    mobileEventTopPx(activeSlot.hourIndex, layout),
+    cardHeight - layout.eventHeight - 8
   );
 
   return (
@@ -965,17 +1016,19 @@ export function ActivityScheduleMobileCard() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative box-border h-[305px] w-[315px] max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] border-[0.3px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
+        className={`relative box-border max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
+          isTablet ? "h-[401px] w-[445px] border" : "h-[305px] w-[315px] border-[0.3px]"
+        }`}
         aria-label="Activity schedule"
       >
         <p
           className="absolute m-0"
           style={{
-            top: MOBILE_SCHEDULE_LAYOUT.dayTop,
-            left: MOBILE_SCHEDULE_LAYOUT.dayLeft,
+            top: layout.dayTop,
+            left: layout.dayLeft,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "32px",
+            fontSize: layout.dayFont,
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
@@ -988,11 +1041,11 @@ export function ActivityScheduleMobileCard() {
         <p
           className="absolute m-0 text-center"
           style={{
-            top: MOBILE_SCHEDULE_LAYOUT.monthTop,
-            right: MOBILE_SCHEDULE_LAYOUT.monthRight,
+            top: layout.monthTop,
+            right: layout.monthRight,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "18px",
+            fontSize: layout.monthFont,
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
@@ -1006,8 +1059,8 @@ export function ActivityScheduleMobileCard() {
         <hr
           className="absolute left-0 m-0 border-0 bg-black"
           style={{
-            top: MOBILE_SCHEDULE_LAYOUT.hrTop,
-            width: 315,
+            top: layout.hrTop,
+            width: cardWidth,
             height: "0.2px",
           }}
           aria-hidden
@@ -1016,8 +1069,8 @@ export function ActivityScheduleMobileCard() {
         <div
           className="absolute"
           style={{
-            top: MOBILE_SCHEDULE_LAYOUT.timesTop,
-            left: MOBILE_SCHEDULE_LAYOUT.timesLeft,
+            top: layout.timesTop,
+            left: layout.timesLeft,
           }}
         >
           {MOBILE_SCHEDULE_TIMES.map((time, index) => (
@@ -1025,10 +1078,10 @@ export function ActivityScheduleMobileCard() {
               key={time}
               className="m-0"
               style={{
-                marginTop: index === 0 ? 0 : MOBILE_SCHEDULE_LAYOUT.timeGap,
+                marginTop: index === 0 ? 0 : layout.timeGap,
                 color: "var(--Black, #000)",
                 fontFamily: pangeaFont,
-                fontSize: "18px",
+                fontSize: layout.timeFont,
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
@@ -1043,23 +1096,24 @@ export function ActivityScheduleMobileCard() {
           className="absolute box-border flex flex-col items-center justify-center border-[0.3px] border-[var(--Black,#000)]"
           style={{
             top: eventTop,
-            right: MOBILE_SCHEDULE_LAYOUT.eventRight,
-            width: MOBILE_SCHEDULE_LAYOUT.eventWidth,
-            height: MOBILE_SCHEDULE_LAYOUT.eventHeight,
-            padding: "0 16px",
-            borderRadius: 24,
+            right: layout.eventRight,
+            width: layout.eventWidth,
+            height: layout.eventHeight,
+            padding: `0 ${layout.eventPadX}px`,
+            borderRadius: layout.eventRadius,
             background: "var(--Purple, #FF8CFF)",
           }}
         >
           <p
-            className="m-0 w-[118px] text-center"
+            className="m-0 text-center"
             style={{
+              width: layout.eventTitleWidth,
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
-              fontSize: "16px",
+              fontSize: layout.eventTitleFont,
               fontStyle: "normal",
               fontWeight: 500,
-              lineHeight: "23px",
+              lineHeight: `${layout.eventLineHeight}px`,
             }}
           >
             {mobileEventTitle(activeSlot)}
@@ -1069,10 +1123,10 @@ export function ActivityScheduleMobileCard() {
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
-              fontSize: "14px",
+              fontSize: layout.eventMetaFont,
               fontStyle: "normal",
               fontWeight: 400,
-              lineHeight: "23px",
+              lineHeight: `${layout.eventLineHeight}px`,
             }}
           >
             {mobileEventDuration(activeSlot)}

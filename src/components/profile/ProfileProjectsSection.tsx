@@ -1,5 +1,12 @@
+"use client";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
-import { MobileStudentRatingCard } from "@/components/students/StudentsRatingWorkSection";
+import {
+  MobileStudentRatingCard,
+  TabletStudentRatingCard,
+} from "@/components/students/StudentsRatingWorkSection";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -111,11 +118,11 @@ export function ProfileProjectsSection({
 
   return (
     <div
-      className={`max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px] lg:pr-[120px] ${className}`.trim()}
+      className={`max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px] lg:pr-[120px] ${className}`.trim()}
       aria-label="Projects"
     >
       <h2
-        className="m-0 uppercase lg:hidden"
+        className="m-0 hidden uppercase max-[743px]:block"
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -127,6 +134,21 @@ export function ProfileProjectsSection({
       >
         YOUR{" "}
         <span style={{ fontStyle: "italic", fontWeight: 700 }}>PROJECTS</span>
+      </h2>
+
+      <h2
+        className="m-0 hidden uppercase min-[744px]:max-lg:block"
+        style={{
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 32,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+        }}
+      >
+        YOUR{" "}
+        <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
       </h2>
 
       <h2
@@ -144,10 +166,30 @@ export function ProfileProjectsSection({
         <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
       </h2>
 
-      <div className="mt-[27px] flex flex-col items-center gap-[30px] pr-[30px] lg:hidden">
+      <div className="mt-[27px] flex flex-col items-center gap-[30px] pr-[30px] min-[744px]:hidden">
         {visible.map((card, idx) => (
           <MobileStudentRatingCard key={`${card.name}-${idx}`} card={card} />
         ))}
+      </div>
+
+      <div className="relative left-1/2 mt-[27px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:max-lg:block">
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={31}
+          slidesPerGroup={1}
+          slidesOffsetBefore={61}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          className="overflow-visible!"
+        >
+          {visible.map((card, idx) => (
+            <SwiperSlide key={`${card.name}-${idx}`} className="w-[621px]!">
+              <TabletStudentRatingCard card={card} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
 
       <div

@@ -396,3 +396,173 @@ export function ProfileInfoPanelMobile({
     </div>
   );
 }
+
+export function ProfileInfoPanelTablet({
+  initialName,
+  email,
+  initialProfession,
+  initialBio,
+  initialSkills,
+  onProfessionChange,
+}: ProfileInfoPanelProps) {
+  const [name, setName] = useState(initialName);
+  const [profession, setProfession] = useState(initialProfession);
+  const [bio, setBio] = useState(initialBio || FALLBACK_BIO);
+  const [skills, setSkills] = useState<string[]>(
+    initialSkills.length > 0 ? initialSkills : []
+  );
+
+  const visibleSkills = skills.slice(0, MAX_VISIBLE_SKILLS);
+  const bioText = bio.trim() || FALLBACK_BIO;
+  const visibleName = name.trim();
+
+  return (
+    <div
+      className="relative box-border shrink-0"
+      style={{
+        marginLeft: 9,
+        width: 426,
+        height: 372,
+        borderRadius: 50,
+        background: "#89F496",
+        paddingTop: 28,
+        paddingLeft: 27,
+      }}
+    >
+      <p
+        className="m-0"
+        style={{
+          paddingRight: 48,
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 24,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "normal",
+        }}
+      >
+        {visibleName}
+      </p>
+      {email ? (
+        <p
+          className="m-0"
+          style={{
+            marginTop: 4,
+            paddingRight: 48,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 14,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "120%",
+            opacity: 0.6,
+          }}
+        >
+          {email}
+        </p>
+      ) : null}
+      <p
+        className="m-0"
+        style={{
+          marginTop: 16,
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 14,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+          opacity: 0.6,
+        }}
+      >
+        Bio
+      </p>
+      <p
+        className="m-0"
+        style={{
+          marginTop: 4,
+          width: 372,
+          maxWidth: "100%",
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 18,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "normal",
+        }}
+      >
+        {bioText}
+      </p>
+      <p
+        className="m-0"
+        style={{
+          marginTop: 18,
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 14,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+          opacity: 0.6,
+        }}
+      >
+        Skills
+      </p>
+      <div
+        className="flex flex-wrap items-center"
+        style={{
+          marginTop: 7,
+          columnGap: 6,
+          rowGap: 6,
+          paddingRight: 16,
+        }}
+      >
+        {visibleSkills.map((label) => (
+          <div
+            key={label}
+            className="box-border flex items-center justify-center"
+            style={{
+              height: 29,
+              padding: "0 16px",
+              borderRadius: "var(--Radius-MD, 8px)",
+              border: "0.3px solid var(--Black, #000)",
+              background: "#FFF",
+            }}
+          >
+            <span
+              style={{
+                color: "var(--Black, #000)",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 14,
+                fontStyle: "normal",
+                fontWeight: 500,
+                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <Suspense fallback={null}>
+        <ProfileEditButton
+          variant="icon"
+          initialName={name}
+          initialProfession={profession}
+          initialBio={bio}
+          initialSkills={skills}
+          onSaved={(next) => {
+            const nextProfession = next.profession || "Graphic Designer";
+            setName(next.name);
+            setProfession(nextProfession);
+            setBio(next.bio || FALLBACK_BIO);
+            setSkills(next.skills);
+            onProfessionChange?.(nextProfession);
+          }}
+        />
+      </Suspense>
+    </div>
+  );
+}

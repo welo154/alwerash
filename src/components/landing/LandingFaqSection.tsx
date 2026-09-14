@@ -33,7 +33,15 @@ const FAQ_ITEMS: readonly { question: string; answer: string }[] = [
   },
 ];
 
-function FaqExpandIcon({ open, size = 50 }: { open: boolean; size?: number }) {
+function FaqExpandIcon({
+  open,
+  size = 50,
+  className,
+}: {
+  open: boolean;
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +49,7 @@ function FaqExpandIcon({ open, size = 50 }: { open: boolean; size?: number }) {
       height={size}
       viewBox="0 0 53 53"
       fill="none"
-      className="shrink-0 transition-transform duration-200"
+      className={`shrink-0 transition-transform duration-200 ${className ?? ""}`}
       style={{ transform: open ? "rotate(45deg)" : undefined }}
       aria-hidden
     >
@@ -83,7 +91,7 @@ function FaqAccordionList({
               type="button"
               className={
                 isMobile
-                  ? "mt-[18px] flex w-full shrink-0 items-center justify-between gap-4 pl-[30px] pr-[30px] text-left transition-colors hover:bg-black/[0.02]"
+                  ? "mt-[18px] flex w-full shrink-0 items-center justify-between gap-4 pl-[30px] pr-[30px] text-left transition-colors hover:bg-black/[0.02] min-[744px]:mt-0 min-[744px]:py-[22px] min-[744px]:pl-[62px] min-[744px]:pr-[62px]"
                   : "flex h-[90px] w-full shrink-0 items-center justify-between gap-4 pl-[53px] pr-[164px] text-left transition-colors hover:bg-black/[0.02]"
               }
               style={{ fontFamily: pangeaFont }}
@@ -93,11 +101,15 @@ function FaqAccordionList({
               suppressHydrationWarning
             >
               <span
-                className={isMobile ? "min-w-0 flex-1 font-bold" : "font-bold"}
+                className={
+                  isMobile
+                    ? "min-w-0 flex-1 text-[20px] font-bold min-[744px]:text-[24px]"
+                    : "font-bold"
+                }
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily: pangeaFont,
-                  fontSize: isMobile ? "20px" : "32px",
+                  fontSize: isMobile ? undefined : "32px",
                   fontStyle: "normal",
                   fontWeight: 700,
                   fontVariationSettings: '"wght" 700',
@@ -106,7 +118,11 @@ function FaqAccordionList({
               >
                 {item.question}
               </span>
-              <FaqExpandIcon open={isOpen} size={isMobile ? 30.735 : 50} />
+              <FaqExpandIcon
+                open={isOpen}
+                size={isMobile ? 30.735 : 50}
+                className={isMobile ? "min-[744px]:h-[46px] min-[744px]:w-[46px]" : undefined}
+              />
             </button>
             <div
               id={panelId}
@@ -118,7 +134,7 @@ function FaqAccordionList({
               <div
                 className={
                   isMobile
-                    ? "min-h-0 overflow-hidden pl-[30px] pr-[30px]"
+                    ? "min-h-0 overflow-hidden pl-[30px] pr-[30px] min-[744px]:pl-[62px] min-[744px]:pr-[62px]"
                     : "min-h-0 overflow-hidden pl-[53px] pr-[164px]"
                 }
               >
@@ -133,18 +149,27 @@ function FaqAccordionList({
           </div>
         );
       })}
-      {isMobile ? <FaqMobileRule /> : null}
+      {isMobile ? <FaqMobileRule includeTablet={false} /> : null}
     </>
   );
 }
 
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
-function FaqMobileRule() {
+function FaqMobileRule({ includeTablet = true }: { includeTablet?: boolean }) {
   return (
-    <div className={`${FULL_BLEED} mt-[21px]`} aria-hidden>
-      <div className="bg-black" style={{ height: "0.3px" }} />
-    </div>
+    <>
+      <div className={`${FULL_BLEED} mt-[21px] min-[744px]:hidden`} aria-hidden>
+        <div className="bg-black" style={{ height: "0.3px" }} />
+      </div>
+      {includeTablet ? (
+        <div
+          className="mx-auto hidden bg-black min-[744px]:block lg:hidden"
+          style={{ width: 676, height: 0.3 }}
+          aria-hidden
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -166,18 +191,17 @@ export function LandingFaqSection({
       <section
         className={`w-full bg-white ${className ?? "mt-[100px]"}`}
         aria-labelledby="landing-faq-heading-mobile"
-        data-gsap-reveal
       >
         <h2
           id="landing-faq-heading-mobile"
-          className="m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black"
+          className="m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black min-[744px]:mx-auto min-[744px]:w-full min-[744px]:max-w-none min-[744px]:text-center"
           style={{ fontFamily: pangeaFont }}
         >
           <span
+            className="text-[36px] font-bold italic leading-[120%] min-[744px]:text-[40px]"
             style={{
               color: "#000",
               fontFamily: pangeaFont,
-              fontSize: "36px",
               fontStyle: "italic",
               fontWeight: 700,
               lineHeight: "120%",
@@ -186,10 +210,10 @@ export function LandingFaqSection({
             FREQUENTLY{" "}
           </span>
           <span
+            className="text-[36px] font-normal not-italic leading-[120%] min-[744px]:text-[40px]"
             style={{
               color: "#000",
               fontFamily: pangeaFont,
-              fontSize: "36px",
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "120%",
@@ -199,7 +223,7 @@ export function LandingFaqSection({
           </span>
         </h2>
 
-        <div className={FULL_BLEED}>
+        <div className={`${FULL_BLEED} min-[744px]:ml-0 min-[744px]:mt-[61px] min-[744px]:w-full min-[744px]:max-w-none`}>
           <FaqAccordionList
             baseId={baseId}
             openIndex={openIndex}

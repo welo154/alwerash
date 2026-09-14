@@ -13,10 +13,8 @@ import {
 } from "@/components/learn/learn-carousel-swiper-config";
 import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
-import {
-  LearnPopularFigmaTile,
-  LEARN_POPULAR_FIGMA_TILE_W,
-} from "@/components/learn/LearnPopularFigmaTile";
+import { useCourseCarouselMetrics } from "@/components/learn/useCourseCarouselMetrics";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
   LearnCourseTrackOption,
@@ -25,24 +23,6 @@ import type {
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
-
-const MOBILE_COURSE_CAROUSEL_CARD_W = 315;
-const MOBILE_COURSE_CAROUSEL_GAP = 20;
-const MOBILE_COURSE_CAROUSEL_INSET_PX = 30;
-
-function useIsLgUp() {
-  const [isLgUp, setIsLgUp] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsLgUp(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  return isLgUp;
-}
 
 const DEEP_DIVE_MIN_LESSONS = 3;
 const DEEP_DIVE_MIN_MINUTES = 45;
@@ -211,7 +191,7 @@ export default function LearnAllCoursesSection({
   fullBleed?: boolean | "right";
   hideNavOnMobile?: boolean;
 }) {
-  const isLgUp = useIsLgUp();
+  const { width: slideW, gap: slideGap, inset: slidesOffsetBefore } = useCourseCarouselMetrics();
   const searchParams = useSearchParams();
   const [trackSlug, setTrackSlug] = useState("all");
   const [typeFilter, setTypeFilter] = useState<LearnCourseTypeFilter>("all");
@@ -220,10 +200,6 @@ export default function LearnAllCoursesSection({
   const bleedWrapRef = useRef<HTMLDivElement | null>(null);
   const bleedRight = fullBleed === "right";
   const bleedWidth = useBleedRightToViewport(bleedWrapRef, bleedRight);
-
-  const slideW = isLgUp ? LEARN_POPULAR_FIGMA_TILE_W : MOBILE_COURSE_CAROUSEL_CARD_W;
-  const slideGap = isLgUp ? learnCarouselSwiperBehavior.spaceBetween : MOBILE_COURSE_CAROUSEL_GAP;
-  const slidesOffsetBefore = isLgUp ? 0 : MOBILE_COURSE_CAROUSEL_INSET_PX;
 
   const {
     scrollAreaRef,
@@ -297,7 +273,7 @@ export default function LearnAllCoursesSection({
     fullBleed === true
       ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
       : bleedRight
-        ? "relative max-lg:-ml-6 max-lg:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-lg:-ml-8 lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
+        ? "relative max-[743px]:-ml-6 max-[743px]:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:mt-[40px] lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
         : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
   const bleedWrapStyle =

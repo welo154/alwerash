@@ -8,12 +8,67 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
 
+const TABLET_HEADING_LEFT_PX = 63;
+const TABLET_CARD_W = 301;
+const TABLET_CARD_H = 311.979;
+const TABLET_GAP_X = 18;
+const TABLET_GAP_Y = 50;
+const TABLET_GRID_W = TABLET_CARD_W * 2 + TABLET_GAP_X;
+
+function CurrentMostsHeading({
+  id,
+  sizePx,
+  className,
+  align = "left",
+  paddingLeftPx,
+}: {
+  id: string;
+  sizePx: number;
+  className?: string;
+  align?: "left" | "right";
+  paddingLeftPx?: number;
+}) {
+  return (
+    <h2
+      id={id}
+      className={`m-0 uppercase text-black ${
+        align === "right" ? "text-right" : "text-left"
+      } ${className ?? ""}`}
+      style={{
+        fontFamily: pangeaFont,
+        fontSize: `${sizePx}px`,
+        lineHeight: "120%",
+        color: "#000",
+        paddingLeft: paddingLeftPx != null ? `${paddingLeftPx}px` : undefined,
+      }}
+    >
+      <span
+        style={{
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "120%",
+        }}
+      >
+        THE CURRENT{" "}
+      </span>
+      <span
+        style={{
+          fontStyle: "italic",
+          fontWeight: 700,
+          lineHeight: "120%",
+        }}
+      >
+        MOSTS
+      </span>
+    </h2>
+  );
+}
+
 /**
  * “THE CURRENT MOSTS” strip — below Everything-in-one-place.
- * Mobile (< lg): stacked 329×341 cards, 36px heading, 40px gaps.
- * lg+: 120px from viewport left to content, 112px right inset; 166px top padding.
- * Mentor grid: 112px below header; 77px / 76px horizontal insets from page (md+).
- * Cards are filled from admin Mentors (`publicListLandingMostsMentors`), text-only.
+ * Phone: stacked 329×341 cards.
+ * iPad (744–lg): 40px heading, 2×301×311.979 cards, 18×50 gaps.
+ * lg+: same heading type; 383×357 cards in the page’s column count.
  */
 export function LandingCurrentMostsSection({
   mentors,
@@ -27,9 +82,12 @@ export function LandingCurrentMostsSection({
   alignToRight = false,
   alignCardsLeft = false,
   headingSizePx,
+  tabletHeadingSizePx,
   cardsTopGapPx,
   mentorCardWidthPx,
   mentorCardHeightPx,
+  /** Guest home only: line under the heading on iPad. */
+  showExploreCopy = false,
   className,
 }: {
   mentors: LandingMostsMentorCardDto[];
@@ -46,12 +104,15 @@ export function LandingCurrentMostsSection({
   alignToRight?: boolean;
   /** When true, the mentor grid starts at the same left edge as the heading (logged-in `/home`). */
   alignCardsLeft?: boolean;
-  /** Heading font size; defaults to the guest-landing 48px. */
+  /** Heading font size; defaults to 40px on all pages. */
   headingSizePx?: number;
+  /** iPad heading size (744–lg); defaults to 40px. */
+  tabletHeadingSizePx?: number;
   /** Gap between the heading and the card grid; defaults to 82px (70px compact). */
   cardsTopGapPx?: number;
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
+  showExploreCopy?: boolean;
   className?: string;
 }) {
   const [selectedMentor, setSelectedMentor] =
@@ -136,8 +197,7 @@ export function LandingCurrentMostsSection({
   return (
     <>
       <section
-        className={`w-full lg:hidden ${className ?? ""}`}
-        data-gsap-reveal
+        className={`w-full min-[744px]:hidden ${className ?? ""}`}
         aria-labelledby="landing-current-mosts-heading-mobile"
       >
         <h2
@@ -191,6 +251,54 @@ export function LandingCurrentMostsSection({
       </section>
 
       <section
+        className={`relative left-1/2 hidden w-screen max-w-[100vw] -translate-x-1/2 min-[744px]:block lg:hidden ${className ?? ""}`}
+        aria-labelledby="landing-current-mosts-heading-tablet"
+      >
+        <CurrentMostsHeading
+          id="landing-current-mosts-heading-tablet"
+          sizePx={tabletHeadingSizePx ?? 40}
+          paddingLeftPx={TABLET_HEADING_LEFT_PX}
+        />
+        {showExploreCopy ? (
+          <p
+            className="m-0 mt-[17px] h-[60px] w-[404px] text-[24px] font-normal leading-[127%] text-black"
+            style={{
+              fontFamily: pangeaFont,
+              marginLeft: TABLET_HEADING_LEFT_PX,
+            }}
+          >
+            Explore our most popular and most watched mentors and instructors.
+          </p>
+        ) : null}
+        {visibleMentors.length > 0 ? (
+          <div
+            className="mx-auto grid justify-items-center"
+            style={{
+              marginTop: 70,
+              width: TABLET_GRID_W,
+              maxWidth: "100%",
+              gridTemplateColumns: `repeat(2, ${TABLET_CARD_W}px)`,
+              columnGap: TABLET_GAP_X,
+              rowGap: TABLET_GAP_Y,
+            }}
+          >
+            {visibleMentors.map((m) => (
+              <LandingMentorCard
+                key={m.id}
+                layout="tablet"
+                variant={m.variant}
+                name={m.name}
+                profession={m.profession}
+                onOpen={() => setSelectedMentor(m)}
+                widthPx={TABLET_CARD_W}
+                heightPx={TABLET_CARD_H}
+              />
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <section
         className={`hidden lg:block ${sectionSpacingClass} ${className ?? ""}`}
         style={sectionInlineStyle}
         data-gsap-reveal
@@ -210,37 +318,12 @@ export function LandingCurrentMostsSection({
               : undefined
           }
         >
-          <h2
+          <CurrentMostsHeading
             id="landing-current-mosts-heading"
-            className={`m-0 w-full uppercase text-black ${
-              alignToRight ? "text-right" : "text-left"
-            }`}
-            style={{
-              fontFamily: pangeaFont,
-              fontSize: `${headingSizePx ?? 48}px`,
-              lineHeight: "120%",
-              color: "#000",
-            }}
-          >
-            <span
-              style={{
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "120%",
-              }}
-            >
-              THE CURRENT{" "}
-            </span>
-            <span
-              style={{
-                fontStyle: "italic",
-                fontWeight: 700,
-                lineHeight: "120%",
-              }}
-            >
-              MOSTS
-            </span>
-          </h2>
+            sizePx={headingSizePx ?? 40}
+            align={alignToRight ? "right" : "left"}
+            className="w-full"
+          />
 
           <div
             className={alignToRight || contained ? cardsTopClass : "mt-[82px] w-full"}

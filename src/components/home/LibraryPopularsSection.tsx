@@ -23,16 +23,26 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 const SWIPER_GAP_PX = 60;
 const MOBILE_SECTION_INSET_PX = 30;
+const TABLET_SECTION_INSET_PX = 61;
 
-function useMobileSwiperInset() {
+function useLibrarySwiperInset() {
   const [inset, setInset] = useState(MOBILE_SECTION_INSET_PX);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setInset(media.matches ? 0 : MOBILE_SECTION_INSET_PX);
+    const desktop = window.matchMedia("(min-width: 1036px)");
+    const tablet = window.matchMedia("(min-width: 744px)");
+    const update = () => {
+      if (desktop.matches) setInset(0);
+      else if (tablet.matches) setInset(TABLET_SECTION_INSET_PX);
+      else setInset(MOBILE_SECTION_INSET_PX);
+    };
     update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    desktop.addEventListener("change", update);
+    tablet.addEventListener("change", update);
+    return () => {
+      desktop.removeEventListener("change", update);
+      tablet.removeEventListener("change", update);
+    };
   }, []);
 
   return inset;
@@ -155,18 +165,20 @@ export type LibraryPopularsSectionProps = {
 
 export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSectionProps) {
   const { scrollAreaRef, handleSwiper, handleNavSync } = useLearnCarouselSwiper();
-  const mobileSwiperInset = useMobileSwiperInset();
+  const inset = useLibrarySwiperInset();
 
   const contentInsetClass =
-    contentLeftPx != null ? "max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px]" : "";
+    contentLeftPx != null
+      ? "max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px]"
+      : "";
 
   return (
-    <div className="mt-[60px] -mb-[70px] last:mb-[60px] lg:mt-[72px]">
+    <div className="mt-[60px] -mb-[70px] last:mb-[60px] min-[744px]:max-lg:mt-[84px] min-[744px]:max-lg:mb-0 lg:mt-[72px]">
       <div
-        className={`flex items-center gap-[13px] lg:gap-[26px] ${contentInsetClass}`}
+        className={`flex items-center max-[743px]:gap-[13px] min-[744px]:max-lg:gap-[20px] lg:gap-[26px] ${contentInsetClass}`}
       >
         <h2
-          className="m-0 text-[24px] font-normal leading-[120%] text-black lg:text-[36px]"
+          className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
           style={{ fontFamily: pangeaFont }}
         >
           LIBRARY POPULARS
@@ -176,7 +188,7 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
           viewBox="0 0 45 45"
           fill="none"
           aria-hidden
-          className="size-[28px] shrink-0 lg:size-[43px]"
+          className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
         >
           <path
             d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -194,7 +206,7 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
       </div>
 
       <div
-        className={`${FULL_BLEED} relative mt-[64px] overflow-x-clip overflow-y-visible lg:ml-0 lg:w-full lg:max-w-none ${
+        className={`${FULL_BLEED} relative mt-[64px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[65px] lg:ml-0 lg:w-full lg:max-w-none ${
           contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : "pr-6"
         }`}
       >
@@ -209,7 +221,7 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
             slidesPerView="auto"
             spaceBetween={SWIPER_GAP_PX}
             slidesPerGroup={1}
-            slidesOffsetBefore={mobileSwiperInset}
+            slidesOffsetBefore={inset}
             speed={400}
             grabCursor
             allowTouchMove

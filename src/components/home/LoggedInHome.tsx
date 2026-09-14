@@ -17,6 +17,11 @@ const PURPLE = "#FF8CFF";
 const MOBILE_HEADER_HEIGHT_PX = 84;
 const MOBILE_USER_INFO_TOP_PX = 100;
 const MOBILE_USER_INFO_HR_TOP_PX = 167;
+/** iPad header: 7px page padding + 3px logo offset + 65.6px logo. */
+const TABLET_HEADER_HEIGHT_PX = 7 + 3 + 41 * 1.6;
+const TABLET_USER_INFO_TOP_PX = 117;
+const TABLET_USER_INFO_LEFT_PX = 34;
+const TABLET_PHOTO = 82;
 
 export type LoggedInHomeProps = {
   userName: string;
@@ -59,7 +64,7 @@ export function LoggedInHome({
     <div className="min-h-screen bg-white font-sans">
       <section className="relative bg-white lg:pt-[60px]" style={{ fontFamily: pangeaFont }}>
         <div
-          className="flex items-center gap-[10px] pl-[30px] lg:hidden"
+          className="flex items-center gap-[10px] pl-[30px] min-[744px]:hidden"
           style={{ paddingTop: MOBILE_USER_INFO_TOP_PX - MOBILE_HEADER_HEIGHT_PX }}
         >
           <div className="relative h-[45px] w-[45px] shrink-0 overflow-hidden rounded-full border-2 border-black">
@@ -147,13 +152,123 @@ export function LoggedInHome({
         </div>
 
         <hr
-          className="absolute left-1/2 border-0 bg-black lg:hidden"
+          className="absolute left-1/2 border-0 bg-black min-[744px]:hidden"
           style={{
             top: MOBILE_USER_INFO_HR_TOP_PX - MOBILE_HEADER_HEIGHT_PX,
             width: "100vw",
             maxWidth: "100vw",
             height: "0.3px",
             transform: "translateX(-50%)",
+          }}
+          aria-hidden
+        />
+
+        <div
+          className="hidden items-center min-[744px]:flex lg:hidden"
+          style={{
+            paddingTop: TABLET_USER_INFO_TOP_PX - TABLET_HEADER_HEIGHT_PX,
+            paddingLeft: TABLET_USER_INFO_LEFT_PX,
+            gap: 16,
+          }}
+        >
+          <div
+            className="relative shrink-0 overflow-hidden rounded-full bg-white"
+            style={{
+              width: TABLET_PHOTO,
+              height: TABLET_PHOTO,
+              border: "0.3px solid var(--Black, #000)",
+              background: "var(--White, #FFF)",
+            }}
+          >
+            {userImage ? (
+              <Image
+                src={userImage}
+                alt={userName}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center bg-white text-[27px] font-bold text-black"
+                style={{ fontVariationSettings: '"wght" 700' }}
+              >
+                {initials}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <h1 className="m-0 uppercase">
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: 32,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                WELCOME BACK,{" "}
+              </span>
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: 32,
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  lineHeight: "120%",
+                }}
+              >
+                {firstName.toUpperCase()}!
+              </span>
+            </h1>
+
+            <p
+              className="m-0 mt-[3px] flex flex-wrap items-baseline"
+              style={{ gap: subtitleLeftOfEdit ? 11 : 0 }}
+            >
+              {subtitleLeftOfEdit ? (
+                <span
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: 20,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                    opacity: 0.6,
+                  }}
+                >
+                  {subtitleLeftOfEdit}
+                </span>
+              ) : null}
+              <Link
+                href="/profile"
+                className="transition-opacity hover:opacity-80"
+                style={{
+                  color: "var(--Purple, #FF8CFF)",
+                  fontFamily: pangeaFont,
+                  fontSize: 18,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                Edit
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        <hr
+          className="mt-[40px] hidden border-0 bg-black min-[744px]:block lg:hidden"
+          style={{
+            width: "100%",
+            height: "0.3px",
+            background: "#000",
           }}
           aria-hidden
         />
@@ -249,7 +364,7 @@ export function LoggedInHome({
 
         <ContinueLearningSection
           courses={continueLearningCourses}
-          className="max-lg:mt-[62px]"
+          className="max-[743px]:mt-[62px] min-[744px]:max-lg:mt-[48px]"
         />
 
         <TrackActivitySection
@@ -258,12 +373,12 @@ export function LoggedInHome({
           learningProgressPercent={learningProgressPercent}
           className={
             continueLearningCourses.length > 0
-              ? "max-lg:mt-[60px] lg:mt-[101px]"
+              ? "max-[743px]:mt-[60px] min-[744px]:max-lg:mt-[73px] lg:mt-[101px]"
               : "mt-[48px]"
           }
         />
 
-        <h2 className="m-0 max-lg:mt-[60px] max-lg:pl-[30px] uppercase lg:hidden">
+        <h2 className="m-0 mt-[60px] pl-[30px] uppercase max-[743px]:block hidden">
           <span
             className="block"
             style={{
@@ -289,6 +404,32 @@ export function LoggedInHome({
             }}
           >
             FOR YOU
+          </span>
+        </h2>
+
+        <h2
+          className="mt-[84px] hidden pl-[61px] uppercase min-[744px]:block lg:hidden"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 32,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "120%",
+          }}
+        >
+          TOPICS RECOMMENDED FOR{" "}
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 32,
+              fontStyle: "normal",
+              fontWeight: 600,
+              lineHeight: "120%",
+            }}
+          >
+            YOU
           </span>
         </h2>
 
@@ -327,7 +468,7 @@ export function LoggedInHome({
           trackPillSelectsCourses
           courseTilesByTrackSlug={trackExplorer.courseTilesByTrackSlug}
           showDiscoverCta={false}
-          sectionClassName="max-lg:mt-[18px] lg:mt-[24px]"
+          sectionClassName="max-[743px]:mt-[18px] min-[744px]:max-lg:mt-[30px] lg:mt-[24px]"
           contentLeftPx={120}
           pillGapPx={15}
           maxPills={8}

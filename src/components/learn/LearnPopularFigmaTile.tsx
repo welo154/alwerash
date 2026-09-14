@@ -326,7 +326,7 @@ export function LearnPopularFigmaTile(
         className={
           isGrid
             ? `relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
-            : `relative flex w-[315px] shrink-0 flex-col overflow-visible no-underline min-[744px]:w-[346px] ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
+            : `relative flex w-[315px] shrink-0 flex-col overflow-visible no-underline min-[744px]:w-[345px] lg:w-[346px] ${isStartHovered ? "z-1000" : "z-0"} ${className}`.trim()
         }
         onMouseLeave={
           isGrid ? undefined : (e: MouseEvent<HTMLAnchorElement>) => deactivateHover(e.currentTarget)

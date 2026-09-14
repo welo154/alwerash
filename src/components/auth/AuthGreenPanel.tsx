@@ -36,7 +36,7 @@ export function AuthGreenPanel({
     const el = ref.current;
     if (!el) return;
 
-    const desktop = window.matchMedia("(min-width: 1024px)");
+    const desktop = window.matchMedia("(min-width: 1036px)");
 
     const onWheel = (event: WheelEvent) => {
       if (!desktop.matches) return;
@@ -65,7 +65,7 @@ export function AuthGreenPanel({
     const el = ref.current;
     if (!el) return;
 
-    const desktop = window.matchMedia("(min-width: 1024px)");
+    const desktop = window.matchMedia("(min-width: 1036px)");
     if (!desktop.matches) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -54,9 +54,13 @@ function arcTickLine(t: number) {
 function ActivityProgressArc({
   progressPercent,
   showTrackTicks = false,
+  width = 286,
+  height = 238,
 }: {
   progressPercent: number;
   showTrackTicks?: boolean;
+  width?: number;
+  height?: number;
 }) {
   const clipId = useId();
   const trackClipId = useId();
@@ -68,8 +72,8 @@ function ActivityProgressArc({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={286}
-      height={238}
+      width={width}
+      height={height}
       viewBox="0 0 286 230"
       fill="none"
       className="block"
@@ -137,33 +141,46 @@ function ActivityProgressArc({
 type Props = {
   progressPercent: number;
   showTrackTicks?: boolean;
+  variant?: "mobile" | "tablet";
 };
 
 export function ActivityProgressMobileCard({
   progressPercent,
   showTrackTicks = false,
+  variant = "mobile",
 }: Props) {
   const displayPercent = Math.min(100, Math.max(0, Math.round(progressPercent)));
+  const isTablet = variant === "tablet";
 
   return (
     <div
-      className="relative box-border h-[305px] w-[315px] max-w-full shrink-0 overflow-hidden rounded-[50px] border-[0.3px] border-[var(--Black,#000)]"
+      className={`relative box-border max-w-full shrink-0 overflow-hidden rounded-[50px] border-[var(--Black,#000)] ${
+        isTablet
+          ? "h-[401px] w-[445px] border"
+          : "h-[305px] w-[315px] border-[0.3px]"
+      }`}
       style={{ background: "var(--White, #FFF)" }}
       aria-label={`Learning progress ${displayPercent} percent`}
     >
-      <div className="absolute left-1/2 top-[21px] -translate-x-1/2">
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ top: isTablet ? 28 : 21 }}
+      >
         <ActivityProgressArc
           progressPercent={displayPercent}
           showTrackTicks={showTrackTicks}
+          width={isTablet ? 363 : 286}
+          height={isTablet ? 302.077 : 238}
         />
       </div>
 
       <p
-        className="absolute left-1/2 top-[116px] m-0 w-full -translate-x-1/2 text-center"
+        className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center"
         style={{
+          top: isTablet ? 148 : 116,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
-          fontSize: "40px",
+          fontSize: isTablet ? 48 : 40,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
@@ -174,11 +191,12 @@ export function ActivityProgressMobileCard({
       </p>
 
       <p
-        className="absolute left-1/2 top-[164px] m-0 w-full -translate-x-1/2 text-center uppercase"
+        className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center uppercase"
         style={{
+          top: isTablet ? 210 : 164,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
-          fontSize: "24px",
+          fontSize: isTablet ? 32 : 24,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",

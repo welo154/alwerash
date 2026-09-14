@@ -170,11 +170,19 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
   );
 }
 
-export function MobileStudentRatingCard({ card }: { card: StudentRatingCard }) {
+export function MobileStudentRatingCard({
+  card,
+  width = 327,
+  height = 293,
+}: {
+  card: StudentRatingCard;
+  width?: number;
+  height?: number;
+}) {
   return (
     <div
       className="mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pt-[25px] pr-[25px]"
-      style={{ width: 327, height: 293 }}
+      style={{ width, height }}
     >
       <div className="flex items-start gap-[9px]">
         <p
@@ -202,6 +210,40 @@ export function MobileStudentRatingCard({ card }: { card: StudentRatingCard }) {
   );
 }
 
+export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
+  return (
+    <div
+      className="box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[45px] pr-[28px]"
+      style={{ width: 621, height: 339 }}
+    >
+      <div className="flex h-full items-start justify-between gap-[16px]">
+        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pt-[64px]">
+          <p
+            className="m-0 max-w-full"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: "16px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {`"${card.quote}"`}
+          </p>
+          <div className="mt-auto mb-[20px] pt-[18px]">
+            <StudentRatingProfileInfo card={card} />
+          </div>
+        </div>
+        <div
+          className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] border border-black bg-[#E7E7E7]"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
 /**
  * Dark-green “WHY STUDENTS LOVE ALWERASH” panel — same layout as the public course page.
  */
@@ -216,10 +258,9 @@ export function StudentsRatingWorkSection({
       <section
         className={`w-full ${sectionClassName}`.trim()}
         aria-label="Why students love Alwerash"
-        data-gsap-reveal
       >
         <div
-          className={`relative mx-auto box-border overflow-hidden ${className}`.trim()}
+          className={`relative mx-auto box-border overflow-hidden min-[744px]:hidden ${className}`.trim()}
           style={{
             width: 393,
             height: 859,
@@ -276,6 +317,41 @@ export function StudentsRatingWorkSection({
             <div className="mt-[34px] flex flex-col items-center gap-[30px]">
               {cards.slice(0, 2).map((card, idx) => (
                 <MobileStudentRatingCard key={`${card.name}-${idx}`} card={card} />
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div
+          className={`relative mx-auto box-border hidden overflow-hidden min-[744px]:block lg:hidden ${className}`.trim()}
+          style={{
+            width: 732,
+            height: 1010.001,
+            borderRadius: 55,
+            background: "var(--Dark-Green, #004B3C)",
+          }}
+        >
+          <div className="pl-[56px] pt-[64px]">
+            <h2
+              className="m-0 w-[583px] max-w-full uppercase text-white"
+              style={{
+                color: "#FFF",
+                fontFamily: pangeaFont,
+                fontSize: 40,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }}
+            >
+              WHY STUDENTS LOVE{" "}
+              <span style={{ fontStyle: "italic", fontWeight: 300 }}>AL</span>
+              <span style={{ fontStyle: "italic", fontWeight: 700 }}>WERASH</span>
+            </h2>
+          </div>
+          {cards.length > 0 ? (
+            <div className="mt-[42px] flex flex-col gap-[40px] pl-[56px]">
+              {cards.slice(0, 2).map((card, idx) => (
+                <TabletStudentRatingCard key={`${card.name}-${idx}`} card={card} />
               ))}
             </div>
           ) : null}

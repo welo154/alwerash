@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
 import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
@@ -48,6 +48,8 @@ type SearchBarProps = {
   outlined?: boolean;
   /** iPad guest header search field */
   layout?: "mobile" | "tablet";
+  /** iPad inner-site bar is shorter than the home/hero bar */
+  tabletSearch?: "home" | "site";
 };
 
 export function SearchBar({
@@ -56,6 +58,7 @@ export function SearchBar({
   expanded = false,
   outlined = false,
   layout = "mobile",
+  tabletSearch = "home",
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
@@ -125,17 +128,22 @@ export function SearchBar({
   const hasResults = results && (results.tracks.length > 0 || results.courses.length > 0);
   const showDropdown = open && query.trim() !== "";
 
+  const uid = useId().replace(/:/g, "");
   const inputId =
     variant === "toolbar"
-      ? "header-search-toolbar"
+      ? `header-search-toolbar-${uid}`
       : variant === "mobileHeader"
-        ? "header-search-mobile"
-        : "header-search";
+        ? `header-search-mobile-${uid}`
+        : `header-search-${uid}`;
+  const listboxId =
+    variant === "mobileHeader"
+      ? `search-results-listbox-mobile-${uid}`
+      : `search-results-listbox-${uid}`;
 
   if (variant === "mobileHeader") {
     const isTablet = layout === "tablet";
     const barWidth = isTablet ? 491 : outlined ? 192 : 206;
-    const barHeight = isTablet ? 66 : 38;
+    const barHeight = isTablet ? 54 : 38;
     return (
       <div
         ref={containerRef}
@@ -146,7 +154,7 @@ export function SearchBar({
           pointerEvents: expanded ? "auto" : "none",
         }}
       >
-        <label htmlFor={inputId} className="sr-only">
+        <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
           Search for courses
         </label>
         <div
@@ -160,9 +168,14 @@ export function SearchBar({
             alignItems: "center",
             gap: 10,
             borderRadius: isTablet ? "14px 8px 8px 28px" : "8px 8px 8px 18px",
-            border: outlined ? "0.3px solid var(--Black, #000)" : "0 solid var(--Black, #000)",
-            background: "var(--White, #FFF)",
+            border: isTablet
+              ? "1px solid var(--Black, #000)"
+              : outlined
+                ? "0.3px solid var(--Black, #000)"
+                : "0 solid transparent",
+            background: isTablet ? "var(--White, #FFF)" : "#FFF",
             boxSizing: "border-box",
+            outline: "none",
           }}
         >
           <input
@@ -175,12 +188,14 @@ export function SearchBar({
             onFocus={() => query.trim() && setOpen(true)}
             autoFocus={autoFocus}
             tabIndex={expanded ? 0 : -1}
-            className="min-w-0 flex-1 bg-transparent text-black outline-none placeholder:text-black/60"
+            className={`min-w-0 flex-1 bg-transparent text-black outline-none ${
+              isTablet ? "placeholder:text-black" : "placeholder:text-black/60"
+            }`}
             style={{
               flex: "1 0 0",
-              color: "#000",
+              color: "var(--Black, #000)",
               fontFamily: pangeaFontFamily,
-              fontSize: 14,
+              fontSize: isTablet ? 20 : 14,
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "19.6px",
@@ -188,14 +203,14 @@ export function SearchBar({
             aria-label="Search for courses"
             role="combobox"
             aria-expanded={showDropdown}
-            aria-controls="search-results-listbox-mobile"
+            aria-controls={listboxId}
             aria-haspopup="listbox"
             autoComplete="off"
           />
         </div>
         {showDropdown && expanded ? (
           <div
-            id="search-results-listbox-mobile"
+            id={listboxId}
             role="listbox"
             className="absolute left-0 right-0 top-full z-[100] mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
           >
@@ -244,7 +259,7 @@ export function SearchBar({
         ref={containerRef}
         className="relative flex h-10 w-full min-w-0 items-center justify-center"
       >
-        <label htmlFor={inputId} className="sr-only">
+        <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
           Search for courses
         </label>
         <div className="relative min-w-0 flex-1">
@@ -260,7 +275,7 @@ export function SearchBar({
             aria-label="Search for courses"
             role="combobox"
             aria-expanded={showDropdown}
-            aria-controls="search-results-listbox"
+            aria-controls={listboxId}
             aria-haspopup="listbox"
             autoComplete="off"
           />
@@ -273,7 +288,7 @@ export function SearchBar({
         </div>
         {showDropdown && (
           <div
-            id="search-results-listbox"
+            id={listboxId}
             role="listbox"
             className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
           >
@@ -341,9 +356,9 @@ export function SearchBar({
 
   return (
     <div ref={containerRef} className="relative flex w-full flex-1">
-      <label htmlFor={inputId} className="sr-only">
-        Search for courses
-      </label>
+      <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
+          Search for courses
+        </label>
       <div className="relative w-full">
         <span className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500">
           <SearchIcon className="h-full w-full" />
@@ -359,7 +374,7 @@ export function SearchBar({
           aria-label="Search for courses"
           role="combobox"
           aria-expanded={showDropdown}
-          aria-controls="search-results-listbox"
+          aria-controls={listboxId}
           aria-haspopup="listbox"
           autoComplete="off"
         />
@@ -373,7 +388,7 @@ export function SearchBar({
 
       {showDropdown && (
         <div
-          id="search-results-listbox"
+          id={listboxId}
           role="listbox"
           className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
         >

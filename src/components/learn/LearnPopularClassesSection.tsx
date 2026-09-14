@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
 import "swiper/css";
@@ -12,31 +12,11 @@ import {
 } from "@/components/learn/learn-carousel-swiper-config";
 import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
-import {
-  LearnPopularFigmaTile,
-  LEARN_POPULAR_FIGMA_TILE_W,
-} from "@/components/learn/LearnPopularFigmaTile";
+import { useCourseCarouselMetrics } from "@/components/learn/useCourseCarouselMetrics";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 
 export type { LearnPopularTile } from "@/components/learn/learn-popular-types";
-
-const MOBILE_POPULAR_CARD_W = 315;
-const MOBILE_POPULAR_CARD_GAP = 20;
-const MOBILE_POPULAR_SWIPER_INSET_PX = 30;
-
-function useIsLgUp() {
-  const [isLgUp, setIsLgUp] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsLgUp(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  return isLgUp;
-}
 
 export function LearnPopularClassesSection({
   tiles = [],
@@ -52,14 +32,10 @@ export function LearnPopularClassesSection({
   fullBleed?: boolean | "right";
   hideNavOnMobile?: boolean;
 }) {
-  const isLgUp = useIsLgUp();
+  const { width: slideW, gap: slideGap, inset: slidesOffsetBefore } = useCourseCarouselMetrics();
   const bleedWrapRef = useRef<HTMLDivElement | null>(null);
   const bleedRight = fullBleed === "right";
   const bleedWidth = useBleedRightToViewport(bleedWrapRef, bleedRight);
-
-  const slideW = isLgUp ? LEARN_POPULAR_FIGMA_TILE_W : MOBILE_POPULAR_CARD_W;
-  const slideGap = isLgUp ? learnCarouselSwiperBehavior.spaceBetween : MOBILE_POPULAR_CARD_GAP;
-  const slidesOffsetBefore = isLgUp ? 0 : MOBILE_POPULAR_SWIPER_INSET_PX;
 
   const {
     scrollAreaRef,
@@ -75,7 +51,7 @@ export function LearnPopularClassesSection({
     fullBleed === true
       ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
       : bleedRight
-        ? "relative max-lg:-ml-6 max-lg:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-lg:-ml-8 lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
+        ? "relative max-[743px]:-ml-6 max-[743px]:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:mt-[40px] lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
         : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
   const bleedWrapStyle =

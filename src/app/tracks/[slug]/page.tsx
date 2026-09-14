@@ -44,7 +44,7 @@ export default async function TrackPage({
         </div>
         <div
           aria-hidden
-          className="mx-auto mt-[19px] w-[393px] max-w-full bg-black opacity-60"
+          className="mx-auto mt-[19px] hidden w-[393px] max-w-full bg-black opacity-60 max-[743px]:block"
           style={{ height: 0, borderTop: "1px solid #000" }}
         />
       </div>

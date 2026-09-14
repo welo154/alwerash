@@ -86,7 +86,7 @@ export default async function LearnPage() {
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
                 aria-label="Featured courses"
-                className="mt-5 w-full min-w-0 overflow-x-visible lg:mt-0 lg:-ml-[33px]"
+                className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ml-[33px]"
               >
                 <LearnFeaturedCoursesPanel
                   slides={trackShowcaseSlides.map((slide) => ({
@@ -97,7 +97,7 @@ export default async function LearnPage() {
                 />
               </section>
 
-              <div className="mt-[45px] min-w-0 w-full overflow-x-visible lg:mt-[90px]">
+              <div className="mt-[45px] min-w-0 w-full overflow-x-visible min-[744px]:max-lg:mt-[69px] lg:mt-[90px]">
                 {popularTiles.length > 0 ? (
                   <section id="popular-classes" aria-label="Popular classes" className="scroll-mt-8">
                     <LearnPopularClassesSection tiles={popularTiles} fullBleed="right" hideNavOnMobile />
@@ -105,7 +105,7 @@ export default async function LearnPage() {
                 ) : null}
 
                 {trendingTiles.length > 0 ? (
-                  <div className={popularTiles.length > 0 ? "mt-[45px] lg:mt-[90px]" : ""}>
+                  <div className={popularTiles.length > 0 ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
                     <section aria-label="Recently added classes">
                       <LearnTrendingClassesSection tiles={trendingTiles} fullBleed="right" hideNavOnMobile />
                     </section>
@@ -113,7 +113,7 @@ export default async function LearnPage() {
                 ) : null}
 
                 {allCourseItems.length > 0 ? (
-                  <div className={hasCarouselSections ? "mt-[45px] lg:mt-[90px]" : ""}>
+                  <div className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
                     <Suspense fallback={null}>
                       <LearnAllCoursesSection
                         courses={allCourseItems}
@@ -143,8 +143,8 @@ export default async function LearnPage() {
                 mentorCardHeightPx={357}
                 compactVerticalSpacing
                 contained
-                headingSizePx={36}
                 mobileHeadingInsetPx={38}
+                tabletHeadingSizePx={32}
                 className="mt-0 lg:mt-0"
               />
             </div>

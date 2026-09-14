@@ -10,7 +10,7 @@ type Props = {
   summary: WeeklyActivitySummary;
   /** 0 = Sunday … 6 = Saturday (UTC), usually `new Date().getUTCDay()`. */
   highlightDayIndex: number;
-  variant?: "desktop" | "mobile";
+  variant?: "desktop" | "mobile" | "tablet";
 };
 
 export function WeeklyActivityBarCard({

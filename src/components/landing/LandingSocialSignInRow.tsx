@@ -15,6 +15,7 @@ const SIZE_PRESETS = {
   tabletHero: { width: 44, height: 43, gap: 12 },
   cta: { width: 64, height: 64, gap: 18.5 },
   mobileCta: { width: 32, height: 32, gap: 10 },
+  tabletCta: { width: 44, height: 43, gap: 12 },
 } as const;
 
 export function LandingSocialSignInRow({

@@ -15,6 +15,8 @@ const pangeaFont = pangeaFontFamily;
 
 const MOBILE_SWIPER_GAP_PX = 20;
 const MOBILE_SECTION_INSET_PX = 30;
+const TABLET_SWIPER_GAP_PX = 33;
+const TABLET_SECTION_INSET_PX = 61;
 
 export function TrackActivitySection({
   weeklyActivity,
@@ -32,9 +34,9 @@ export function TrackActivitySection({
       className={`w-full max-lg:px-0 lg:pl-[120px] lg:pr-6 ${className}`.trim()}
       aria-label="Activity tracking"
     >
-      <div className="max-lg:pl-[30px] max-lg:pr-0">
+      <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px] max-lg:pr-0">
         <h2
-          className="m-0 uppercase lg:hidden"
+          className="m-0 uppercase min-[744px]:hidden"
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -43,6 +45,20 @@ export function TrackActivitySection({
             fontWeight: 400,
             lineHeight: "120%",
             fontVariationSettings: '"wght" 400',
+          }}
+        >
+          TRACK YOUR ACTIVITY
+        </h2>
+
+        <h2
+          className="m-0 hidden uppercase min-[744px]:block lg:hidden"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 32,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "120%",
           }}
         >
           TRACK YOUR ACTIVITY
@@ -64,7 +80,7 @@ export function TrackActivitySection({
         </h2>
       </div>
 
-      <div className="relative left-1/2 mt-[28px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip lg:hidden">
+      <div className="relative left-1/2 mt-[28px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:hidden">
         <Swiper
           slidesPerView="auto"
           spaceBetween={MOBILE_SWIPER_GAP_PX}
@@ -91,6 +107,38 @@ export function TrackActivitySection({
           </SwiperSlide>
           <SwiperSlide className="w-[315px]!">
             <ActivityScheduleMobileCard />
+          </SwiperSlide>
+        </Swiper>
+      </div>
+
+      <div className="relative left-1/2 mt-[45px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:block lg:hidden">
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={TABLET_SWIPER_GAP_PX}
+          slidesPerGroup={1}
+          slidesOffsetBefore={TABLET_SECTION_INSET_PX}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          className="overflow-visible!"
+        >
+          <SwiperSlide className="w-[445px]!">
+            <ActivityProgressMobileCard
+              progressPercent={learningProgressPercent}
+              showTrackTicks
+              variant="tablet"
+            />
+          </SwiperSlide>
+          <SwiperSlide className="w-[445px]!">
+            <WeeklyActivityBarCard
+              summary={weeklyActivity}
+              highlightDayIndex={activityHighlightDayIndex}
+              variant="tablet"
+            />
+          </SwiperSlide>
+          <SwiperSlide className="w-[445px]!">
+            <ActivityScheduleMobileCard variant="tablet" />
           </SwiperSlide>
         </Swiper>
       </div>

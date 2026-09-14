@@ -36,6 +36,7 @@ import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 
 /** Same card gap as Continue Learning mobile swiper. */
 const MOBILE_SWIPER_CARD_GAP_PX = 20;
+const TABLET_SWIPER_CARD_GAP_PX = 33;
 const DESKTOP_SWIPER_CARD_GAP_PX = 27;
 const MOBILE_SECTION_INSET_PX = 30;
 const TABLET_SECTION_INSET_PX = 61;
@@ -44,13 +45,20 @@ function useSwiperCardGap() {
   const [gap, setGap] = useState(MOBILE_SWIPER_CARD_GAP_PX);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
+    const desktop = window.matchMedia("(min-width: 1036px)");
+    const tablet = window.matchMedia("(min-width: 744px)");
     const update = () => {
-      setGap(media.matches ? DESKTOP_SWIPER_CARD_GAP_PX : MOBILE_SWIPER_CARD_GAP_PX);
+      if (desktop.matches) setGap(DESKTOP_SWIPER_CARD_GAP_PX);
+      else if (tablet.matches) setGap(TABLET_SWIPER_CARD_GAP_PX);
+      else setGap(MOBILE_SWIPER_CARD_GAP_PX);
     };
     update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    desktop.addEventListener("change", update);
+    tablet.addEventListener("change", update);
+    return () => {
+      desktop.removeEventListener("change", update);
+      tablet.removeEventListener("change", update);
+    };
   }, []);
 
   return gap;
@@ -60,7 +68,7 @@ function useMobileSwiperInset() {
   const [inset, setInset] = useState(MOBILE_SECTION_INSET_PX);
 
   useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 1024px)");
+    const desktop = window.matchMedia("(min-width: 1036px)");
     const tablet = window.matchMedia("(min-width: 744px)");
     const update = () => {
       if (desktop.matches) setInset(0);
@@ -153,14 +161,28 @@ function MobileDiscoverCta({
   );
 }
 
-function TrackLinkPill({ pill }: { pill: HomeTrackPill }) {
+function TrackLinkPill({
+  pill,
+  fillRow = false,
+}: {
+  pill: HomeTrackPill;
+  fillRow?: boolean;
+}) {
   return (
     <Link
       href={`/tracks/${encodeURIComponent(pill.slug)}`}
-      className="inline-flex h-[27px] w-fit shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border"
-      style={{ ...pillFont, lineHeight: "19.6px" }}
+      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border ${
+        fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
+      }`}
+      style={{
+        ...pillFont,
+        lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+        borderRadius: "var(--Radius-MD, 8px)",
+        padding: "0 16px",
+        border: "0.3px solid var(--Black, #000)",
+      }}
     >
-      {pill.label}
+      <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>
     </Link>
   );
 }
@@ -169,27 +191,149 @@ function TrackSelectPill({
   pill,
   pressed,
   onClick,
+  fillRow = false,
 }: {
   pill: HomeTrackPill;
   pressed: boolean;
   onClick: () => void;
+  fillRow?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`inline-flex h-[27px] w-fit shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border ${
-        pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"
-      }`}
-      style={{ ...pillFont, lineHeight: "19.6px" }}
+      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border ${
+        fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
+      } ${pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"}`}
+      style={{
+        ...pillFont,
+        lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+        borderRadius: "var(--Radius-MD, 8px)",
+        padding: "0 16px",
+        border: "0.3px solid var(--Black, #000)",
+      }}
     >
-      {pill.label}
+      <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>
     </button>
   );
 }
 
 type LoopPill = HomeTrackPill & { loopKey: string };
+
+const TABLET_TOPIC_INSET_PX = 61;
+const TABLET_PILL_GAP_PX = 15;
+
+function packTabletPillRows(
+  pills: HomeTrackPill[],
+  widths: number[],
+  maxWidth: number,
+  gap: number
+) {
+  if (maxWidth <= 0 || pills.length === 0) return [] as HomeTrackPill[][];
+  const minTruncWidth = Math.max(72, Math.min(...widths.filter((w) => w > 0), 72));
+
+  const rows: HomeTrackPill[][] = [];
+  let row: HomeTrackPill[] = [];
+  let used = 0;
+
+  pills.forEach((pill, index) => {
+    const width = widths[index] ?? 0;
+    const extra = row.length > 0 ? gap : 0;
+    if (used + extra + width <= maxWidth) {
+      row.push(pill);
+      used += extra + width;
+      return;
+    }
+
+    const remain = maxWidth - used - extra;
+    if (row.length > 0 && remain >= minTruncWidth) {
+      row.push(pill);
+      rows.push(row);
+      row = [];
+      used = 0;
+      return;
+    }
+
+    if (row.length > 0) rows.push(row);
+    if (width > maxWidth) {
+      rows.push([pill]);
+      row = [];
+      used = 0;
+    } else {
+      row = [pill];
+      used = width;
+    }
+  });
+
+  if (row.length > 0) rows.push(row);
+  return rows;
+}
+
+function TabletEqualWidthPills({
+  pills,
+  renderPill,
+}: {
+  pills: HomeTrackPill[];
+  renderPill: (pill: HomeTrackPill, fillRow: boolean) => ReactNode;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [rows, setRows] = useState<HomeTrackPill[][]>([]);
+
+  useEffect(() => {
+    const box = containerRef.current;
+    const measure = measureRef.current;
+    if (!box || !measure) return;
+
+    const layout = () => {
+      const widths = [...measure.children].map((node) => (node as HTMLElement).offsetWidth);
+      setRows(packTabletPillRows(pills, widths, box.clientWidth, TABLET_PILL_GAP_PX));
+    };
+
+    layout();
+    const ro = new ResizeObserver(layout);
+    ro.observe(box);
+    ro.observe(measure);
+    return () => ro.disconnect();
+  }, [pills]);
+
+  if (pills.length === 0) return null;
+
+  return (
+    <div
+      className="hidden min-[744px]:block lg:hidden"
+      style={{ paddingLeft: TABLET_TOPIC_INSET_PX, paddingRight: TABLET_TOPIC_INSET_PX }}
+    >
+      <div
+        ref={measureRef}
+        className="pointer-events-none invisible absolute -left-[9999px] top-0 flex w-max"
+        aria-hidden
+      >
+        {pills.map((pill) => (
+          <div key={`measure-${pill.slug}`} className="shrink-0">
+            {renderPill(pill, false)}
+          </div>
+        ))}
+      </div>
+      <div ref={containerRef} className="w-full">
+        {rows.map((row, rowIndex) => (
+          <div
+            key={row.map((pill) => pill.slug).join("-") || rowIndex}
+            className="flex w-full items-center"
+            style={{
+              display: "flex",
+              gap: TABLET_PILL_GAP_PX,
+              marginTop: rowIndex === 0 ? 0 : 11,
+            }}
+          >
+            {row.map((pill, pillIndex) => renderPill(pill, pillIndex === row.length - 1))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function buildMarqueePills(pills: HomeTrackPill[]): LoopPill[] {
   if (pills.length === 0) return [];
@@ -406,12 +550,14 @@ export function HomeTrackExplorerSection({
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
 
   const contentInsetClass =
-    contentLeftPx != null ? "max-lg:pl-[30px] max-lg:pr-0 lg:pl-[120px]" : "";
+    contentLeftPx != null
+      ? "max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px]"
+      : "";
   const pillRowGapClass =
     contentLeftPx != null ? "max-lg:gap-[9px] lg:gap-[15px]" : "gap-[25px]";
   const pillRowClass =
     contentLeftPx != null
-      ? `flex flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass}`
+      ? `flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass} hidden max-[743px]:flex lg:flex`
       : `${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`;
   const pillRowStyle =
     pillGapPx != null && contentLeftPx == null
@@ -420,16 +566,17 @@ export function HomeTrackExplorerSection({
         }
       : undefined;
 
-  const renderTrackPill = (pill: HomeTrackPill, key = pill.slug) =>
+  const renderTrackPill = (pill: HomeTrackPill, key = pill.slug, fillRow = false) =>
     trackPillSelectsCourses ? (
       <TrackSelectPill
         key={key}
         pill={pill}
         pressed={pill.slug === activeTrackSlug}
         onClick={() => setSelectedTrackSlug(pill.slug)}
+        fillRow={fillRow}
       />
     ) : (
-      <TrackLinkPill key={key} pill={pill} />
+      <TrackLinkPill key={key} pill={pill} fillRow={fillRow} />
     );
 
   return (
@@ -465,15 +612,22 @@ export function HomeTrackExplorerSection({
               {pillRow2.map((pill) => renderTrackPill(pill))}
             </div>
           ) : null}
+
+          {contentLeftPx != null ? (
+            <TabletEqualWidthPills
+              pills={pillRow1}
+              renderPill={(pill, fillRow) => renderTrackPill(pill, pill.slug, fillRow)}
+            />
+          ) : null}
         </>
       )}
 
       {showWhatToLearnNextHeading ? (
         <div
-          className={`mt-[60px] flex items-center gap-[13px] lg:mt-[76px] lg:gap-[26px] ${contentInsetClass}`}
+          className={`flex items-center max-[743px]:mt-[60px] max-[743px]:gap-[13px] min-[744px]:max-lg:mt-[84px] min-[744px]:max-lg:gap-[20px] lg:mt-[76px] lg:gap-[26px] ${contentInsetClass}`}
         >
           <h2
-            className="m-0 text-[24px] font-normal leading-[120%] text-black lg:text-[36px]"
+            className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
             style={{ fontFamily: pangeaFontFamily }}
           >
             WHAT TO LEARN NEXT
@@ -483,7 +637,7 @@ export function HomeTrackExplorerSection({
             viewBox="0 0 45 45"
             fill="none"
             aria-hidden
-            className="size-[28px] shrink-0 lg:size-[43px]"
+            className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
           >
             <path
               d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -503,7 +657,7 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading ? (
         <p
-          className={`m-0 mt-[2px] text-[16px] font-normal leading-[127%] text-black lg:mt-[5px] lg:text-[18px] ${contentInsetClass}`}
+          className={`m-0 mt-[2px] text-[16px] font-normal leading-[127%] text-black min-[744px]:max-lg:mt-[8px] min-[744px]:max-lg:text-[18px] lg:mt-[5px] lg:text-[18px] ${contentInsetClass}`}
           style={{
             fontFamily: pangeaFontFamily,
           }}
@@ -515,17 +669,14 @@ export function HomeTrackExplorerSection({
       {showWhatToLearnNextHeading ? (
         <div
           key={cardGridKey}
-          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
+          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
             contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : "pr-6"
           }`}
         >
           <div
             ref={scrollAreaRef}
-            className="relative w-full min-w-0 overflow-x-visible overflow-y-visible"
+            className="relative w-full min-w-0 overflow-x-visible overflow-y-visible max-[743px]:min-h-[447px] lg:min-h-[447px]"
             style={{
-              minHeight: trackPillSelectsCourses
-                ? LEARN_POPULAR_FIGMA_TILE_H
-                : CATALOG_SHOWCASE_CARD_H,
               /* Allow hover expand card to paint outside the slide without page scroll. */
               clipPath: "inset(-160px -320px -160px 0)",
             }}
@@ -567,7 +718,7 @@ export function HomeTrackExplorerSection({
                     ? visibleCourseTiles.map((tile) => (
                         <SwiperSlide
                           key={`${cardGridKey}-${tile.id}`}
-                          className="h-auto! w-[315px]! shrink-0 overflow-visible! min-[744px]:w-[346px]!"
+                          className="h-auto! w-[315px]! shrink-0 overflow-visible! min-[744px]:w-[345px]! lg:w-[346px]!"
                         >
                           <LearnPopularFigmaTile {...tile} />
                         </SwiperSlide>
@@ -649,7 +800,7 @@ export function HomeTrackExplorerSection({
                   ? visibleCourseTiles.map((tile) => (
                       <SwiperSlide
                         key={`${cardGridKey}-${tile.id}`}
-                        className="h-auto! w-[315px]! shrink-0 overflow-visible! min-[744px]:w-[346px]!"
+                        className="h-auto! w-[315px]! shrink-0 overflow-visible! min-[744px]:w-[345px]! lg:w-[346px]!"
                       >
                         <LearnPopularFigmaTile {...tile} />
                       </SwiperSlide>
@@ -690,7 +841,7 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading && landingMostsMentors.length > 0 ? (
         <div
-          className={`mt-[55px] lg:mb-[120px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
+          className={`mt-[55px] min-[744px]:max-lg:mt-[84px] lg:mb-[120px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
         >
           <LandingCurrentMostsSection
             mentors={landingMostsMentors}
@@ -699,8 +850,8 @@ export function HomeTrackExplorerSection({
             contained
             alignCardsLeft
             compactVerticalSpacing
-            headingSizePx={36}
             cardsTopGapPx={58}
+            tabletHeadingSizePx={32}
           />
         </div>
       ) : null}
@@ -987,6 +1138,60 @@ export function HomeTrackExplorerSection({
             />
             </div>
           </div>
+          <div className="relative mx-auto hidden w-full min-[744px]:block lg:hidden">
+            <div className="relative h-[401px]" aria-hidden>
+              <div className="absolute left-1/2 top-[198px] h-[153px] w-[152px] -translate-x-[calc(50%+235px)] rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+              <div className="absolute left-1/2 top-[198px] h-[153px] w-[152px] translate-x-[calc(-50%+235px)] rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+              <div className="absolute left-1/2 top-[137px] z-[1] h-[153px] w-[152px] -translate-x-1/2 rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+            </div>
+            <h2
+              className="m-0 w-full text-center text-black"
+              style={{ fontFamily: pangeaFontFamily }}
+            >
+              <span className="text-[40px] font-bold italic leading-[120%]">EVERYTHING</span>
+              <span className="text-[40px] font-normal not-italic leading-[120%]">
+                {" "}
+                IN ONE PLACE
+              </span>
+            </h2>
+          </div>
+          <LandingEverythingInOneSection
+            variant="mobile"
+            showDecoBoxes={false}
+            className="mt-[64px] min-[744px]:mt-0"
+          />
+          <div
+            className="relative mx-auto hidden h-[269px] w-full min-[744px]:block lg:hidden"
+            aria-hidden
+          >
+            <div className="absolute left-1/2 top-[61px] h-[153px] w-[152px] -translate-x-[calc(50%+235px)] rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+            <div className="absolute left-1/2 top-[61px] h-[153px] w-[152px] translate-x-[calc(-50%+235px)] rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+            <div className="absolute left-1/2 top-[116px] z-[1] h-[153px] w-[152px] -translate-x-1/2 rounded-[50px] border-[0.3px] border-solid border-black bg-[#E9E9E9]" />
+          </div>
+
+          {landingMostsMentors.length > 0 ? (
+            <LandingCurrentMostsSection
+              mentors={landingMostsMentors}
+              showExploreCopy
+              className="mt-[68px] min-[744px]:mt-[108px]"
+            />
+          ) : null}
+
+          <StudentsRatingWorkSection
+            variant="mobile"
+            sectionClassName="mt-[75px] min-[744px]:mt-[85px]"
+          />
+
+          <LandingFaqSection
+            variant="mobile"
+            className="mt-[100px] min-[744px]:mt-[85px]"
+          />
+
+          <LandingGetStartedCtaSection
+            variant="mobile"
+            className="mt-[96px] min-[744px]:mt-[128px]"
+          />
+
           {showViewMoreCourses && trackPillSelectsCourses ? (
             <div className="mt-10 hidden justify-center min-[744px]:flex lg:hidden">
               <Link
@@ -998,34 +1203,6 @@ export function HomeTrackExplorerSection({
               </Link>
             </div>
           ) : null}
-
-          <LandingEverythingInOneSection
-            variant="mobile"
-            showDecoBoxes={false}
-            className="mt-[64px]"
-          />
-
-          {landingMostsMentors.length > 0 ? (
-            <LandingCurrentMostsSection
-              mentors={landingMostsMentors}
-              className="mt-[68px]"
-            />
-          ) : null}
-
-          <StudentsRatingWorkSection
-            variant="mobile"
-            sectionClassName="mt-[75px]"
-          />
-
-          <LandingFaqSection
-            variant="mobile"
-            className="mt-[100px]"
-          />
-
-          <LandingGetStartedCtaSection
-            variant="mobile"
-            className="mt-[96px]"
-          />
           </div>
 
           <div className="max-lg:hidden">
