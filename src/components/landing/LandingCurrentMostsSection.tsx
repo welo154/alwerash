@@ -132,14 +132,14 @@ export function LandingCurrentMostsSection({
       ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
       : columnCount === 2
         ? "grid-cols-1 md:grid-cols-2"
-        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+        : "grid-cols-1 md:max-lg:grid-cols-2 lg:grid-cols-3";
 
   const fixedColGridClass =
     columnCount === 4
-      ? "md:grid-cols-[repeat(2,383px)] xl:grid-cols-[repeat(4,191.5px)]"
+      ? "md:max-xl:grid-cols-[repeat(2,383px)] xl:grid-cols-[repeat(4,191.5px)]"
       : columnCount === 2
         ? "md:grid-cols-[repeat(2,383px)]"
-        : "md:grid-cols-[repeat(2,383px)] lg:grid-cols-[repeat(3,383px)]";
+        : "md:max-lg:grid-cols-[repeat(2,383px)] lg:grid-cols-[repeat(3,383px)]";
 
   const gridJustify = alignToRight
     ? "justify-end"
@@ -251,7 +251,7 @@ export function LandingCurrentMostsSection({
       </section>
 
       <section
-        className={`relative left-1/2 hidden w-screen max-w-[100vw] -translate-x-1/2 min-[744px]:block lg:hidden ${className ?? ""}`}
+        className={`relative left-1/2 hidden w-screen max-w-[100vw] -translate-x-1/2 min-[744px]:max-lg:block ${className ?? ""}`}
         aria-labelledby="landing-current-mosts-heading-tablet"
       >
         <CurrentMostsHeading
@@ -299,7 +299,7 @@ export function LandingCurrentMostsSection({
       </section>
 
       <section
-        className={`hidden lg:block ${sectionSpacingClass} ${className ?? ""}`}
+        className={`max-lg:hidden ${sectionSpacingClass} ${className ?? ""}`}
         style={sectionInlineStyle}
         data-gsap-reveal
         aria-labelledby="landing-current-mosts-heading"

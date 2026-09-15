@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LEARN_POPULAR_FIGMA_TILE_W } from "@/components/learn/LearnPopularFigmaTile";
 import { learnCarouselSwiperBehavior } from "@/components/learn/learn-carousel-swiper-config";
 
 /** Same as Continue Learning on iPad. */
 export const COURSE_SWIPER_TABLET = { width: 345, gap: 33, inset: 61 } as const;
 export const COURSE_SWIPER_MOBILE = { width: 315, gap: 20, inset: 30 } as const;
+/** Desktop tile width — keep in sync with `LEARN_POPULAR_FIGMA_TILE_W`. */
+const DESKTOP_TILE_W = 346;
 
 export function useCourseCarouselMetrics() {
   const [metrics, setMetrics] = useState({
@@ -22,7 +23,7 @@ export function useCourseCarouselMetrics() {
     const update = () => {
       if (desktop.matches) {
         setMetrics({
-          width: LEARN_POPULAR_FIGMA_TILE_W,
+          width: DESKTOP_TILE_W,
           gap: learnCarouselSwiperBehavior.spaceBetween,
           inset: 0,
           isLgUp: true,

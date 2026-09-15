@@ -54,7 +54,7 @@ function PlayGlyph() {
       viewBox="0 0 122 122"
       fill="none"
       aria-hidden
-      className="h-[63px] w-[63px] lg:h-[120px] lg:w-[120px]"
+      className="h-[63px] w-[63px] min-[744px]:max-lg:h-[82px] min-[744px]:max-lg:w-[82px] lg:h-[120px] lg:w-[120px]"
     >
       <circle
         cx="61"
@@ -129,9 +129,9 @@ export function CoursePreviewExperience({
 
   return (
     <>
-      <div className="max-lg:order-2 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center">
+      <div className="max-lg:order-2 max-[743px]:-ml-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:ml-[31px]">
       <div
-        className="relative mt-[15px] h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] lg:mt-[39px] lg:h-[557px] lg:w-[843px] lg:rounded-[50px] lg:border-2"
+        className="relative mt-[15px] h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:mt-[39px] lg:h-[557px] lg:w-[843px] lg:rounded-[50px] lg:border-2"
         aria-label="Course preview"
       >
         {showingArticle ? (

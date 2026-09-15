@@ -14,7 +14,7 @@ function BreadcrumbChevron() {
         height="10"
         viewBox="0 0 5 10"
         fill="none"
-        className="h-[10px] w-[5px] shrink-0 lg:hidden"
+        className="h-[10px] w-[5px] shrink-0 min-[744px]:hidden"
         aria-hidden
       >
         <path
@@ -32,7 +32,7 @@ function BreadcrumbChevron() {
         height="15"
         viewBox="0 0 8 15"
         fill="none"
-        className="hidden h-[15px] w-[8px] shrink-0 lg:block"
+        className="hidden h-[15px] w-[8px] shrink-0 min-[744px]:block"
         style={{ opacity: 0.6 }}
         aria-hidden
       >
@@ -60,11 +60,11 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-[18px] lg:gap-[15px]"
+      className="flex items-center gap-[18px] min-[744px]:gap-[15px]"
     >
       <Link
         href="/course"
-        className="text-[14px] leading-[127%] hover:opacity-80 lg:text-[18px] lg:leading-normal"
+        className="text-[14px] leading-[127%] hover:opacity-80 min-[744px]:text-[18px] min-[744px]:leading-normal"
         style={textStyle}
       >
         Courses
@@ -72,14 +72,14 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
       <BreadcrumbChevron />
       <Link
         href="/course"
-        className="text-[14px] leading-[127%] hover:opacity-80 lg:text-[18px] lg:leading-normal"
+        className="text-[14px] leading-[127%] hover:opacity-80 min-[744px]:text-[18px] min-[744px]:leading-normal"
         style={textStyle}
       >
         Classes
       </Link>
       <BreadcrumbChevron />
       <span
-        className="text-[14px] leading-[127%] lg:text-[18px] lg:leading-normal"
+        className="text-[14px] leading-[127%] min-[744px]:text-[18px] min-[744px]:leading-normal"
         style={textStyle}
       >
         {courseTitle}
