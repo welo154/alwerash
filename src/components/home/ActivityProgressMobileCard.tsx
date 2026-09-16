@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useId } from "react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
@@ -141,7 +142,7 @@ function ActivityProgressArc({
 type Props = {
   progressPercent: number;
   showTrackTicks?: boolean;
-  variant?: "mobile" | "tablet";
+  variant?: "mobile" | "tablet" | "tabletWide";
 };
 
 export function ActivityProgressMobileCard({
@@ -150,14 +151,17 @@ export function ActivityProgressMobileCard({
   variant = "mobile",
 }: Props) {
   const displayPercent = Math.min(100, Math.max(0, Math.round(progressPercent)));
-  const isTablet = variant === "tablet";
+  const isTablet = variant === "tablet" || variant === "tabletWide";
+  const isWide = variant === "tabletWide";
 
   return (
     <div
       className={`relative box-border max-w-full shrink-0 overflow-hidden rounded-[50px] border-[var(--Black,#000)] ${
-        isTablet
-          ? "h-[401px] w-[445px] border"
-          : "h-[305px] w-[315px] border-[0.3px]"
+        isWide
+          ? "h-[401px] w-[622px] border-[0.3px]"
+          : isTablet
+            ? "h-[401px] w-[445px] border"
+            : "h-[305px] w-[315px] border-[0.3px]"
       }`}
       style={{ background: "var(--White, #FFF)" }}
       aria-label={`Learning progress ${displayPercent} percent`}

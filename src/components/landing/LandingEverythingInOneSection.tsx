@@ -222,7 +222,6 @@ const mobileFeatureBodyStyle = {
 const courseFeatureTitleStyle = {
   color: "#000",
   fontFamily: pangeaFont,
-  fontSize: "16px",
   fontStyle: "normal",
   fontWeight: 600,
   lineHeight: "127%",
@@ -231,7 +230,6 @@ const courseFeatureTitleStyle = {
 const courseFeatureBodyStyle = {
   color: "#000",
   fontFamily: pangeaFont,
-  fontSize: "14px",
   fontStyle: "normal",
   fontWeight: 400,
   lineHeight: "127%",
@@ -257,13 +255,19 @@ export function LandingEverythingInOneSection({
     const isCourseRows = mobileRowLayout === "course";
     return (
       <section
-        className={`w-full pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px] ${className ?? ""}`}
+        className={`w-full ${
+          isCourseRows
+            ? "pl-[30px] pr-4 min-[744px]:max-lg:pl-[61px]"
+            : "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
+        } ${className ?? ""}`}
         aria-labelledby="everything-in-one-place-heading-mobile"
       >
         {mobileHeading ? (
           <h2
             id="everything-in-one-place-heading-mobile"
-            className="m-0 text-[16px]"
+            className={`m-0 text-[16px] ${
+              isCourseRows ? "min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:text-[18px]" : ""
+            }`}
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
@@ -300,17 +304,17 @@ export function LandingEverythingInOneSection({
         <ul
           className={`flex list-none flex-col p-0 ${
             isCourseRows
-              ? "mt-[25px] mb-[50px] gap-[25px]"
+              ? "mt-[25px] mb-[50px] gap-[25px] min-[744px]:max-lg:mt-[53px] min-[744px]:max-lg:mb-0 min-[744px]:max-lg:gap-[45px]"
               : "mt-[37px] mb-0 gap-[35px] min-[744px]:mt-[51px] min-[744px]:gap-[45px]"
           }`}
         >
           {FEATURES.map(({ title, body, Icon }) => (
-            <li key={title} className="flex items-center">
+            <li key={title} className={`flex items-center ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}>
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
                   className={`shrink-0 ${
                     isCourseRows
-                      ? "h-[21px] w-[22px]"
+                      ? "h-[21px] w-[22px] min-[744px]:max-lg:h-[31px] min-[744px]:max-lg:w-[34px]"
                       : "h-[24px] w-[26px] min-[744px]:h-[31px] min-[744px]:w-[34px]"
                   }`}
                 />
@@ -318,16 +322,21 @@ export function LandingEverythingInOneSection({
               <div
                 className={
                   isCourseRows
-                    ? "ml-[14px] min-w-0"
+                    ? "ml-[14px] min-w-0 min-[744px]:max-lg:ml-[27px]"
                     : "ml-[21px] w-[221px] shrink-0 min-[744px]:ml-[27px] min-[744px]:w-[480px]"
                 }
               >
-                <h3 className="m-0" style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}>
+                <h3
+                  className={isCourseRows ? "m-0 text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0"}
+                  style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}
+                >
                   {title}
                 </h3>
                 <p
                   className={
-                    isCourseRows ? "m-0" : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
+                    isCourseRows
+                      ? "m-0 text-[14px] min-[744px]:max-lg:text-[20px]"
+                      : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
                   }
                   style={isCourseRows ? courseFeatureBodyStyle : mobileFeatureBodyStyle}
                 >

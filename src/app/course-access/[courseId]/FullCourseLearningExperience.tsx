@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
@@ -38,8 +39,6 @@ type FullCourseLearningExperienceProps = {
 };
 
 const LESSON_ROW_WIDTH = 432;
-const LESSON_ROW_HEIGHT = 60;
-const LESSON_TEXT_SIZE = 18;
 const VIDEO_WIDTH = 675;
 const VIDEO_HEIGHT = 410;
 /** Space after any horizontal rule before the next lesson title/content. */
@@ -66,7 +65,7 @@ function PlayOverlayButton({
         viewBox="0 0 122 122"
         fill="none"
         aria-hidden
-        className="h-[63px] w-[63px] lg:h-[120px] lg:w-[120px]"
+        className="h-[63px] w-[63px] min-[744px]:max-lg:h-[82px] min-[744px]:max-lg:w-[82px] lg:h-[120px] lg:w-[120px]"
       >
         <circle
           cx="61"
@@ -176,10 +175,14 @@ function LessonCompleteCheckIcon() {
   );
 }
 
-function LessonDivider() {
+function LessonDivider({ afterVideo }: { afterVideo?: boolean }) {
   return (
-    <div className="fcl-lesson-rule flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:block">
-      <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 lg:w-[775px] lg:max-w-full" />
+    <div
+      className={`fcl-lesson-rule flex justify-center max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:-ml-[61px] min-[744px]:max-lg:w-[calc(100%+61px)] lg:block lg:justify-start ${
+        afterVideo ? "fcl-lesson-rule-after-video" : ""
+      }`}
+    >
+      <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] lg:w-[775px] lg:max-w-full" />
     </div>
   );
 }
@@ -256,9 +259,9 @@ function SectionHeader({
   ].filter(Boolean);
 
   return (
-    <header className="max-lg:pl-[30px]">
+    <header className="max-[743px]:pl-[30px]">
       <h1
-        className="m-0 w-[334px] max-w-full text-[18px] font-medium lg:w-[755px] lg:text-[32px]"
+        className="m-0 w-[334px] max-w-full text-[18px] font-medium min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[24px] lg:w-[755px] lg:text-[32px]"
         style={{
           color: "var(--Black, #000)",
           fontFamily,
@@ -270,7 +273,7 @@ function SectionHeader({
         {courseTitle}
       </h1>
       <p
-        className="m-0 mt-[3px] text-[14px] leading-[127%] lg:mt-[7px] lg:text-[18px]"
+        className="m-0 mt-[3px] text-[14px] leading-[127%] min-[744px]:max-lg:text-[18px] lg:mt-[7px] lg:text-[18px]"
         style={{
           color: "var(--Black, #000)",
           fontFamily,
@@ -281,8 +284,8 @@ function SectionHeader({
       >
         A course by {bylineParts.join(" , ")}
       </p>
-      <div className="fcl-title-rule mt-[28px] flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:mt-[22px] lg:block">
-        <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 lg:w-[775px] lg:max-w-full" />
+      <div className="fcl-title-rule mt-[28px] flex justify-center max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:-ml-[61px] min-[744px]:max-lg:w-[calc(100%+61px)] lg:mt-[22px] lg:block lg:justify-start">
+        <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] lg:w-[775px] lg:max-w-full" />
       </div>
     </header>
   );
@@ -360,10 +363,10 @@ function TextContentLessonBlock({
   return (
     <article id={`lesson-${lesson.id}`}>
       {variant === "article" ? (
-        <div className="lg:hidden" style={{ height: 35 }} aria-hidden />
+        <div className="hidden max-[743px]:block" style={{ height: 35 }} aria-hidden />
       ) : null}
       <h2
-        className={`m-0 text-[18px] lg:text-[24px] ${
+        className={`m-0 text-[18px] min-[744px]:max-lg:text-[24px] lg:text-[24px] ${
           variant === "article" ? "fcl-text-title-article" : "fcl-text-title-intro"
         }`}
         style={{
@@ -379,11 +382,11 @@ function TextContentLessonBlock({
 
       <div className="lg:mt-[22px]">
         {variant === "article" && !expanded ? (
-          <p className="m-0 line-clamp-4 w-[334px] max-w-full text-[16px] lg:w-[673px] lg:text-[18px]" style={textStyle}>
+          <p className={`m-0 line-clamp-4 w-[334px] max-w-full text-[16px] min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:text-[18px] ${variant === "article" ? "min-[744px]:max-lg:w-[619px]" : "min-[744px]:max-lg:w-[620px]"}`} style={textStyle}>
             {body}
           </p>
         ) : (
-          <p className="m-0 w-[334px] max-w-full text-[16px] lg:w-[673px] lg:text-[18px]" style={textStyle}>
+          <p className={`m-0 w-[334px] max-w-full text-[16px] min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:text-[18px] ${variant === "article" ? "min-[744px]:max-lg:w-[619px]" : "min-[744px]:max-lg:w-[620px]"}`} style={textStyle}>
             {body}
           </p>
         )}
@@ -391,9 +394,9 @@ function TextContentLessonBlock({
 
       {variant === "article" ? (
         <>
-          <div className="lg:hidden" style={{ height: 38 }} aria-hidden />
+          <div className="hidden max-[743px]:block" style={{ height: 38 }} aria-hidden />
           <div className="hidden lg:block" style={{ height: 39 }} aria-hidden />
-          <div className="flex items-center">
+          <div className="flex items-center min-[744px]:max-lg:mt-[42px]">
             <button
               type="button"
               onClick={() => setExpanded((prev) => !prev)}
@@ -475,9 +478,9 @@ function VideoLessonBlock({
 
   return (
     <article id={`lesson-${lesson.id}`} className="fcl-video-block">
-      <div className="mb-[18px] flex w-full max-w-full items-center justify-between gap-[16px] max-lg:pr-[29px] lg:mb-[20px] lg:w-[675px]">
+      <div className="mb-[18px] flex w-full max-w-full items-center justify-between gap-[16px] max-[743px]:pr-[29px] min-[744px]:max-lg:mb-[28px] min-[744px]:max-lg:pr-[61px] lg:mb-[20px] lg:w-[675px]">
         <h2
-          className="m-0 min-w-0 truncate text-[18px] lg:text-[24px]"
+          className="m-0 min-w-0 truncate text-[18px] min-[744px]:max-lg:text-[24px] lg:text-[24px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
@@ -492,7 +495,7 @@ function VideoLessonBlock({
           <div className="inline-flex shrink-0 items-center">
             <ClockIcon />
             <span
-              className="ml-[6px] text-[14px] lg:text-[16px] lg:opacity-60"
+              className="ml-[6px] text-[14px] min-[744px]:max-lg:text-[16px] min-[744px]:max-lg:opacity-60 lg:text-[16px] lg:opacity-60"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily,
@@ -507,9 +510,9 @@ function VideoLessonBlock({
         ) : null}
       </div>
 
-      <div className="max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center">
+      <div className="max-[743px]:-ml-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center">
       <div
-        className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
+        className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
       >
         {isPlaying && hasStream ? (
           <div className="h-full w-full">
@@ -564,7 +567,7 @@ function VideoLessonBlock({
 
       {lesson.description ? (
         <p
-          className="m-0 mt-[20px] w-[334px] max-w-full text-[16px] lg:mt-[46px] lg:w-[673px] lg:text-[18px]"
+          className="m-0 mt-[20px] w-[334px] max-w-full text-[16px] min-[744px]:max-lg:mt-[42px] min-[744px]:max-lg:w-[620px] min-[744px]:max-lg:text-[18px] lg:mt-[46px] lg:w-[673px] lg:text-[18px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
@@ -580,7 +583,7 @@ function VideoLessonBlock({
       {!isLast ? (
         <>
           <div className="hidden lg:block" style={{ height: SPACE_ABOVE_HR_PX }} aria-hidden />
-          <LessonDivider />
+          <LessonDivider afterVideo />
           <div className="hidden lg:block" style={{ height: SPACE_BELOW_HR_PX }} aria-hidden />
         </>
       ) : null}
@@ -847,14 +850,22 @@ export function FullCourseLearningExperience({
 
   return (
     <div className="fcl-page mx-auto max-w-[1600px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
-      <div className="max-lg:pl-[30px]">
+      <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px]">
         <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
       </div>
 
-      <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black opacity-30 lg:mt-[13px] lg:w-full lg:opacity-60" />
+      <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:max-lg:mt-[13px] min-[744px]:max-lg:w-[1440px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:opacity-60 lg:mt-[13px] lg:w-full lg:opacity-60" />
 
-      <div className="mt-[27px] flex justify-center lg:hidden">
+      <div className="mt-[27px] flex justify-center min-[744px]:hidden">
         <ActivityProgressMobileCard progressPercent={progressPercent} showTrackTicks />
+      </div>
+
+      <div className="mt-[60px] hidden justify-center min-[744px]:flex lg:hidden">
+        <ActivityProgressMobileCard
+          progressPercent={progressPercent}
+          showTrackTicks
+          variant="tabletWide"
+        />
       </div>
 
       <section className="mt-[41px] max-lg:hidden" aria-label="Course progress">
@@ -939,8 +950,8 @@ export function FullCourseLearningExperience({
         </div>
       </section>
 
-      <div className="mt-[48px] flex flex-col-reverse max-lg:gap-[66px] lg:flex-row lg:items-start lg:gap-[94px]">
-        <div className="min-w-0 max-lg:flex-none lg:flex-1" aria-label="Section content">
+      <div className="mt-[48px] flex flex-col max-[743px]:gap-[66px] min-[744px]:max-lg:mt-[50px] min-[744px]:max-lg:gap-[60px] lg:flex-row lg:items-start lg:gap-[94px]">
+        <div className="min-w-0 max-lg:order-2 max-lg:flex-none min-[744px]:max-lg:w-full min-[744px]:max-lg:pl-[61px] lg:order-1 lg:flex-1" aria-label="Section content">
           {selectedModule ? (
             <div className="flex flex-col">
               <SectionHeader
@@ -949,7 +960,7 @@ export function FullCourseLearningExperience({
                 instructorProfession={instructorProfession}
                 fontFamily={fontFamily}
               />
-              <div className="max-lg:pl-[30px] lg:pt-[24px]">
+              <div className="max-[743px]:pl-[30px] lg:pt-[24px]">
               {selectedModule.lessons.map((lesson, index) => {
                 const isLast = index === selectedModule.lessons.length - 1;
 
@@ -1006,30 +1017,28 @@ export function FullCourseLearningExperience({
         </div>
 
         <aside
-          className="flex w-full shrink-0 flex-col gap-[16px] max-lg:items-center lg:sticky lg:top-[28px] lg:w-[432px]"
+          className="flex w-full shrink-0 flex-col gap-[16px] max-lg:order-1 max-lg:items-center min-[744px]:max-lg:mx-auto min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:gap-[17px] lg:order-2 lg:sticky lg:top-[28px] lg:w-[432px]"
           aria-label="Course sections"
         >
           {modules.map((module) => {
             const isOpen = !!openMap[module.id];
             const isSelected = selectedModuleId === module.id;
-            const openHeight =
-              LESSON_ROW_HEIGHT + module.lessons.length * LESSON_ROW_HEIGHT;
             return (
               <div
                 key={module.id}
-                className={`w-[315px] overflow-hidden rounded-[30px] border border-black lg:w-[432px] ${
-                  isOpen || isSelected ? "bg-[#89F496]" : "bg-white"
-                }`}
+                className={`w-[315px] overflow-hidden rounded-[30px] border border-black min-[744px]:max-lg:w-[622px] lg:w-[432px] ${
+                  isOpen
+                    ? "h-auto"
+                    : "h-[60px] min-[744px]:max-lg:h-[74px] lg:h-[60px]"
+                } ${isOpen || isSelected ? "bg-[#89F496]" : "bg-white"}`}
                 style={{
-                  height: isOpen ? `${openHeight}px` : `${LESSON_ROW_HEIGHT}px`,
                   transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
                 }}
               >
                 <div
-                  className={`flex w-full items-center px-[20px] ${
+                  className={`flex h-[60px] w-full items-center px-[20px] min-[744px]:max-lg:h-[74px] min-[744px]:max-lg:pl-[31px] ${
                     isOpen || isSelected ? "bg-[#89F496]" : "bg-white"
                   }`}
-                  style={{ height: LESSON_ROW_HEIGHT }}
                 >
                   <button
                     type="button"
@@ -1037,20 +1046,20 @@ export function FullCourseLearningExperience({
                       event.stopPropagation();
                       toggleModule(module.id);
                     }}
-                    className="inline-flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-transparent transition-colors hover:bg-black/[0.06] active:bg-black/[0.12]"
+                    className="inline-flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-transparent transition-colors hover:bg-black/[0.06] active:bg-black/[0.12] min-[744px]:max-lg:h-auto min-[744px]:max-lg:w-auto min-[744px]:max-lg:rounded-none"
                     aria-expanded={isOpen}
                     aria-label={
                       isOpen ? `Collapse ${module.title}` : `Expand ${module.title}`
                     }
                   >
                     <svg
-                      className="transition-transform duration-300 ease-in-out"
+                      className="h-[8px] w-[14px] transition-transform duration-300 ease-in-out min-[744px]:max-lg:h-[9px] min-[744px]:max-lg:w-[19px]"
                       style={{
                         transform: isOpen ? "rotate(0deg)" : "rotate(180deg)",
                       }}
                       xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="8"
+                      width="19"
+                      height="9"
                       viewBox="0 0 21 11"
                       fill="none"
                       aria-hidden
@@ -1070,14 +1079,13 @@ export function FullCourseLearningExperience({
                       selectModule(module.id);
                       setOpenMap((prev) => ({ ...prev, [module.id]: true }));
                     }}
-                    className="ml-[12px] inline-flex min-w-0 flex-1 items-center bg-transparent p-0 text-left transition-opacity hover:opacity-80"
+                    className="ml-[12px] inline-flex min-w-0 flex-1 items-center bg-transparent p-0 text-left transition-opacity hover:opacity-80 min-[744px]:max-lg:ml-[20px]"
                   >
                     <span
-                      className="truncate"
+                      className="truncate text-[18px] font-medium min-[744px]:max-lg:text-[24px]"
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily,
-                        fontSize: LESSON_TEXT_SIZE,
                         fontWeight: 500,
                       }}
                     >
@@ -1099,20 +1107,18 @@ export function FullCourseLearningExperience({
                         key={lesson.id}
                         type="button"
                         onClick={() => selectLesson(lesson)}
-                        className={`flex w-full items-center justify-between border-t border-black pl-[20px] pr-[16px] text-left transition-colors duration-200 ${
+                        className={`flex h-[60px] w-full items-center justify-between border-t border-black pl-[20px] pr-[16px] text-left transition-colors duration-200 min-[744px]:max-lg:h-[74px] min-[744px]:max-lg:pl-[24px] ${
                           isActive
                             ? "bg-[#64E1FF]"
                             : "bg-white hover:bg-[#64E1FF]"
                         } ${lessonIndex === 0 ? "rounded-t-[30px]" : ""}`}
-                        style={{ height: LESSON_ROW_HEIGHT }}
                         aria-current={isActive ? "true" : undefined}
                       >
                         <p
-                          className="m-0 truncate"
+                          className="m-0 truncate text-[18px] min-[744px]:max-lg:text-[24px]"
                           style={{
                             color: "var(--Black, #000)",
                             fontFamily,
-                            fontSize: LESSON_TEXT_SIZE,
                             fontWeight: 400,
                           }}
                         >
@@ -1147,11 +1153,10 @@ export function FullCourseLearningExperience({
           aria-hidden
         />
         <div
-          className="flex w-full justify-center lg:hidden"
-          style={{ paddingTop: 35 }}
+          className="flex w-full justify-center max-[743px]:pt-[35px] min-[744px]:max-lg:pt-[73px] lg:hidden"
           aria-hidden
         >
-          <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
+          <hr className="m-0 h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
         </div>
         <div className="fcl-unit-complete-row flex items-center justify-between lg:mt-[45px]">
           <button

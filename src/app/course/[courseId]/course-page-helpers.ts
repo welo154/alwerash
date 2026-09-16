@@ -24,3 +24,13 @@ export function formatCourseDurationLabel(
 export function formatUpdatedMonthYear(date: Date): string {
   return `Last Updated ${date.getMonth() + 1}/${date.getFullYear()}`;
 }
+
+export const DEFAULT_COURSE_REQUIREMENTS = [
+  "Drawing Tablet or iPad",
+  "Digital Painting Software",
+] as const;
+
+export function courseRequirementItems(requirements: string[] | null | undefined): string[] {
+  const items = (requirements ?? []).map((item) => item.trim()).filter(Boolean);
+  return items.length > 0 ? items : [...DEFAULT_COURSE_REQUIREMENTS];
+}

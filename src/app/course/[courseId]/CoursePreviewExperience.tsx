@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useCallback, useMemo, useState } from "react";
 import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
@@ -200,7 +201,7 @@ export function CoursePreviewExperience({
       </div>
       </div>
 
-      <div className="max-lg:order-6">
+      <div className="max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
       <CourseContentAccordion
         courseId={courseId}
         fontFamily={fontFamily}

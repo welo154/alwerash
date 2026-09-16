@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -43,7 +44,7 @@ function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continu
   const cardBase = "box-border w-full rounded-[50px] border border-[var(--Black,#000)]";
 
   return (
-    <div className="relative w-[315px] max-w-full shrink-0 lg:w-[347px]">
+    <div className="relative w-[315px] max-w-full shrink-0 min-[744px]:max-lg:w-[346px] lg:w-[347px]">
       <div
         className={`relative z-1 ${cardBase}`}
         style={{
@@ -110,14 +111,33 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
 
   return (
     <section className="mt-[70px] w-full max-lg:mt-[65px]">
-      <div className="flex items-center max-lg:pl-[30px]">
+      <div className="flex items-center max-[743px]:pl-[30px] min-[744px]:max-lg:ml-[31px]">
         <h2
-          className="m-0 text-[24px] font-semibold italic leading-[120%] text-[var(--Black,#000)] lg:text-[48px]"
+          className="m-0 text-[24px] font-semibold italic leading-[120%] text-[var(--Black,#000)] min-[744px]:max-lg:text-[32px] min-[744px]:max-lg:font-bold lg:text-[48px]"
           style={{ fontFamily }}
         >
           RELATED <span className="font-normal not-italic">CLASSES</span>
         </h2>
-        <svg className="ml-[27px] max-lg:hidden" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
+        <svg
+          className="ml-[16px] hidden h-[41px] w-[41px] min-[744px]:max-lg:block"
+          xmlns="http://www.w3.org/2000/svg"
+          width="41"
+          height="41"
+          viewBox="0 0 62 62"
+          fill="none"
+          aria-hidden
+        >
+          <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
+          <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
+          <path
+            d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
+            stroke="var(--Black, #000)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <svg className="ml-[27px] hidden lg:block" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
           <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
           <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
           <path
@@ -130,13 +150,16 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
         </svg>
       </div>
 
-      <div className="relative mt-[35px] max-lg:pl-[30px] lg:left-1/2 lg:mt-[50px] lg:w-screen lg:max-w-[100vw] lg:-translate-x-1/2 lg:overflow-hidden lg:pl-[55px] lg:pr-[60px]">
+      <div className="relative mt-[35px] max-[743px]:pl-[30px] min-[744px]:max-lg:mt-[40px] min-[744px]:max-lg:ml-[31px] lg:left-1/2 lg:mt-[50px] lg:w-screen lg:max-w-[100vw] lg:-translate-x-1/2 lg:overflow-hidden lg:pl-[55px] lg:pr-[60px]">
         <Swiper
           slidesPerView="auto"
           spaceBetween={20}
           breakpoints={{
-            1024: {
+            744: {
               spaceBetween: 30,
+            },
+            1036: {
+              spaceBetween: 20,
             },
           }}
           slidesPerGroup={1}
@@ -160,7 +183,7 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
           }}
         >
           {cards.map((card) => (
-            <SwiperSlide key={card.continueHref} className="w-[315px]! lg:w-[347px]!">
+            <SwiperSlide key={card.continueHref} className="w-[315px]! min-[744px]:max-lg:mr-[30px]! min-[744px]:max-lg:w-[346px]! lg:w-[347px]!">
               <CourseStackCard {...card} fontFamily={fontFamily} />
             </SwiperSlide>
           ))}

@@ -1527,6 +1527,44 @@ label:has(input[type="radio"]) {
     padding-left: 30px;
   }
 
+  @media (min-width: 744px) {
+    .fcl-title-rule {
+      padding-bottom: 33px;
+    }
+
+    .fcl-text-title-intro,
+    .fcl-text-title-article {
+      margin-bottom: 22px;
+    }
+
+    .fcl-lesson-rule {
+      padding-top: 61px;
+      padding-bottom: 0;
+    }
+
+    .fcl-video-block {
+      padding-top: 43px;
+    }
+
+    .fcl-text-title-article {
+      padding-top: 42px;
+    }
+
+    .fcl-lesson-rule-after-video {
+      padding-top: 58px;
+    }
+
+    .course-article-download-icon {
+      width: 27px;
+      height: 27px;
+    }
+
+    .fcl-unit-complete-row {
+      padding-top: 48px;
+      padding-left: 61px;
+    }
+  }
+
   /* Home footer uses extra margin + translateY; don't stack that on this page */
   body:has(.fcl-page) .site-mobile-footer {
     margin-top: 0 !important;
@@ -1558,6 +1596,21 @@ label:has(input[type="radio"]) {
 
   .fcl-next-unit {
     display: none;
+  }
+
+  @media (min-width: 744px) {
+    .fcl-unit-check {
+      width: 41px;
+      height: 41px;
+    }
+
+    .fcl-unit-check-gap {
+      margin-left: 17px;
+    }
+
+    .fcl-unit-label {
+      font-size: 24px;
+    }
   }
 }
 

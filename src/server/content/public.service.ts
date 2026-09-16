@@ -20,6 +20,7 @@ import { getFreeLessonIds, isFreeLesson } from "@/lib/course-access";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
 import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
+import { sqlGetCourseRequirements } from "@/server/content/course-requirements-sql";
 import type {
   HomeTrackExplorerBundle,
   HomeTrackMetaFilter,
@@ -650,6 +651,7 @@ export async function publicGetCourseById(courseId: string) {
 
   return {
     ...course,
+    requirements: await sqlGetCourseRequirements(courseId),
     coverImage: effectiveCoverImage(
       course.coverImage,
       course.introVideoMuxPlaybackId,

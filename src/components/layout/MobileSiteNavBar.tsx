@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";

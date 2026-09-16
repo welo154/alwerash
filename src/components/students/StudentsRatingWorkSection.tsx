@@ -256,7 +256,7 @@ export function StudentsRatingWorkSection({
   if (variant === "mobile") {
     return (
       <section
-        className={`w-full ${sectionClassName}`.trim()}
+        className={`w-full min-[744px]:max-lg:mx-auto min-[744px]:max-lg:w-[732px] ${sectionClassName}`.trim()}
         aria-label="Why students love Alwerash"
       >
         <div

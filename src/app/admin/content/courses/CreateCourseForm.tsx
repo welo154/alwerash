@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
 import { adminCreateCourse, adminListTracks, adminListMentors } from "@/server/content/admin.service";
+import { parseRequirementLines } from "@/server/content/course-requirements-sql";
 
 type TrackItem = Awaited<ReturnType<typeof adminListTracks>>[number];
 type MentorItem = Awaited<ReturnType<typeof adminListMentors>>[number];
@@ -22,6 +23,7 @@ export async function CreateCourseForm() {
       mentorId: mentorId || undefined,
       title,
       summary: String(formData.get("summary") ?? "").trim() || undefined,
+      requirements: parseRequirementLines(String(formData.get("requirements") ?? "")),
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
       instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
       instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
@@ -105,6 +107,16 @@ export async function CreateCourseForm() {
           rows={3}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Requirements</label>
+        <textarea
+          name="requirements"
+          placeholder={"Drawing Tablet or iPad\nDigital Painting Software"}
+          rows={4}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+        <p className="mt-0.5 text-xs text-slate-500">One requirement per line. Shown on the public course page.</p>
       </div>
       <div className="flex flex-wrap items-center gap-4">
         <div>

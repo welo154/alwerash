@@ -26,6 +26,7 @@ import {
   sqlMaxTrendingOrder,
   sqlSetTrendingOrder,
 } from "./featured-trending-sql";
+import { sqlGetCourseRequirements, sqlSetCourseRequirements } from "./course-requirements-sql";
 import {
   sqlCountLandingPopularMentors,
   sqlGetLandingPopularOrder,
@@ -223,6 +224,7 @@ export async function adminGetCourse(id: string) {
       ...c,
       ...tags,
       mentorId,
+      requirements: await sqlGetCourseRequirements(id),
       featuredTrendingOrder: await sqlGetTrendingOrder(id),
     };
   } catch (e) {
@@ -248,7 +250,7 @@ export async function adminCreateCourse(input: unknown) {
         instructorImage = mentor.photo;
       }
     }
-    const { mentorId: _m, trackId, ...rest } = data;
+    const { mentorId: _m, trackId, requirements, ...rest } = data;
     const course = await prisma.course.create({
       data: {
         ...rest,
@@ -258,6 +260,9 @@ export async function adminCreateCourse(input: unknown) {
         instructorImage: instructorImage ?? undefined,
       },
     });
+    if (requirements) {
+      await sqlSetCourseRequirements(course.id, requirements);
+    }
     if (mentorId) {
       try {
         await prisma.$executeRaw`UPDATE courses SET mentor_id = ${mentorId} WHERE id = ${course.id}`;
@@ -287,6 +292,9 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   set("summary", data.summary);
   set("cover_image", data.coverImage);
   set("published", Boolean(data.published));
+  if (Array.isArray(data.requirements)) {
+    await sqlSetCourseRequirements(courseId, data.requirements as string[]);
+  }
 
   const runUpdate = (updates: string[], values: unknown[]) => {
     if (updates.length === 0) return Promise.resolve();
@@ -407,6 +415,7 @@ async function adminGetCourseSafeFallback(id: string) {
     featuredTrendingOrder: null as number | null,
     totalDurationMinutes: null as number | null,
     rating: null as number | null,
+    requirements: await sqlGetCourseRequirements(id),
     ...tags,
   };
 }
@@ -433,6 +442,7 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
     tagBasics,
     tagNew,
     tagTopRated,
+    requirements: requirementsToSet,
     ...dataForPrisma
   } = updateData;
   const tagPatch: Partial<CourseCatalogTagState> = {};
@@ -463,6 +473,9 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
         // tag_* columns may not exist yet
       }
     }
+    if (Array.isArray(requirementsToSet)) {
+      await sqlSetCourseRequirements(courseId, requirementsToSet as string[]);
+    }
     const tags = await sqlGetCourseTags(courseId);
     return {
       ...updated,
@@ -473,7 +486,7 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     const metaMsg = e instanceof Prisma.PrismaClientKnownRequestError ? (e.meta as { message?: string })?.message : undefined;
     if (msg?.includes("does not exist") || metaMsg?.includes("does not exist")) {
-      return courseUpdateRawSafe(courseId, dataForPrisma);
+      return courseUpdateRawSafe(courseId, { ...dataForPrisma, requirements: requirementsToSet });
     }
     handlePrismaError(e);
   }

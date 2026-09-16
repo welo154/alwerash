@@ -203,6 +203,7 @@ model Course {
   mentorId                String?  @map("mentor_id")
   title                  String
   summary                String?
+  requirements           String[] @default([])
   coverImage             String?  @map("cover_image")
   instructorName         String?  @map("instructor_name")
   instructorImage        String?  @map("instructor_image")

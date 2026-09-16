@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -111,12 +112,19 @@ export function CourseContentAccordion({
     setOpenMap(initial);
   }, [sections]);
 
+  const mins = totalDurationMinutes ?? lessonCount * 15;
   const durationLabel = (() => {
-    const mins = totalDurationMinutes ?? lessonCount * 15;
     if (mins <= 0) return "0m";
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    return `${m}m`;
+  })();
+  const durationLabelCompact = (() => {
+    if (mins <= 0) return "0m";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h > 0) return m > 0 ? `${h}h${String(m).padStart(2, "0")}m` : `${h}h`;
     return `${m}m`;
   })();
 
@@ -139,28 +147,11 @@ export function CourseContentAccordion({
     }
   };
 
-  if (sections.length === 0) {
-    return (
-      <p
-        className="mt-[35px] m-0 text-[24px] lg:mt-[46px] lg:text-[36px]"
-        style={{
-          color: "var(--Black, #000)",
-          fontFamily,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "normal",
-        }}
-      >
-        COURSE <span style={{ fontStyle: "italic", fontWeight: 600 }}>CONTENT</span>
-      </p>
-    );
-  }
-
   return (
     <>
-      <div className="mt-[35px] flex items-center justify-between lg:mt-[46px]">
+      <div className="mt-[35px] flex items-center justify-between min-[744px]:max-lg:mt-[43px] min-[744px]:max-lg:w-[676px] lg:mt-[46px]">
         <p
-          className="m-0 text-[24px] lg:text-[36px]"
+          className="m-0 text-[24px] min-[744px]:max-lg:text-[32px] lg:text-[36px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
@@ -210,9 +201,9 @@ export function CourseContentAccordion({
         </div>
       </div>
 
-      <div className="mt-[5px] flex items-center justify-between max-lg:pr-[29px] lg:mt-[26px]">
+      <div className="mt-[5px] flex items-center justify-between max-[743px]:pr-[29px] min-[744px]:max-lg:mt-[9px] min-[744px]:max-lg:w-[676px] lg:mt-[26px]">
         <p
-          className="m-0 text-[14px] lg:text-[24px]"
+          className="m-0 text-[14px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
           style={{
             color: "var(--Black, #000)",
             fontFamily,
@@ -227,10 +218,10 @@ export function CourseContentAccordion({
         </p>
         <div className="flex items-center lg:hidden">
           <span
+            className="text-[14px] min-[744px]:max-lg:text-[18px]"
             style={{
               color: "var(--Black, #000)",
               fontFamily,
-              fontSize: "14px",
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "normal",
@@ -238,7 +229,7 @@ export function CourseContentAccordion({
           >
             {lessonCount} {lessonCount === 1 ? "Lesson" : "Lessons"}
           </span>
-          <svg className="ml-[12px]" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 27 27" fill="none" aria-hidden>
+          <svg className="ml-[12px] min-[744px]:max-lg:hidden" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 27 27" fill="none" aria-hidden>
             <path
               d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
               stroke="var(--Black, #000)"
@@ -247,8 +238,25 @@ export function CourseContentAccordion({
               strokeLinejoin="round"
             />
           </svg>
+          <svg
+            className="ml-[17px] hidden min-[744px]:max-lg:block"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M9.75 4.35V9.75L13.35 11.55M18.75 9.75C18.75 14.7206 14.7206 18.75 9.75 18.75C4.77944 18.75 0.75 14.7206 0.75 9.75C0.75 4.77944 4.77944 0.75 9.75 0.75C14.7206 0.75 18.75 4.77944 18.75 9.75Z"
+              stroke="var(--Black, #000)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           <span
-            className="ml-[12px]"
+            className="ml-[12px] min-[744px]:max-lg:hidden"
             style={{
               color: "var(--Black, #000)",
               fontFamily,
@@ -259,6 +267,18 @@ export function CourseContentAccordion({
             }}
           >
             {durationLabel}
+          </span>
+          <span
+            className="ml-[7px] mr-[50px] hidden text-[18px] min-[744px]:max-lg:inline"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+            }}
+          >
+            {durationLabelCompact}
           </span>
         </div>
         <button
@@ -307,7 +327,7 @@ export function CourseContentAccordion({
         </p>
       ) : null}
 
-      <div className="mt-[20px] flex w-[843px] max-w-full flex-col gap-[17px] max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:max-w-none max-lg:items-center lg:gap-[22px]">
+      <div className="mt-[20px] flex w-[843px] max-w-full flex-col gap-[17px] max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:max-w-none max-[743px]:items-center min-[744px]:max-lg:mt-[48px] min-[744px]:max-lg:w-[622px] lg:gap-[22px]">
         {sections.map((section) => {
           const isOpen = !!openMap[section.id];
           const openHeightMobile = 54 + section.lessons.length * 74;
@@ -315,7 +335,7 @@ export function CourseContentAccordion({
           return (
             <div
               key={section.id}
-              className={`h-[var(--h-sm)] w-[334px] overflow-hidden rounded-[30px] border border-black max-lg:mx-auto lg:h-[var(--h-lg)] lg:w-full ${
+              className={`h-[var(--h-sm)] w-[334px] overflow-hidden rounded-[30px] border border-black max-[743px]:mx-auto min-[744px]:max-lg:h-[var(--h-lg)] min-[744px]:max-lg:w-[622px] lg:h-[var(--h-lg)] lg:w-full ${
                 isOpen ? "bg-[#89F496]" : "bg-white"
               }`}
               style={{
@@ -325,7 +345,7 @@ export function CourseContentAccordion({
               }}
             >
               <div
-                className={`flex h-[54px] w-full items-center px-4 transition-[height,background-color] duration-300 ease-in-out lg:h-[74px] lg:px-[38px] ${
+                className={`flex h-[54px] w-full items-center px-4 transition-[height,background-color] duration-300 ease-in-out min-[744px]:max-lg:h-[74px] min-[744px]:max-lg:pl-[31px] lg:h-[74px] lg:px-[38px] ${
                   isOpen ? "bg-[#89F496]" : "bg-white"
                 }`}
               >
@@ -337,7 +357,7 @@ export function CourseContentAccordion({
                   aria-label={isOpen ? `Collapse ${section.title}` : `Expand ${section.title}`}
                 >
                   <svg
-                    className="transition-transform duration-300 ease-in-out"
+                    className="h-[9px] w-[19px] transition-transform duration-300 ease-in-out"
                     style={{ transform: isOpen ? "rotate(0deg)" : "rotate(180deg)" }}
                     xmlns="http://www.w3.org/2000/svg"
                     width="19"
@@ -356,7 +376,7 @@ export function CourseContentAccordion({
                   aria-label={`Start ${section.title}`}
                 >
                   <span
-                    className="truncate text-[16px] font-medium lg:text-[24px]"
+                    className="truncate text-[16px] font-medium min-[744px]:max-lg:text-[24px] lg:text-[24px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily,
@@ -376,7 +396,7 @@ export function CourseContentAccordion({
                 }`}
               >
                 {section.lessons.map((lesson, lessonIndex) => {
-                  const rowClassName = `flex h-[74px] w-full items-center justify-between border-t border-black bg-white px-4 text-left transition-colors duration-200 lg:pl-[34px] lg:pr-[38px] ${
+                  const rowClassName = `flex h-[74px] w-full items-center justify-between border-t border-black bg-white px-4 text-left transition-colors duration-200 min-[744px]:max-lg:pl-[24px] lg:pl-[34px] lg:pr-[38px] ${
                     lesson.isFree
                       ? activeFreeLessonId === lesson.id
                         ? "bg-[#64E1FF] hover:bg-[#64E1FF]"
@@ -406,7 +426,7 @@ export function CourseContentAccordion({
 
                   const rowContent = (
                     <>
-                      <p className="m-0 truncate text-[16px] lg:text-[24px]" style={labelStyle}>
+                      <p className="m-0 truncate text-[16px] min-[744px]:max-lg:text-[24px] lg:text-[24px]" style={labelStyle}>
                         {lesson.name}
                       </p>
                       {lesson.isAction ? (

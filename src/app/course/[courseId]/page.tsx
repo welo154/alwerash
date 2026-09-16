@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { CoursePreviewExperience } from "./CoursePreviewExperience";
 import { RelatedClassesSection } from "./RelatedClassesSection";
 import {
+  courseRequirementItems,
   formatCourseDurationLabel,
   formatCourseRatingLabel,
   formatUpdatedMonthYear,
@@ -69,6 +70,7 @@ export default async function PublicCoursePage({
   const aboutText =
     course.summary?.trim() ||
     `Learn ${course.title} with step-by-step lessons designed to build practical skills from the ground up.`;
+  const requirementItems = courseRequirementItems(course.requirements);
 
   const relatedCourses =
     course.track?.slug != null
@@ -126,7 +128,7 @@ export default async function PublicCoursePage({
           />
 
           {hasSubscription ? (
-            <div className="mt-[40px] max-lg:order-6">
+            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
               <Link
                 href={fullCourseHref}
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#004B3C] px-8 text-[24px] font-bold text-white transition-opacity hover:opacity-90"
@@ -135,10 +137,10 @@ export default async function PublicCoursePage({
                 Go to full course
               </Link>
               <div
-                className="mt-[35px] flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:hidden"
+                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
                 aria-hidden
               >
-                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
+                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
               </div>
             </div>
           ) : (
@@ -151,10 +153,10 @@ export default async function PublicCoursePage({
                 Subscribe to unlock all lessons
               </Link>
               <div
-                className="mt-[35px] flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:hidden"
+                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
                 aria-hidden
               >
-                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
+                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
               </div>
             </div>
           )}
@@ -602,10 +604,10 @@ export default async function PublicCoursePage({
           </aside>
           </div>
 
-          <section className="mt-[30px] max-lg:order-4 max-lg:mt-[35px]">
+          <section className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:mt-[45px]">
             <div className="flex items-center gap-[16px]">
               <h3
-                className="m-0 text-[16px] lg:text-[24px]"
+                className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily: pangeaVar.style.fontFamily,
@@ -619,7 +621,7 @@ export default async function PublicCoursePage({
               </h3>
             </div>
             <p
-              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] lg:mt-[19px] lg:text-[24px]"
+              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] min-[744px]:max-lg:mt-[12px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[18px] lg:mt-[19px] lg:text-[24px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -632,9 +634,9 @@ export default async function PublicCoursePage({
             </p>
           </section>
 
-          <section className="max-lg:order-5 max-lg:mt-[15px]">
+          <section className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:mt-[36px]">
             <h3
-              className="m-0 mt-[30px] text-[16px] max-lg:mt-0 lg:text-[24px]"
+              className="m-0 mt-[30px] text-[16px] max-[743px]:mt-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[18px] lg:text-[24px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -647,7 +649,7 @@ export default async function PublicCoursePage({
               Requirements
             </h3>
             <ul
-              className="m-0 mt-[13px] list-disc pl-[28px] text-[16px] lg:text-[24px]"
+              className="m-0 mt-[13px] list-disc pl-[28px] text-[16px] min-[744px]:max-lg:mt-[10px] min-[744px]:max-lg:w-[294px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -656,17 +658,18 @@ export default async function PublicCoursePage({
                 lineHeight: "normal",
               }}
             >
-              <li>Drawing Tablet or iPad</li>
-              <li>Digital Painting Software</li>
+              {requirementItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
-            <div className="mt-[35px] flex w-[359px] max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:mt-[57px] lg:block lg:w-[413px]" aria-hidden>
-              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 lg:h-px lg:w-[413px] lg:max-w-full lg:border-0" />
+            <div className="mt-[35px] flex w-[359px] max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[51px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:mt-[57px] lg:block lg:w-[413px]" aria-hidden>
+              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] min-[744px]:max-lg:bg-black lg:h-px lg:w-[413px] lg:max-w-full lg:border-0" />
             </div>
           </section>
 
-          <section className="mt-[30px] max-lg:order-7 max-lg:mt-[35px]">
+          <section className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ml-[31px]">
             <h3
-              className="m-0 text-[16px] lg:text-[24px]"
+              className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -679,8 +682,8 @@ export default async function PublicCoursePage({
               About your instructor
             </h3>
 
-            <div className="mt-[23px] flex items-start lg:mt-[43px]">
-              <div className="relative h-[135px] w-[135px] shrink-0 overflow-hidden rounded-full border border-black bg-[#E9E9E9] lg:h-[174px] lg:w-[174px]">
+            <div className="mt-[23px] flex items-start min-[744px]:max-lg:mt-[30px] lg:mt-[43px]">
+              <div className="relative h-[135px] w-[135px] shrink-0 overflow-hidden rounded-full border-black bg-[#E9E9E9] max-[743px]:border min-[744px]:max-lg:h-[154px] min-[744px]:max-lg:w-[154px] min-[744px]:max-lg:border-[0.3px] lg:h-[174px] lg:w-[174px] lg:border">
                 {instructorImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -689,11 +692,12 @@ export default async function PublicCoursePage({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="174" height="174" viewBox="0 0 175 175" fill="none" className="h-full w-full" aria-hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="155" height="155" viewBox="0 0 155 155" fill="none" className="h-full w-full" aria-hidden>
                     <path
-                      d="M87.5 174.5C135.549 174.5 174.5 135.549 174.5 87.5C174.5 39.4512 135.549 0.5 87.5 0.5C39.4512 0.5 0.5 39.4512 0.5 87.5C0.5 135.549 39.4512 174.5 87.5 174.5Z"
+                      d="M77.1499 154.15C119.676 154.15 154.15 119.676 154.15 77.1504C154.15 34.6245 119.676 0.150391 77.1499 0.150391C34.624 0.150391 0.149902 34.6245 0.149902 77.1504C0.149902 119.676 34.624 154.15 77.1499 154.15Z"
                       fill="#E9E9E9"
-                      stroke="black"
+                      stroke="var(--Black, #000)"
+                      strokeWidth="0.3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -701,9 +705,9 @@ export default async function PublicCoursePage({
                 )}
               </div>
 
-              <div className="ml-[21px] min-w-0 lg:ml-[30px]">
+              <div className="ml-[21px] min-w-0 min-[744px]:max-lg:ml-[24px] lg:ml-[30px]">
                 <p
-                  className="m-0 text-[16px] lg:text-[24px]"
+                  className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
@@ -715,7 +719,7 @@ export default async function PublicCoursePage({
                   {instructorName.toUpperCase()}
                 </p>
                 <p
-                  className="m-0 text-[14px] opacity-60 lg:text-[24px]"
+                  className="m-0 text-[14px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
@@ -727,8 +731,8 @@ export default async function PublicCoursePage({
                   {instructorRole}
                 </p>
 
-                <div className="mt-[20px] flex items-center lg:mt-[16px]">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 lg:h-[20px] lg:w-[21px]" aria-hidden>
+                <div className="mt-[20px] flex items-center min-[744px]:max-lg:mt-[12px] lg:mt-[16px]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[20px] lg:w-[21px]" aria-hidden>
                     <path
                       d="M11.5 1L14.7445 7.58254L22 8.64458L16.75 13.7655L17.989 21L11.5 17.5825L5.011 21L6.25 13.7655L1 8.64458L8.2555 7.58254L11.5 1Z"
                       stroke="var(--Black, #000)"
@@ -738,7 +742,7 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] lg:ml-[18px] lg:text-[18px]"
+                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
@@ -751,8 +755,8 @@ export default async function PublicCoursePage({
                   </span>
                 </div>
 
-                <div className="mt-[13px] flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 20" fill="none" className="h-[18px] w-[19px] shrink-0 lg:h-[18px] lg:w-[21px]" aria-hidden>
+                <div className="mt-[13px] flex items-center min-[744px]:max-lg:mt-[11px]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 20" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[18px] lg:w-[21px]" aria-hidden>
                     <path
                       d="M16.2727 19V17C16.2727 15.9391 15.8705 14.9217 15.1544 14.1716C14.4384 13.4214 13.4672 13 12.4545 13H4.81818C3.80554 13 2.83437 13.4214 2.11832 14.1716C1.40227 14.9217 1 15.9391 1 17V19M22 19V17C21.9994 16.1137 21.7178 15.2528 21.1995 14.5523C20.6812 13.8519 19.9555 13.3516 19.1364 13.13M15.3182 1.13C16.1395 1.3503 16.8674 1.8507 17.3873 2.55231C17.9071 3.25392 18.1893 4.11683 18.1893 5.005C18.1893 5.89317 17.9071 6.75608 17.3873 7.45769C16.8674 8.1593 16.1395 8.6597 15.3182 8.88M12.4545 5C12.4545 7.20914 10.7451 9 8.63636 9C6.52764 9 4.81818 7.20914 4.81818 5C4.81818 2.79086 6.52764 1 8.63636 1C10.7451 1 12.4545 2.79086 12.4545 5Z"
                       stroke="var(--Black, #000)"
@@ -762,7 +766,7 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] lg:ml-[18px] lg:text-[18px]"
+                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
@@ -775,8 +779,8 @@ export default async function PublicCoursePage({
                   </span>
                 </div>
 
-                <div className="mt-[13px] flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 lg:h-[20px] lg:w-[21px]" aria-hidden>
+                <div className="mt-[13px] flex items-center min-[744px]:max-lg:mt-[11px]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[20px] lg:w-[21px]" aria-hidden>
                     <path
                       d="M11.5 5.44444C11.5 4.2657 11.0575 3.13524 10.2698 2.30175C9.4822 1.46825 8.41391 1 7.3 1H1V17.6667H8.35C9.18543 17.6667 9.98665 18.0179 10.5774 18.643C11.1681 19.2681 11.5 20.1159 11.5 21M11.5 5.44444V21M11.5 5.44444C11.5 4.2657 11.9425 3.13524 12.7302 2.30175C13.5178 1.46825 14.5861 1 15.7 1H22V17.6667H14.65C13.8146 17.6667 13.0134 18.0179 12.4226 18.643C11.8319 19.2681 11.5 20.1159 11.5 21"
                       stroke="var(--Black, #000)"
@@ -786,7 +790,7 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] lg:ml-[18px] lg:text-[18px]"
+                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
@@ -798,11 +802,23 @@ export default async function PublicCoursePage({
                     4 courses
                   </span>
                 </div>
+                <p
+                  className="m-0 mt-[43px] hidden w-[620px] -ml-[178px] text-[18px] min-[744px]:max-lg:block"
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaVar.style.fontFamily,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "normal",
+                  }}
+                >
+                  {aboutText}
+                </p>
               </div>
             </div>
 
             <p
-              className="m-0 mt-[23px] w-[334px] max-w-full text-[16px] lg:mt-[35px] lg:text-[24px]"
+              className="m-0 mt-[23px] w-[334px] max-w-full text-[16px] min-[744px]:max-lg:hidden lg:mt-[35px] lg:text-[24px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -811,18 +827,24 @@ export default async function PublicCoursePage({
                 lineHeight: "normal",
               }}
             >
-              <span className="lg:hidden">“</span>
+              <span className="hidden max-[743px]:inline">“</span>
               {aboutText}
-              <span className="lg:hidden">”</span>
+              <span className="hidden max-[743px]:inline">”</span>
             </p>
-            <div className="mt-[35px] flex max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:hidden" aria-hidden>
+            <div className="mt-[35px] hidden max-[743px]:flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center lg:hidden" aria-hidden>
               <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
             </div>
           </section>
         </div>
       </div>
 
-      <div className="mt-[35px] max-lg:order-8 max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] lg:hidden">
+      <div className="mt-[35px] max-lg:order-8 max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] min-[744px]:max-lg:mt-[50px] lg:hidden">
+        <div
+          className="hidden min-[744px]:max-lg:flex min-[744px]:max-lg:justify-center"
+          aria-hidden
+        >
+          <div className="h-0 w-[676px] border-0 border-t border-black bg-black opacity-60" />
+        </div>
         <LandingEverythingInOneSection
           variant="mobile"
           hideChecks
@@ -831,7 +853,7 @@ export default async function PublicCoursePage({
         />
       </div>
 
-      <div className="max-lg:order-9 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center lg:hidden">
+      <div className="max-lg:order-9 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
         <StudentsRatingWorkSection variant="mobile" />
       </div>
 
@@ -839,7 +861,7 @@ export default async function PublicCoursePage({
         <StudentsRatingWorkSection sectionClassName="py-0" />
       </div>
 
-      <div className="max-lg:order-10 max-lg:-ml-[30px] max-lg:mb-[65px] max-lg:w-[calc(100%+30px)]">
+      <div className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
         <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />
       </div>
       </div>

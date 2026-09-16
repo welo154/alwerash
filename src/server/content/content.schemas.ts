@@ -75,6 +75,7 @@ export const CourseCreateSchema = z.object({
   mentorId: OptionalCuid,
   title: z.string().min(2, "Title too short").max(200),
   summary: z.string().max(2000).optional(),
+  requirements: z.array(z.string().trim().min(1).max(200)).max(30).optional(),
   coverImage: OptionalUrl,
   instructorName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
   instructorImage: OptionalUrl,
