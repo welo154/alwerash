@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/auth";
 import { SubscriptionPricingCards } from "@/components/subscription/SubscriptionPricingCard";
 import { SubscriptionMobileCards } from "@/components/subscription/SubscriptionMobileCards";
 import { AUTH_SOCIAL_LINKS } from "@/components/auth/auth-theme";
@@ -7,13 +8,30 @@ import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
 const SUBSCRIPTION_LOGO = "/auth/alwerash-logo.png";
 
-export default function SubscriptionPage() {
+const SUBSCRIPTION_ERRORS: Record<string, string> = {
+  payment_required:
+    "Checkout isn’t available yet, so this plan can’t be activated. Please contact support to complete your subscription.",
+  invalid: "That plan is no longer available. Please choose another one.",
+};
+
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const session = await auth();
+  const homeHref = session?.user ? "/home" : "/";
+
+  const params = (await searchParams) ?? {};
+  const errorKey = Array.isArray(params.error) ? params.error[0] : params.error;
+  const errorMessage = errorKey ? SUBSCRIPTION_ERRORS[errorKey] : undefined;
+
   return (
     <div
       className={`${pangeaVar.className} subscription-page flex min-h-screen flex-col items-center bg-white max-lg:pt-[64px] max-lg:px-0 lg:items-stretch lg:[padding:35px_48px]`}
     >
       <Link
-        href="/"
+        href={homeHref}
         aria-label="Alwerash home"
         className="subscription-logo mx-auto block shrink-0 max-lg:h-[36px] max-lg:w-[121px] lg:h-[87px] lg:w-[198px]"
       >
@@ -65,6 +83,22 @@ export default function SubscriptionPage() {
       >
         Thousands of creative classes. Beginner to pro, watch at your pace and even offline.
       </p>
+      {errorMessage ? (
+        <p
+          role="alert"
+          className="m-0 mx-auto mt-[24px] w-[485px] max-w-full rounded-[16px] px-[20px] py-[14px] text-center text-black max-lg:w-[320px]"
+          style={{
+            fontFamily: pangeaFontFamily,
+            fontSize: 16,
+            fontWeight: 400,
+            lineHeight: "140%",
+            background: "#FFE9E4",
+            border: "1px solid #F0B8AA",
+          }}
+        >
+          {errorMessage}
+        </p>
+      ) : null}
       <div className="subscription-panel-gap h-[41px] shrink-0" aria-hidden />
       <div
         className="subscription-panel mx-auto flex w-[1343px] max-w-full shrink-0 items-stretch overflow-hidden max-lg:h-[627px] max-lg:w-[382px] max-lg:p-0 lg:h-[720px] lg:p-[59px_61px]"
