@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import { VideoWatermark } from "@/components/video/VideoWatermark";
 
 export type HlsPlayerProps = {
   src: string;
@@ -27,6 +28,11 @@ export type HlsPlayerProps = {
    * iOS) gives no request hook and falls back to reloading on error.
    */
   resolveUrl?: (url: string) => string;
+  /**
+   * Opaque per-viewer marker rendered over the video for leak attribution.
+   * Must never contain personal data; see server/video/watermark.ts.
+   */
+  watermark?: string | null;
 };
 
 type LevelInfo = { height: number; width: number; index: number };
@@ -61,6 +67,7 @@ export function HlsPlayer({
   onEnded,
   onError,
   resolveUrl,
+  watermark,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -318,6 +325,10 @@ export function HlsPlayer({
           preload="metadata"
           onClick={togglePlay}
         />
+
+        {/* Sits inside the fullscreen container and above the video, but before the
+            control bar so it never covers the controls. */}
+        {watermark ? <VideoWatermark text={watermark} /> : null}
 
         {/* Custom control bar at bottom of video frame */}
         <div className="absolute bottom-0 left-0 right-0 flex flex-col bg-linear-to-t from-black/80 to-transparent pt-8 pb-1 px-2">

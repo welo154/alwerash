@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HlsPlayer, type HlsPlayerProps } from "@/components/video/HlsPlayer";
 
-type AuthorizedHlsPlayerProps = Omit<HlsPlayerProps, "src" | "resolveUrl"> & {
+type AuthorizedHlsPlayerProps = Omit<
+  HlsPlayerProps,
+  "src" | "resolveUrl" | "watermark"
+> & {
   lessonId: string;
 };
 
@@ -46,6 +49,7 @@ function messageForFailure({ status, code }: PlaybackFailure): string {
 export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsPlayerProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [watermark, setWatermark] = useState<string | null>(null);
 
   const tokenRef = useRef<string | null>(null);
   const reloadCountRef = useRef(0);
@@ -131,6 +135,7 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
     }
 
     tokenRef.current = result.token ?? null;
+    setWatermark(result.watermarkText ?? null);
     setSrc(result.playbackUrl);
     scheduleRefresh(result.expiresAt);
   }, [clearRefreshTimer, fetchPlayback, scheduleRefresh]);
@@ -223,6 +228,7 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
       onProgress={handleProgress}
       onError={handleFatalError}
       resolveUrl={resolveUrl}
+      watermark={watermark}
     />
   );
 }
