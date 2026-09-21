@@ -21,7 +21,12 @@ const MIN_RELOAD_INTERVAL_MS = 3_000;
 const REFRESH_AT_FRACTION = 0.6;
 const MIN_REFRESH_DELAY_MS = 10_000;
 
-function messageForStatus(status: number): string {
+type PlaybackFailure = { status: number; code: string | null };
+
+function messageForFailure({ status, code }: PlaybackFailure): string {
+  if (code === "DEVICE_SESSION_REVOKED") {
+    return "This device was signed out because the account was used on another device.";
+  }
   if (status === 401) return "Sign in to watch this lesson.";
   if (status === 403) return "A subscription is required to watch this lesson.";
   if (status === 404) return "Video is not available for this lesson yet.";
@@ -56,12 +61,18 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
     }
   }, []);
 
-  const fetchPlayback = useCallback(async (): Promise<PlaybackResponse | number> => {
+  const fetchPlayback = useCallback(async (): Promise<PlaybackResponse | PlaybackFailure> => {
     const res = await fetch(`/api/video/playback/${encodeURIComponent(lessonId)}`, {
       credentials: "same-origin",
       cache: "no-store",
     });
-    if (!res.ok) return res.status;
+    if (!res.ok) {
+      const code = await res
+        .json()
+        .then((body: { error?: string }) => body?.error ?? null)
+        .catch(() => null);
+      return { status: res.status, code };
+    }
     return (await res.json()) as PlaybackResponse;
   }, [lessonId]);
 
@@ -83,11 +94,11 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
         const result = await fetchPlayback();
         if (cancelledRef.current) return;
 
-        if (typeof result === "number") {
-          // Access was revoked mid-playback, or the network failed. Retry once
-          // near expiry rather than tearing down a working stream immediately.
-          if (result === 401 || result === 403) {
-            setError(messageForStatus(result));
+        if ("status" in result) {
+          // Access was revoked mid-playback, or the network failed. Only stop the
+          // stream for a definitive answer; retry transient failures near expiry.
+          if (result.status === 401 || result.status === 403) {
+            setError(messageForFailure(result));
             setSrc(null);
             return;
           }
@@ -110,8 +121,8 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
     const result = await fetchPlayback();
     if (cancelledRef.current) return;
 
-    if (typeof result === "number") {
-      setError(messageForStatus(result));
+    if ("status" in result) {
+      setError(messageForFailure(result));
       return;
     }
     if (!result.playbackUrl) {

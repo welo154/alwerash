@@ -33,6 +33,7 @@ export const GET = handleRoute(async (_req: Request, ctx: { params: Promise<{ le
       userId: session?.user?.id ?? null,
       email: session?.user?.email ?? null,
       roles: session?.user?.roles ?? [],
+      deviceSessionId: session?.user?.deviceSessionId ?? null,
     },
   });
 

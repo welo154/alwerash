@@ -9,6 +9,7 @@ import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 import { verifyPassword } from "@/server/auth/password";
+import { registerDeviceSession, revokeDeviceSession } from "@/server/auth/device-session";
 
 const CredentialsSchema = z.object({
   email: z.string().email().transform((v) => v.toLowerCase().trim()),
@@ -66,12 +67,24 @@ export const authOptions: NextAuthOptions = {
         data: { userId: user.id, role: Role.LEARNER },
       });
     },
+    async signOut({ token }) {
+      // Free the device slot on explicit sign-out. Without this the row stays
+      // ACTIVE until the next sign-in displaces it.
+      if (token?.sub && token?.sid) {
+        await revokeDeviceSession(token.sub, token.sid, "USER_SIGNED_OUT").catch((error) => {
+          console.error("[auth] device session revoke on sign-out failed", error);
+        });
+      }
+    },
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user?.id) {
         token.sub = user.id;
         delete token.roles;
+        // A fresh sign-in always occupies a device slot, so drop any sid carried
+        // over from a previous session on this browser.
+        delete token.sid;
       }
 
       if (trigger === "update" && session && typeof session === "object") {
@@ -112,11 +125,28 @@ export const authOptions: NextAuthOptions = {
           token.roles = [];
         }
       }
+
+      // Register a device for this cookie if it does not have one yet. This runs
+      // on sign-in and also once for cookies issued before device sessions
+      // existed, so current students are grandfathered in without being signed
+      // out. The jwt callback re-encodes the cookie, so the sid persists.
+      if (token.sub && !token.sid) {
+        try {
+          const registration = await registerDeviceSession(token.sub);
+          token.sid = registration.sessionId;
+        } catch (error) {
+          // Never block sign-in on registry failure; the request stays legacy and
+          // registration is retried next time.
+          console.error("[auth] device session registration failed", error);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
+        session.user.deviceSessionId = token.sid ?? null;
         session.user.roles = token.roles ?? [];
         session.user.name = token.name ?? session.user.name ?? null;
         session.user.email = token.email ?? session.user.email ?? null;

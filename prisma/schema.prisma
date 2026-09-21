@@ -35,6 +35,17 @@ enum SubscriptionProvider {
   PAYMOB
 }
 
+/// Device class for session limits. Tablets count as MOBILE.
+enum DeviceKind {
+  MOBILE
+  COMPUTER
+}
+
+enum DeviceSessionStatus {
+  ACTIVE
+  REVOKED
+}
+
 enum SubscriptionStatus {
   ACTIVE
   CANCELED
@@ -109,8 +120,35 @@ model User {
   mentorProfile         Mentor?
   learningDays          UserLearningDay[]
   courseLearningDays    UserCourseLearningDay[]
+  deviceSessions        DeviceSession[]
 
   @@map("users")
+}
+
+/// Registered sign-in device. One ACTIVE row per (user, kind) is allowed, which is
+/// how "one phone and one computer per student" is enforced. The row id is the
+/// opaque `sid` claim carried in the signed session cookie, so revoking a row
+/// invalidates that cookie on the next protected request.
+model DeviceSession {
+  id            String              @id @default(cuid())
+  userId        String              @map("user_id")
+  kind          DeviceKind
+  status        DeviceSessionStatus @default(ACTIVE)
+  /// Human-readable summary for the account's device list, e.g. "Chrome on Windows".
+  label         String?
+  userAgent     String?             @map("user_agent")
+  /// Truncated/hashed client address. Never store a raw IP.
+  ipHash        String?             @map("ip_hash")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  lastSeenAt    DateTime            @default(now()) @map("last_seen_at")
+  revokedAt     DateTime?           @map("revoked_at")
+  revokedReason String?             @map("revoked_reason")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, kind, status])
+  @@map("device_sessions")
 }
 
 model UserRole {
