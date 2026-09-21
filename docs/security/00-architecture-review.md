@@ -239,6 +239,23 @@ action independently calls `requireRole(["ADMIN"])`, so nothing depends on hidde
 - **No SSRF.** No server-side fetch of a user-supplied URL.
 - **No Supabase client key in the browser.** The data path is Prisma-only.
 
+### The "AI Mentor" audit area does not exist as a feature
+
+The original audit brief listed AI Mentor as an area to review. There is **no LLM
+integration anywhere in the codebase**: no OpenAI, Anthropic, Gemini, `@ai-sdk`,
+LangChain, embeddings, pgvector, or chat-completion code in `src/`. "Mentor" here
+means a **human** reviewer — the `Mentor` model, public mentor profiles, and
+capstone submission grading.
+
+So none of the usual concerns apply today: no prompt injection, no tool-permission
+scoping, no RAG authorization boundary, no model API keys to leak, and no
+per-request spend to cap. References to "ChatGPT courses" in `SiteFooter.tsx` are
+marketing navigation labels, and the `LLM` mentions under `docs/` and the skill
+folders are contributor documentation, not product code.
+
+If an AI mentor is built later it needs its own threat model, because it would be
+the first feature to combine untrusted student input with privileged data access.
+
 ---
 
 ## 7. Unverified risks (need staging, config access, or test accounts)
