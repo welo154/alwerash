@@ -9,7 +9,7 @@ type Lesson = {
   title: string;
   type: string;
   order: number;
-  video?: { muxPlaybackId: string } | null;
+  video?: { hasVideo?: boolean } | null;
 };
 
 type Module = {

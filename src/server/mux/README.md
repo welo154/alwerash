@@ -17,13 +17,20 @@
 
 ## Existing public assets
 
-Changing upload code does **not** convert assets already created as public. Run:
+Changing upload code does **not** convert assets already created as public. Audit then migrate:
 
 ```bash
-npx tsx scripts/migrate-mux-lesson-playback-to-signed.ts
+npm run scripts:migrate-mux-signed-playback -- --dry-run
+npm run scripts:migrate-mux-signed-playback
 ```
 
 See that script’s comments for Mux dashboard fallback steps.
+
+**Deploy checklist**
+
+1. `MUX_SIGNING_KEY_ID` + `MUX_PRIVATE_KEY` set on Vercel (required or playback returns 503).
+2. Run the migration against production Mux + DB so old public `.m3u8` URLs stop working.
+3. Confirm learner Network tab shows `stream.mux.com/...m3u8?token=...` and that the same URL without `token` fails in Incognito.
 
 ## Webhook URL
 

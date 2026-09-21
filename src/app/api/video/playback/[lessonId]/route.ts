@@ -4,6 +4,8 @@ import { handleRoute } from "@/server/lib/route";
 import { getSignedPlaybackForLesson } from "@/server/video/video.service";
 
 export const runtime = "nodejs";
+// Personalized, short-lived credentials: never cache or share this response.
+export const dynamic = "force-dynamic";
 
 /**
  * Returns a short-lived signed Mux HLS URL.
@@ -14,7 +16,10 @@ export const GET = handleRoute(async (_req: Request, ctx: { params: Promise<{ le
   const session = await auth();
   const { lessonId } = await ctx.params;
   if (!lessonId) {
-    return NextResponse.json({ error: "BAD_REQUEST", message: "lessonId required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "BAD_REQUEST", message: "lessonId required" },
+      { status: 400, headers: { "Cache-Control": "private, no-store" } }
+    );
   }
 
   const result = await getSignedPlaybackForLesson({
@@ -26,9 +31,12 @@ export const GET = handleRoute(async (_req: Request, ctx: { params: Promise<{ le
     },
   });
 
-  return NextResponse.json({
-    lessonId: result.lessonId,
-    playbackUrl: result.playbackUrl,
-    watermarkText: result.watermarkText,
-  });
+  return NextResponse.json(
+    {
+      lessonId: result.lessonId,
+      playbackUrl: result.playbackUrl,
+      watermarkText: result.watermarkText,
+    },
+    { headers: { "Cache-Control": "private, no-store" } }
+  );
 });
