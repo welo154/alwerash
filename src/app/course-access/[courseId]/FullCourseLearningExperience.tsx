@@ -36,6 +36,8 @@ type FullCourseLearningExperienceProps = {
   instructorName: string | null;
   instructorProfession: string | null;
   completedLessonIds: string[];
+  trackSlug?: string | null;
+  trackTitle?: string | null;
 };
 
 const LESSON_ROW_WIDTH = 432;
@@ -601,6 +603,8 @@ export function FullCourseLearningExperience({
   instructorName,
   instructorProfession,
   completedLessonIds: initialCompletedLessonIds,
+  trackSlug = null,
+  trackTitle = null,
 }: FullCourseLearningExperienceProps) {
   const firstModule = modules[0] ?? null;
   const firstPlayableVideo = useMemo(() => findFirstPlayableVideo(modules), [modules]);
@@ -851,7 +855,12 @@ export function FullCourseLearningExperience({
   return (
     <div className="fcl-page mx-auto max-w-[1600px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
       <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px]">
-        <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
+        <CourseBreadcrumb
+          courseTitle={courseTitle}
+          fontFamily={fontFamily}
+          trackSlug={trackSlug}
+          trackTitle={trackTitle}
+        />
       </div>
 
       <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:max-lg:mt-[13px] min-[744px]:max-lg:w-[1440px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:opacity-60 lg:mt-[13px] lg:w-full lg:opacity-60" />

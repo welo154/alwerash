@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, type ReactNode } from "react";
+import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -85,6 +86,8 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
   }, [open, onClose]);
 
   if (!open || !mentor) return null;
+
+  const mentorHref = `/mentors/${encodeURIComponent(mentor.id)}`;
 
   return (
     <div
@@ -343,6 +346,25 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
             >
               “{PLACEHOLDER_BIO}”
             </p>
+
+            <div className="mt-[20px] flex flex-wrap items-center gap-3">
+              <Link
+                href={mentorHref}
+                onClick={onClose}
+                className="inline-flex h-[40px] items-center justify-center rounded-[8px] border border-black bg-[#64E1FF] px-4 text-[16px] font-medium text-black no-underline transition-opacity hover:opacity-90"
+                style={{ fontFamily: pangeaFont }}
+              >
+                View profile
+              </Link>
+              <Link
+                href="/mentors"
+                onClick={onClose}
+                className="inline-flex h-[40px] items-center justify-center rounded-[8px] border border-black bg-white px-4 text-[16px] font-medium text-black no-underline transition-opacity hover:opacity-90"
+                style={{ fontFamily: pangeaFont }}
+              >
+                All mentors
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ const sectionLinks: { label: string; href: string }[] = [
   { label: "Library", href: "/library" },
   { label: "Events", href: "/events" },
   { label: "Creatives", href: "/mentors" },
-  { label: "Tracks", href: "/course" },
+  { label: "Tracks", href: "/tracks" },
   { label: "Blog", href: "/" },
 ];
 
@@ -188,7 +188,7 @@ export function LandingMobileFooter() {
           </p>
           <Link
             href="/subscription"
-            className="ml-[16px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
+            className="ml-[16px] shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70"
             style={{
               color: "#000",
               textAlign: "center",
@@ -201,7 +201,7 @@ export function LandingMobileFooter() {
           </Link>
           <Link
             href="/subscription"
-            className="ml-[20px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
+            className="ml-[20px] shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70"
             style={{
               color: "#000",
               textAlign: "center",

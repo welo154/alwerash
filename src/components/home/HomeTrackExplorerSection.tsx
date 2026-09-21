@@ -124,9 +124,11 @@ function SectionLabelUnderline({ width }: { width: number }) {
 function MobileDiscoverCta({
   className,
   onDark = false,
+  href = "/course",
 }: {
   className?: string;
   onDark?: boolean;
+  href?: string;
 }) {
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
@@ -145,7 +147,7 @@ function MobileDiscoverCta({
         industry professionals.
       </p>
       <Link
-        href="/course"
+        href={href}
         className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[8px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
         style={{
           ...pillFont,
@@ -1134,6 +1136,7 @@ export function HomeTrackExplorerSection({
 
             <MobileDiscoverCta
               onDark
+              href="/library"
               className="absolute left-[31px] top-[1170px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
             />
             </div>
@@ -1254,7 +1257,7 @@ export function HomeTrackExplorerSection({
                   industry professionals.
                 </p>
                 <Link
-                  href="/course"
+                  href="/library"
                   className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
                   style={{
                     ...pillFont,

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
-const pangeaFont =
-  '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
+const pangeaFont = pangeaFontFamily;
 
 export type TrackCourseItem = LearnPopularTile & {
   rating: number | null;
@@ -162,6 +163,28 @@ export function TrackCoursesSection({
 
   return (
     <div className="min-w-0 max-lg:mt-[15px] lg:mt-0">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-[12px] flex flex-wrap items-center gap-[12px] max-[743px]:-ml-6 max-[743px]:pl-[30px] min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:pl-[63px] lg:mb-[16px]"
+      >
+        <Link
+          href="/course"
+          className="text-[14px] leading-[127%] text-black opacity-60 hover:opacity-80 min-[744px]:text-[18px]"
+          style={{ fontFamily: pangeaFont }}
+        >
+          Courses
+        </Link>
+        <span className="text-[14px] text-black opacity-60 min-[744px]:text-[18px]" aria-hidden>
+          /
+        </span>
+        <span
+          className="text-[14px] leading-[127%] text-black opacity-60 min-[744px]:text-[18px]"
+          style={{ fontFamily: pangeaFont }}
+        >
+          {trackTitle}
+        </span>
+      </nav>
+
       <div className="max-[743px]:-ml-6 max-[743px]:w-[calc(100%+1.5rem)] max-[743px]:pl-[30px] sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:flex min-[744px]:max-lg:w-[calc(100%+2rem)] min-[744px]:max-lg:items-center min-[744px]:max-lg:justify-between min-[744px]:max-lg:pl-[63px] min-[744px]:max-lg:pr-[63px] lg:hidden">
         <h1
           className="m-0 min-w-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px]"

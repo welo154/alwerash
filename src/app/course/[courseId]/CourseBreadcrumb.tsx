@@ -3,6 +3,8 @@ import Link from "next/link";
 type CourseBreadcrumbProps = {
   courseTitle: string;
   fontFamily: string;
+  trackSlug?: string | null;
+  trackTitle?: string | null;
 };
 
 function BreadcrumbChevron() {
@@ -48,7 +50,12 @@ function BreadcrumbChevron() {
   );
 }
 
-export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbProps) {
+export function CourseBreadcrumb({
+  courseTitle,
+  fontFamily,
+  trackSlug,
+  trackTitle,
+}: CourseBreadcrumbProps) {
   const textStyle = {
     color: "var(--Black, #000)",
     fontFamily,
@@ -56,11 +63,12 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
     fontWeight: 400,
     opacity: 0.6,
   };
+  const hasTrack = Boolean(trackSlug && trackTitle);
 
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-[18px] min-[744px]:gap-[15px]"
+      className="flex flex-wrap items-center gap-[18px] min-[744px]:gap-[15px]"
     >
       <Link
         href="/course"
@@ -70,14 +78,29 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
         Courses
       </Link>
       <BreadcrumbChevron />
-      <Link
-        href="/course"
-        className="text-[14px] leading-[127%] hover:opacity-80 min-[744px]:text-[18px] min-[744px]:leading-normal"
-        style={textStyle}
-      >
-        Classes
-      </Link>
-      <BreadcrumbChevron />
+      {hasTrack ? (
+        <>
+          <Link
+            href={`/tracks/${encodeURIComponent(trackSlug!)}`}
+            className="text-[14px] leading-[127%] hover:opacity-80 min-[744px]:text-[18px] min-[744px]:leading-normal"
+            style={textStyle}
+          >
+            {trackTitle}
+          </Link>
+          <BreadcrumbChevron />
+        </>
+      ) : (
+        <>
+          <Link
+            href="/course"
+            className="text-[14px] leading-[127%] hover:opacity-80 min-[744px]:text-[18px] min-[744px]:leading-normal"
+            style={textStyle}
+          >
+            Classes
+          </Link>
+          <BreadcrumbChevron />
+        </>
+      )}
       <span
         className="text-[14px] leading-[127%] min-[744px]:text-[18px] min-[744px]:leading-normal"
         style={textStyle}

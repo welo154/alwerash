@@ -47,7 +47,7 @@ const sectionLinks: { label: string; href: string }[] = [
   { label: "Library", href: "/library" },
   { label: "Events", href: "/events" },
   { label: "Creatives", href: "/mentors" },
-  { label: "Tracks", href: "/course" },
+  { label: "Tracks", href: "/tracks" },
   { label: "Blog", href: "/" },
 ];
 

@@ -111,7 +111,18 @@ export function LearnCoursesPageFilterBar({
 
   const scrollToSection = (targetId: string) => {
     window.setTimeout(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      // On track pages (and other hubs without those anchors), land on the catalog.
+      if (targetId === "all-courses" || targetId === "popular-classes") {
+        const hash = `#${targetId}`;
+        if (!window.location.pathname.startsWith("/course") || window.location.hash !== hash) {
+          router.push(`/course${hash}`);
+        }
+      }
     }, 0);
   };
 
@@ -125,7 +136,8 @@ export function LearnCoursesPageFilterBar({
     }
 
     const query = params.toString();
-    router.replace(query ? `/course?${query}` : "/course", { scroll: false });
+    const hash = action.scrollTargetId ? `#${action.scrollTargetId}` : "";
+    router.replace(query ? `/course?${query}${hash}` : `/course${hash}`, { scroll: false });
     setOpenMenu(null);
 
     if (action.scrollTargetId) {
@@ -139,7 +151,7 @@ export function LearnCoursesPageFilterBar({
       router.push(item.href);
       return;
     }
-    scrollToSection("all-courses");
+    router.push("/course#all-courses");
   };
 
   const menuClassName =

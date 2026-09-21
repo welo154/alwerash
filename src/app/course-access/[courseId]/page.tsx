@@ -135,6 +135,8 @@ export default async function PrivateCoursePage({
         instructorName={course.instructorName}
         instructorProfession={course.instructorProfession}
         completedLessonIds={courseProgress?.completedLessonIds ?? []}
+        trackSlug={course.track?.slug}
+        trackTitle={course.track?.title}
       />
     </main>
   );

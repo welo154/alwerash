@@ -95,6 +95,8 @@ export default async function PublicCoursePage({
         <CourseBreadcrumb
           courseTitle={course.title}
           fontFamily={pangeaVar.style.fontFamily}
+          trackSlug={course.track?.slug}
+          trackTitle={course.track?.title}
         />
       </div>
 
