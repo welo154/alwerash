@@ -12,6 +12,7 @@ import {
   buildLearnSidebarCategories,
 } from "@/components/learn/LearnCoursesSidebar";
 import { LearnCoursesPageFilterBar } from "@/components/learn/LearnCoursesPageFilterBar";
+import { markPage } from "@/server/observability/query-timing";
 
 function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
   return courses.map((c) => ({
@@ -40,6 +41,7 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
 }
 
 export default async function LearnPage() {
+  markPage("/course");
   let catalog: Awaited<ReturnType<typeof loadCoursePageCatalog>>;
   try {
     catalog = await loadCoursePageCatalog();

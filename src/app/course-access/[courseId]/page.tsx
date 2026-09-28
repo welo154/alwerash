@@ -5,6 +5,7 @@ import { getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
 import { requireSubscription } from "@/server/subscription/require-subscription";
 import { getCourseProgress } from "@/server/learning/progress.service";
+import { markPage } from "@/server/observability/query-timing";
 import { prisma } from "@/server/db/prisma";
 import {
   FullCourseLearningExperience,
@@ -84,6 +85,7 @@ export default async function PrivateCoursePage({
 }: {
   params: Promise<{ courseId: string }>;
 }) {
+  markPage("/course-access/[courseId]");
   const { courseId } = await params;
   const destination = privateCoursePath(courseId);
 

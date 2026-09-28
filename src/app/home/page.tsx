@@ -7,6 +7,7 @@ import { getWeeklyActivitySummary } from "@/server/home/learning-activity.servic
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
+import { markPage } from "@/server/observability/query-timing";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 
 export const metadata = {
@@ -27,6 +28,7 @@ const EMPTY_TRACK_EXPLORER: HomeTrackExplorerBundle = {
 };
 
 export default async function LoggedInHomePage() {
+  markPage("/home");
   const session = await auth();
   if (!session?.user) {
     redirect("/login?next=/home");

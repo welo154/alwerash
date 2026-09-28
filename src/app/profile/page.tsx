@@ -8,6 +8,7 @@ import { getContinueLearningCardsForUser } from "@/server/home/continue-learning
 import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { readUserProfileFromDb } from "@/server/user/readProfile";
+import { markPage } from "@/server/observability/query-timing";
 
 const FALLBACK_BIO =
   "I'm a working professional creative in the graphic design industry. I work as a concept artist and freelance illustrator. I've worked in-house at an animation studio but currently, work from home.";
@@ -23,6 +24,7 @@ export default async function ProfilePage({
 }: {
   searchParams: Promise<{ tab?: string; edit?: string }>;
 }) {
+  markPage("/profile");
   const session = await auth();
   if (!session?.user) redirect("/login?next=/profile");
 
