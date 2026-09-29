@@ -18,6 +18,7 @@
 import { headers } from "next/headers";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import { securityHashSecret } from "@/server/security/request-context";
 import {
   classifyDeviceKind,
   clientIpFromHeaders,
@@ -34,20 +35,12 @@ const LAST_SEEN_THROTTLE_MS = 5 * 60 * 1000;
  *
  * Defaults to OFF so deploying this does not start signing students out before
  * the registry has been observed filling correctly. Registration happens either
- * way, so turning this on later acts on real data.
+ * way, so turning this on later acts on real data. Explicit revocations (sign-out,
+ * password reset) are enforced whatever this is set to.
  */
 export function isDeviceEnforcementEnabled(): boolean {
   const raw = process.env.DEVICE_SESSION_ENFORCEMENT?.trim().toLowerCase();
   return raw === "true" || raw === "1";
-}
-
-function ipSecret(): string {
-  return (
-    process.env.DEVICE_IP_HASH_SECRET ??
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
-    "device-ip-fallback"
-  );
 }
 
 type RequestFingerprint = {
@@ -69,7 +62,7 @@ async function readRequestFingerprint(): Promise<RequestFingerprint> {
     const ip = clientIpFromHeaders(h.get("x-forwarded-for"), h.get("x-real-ip"));
     return {
       userAgent,
-      ipHash: hashClientIp(ip, ipSecret()),
+      ipHash: hashClientIp(ip, securityHashSecret()),
       kind: classifyDeviceKind(userAgent),
       label: describeDevice(userAgent),
     };
@@ -177,16 +170,15 @@ export const DEVICE_REVOKED_MESSAGE =
  * Throw 401 when a session's device registration is no longer valid.
  *
  * This is the point where JWT revocation actually takes effect: the cookie stays
- * validly signed, so only a server-side registry check can stop a displaced
- * device. No-ops while enforcement is disabled, and allows LEGACY cookies through
- * so existing students are not signed out.
+ * validly signed, so only a server-side registry check can stop a revoked device.
+ * Runs regardless of DEVICE_SESSION_ENFORCEMENT, which only decides whether a new
+ * sign-in displaces an older device; revocations such as a password reset must
+ * always hold. LEGACY cookies pass so existing students are not signed out.
  */
 export async function assertActiveDeviceSession(
   userId: string,
   sid: string | null | undefined
 ): Promise<void> {
-  if (!isDeviceEnforcementEnabled()) return;
-
   const check = await checkDeviceSession(userId, sid);
   if (check.state === "REVOKED" || check.state === "UNKNOWN") {
     throw new AppError("DEVICE_SESSION_REVOKED", 401, DEVICE_REVOKED_MESSAGE);

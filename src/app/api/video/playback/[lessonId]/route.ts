@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { handleRoute } from "@/server/lib/route";
 import { getSignedPlaybackForLesson } from "@/server/video/video.service";
+import { RATE_LIMITS, enforceRateLimit } from "@/server/security/rate-limit";
+import { readRequestContext } from "@/server/security/request-context";
 
 export const runtime = "nodejs";
 // Personalized, short-lived credentials: never cache or share this response.
@@ -26,6 +28,9 @@ export const GET = handleRoute(async (_req: Request, ctx: { params: Promise<{ le
       { status: 400, headers: { "Cache-Control": "private, no-store" } }
     );
   }
+
+  const viewerKey = session?.user?.id ?? (await readRequestContext()).ip;
+  await enforceRateLimit(RATE_LIMITS.playbackPerViewer, viewerKey);
 
   const result = await getSignedPlaybackForLesson({
     lessonId,

@@ -154,7 +154,17 @@ Phase 5 can compare sign-in locations without holding personal data, keyed by
 `DEVICE_SESSION_ENFORCEMENT` must be explicitly set to `true` or `1`. Until then:
 
 - Device sessions **are** created and tracked, including for grandfathered cookies.
-- Nothing is revoked and no request is rejected.
+- A new sign-in never displaces an older device.
+
+> **Changed in Phase 5.** The flag originally disabled the revocation check as well.
+> It now controls displacement only: a session revoked explicitly (sign-out, password
+> reset) is rejected whatever the flag says, because a password reset that leaves the
+> attacker signed in is not a reset. See `05-abuse-and-storage.md`.
+>
+> **Fixed in Phase 5.** Legacy-cookie registration ran inside every server-component
+> `auth()` call, whose re-encoded cookie Next.js discards, so each page load inserted
+> another row. Registration now happens only in the NextAuth route handler, which
+> `/api/auth/session` reaches on every client page load.
 
 This is deliberate. It lets the registry fill with real data and be inspected
 before any student can be signed out. Recommended sequence:

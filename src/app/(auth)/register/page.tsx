@@ -1,19 +1,13 @@
 import { Suspense } from "react";
-import { Prisma } from "@prisma/client";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { AuthRegisterPanel } from "@/components/auth/AuthRegisterPanel";
 import { registerUser, RegisterInput } from "@/server/auth/auth.service";
 import { AppError } from "@/server/lib/errors";
 
+/** Only AppError messages are written for users; anything else may expose internals. */
 function getErrorMessage(e: unknown): string {
   if (e instanceof AppError) return e.message;
-  if (e instanceof Error) return e.message;
-  if (e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string") {
-    return (e as { message: string }).message;
-  }
-  if (e instanceof Prisma.PrismaClientKnownRequestError) {
-    if (e.code === "P2002") return "This email is already registered.";
-  }
+  console.error("[register] failed", e);
   return "Registration failed. Please try again.";
 }
 

@@ -202,11 +202,41 @@ model Session {
 
 model VerificationToken {
   identifier String
+  /// SHA-256 of the emailed token; the raw value only ever exists in the link.
   token      String
   expires    DateTime
 
   @@unique([identifier, token])
+  @@index([token])
   @@map("verification_tokens")
+}
+
+/// Fixed-window request counters. `key` is `<rule>:<hmac(identifier)>`, so no raw
+/// email or IP address is stored.
+model RateLimitBucket {
+  key         String   @id
+  windowStart DateTime @map("window_start")
+  count       Int
+
+  @@index([windowStart])
+  @@map("rate_limit_buckets")
+}
+
+/// Append-only record of authentication and abuse events.
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  type      String
+  userId    String?  @map("user_id")
+  /// HMAC of a submitted email when no user id is known (e.g. failed login).
+  emailHash String?  @map("email_hash")
+  ipHash    String?  @map("ip_hash")
+  userAgent String?  @map("user_agent")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@map("security_events")
 }
 
 // ===== Content =====

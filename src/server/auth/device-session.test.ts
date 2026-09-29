@@ -260,17 +260,16 @@ describe("assertActiveDeviceSession", () => {
     await expect(assertActiveDeviceSession("user-1", null)).resolves.toBeUndefined();
   });
 
-  it("does nothing at all while enforcement is disabled", async () => {
+  it("still rejects an explicitly revoked session while displacement is disabled", async () => {
     vi.stubEnv("DEVICE_SESSION_ENFORCEMENT", "false");
     findUnique.mockResolvedValue({
       userId: "user-1",
       status: "REVOKED",
       kind: "MOBILE",
       lastSeenAt: new Date(),
-      revokedReason: "REPLACED_BY_NEW_DEVICE",
+      revokedReason: "PASSWORD_RESET",
     });
-    await expect(assertActiveDeviceSession("user-1", "device-1")).resolves.toBeUndefined();
-    expect(findUnique).not.toHaveBeenCalled();
+    await expect(assertActiveDeviceSession("user-1", "device-1")).rejects.toBeInstanceOf(AppError);
   });
 });
 

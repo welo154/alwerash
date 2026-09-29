@@ -7,6 +7,7 @@ export type ErrorCode =
   | "BAD_REQUEST"
   | "CONFLICT"
   | "NOT_FOUND"
+  | "RATE_LIMITED"
   | "UNAVAILABLE"
   | "INTERNAL";
 

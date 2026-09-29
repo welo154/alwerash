@@ -10,6 +10,9 @@ import { prisma } from "@/server/db/prisma";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 import { verifyPassword } from "@/server/auth/password";
 import { registerDeviceSession, revokeDeviceSession } from "@/server/auth/device-session";
+import { RATE_LIMITS, consumeRateLimit } from "@/server/security/rate-limit";
+import { readRequestContext } from "@/server/security/request-context";
+import { recordSecurityEvent } from "@/server/security/security-events";
 
 const CredentialsSchema = z.object({
   email: z.string().email().transform((v) => v.toLowerCase().trim()),
@@ -46,18 +49,46 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
           if (!parsed.success) return null;
 
           const { email, password } = parsed.data;
+
+          // Both limits are counted before the password check so a locked-out
+          // attacker learns nothing from response timing. Exceeding either looks
+          // like a wrong password to the client.
+          const { ip } = await readRequestContext();
+          const [perEmail, perIp] = await Promise.all([
+            consumeRateLimit(RATE_LIMITS.loginPerEmail, email),
+            consumeRateLimit(RATE_LIMITS.loginPerIp, ip),
+          ]);
+          if (!perEmail.allowed || !perIp.allowed) {
+            await recordSecurityEvent({
+              type: "LOGIN_RATE_LIMITED",
+              email,
+              metadata: { perEmail: !perEmail.allowed, perIp: !perIp.allowed },
+            });
+            return null;
+          }
+
           const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() },
             include: { roles: true },
           });
 
-          if (!user?.passwordHash) return null;
+          let failure: string | null = null;
+          if (!user) failure = "unknown_email";
+          else if (!user.passwordHash) failure = "no_password_account";
+          else if (!(await verifyPassword(password, user.passwordHash))) failure = "bad_password";
+          else if (!user.emailVerified) failure = "unverified";
 
-          const ok = await verifyPassword(password, user.passwordHash);
-          if (!ok) return null;
+          if (!user || failure) {
+            await recordSecurityEvent({
+              type: "LOGIN_FAILED",
+              userId: user?.id ?? null,
+              email: user ? null : email,
+              metadata: { reason: failure },
+            });
+            return null;
+          }
 
-          if (!user.emailVerified) return null;
-
+          await recordSecurityEvent({ type: "LOGIN_SUCCEEDED", userId: user.id, metadata: { method: "password" } });
           return { id: user.id, email: user.email, name: user.name ?? undefined };
         },
       }),
@@ -137,6 +168,13 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
           try {
             const registration = await registerDeviceSession(token.sub);
             token.sid = registration.sessionId;
+            if (registration.replaced.length > 0) {
+              await recordSecurityEvent({
+                type: "DEVICE_REPLACED",
+                userId: token.sub,
+                metadata: { kind: registration.kind, replaced: registration.replaced.length },
+              });
+            }
           } catch (error) {
             // Never block sign-in on registry failure; the request stays legacy and
             // registration is retried next time.

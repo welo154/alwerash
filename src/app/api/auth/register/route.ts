@@ -13,6 +13,7 @@ export const POST = handleRoute(async (req) => {
     );
   }
 
-  const user = await registerUser(parsed.data);
-  return NextResponse.json({ user }, { status: 201 });
+  // Same response for new and existing emails; see registerUser.
+  const { email } = await registerUser(parsed.data);
+  return NextResponse.json({ status: "check_email", email }, { status: 202 });
 });
