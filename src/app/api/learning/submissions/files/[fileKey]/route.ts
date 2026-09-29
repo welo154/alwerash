@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
 import path from "path";
 import { auth } from "@/auth";
 import { canAccessSubmissionFile } from "@/server/learning/submission.service";
+import { detectFileType } from "@/server/storage/file-signature";
+import { getPrivateObject } from "@/server/storage/object-storage";
+import { submissionObjectKey } from "@/server/storage/submission-files";
 
 export const dynamic = "force-dynamic";
 
@@ -24,25 +26,25 @@ export async function GET(
     return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   }
 
-  const filepath = path.join(process.cwd(), "public", "submission-files", safeKey);
+  let bytes: Uint8Array | null;
   try {
-    const bytes = await readFile(filepath);
-    const ext = path.extname(safeKey).toLowerCase();
-    const mime =
-      ext === ".png"
-        ? "image/png"
-        : ext === ".webp"
-          ? "image/webp"
-          : ext === ".pdf"
-            ? "application/pdf"
-            : "image/jpeg";
-    return new NextResponse(bytes, {
-      headers: {
-        "Content-Type": mime,
-        "Content-Disposition": `inline; filename="${safeKey}"`,
-      },
-    });
-  } catch {
+    bytes = await getPrivateObject(submissionObjectKey(safeKey));
+  } catch (err) {
+    console.error("Submission file read failed:", err);
+    return NextResponse.json({ error: "Failed to read file" }, { status: 500 });
+  }
+  if (!bytes) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
+
+  // Serve under the type the bytes actually are; unknown content is downloaded, never rendered.
+  const detected = detectFileType(bytes);
+  return new NextResponse(Buffer.from(bytes), {
+    headers: {
+      "Content-Type": detected?.mime ?? "application/octet-stream",
+      "Content-Disposition": `${detected ? "inline" : "attachment"}; filename="${safeKey}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }

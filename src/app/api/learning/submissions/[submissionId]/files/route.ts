@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomBytes } from "crypto";
 import { auth } from "@/auth";
 import { AppError } from "@/server/lib/errors";
 import { prisma } from "@/server/db/prisma";
 import { addSubmissionFile } from "@/server/learning/submission.service";
+import { putObject } from "@/server/storage/object-storage";
+import { readValidatedUpload, uniqueObjectName } from "@/server/storage/upload";
+import { submissionObjectKey } from "@/server/storage/submission-files";
+import { RATE_LIMITED_MESSAGE, RATE_LIMITS, consumeRateLimit } from "@/server/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
 const MAX_SIZE = 10 * 1024 * 1024;
 
 export async function POST(
@@ -35,6 +30,11 @@ export async function POST(
     return NextResponse.json({ error: "Submission not found" }, { status: 404 });
   }
 
+  const limited = await consumeRateLimit(RATE_LIMITS.uploadPerUser, session.user.id);
+  if (!limited.allowed) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
+
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -42,38 +42,19 @@ export async function POST(
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
-  const file = formData.get("file");
-  if (!file || typeof file === "string") {
-    return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  const validation = await readValidatedUpload(formData, ["file"], {
+    allowed: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
+    maxBytes: MAX_SIZE,
+    allowedLabel: "JPEG, PNG, WebP images and PDF files",
+  });
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.error }, { status: validation.status });
   }
+  const { bytes, type, size } = validation.upload;
 
-  const f = file as File;
-  if (!ALLOWED_TYPES.includes(f.type)) {
-    return NextResponse.json(
-      { error: "Only JPEG, PNG, WebP images and PDF files are allowed" },
-      { status: 400 }
-    );
-  }
-  if (f.size > MAX_SIZE) {
-    return NextResponse.json({ error: "File must be 10MB or smaller" }, { status: 400 });
-  }
-
-  const ext =
-    f.type === "image/png"
-      ? "png"
-      : f.type === "image/webp"
-        ? "webp"
-        : f.type === "application/pdf"
-          ? "pdf"
-          : "jpg";
-  const fileKey = `${submissionId}-${randomBytes(8).toString("hex")}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "submission-files");
-  const filepath = path.join(dir, fileKey);
-
+  const fileKey = uniqueObjectName(submissionId, type.ext);
   try {
-    await mkdir(dir, { recursive: true });
-    const bytes = await f.arrayBuffer();
-    await writeFile(filepath, Buffer.from(bytes));
+    await putObject("private", submissionObjectKey(fileKey), bytes, type.mime);
   } catch (err) {
     console.error("Submission file write failed:", err);
     return NextResponse.json({ error: "Failed to save file" }, { status: 500 });
@@ -82,8 +63,8 @@ export async function POST(
   try {
     const record = await addSubmissionFile(submissionId, session.user.id, {
       fileKey,
-      mime: f.type,
-      size: f.size,
+      mime: type.mime,
+      size,
     });
     return NextResponse.json({ file: record }, { status: 201 });
   } catch (e) {

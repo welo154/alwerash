@@ -14,8 +14,10 @@ frontend/.next/
 # production
 /build
 
-# user uploads (profile photos)
+# user uploads written to local disk in development
 /public/avatars
+/public/uploads
+/.data
 
 # misc
 .DS_Store

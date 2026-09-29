@@ -8,7 +8,7 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://www.clarity.ms https://*.clarity.ms",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://images.unsplash.com https://image.mux.com https://*.googleusercontent.com https://*.clarity.ms",
+  "img-src 'self' data: blob: https://images.unsplash.com https://image.mux.com https://*.googleusercontent.com https://*.supabase.co https://*.clarity.ms",
   "media-src 'self' blob: https://stream.mux.com https://*.mux.com",
   "connect-src 'self' https://stream.mux.com https://*.mux.com https://storage.googleapis.com https://*.clarity.ms",
   "font-src 'self' data:",
