@@ -103,25 +103,21 @@ function logCatalogError(scope: string, e: unknown) {
   console.warn(`[catalog] ${scope}:`, msg);
 }
 
-const catalogRequiresPublished = cache(async (): Promise<boolean> => {
-  try {
-    const pubTracks = await prisma.track.count({ where: { published: true } });
-    const tracks = await prisma.track.count();
-    const pubCourses = await prisma.course.count({ where: { published: true } });
-    const courses = await prisma.course.count();
-    const hasRows = tracks + courses > 0;
-    const hasPublished = pubTracks + pubCourses > 0;
-    if (hasRows && !hasPublished) {
-      console.warn(
-        "[catalog] No published tracks/courses; listing unpublished rows from the database."
-      );
-    }
-    return hasPublished || !hasRows;
-  } catch (e) {
-    logCatalogError("catalogRequiresPublished", e);
-    return true;
-  }
-});
+/**
+ * Whether catalog reads filter to published rows.
+ *
+ * This used to probe the database with four sequential `COUNT`s on every request
+ * to decide whether to fall back to listing unpublished rows when nothing was
+ * published. Measured at 1438 ms of 3210 ms — 45% of all database time on
+ * `/course` — to answer a question whose answer never changes in production.
+ *
+ * It is now an explicit opt-in for working locally against a database with no
+ * published content. See docs/performance/00-measurement.md.
+ */
+function catalogRequiresPublished(): boolean {
+  const raw = process.env.CATALOG_SHOW_UNPUBLISHED?.trim().toLowerCase();
+  return !(raw === "true" || raw === "1");
+}
 
 function publishedWhere(requirePublished: boolean): { published: true } | Record<string, never> {
   return requirePublished ? { published: true } : {};

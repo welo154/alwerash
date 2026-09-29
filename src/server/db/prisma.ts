@@ -91,11 +91,15 @@ function rewriteRuntimeUrl(connectionString: string): string {
   }
 
   const isPooler = host.includes("pooler.supabase.com");
-  if (isPooler) {
-    port = "6543";
-  } else if (!port) {
-    port = "5432";
-  }
+  // Honour the configured port. This previously forced pooler hosts onto :6543,
+  // which in turn forced `pgbouncer=true` below; that disables prepared-statement
+  // reuse and measured ~280 ms of protocol overhead on *every* query — `SELECT 1`
+  // took 341 ms against a 70 ms network floor. See docs/performance/00-measurement.md.
+  //
+  // Session mode (:5432) shares a pool_size of 15 across all clients, so keep
+  // `connection_limit` low per instance. Set the port to 6543 in DATABASE_URL if
+  // you need transaction-mode headroom for many concurrent serverless instances.
+  if (!port) port = "5432";
 
   const qIndex = pathAndQuery.indexOf("?");
   const path = qIndex === -1 ? pathAndQuery || "/postgres" : pathAndQuery.slice(0, qIndex);
@@ -103,6 +107,8 @@ function rewriteRuntimeUrl(connectionString: string): string {
   const params = new URLSearchParams(query);
   params.set("connection_limit", String(resolveConnectionLimit()));
   params.set("pool_timeout", "20");
+  // Required in transaction mode, where prepared statements collide across pooled
+  // connections. Costly, so only applied when that port is explicitly configured.
   if (port === "6543") {
     params.set("pgbouncer", "true");
   }
