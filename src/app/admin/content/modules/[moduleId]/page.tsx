@@ -287,10 +287,10 @@ export default async function AdminModuleDetail({
                       />
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                      {l.type === "VIDEO" && l.video?.muxPlaybackId && (
+                      {l.type === "VIDEO" && l.video?.hasVideo && (
                         <span className="text-emerald-600">Video ready</span>
                       )}
-                      {l.type === "VIDEO" && !l.video?.muxPlaybackId && l.videoUploads?.[0] && (
+                      {l.type === "VIDEO" && !l.video?.hasVideo && l.videoUploads?.[0] && (
                         <span className="text-amber-600">Upload {l.videoUploads[0].status.toLowerCase()}</span>
                       )}
                       {l.type === "ARTICLE" && l.article?.body?.trim() && (
@@ -355,9 +355,9 @@ export default async function AdminModuleDetail({
                     <MuxUploadButton
                       lessonId={l.id}
                       lessonTitle={l.title}
-                      disabled={Boolean(l.video?.muxPlaybackId)}
+                      disabled={Boolean(l.video?.hasVideo)}
                     />
-                    {l.video?.muxPlaybackId && (
+                    {l.video?.hasVideo && (
                       <ReplaceVideoButton
                         lessonId={l.id}
                         lessonTitle={l.title}
@@ -372,7 +372,7 @@ export default async function AdminModuleDetail({
                   deleteLesson={deleteLesson}
                 />
               </div>
-              {l.type === "VIDEO" && l.video?.muxPlaybackId && (
+              {l.type === "VIDEO" && l.video?.hasVideo && (
                 <div className="mt-4 border-t border-slate-100 pt-4">
                   <AdminVideoPreview
                     lessonId={l.id}

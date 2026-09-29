@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import { VideoWatermark } from "@/components/video/VideoWatermark";
 
 export type HlsPlayerProps = {
   src: string;
@@ -20,6 +21,18 @@ export type HlsPlayerProps = {
   onEnded?: () => void;
   /** Called on a fatal media/network error (e.g. expired Mux token). */
   onError?: () => void;
+  /**
+   * Rewrite each outgoing segment/playlist URL just before it is requested.
+   * Used to swap in a freshly minted playback token so short-lived credentials
+   * can roll without interrupting playback. hls.js only — native HLS (Safari,
+   * iOS) gives no request hook and falls back to reloading on error.
+   */
+  resolveUrl?: (url: string) => string;
+  /**
+   * Opaque per-viewer marker rendered over the video for leak attribution.
+   * Must never contain personal data; see server/video/watermark.ts.
+   */
+  watermark?: string | null;
 };
 
 type LevelInfo = { height: number; width: number; index: number };
@@ -53,6 +66,8 @@ export function HlsPlayer({
   onProgress,
   onEnded,
   onError,
+  resolveUrl,
+  watermark,
 }: HlsPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -70,6 +85,8 @@ export function HlsPlayer({
   const [mounted, setMounted] = useState(false);
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const resolveUrlRef = useRef(resolveUrl);
+  resolveUrlRef.current = resolveUrl;
 
   // Video elements are often modified by browser extensions before hydration; render after mount.
   useEffect(() => {
@@ -90,7 +107,15 @@ export function HlsPlayer({
 
     if (Hls.isSupported()) {
       setUseHlsJs(true);
-      const hls = new Hls({ enableWorker: true });
+      const hls = new Hls({
+        enableWorker: true,
+        // hls.js skips its own open() when the callback already opened the
+        // request, which is how the URL can be rewritten per request.
+        xhrSetup: (xhr, url) => {
+          const next = resolveUrlRef.current?.(url);
+          xhr.open("GET", next && next !== url ? next : url, true);
+        },
+      });
       hlsRef.current = hls;
 
       const updateLevels = (fromData?: Array<{ height?: number; width?: number }>) => {
@@ -300,6 +325,10 @@ export function HlsPlayer({
           preload="metadata"
           onClick={togglePlay}
         />
+
+        {/* Sits inside the fullscreen container and above the video, but before the
+            control bar so it never covers the controls. */}
+        {watermark ? <VideoWatermark text={watermark} /> : null}
 
         {/* Custom control bar at bottom of video frame */}
         <div className="absolute bottom-0 left-0 right-0 flex flex-col bg-linear-to-t from-black/80 to-transparent pt-8 pb-1 px-2">

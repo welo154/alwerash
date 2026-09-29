@@ -604,7 +604,8 @@ export type ModuleWithLessons = Prisma.ModuleGetPayload<{
 
 /** Lesson with optional video, article, and optionally latest videoUpload for status. */
 export type LessonWithVideoUpload = ModuleWithLessons["lessons"][number] & {
-  video?: { id: string; muxPlaybackId: string } | null;
+  /** Presence only — never expose Mux playback IDs to the admin browser. */
+  video?: { id: string; hasVideo: true } | null;
   article?: { id: string; body: string } | null;
   videoUploads?: { id: string; status: string }[];
 };
@@ -632,7 +633,7 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
       lessons: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         include: {
-          video: { select: { id: true, muxPlaybackId: true } },
+          video: { select: { id: true } },
           article: { select: { id: true, body: true } },
           videoUploads: { take: 1, orderBy: { createdAt: "desc" }, select: { id: true, status: true } },
         },
@@ -640,7 +641,13 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
     },
   });
   if (!m) throw new AppError("NOT_FOUND", 404, "Module not found");
-  return m as Omit<ModuleWithLessons, "lessons"> & { lessons: LessonWithVideoUpload[] };
+  const lessons = m.lessons.map((l) => ({
+    ...l,
+    video: l.video ? { id: l.video.id, hasVideo: true as const } : null,
+  }));
+  return { ...m, lessons } as unknown as Omit<ModuleWithLessons, "lessons"> & {
+    lessons: LessonWithVideoUpload[];
+  };
 }
 
 export async function adminCreateModule(input: unknown) {

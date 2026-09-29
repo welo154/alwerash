@@ -1,13 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HlsPlayer, type HlsPlayerProps } from "@/components/video/HlsPlayer";
 
-type AuthorizedHlsPlayerProps = Omit<HlsPlayerProps, "src"> & {
+type AuthorizedHlsPlayerProps = Omit<
+  HlsPlayerProps,
+  "src" | "resolveUrl" | "watermark"
+> & {
   lessonId: string;
 };
 
-function messageForStatus(status: number): string {
+type PlaybackResponse = {
+  playbackUrl?: string;
+  token?: string;
+  expiresAt?: number;
+  watermarkText?: string | null;
+};
+
+/** Reload attempts allowed when the browser gives us no request hook. */
+const MAX_RELOADS = 5;
+const MIN_RELOAD_INTERVAL_MS = 3_000;
+/** Refresh once this share of the token lifetime has elapsed. */
+const REFRESH_AT_FRACTION = 0.6;
+const MIN_REFRESH_DELAY_MS = 10_000;
+
+type PlaybackFailure = { status: number; code: string | null };
+
+function messageForFailure({ status, code }: PlaybackFailure): string {
+  if (code === "DEVICE_SESSION_REVOKED") {
+    return "This device was signed out because the account was used on another device.";
+  }
   if (status === 401) return "Sign in to watch this lesson.";
   if (status === 403) return "A subscription is required to watch this lesson.";
   if (status === 404) return "Video is not available for this lesson yet.";
@@ -16,46 +38,171 @@ function messageForStatus(status: number): string {
 }
 
 /**
- * Fetches a short-lived signed Mux URL for a lesson. Does not accept a raw playback ID.
- * Refetches at most once if Mux rejects an expired token.
+ * Fetches a short-lived signed Mux URL for a lesson. Never accepts a raw playback ID.
+ *
+ * Mux validates only the token's signature, expiry, and playback id — it cannot tell
+ * who is asking. Short token lifetimes are therefore the control that limits how long
+ * a copied URL keeps working, and this component rolls the token during playback so a
+ * short lifetime does not interrupt the lesson. Every roll re-runs server-side
+ * authorization, so revoked access stops playback at the next refresh.
  */
 export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsPlayerProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const retryCountRef = useRef(0);
+  const [watermark, setWatermark] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setError(null);
-    setSrc(null);
+  const tokenRef = useRef<string | null>(null);
+  const reloadCountRef = useRef(0);
+  const lastReloadAtRef = useRef(0);
+  const positionRef = useRef(0);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelledRef = useRef(false);
+
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  }, []);
+
+  const fetchPlayback = useCallback(async (): Promise<PlaybackResponse | PlaybackFailure> => {
     const res = await fetch(`/api/video/playback/${encodeURIComponent(lessonId)}`, {
       credentials: "same-origin",
+      cache: "no-store",
     });
     if (!res.ok) {
-      setError(messageForStatus(res.status));
+      const code = await res
+        .json()
+        .then((body: { error?: string }) => body?.error ?? null)
+        .catch(() => null);
+      return { status: res.status, code };
+    }
+    return (await res.json()) as PlaybackResponse;
+  }, [lessonId]);
+
+  /**
+   * Mint a fresh token without touching `src`, so hls.js keeps its buffer and the
+   * learner sees no interruption.
+   */
+  const scheduleRefresh = useCallback(
+    (expiresAt: number | undefined) => {
+      clearRefreshTimer();
+      if (!expiresAt) return;
+
+      const lifetime = expiresAt - Date.now();
+      if (lifetime <= 0) return;
+      const delay = Math.max(lifetime * REFRESH_AT_FRACTION, MIN_REFRESH_DELAY_MS);
+
+      refreshTimerRef.current = setTimeout(async () => {
+        if (cancelledRef.current) return;
+        const result = await fetchPlayback();
+        if (cancelledRef.current) return;
+
+        if ("status" in result) {
+          // Access was revoked mid-playback, or the network failed. Only stop the
+          // stream for a definitive answer; retry transient failures near expiry.
+          if (result.status === 401 || result.status === 403) {
+            setError(messageForFailure(result));
+            setSrc(null);
+            return;
+          }
+          scheduleRefresh(Date.now() + MIN_REFRESH_DELAY_MS * 2);
+          return;
+        }
+
+        if (result.token) tokenRef.current = result.token;
+        scheduleRefresh(result.expiresAt);
+      }, delay);
+    },
+    [clearRefreshTimer, fetchPlayback]
+  );
+
+  const load = useCallback(async () => {
+    clearRefreshTimer();
+    setError(null);
+    setSrc(null);
+
+    const result = await fetchPlayback();
+    if (cancelledRef.current) return;
+
+    if ("status" in result) {
+      setError(messageForFailure(result));
       return;
     }
-    const data = (await res.json()) as { playbackUrl?: string };
-    if (!data.playbackUrl) {
+    if (!result.playbackUrl) {
       setError("Could not load this video.");
       return;
     }
-    setSrc(data.playbackUrl);
-  }, [lessonId]);
+
+    tokenRef.current = result.token ?? null;
+    setWatermark(result.watermarkText ?? null);
+    setSrc(result.playbackUrl);
+    scheduleRefresh(result.expiresAt);
+  }, [clearRefreshTimer, fetchPlayback, scheduleRefresh]);
 
   useEffect(() => {
-    retryCountRef.current = 0;
+    cancelledRef.current = false;
+    reloadCountRef.current = 0;
+    positionRef.current = 0;
     void load();
-  }, [load]);
 
+    return () => {
+      cancelledRef.current = true;
+      clearRefreshTimer();
+    };
+  }, [load, clearRefreshTimer]);
+
+  /** Swap the stale token for the current one on every Mux request. */
+  const resolveUrl = useCallback((url: string) => {
+    const token = tokenRef.current;
+    if (!token) return url;
+    try {
+      const parsed = new URL(url);
+      if (!parsed.hostname.endsWith("mux.com")) return url;
+      if (!parsed.searchParams.has("token")) return url;
+      parsed.searchParams.set("token", token);
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }, []);
+
+  // Kept in a ref so the handler identity is stable: HlsPlayer rebinds its media
+  // listeners whenever onProgress changes, and this fires on every timeupdate.
+  const onProgressRef = useRef(playerProps.onProgress);
+  onProgressRef.current = playerProps.onProgress;
+
+  const handleProgress = useCallback((currentTime: number, duration: number) => {
+    positionRef.current = currentTime;
+    onProgressRef.current?.(currentTime, duration);
+  }, []);
+
+  /**
+   * Native HLS (Safari, iOS) exposes no request hook, so an expired token surfaces
+   * as a fatal error. Reload with a fresh token and resume where the learner was.
+   */
   const handleFatalError = useCallback(() => {
-    if (retryCountRef.current >= 1) {
-      setError("Playback expired. Refresh the page to continue.");
+    const now = Date.now();
+    if (
+      reloadCountRef.current >= MAX_RELOADS ||
+      now - lastReloadAtRef.current < MIN_RELOAD_INTERVAL_MS
+    ) {
+      setError("Playback stopped. Refresh the page to continue.");
       setSrc(null);
+      clearRefreshTimer();
       return;
     }
-    retryCountRef.current += 1;
+    reloadCountRef.current += 1;
+    lastReloadAtRef.current = now;
     void load();
-  }, [load]);
+  }, [load, clearRefreshTimer]);
+
+  const initialTime = useMemo(() => {
+    // After a token-expiry reload, resume from the observed position rather than
+    // the caller's saved progress, which may be well behind.
+    if (positionRef.current > 0) return positionRef.current;
+    return playerProps.initialTime;
+  }, [playerProps.initialTime, src]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
@@ -73,5 +220,15 @@ export function AuthorizedHlsPlayer({ lessonId, ...playerProps }: AuthorizedHlsP
     );
   }
 
-  return <HlsPlayer {...playerProps} src={src} onError={handleFatalError} />;
+  return (
+    <HlsPlayer
+      {...playerProps}
+      src={src}
+      initialTime={initialTime}
+      onProgress={handleProgress}
+      onError={handleFatalError}
+      resolveUrl={resolveUrl}
+      watermark={watermark}
+    />
+  );
 }

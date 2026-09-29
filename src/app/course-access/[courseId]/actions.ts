@@ -1,6 +1,8 @@
 "use server";
 
 import { auth } from "@/auth";
+import { authorizeLessonAccess } from "@/server/authz/lesson-access";
+import { assertActiveDeviceSession } from "@/server/auth/device-session";
 import { markLessonComplete } from "@/server/progress/course-progress.service";
 import { getCourseProgress } from "@/server/learning/progress.service";
 
@@ -11,6 +13,23 @@ export async function completeLessonAndGetProgress(
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) return null;
+
+  // Server actions are publicly callable POST endpoints, so the entitlement
+  // check has to happen here and not only on the page that renders the button.
+  try {
+    await assertActiveDeviceSession(userId, session.user.deviceSessionId);
+    await authorizeLessonAccess({
+      lessonId,
+      action: "WRITE_PROGRESS",
+      viewer: {
+        userId,
+        email: session.user.email ?? null,
+        roles: session.user.roles ?? [],
+      },
+    });
+  } catch {
+    return null;
+  }
 
   await markLessonComplete(userId, lessonId);
   const progress = await getCourseProgress(userId, courseId);

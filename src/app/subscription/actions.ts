@@ -3,7 +3,10 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getSubscriptionPlan, isSubscriptionPlanId } from "@/lib/subscription-plans";
-import { createFreeEntitlement } from "@/server/subscription/subscribe.service";
+import {
+  grantSelfServeEntitlement,
+  isSelfServeGrantEnabled,
+} from "@/server/subscription/entitlement.service";
 
 export async function chooseSubscriptionPlan(formData: FormData) {
   const session = await auth();
@@ -21,6 +24,12 @@ export async function chooseSubscriptionPlan(formData: FormData) {
     redirect("/subscription?error=invalid");
   }
 
-  await createFreeEntitlement(session.user.id, plan.durationMonths);
+  // Without a verified payment there is nothing to activate. Send the learner to
+  // checkout instead of silently granting paid access.
+  if (!isSelfServeGrantEnabled()) {
+    redirect(`/subscription?error=payment_required&plan=${encodeURIComponent(plan.id)}`);
+  }
+
+  await grantSelfServeEntitlement(session.user.id, plan.durationMonths);
   redirect("/home?toast=Subscribed");
 }

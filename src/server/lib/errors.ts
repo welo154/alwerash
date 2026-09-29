@@ -1,6 +1,8 @@
 // file: src/server/lib/errors.ts
 export type ErrorCode =
   | "UNAUTHORIZED"
+  /** Session was displaced by a sign-in on another device of the same kind. */
+  | "DEVICE_SESSION_REVOKED"
   | "FORBIDDEN"
   | "BAD_REQUEST"
   | "CONFLICT"
