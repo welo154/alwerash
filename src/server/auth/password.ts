@@ -10,6 +10,18 @@ export async function hashPassword(password: string): Promise<string> {
   });
 }
 
+let dummyHash: Promise<string> | null = null;
+
+/**
+ * Run a real password hash when the account does not exist, so a login attempt for
+ * an unknown email takes about as long as a wrong password and does not reveal
+ * which addresses are registered.
+ */
+export function verifyAgainstDummyPassword(password: string): Promise<boolean> {
+  dummyHash ??= hashPassword("alwerash-timing-equalizer");
+  return dummyHash.then((hash) => verifyPassword(password, hash));
+}
+
 /** Verify password. Supports argon2; also bcrypt if the package is installed (legacy). */
 export async function verifyPassword(
   password: string,

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
 import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
@@ -29,10 +29,7 @@ const EMPTY_TRACK_EXPLORER: HomeTrackExplorerBundle = {
 
 export default async function LoggedInHomePage() {
   markPage("/home");
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login?next=/home");
-  }
+  const session = await requirePageSession("/home");
 
   const roles = (session.user.roles as string[]) ?? [];
   if (roles.includes("ADMIN")) redirect("/admin");

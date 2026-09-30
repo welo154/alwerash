@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { auth } from "@/auth";
+import { requireApiSession, sessionErrorResponse } from "@/server/auth/live-session";
 import { canAccessSubmissionFile } from "@/server/learning/submission.service";
 import { detectFileType } from "@/server/storage/file-signature";
 import { getPrivateObject } from "@/server/storage/object-storage";
@@ -12,9 +12,13 @@ export async function GET(
   _request: NextRequest,
   ctx: { params: Promise<{ fileKey: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  let session;
+  try {
+    session = await requireApiSession();
+  } catch (error) {
+    const response = sessionErrorResponse(error);
+    if (response) return response;
+    throw error;
   }
 
   const { fileKey } = await ctx.params;

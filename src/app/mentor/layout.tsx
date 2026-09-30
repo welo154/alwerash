@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { getMentorIdForUser } from "@/server/auth/mentor-context";
-import { requireRole } from "@/server/auth/require";
+import { requirePageRole } from "@/server/auth/require";
 import { prisma } from "@/server/db/prisma";
 
 export default async function MentorLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRole(["MENTOR", "ADMIN"]);
+  const session = await requirePageRole(["MENTOR", "ADMIN"], "/mentor");
   const mentorId = await getMentorIdForUser(session.user.id);
   const mentor = mentorId
     ? await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true } })

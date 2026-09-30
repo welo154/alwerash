@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 import { getSubscriptionPlan, isSubscriptionPlanId } from "@/lib/subscription-plans";
 import {
   grantSelfServeEntitlement,
@@ -9,10 +9,7 @@ import {
 } from "@/server/subscription/entitlement.service";
 
 export async function chooseSubscriptionPlan(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login?next=" + encodeURIComponent("/subscription"));
-  }
+  const session = await requirePageSession("/subscription");
 
   const planId = String(formData.get("planId") ?? "");
   if (!isSubscriptionPlanId(planId)) {

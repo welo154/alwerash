@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { auth } from "@/auth";
+import { readLiveSession } from "@/server/auth/live-session";
 import { CoursePreviewExperience } from "./CoursePreviewExperience";
 import { RelatedClassesSection } from "./RelatedClassesSection";
 import {
@@ -43,7 +43,8 @@ export default async function PublicCoursePage({
 }) {
   const { courseId } = await params;
 
-  const session = await auth();
+  const live = await readLiveSession();
+  const session = live.state === "active" ? live.session : null;
   const userId = session?.user?.id;
   const isLoggedIn = Boolean(userId);
   const roles = (session?.user as { roles?: string[] } | undefined)?.roles ?? [];

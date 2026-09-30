@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiSession, sessionErrorResponse } from "@/server/auth/live-session";
 import { prisma } from "@/server/db/prisma";
 import { IMAGE_MIME_TYPES } from "@/server/storage/file-signature";
 import { putObject } from "@/server/storage/object-storage";
@@ -12,9 +12,13 @@ const MAX_SIZE = 4 * 1024 * 1024; // 4MB
 
 /** POST /api/profile/photo — upload profile picture; returns { url }. */
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let session;
+  try {
+    session = await requireApiSession();
+  } catch (error) {
+    const response = sessionErrorResponse(error);
+    if (response) return response;
+    throw error;
   }
 
   const limited = await consumeRateLimit(RATE_LIMITS.uploadPerUser, session.user.id);

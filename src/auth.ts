@@ -8,11 +8,12 @@ import { Role } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
-import { verifyPassword } from "@/server/auth/password";
+import { verifyAgainstDummyPassword, verifyPassword } from "@/server/auth/password";
 import { registerDeviceSession, revokeDeviceSession } from "@/server/auth/device-session";
 import { RATE_LIMITS, consumeRateLimit } from "@/server/security/rate-limit";
 import { readRequestContext } from "@/server/security/request-context";
 import { recordSecurityEvent } from "@/server/security/security-events";
+import { sendDeviceDisplacedEmail } from "@/server/email/resend.client";
 
 const CredentialsSchema = z.object({
   email: z.string().email().transform((v) => v.toLowerCase().trim()),
@@ -72,10 +73,14 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
             include: { roles: true },
           });
 
+          const passwordOk = user?.passwordHash
+            ? await verifyPassword(password, user.passwordHash)
+            : await verifyAgainstDummyPassword(password).then(() => false);
+
           let failure: string | null = null;
           if (!user) failure = "unknown_email";
           else if (!user.passwordHash) failure = "no_password_account";
-          else if (!(await verifyPassword(password, user.passwordHash))) failure = "bad_password";
+          else if (!passwordOk) failure = "bad_password";
           else if (!user.emailVerified) failure = "unverified";
 
           if (!user || failure) {
@@ -131,7 +136,9 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
           return token;
         }
 
-        // Hydrate from DB only on sign-in or once for older cookies — never on every request.
+        // Name and profile fields are copied once. Roles are re-read below on later
+        // requests, because an admin can add or remove one without a new sign-in.
+        let hydratedRoles = false;
         if (token.sub && token.roles == null) {
           try {
             const [roles, dbUser, profession] = await Promise.all([
@@ -146,6 +153,7 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
               readUserProfessionFromDb(token.sub),
             ]);
             token.roles = roles.map((r) => r.role);
+            hydratedRoles = true;
             if (dbUser) {
               token.name = dbUser.name ?? token.name;
               token.email = dbUser.email ?? token.email;
@@ -155,6 +163,20 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
             token.profession = profession;
           } catch {
             token.roles = [];
+            hydratedRoles = true;
+          }
+        }
+
+        if (token.sub && !hydratedRoles) {
+          try {
+            const roles = await prisma.userRole.findMany({
+              where: { userId: token.sub },
+              select: { role: true },
+            });
+            token.roles = roles.map((r) => r.role);
+          } catch {
+            // Keep the roles already in the cookie if the database is briefly down,
+            // rather than treating every member as if they had none.
           }
         }
 
@@ -174,6 +196,13 @@ export function buildAuthOptions({ canPersistToken }: { canPersistToken: boolean
                 userId: token.sub,
                 metadata: { kind: registration.kind, replaced: registration.replaced.length },
               });
+              const email = typeof token.email === "string" ? token.email : null;
+              if (email) {
+                const previous = registration.replaced.find((row) => row.label)?.label ?? "your other device";
+                await sendDeviceDisplacedEmail(email, previous).catch((error) => {
+                  console.error("[auth] device displacement email failed", error);
+                });
+              }
             }
           } catch (error) {
             // Never block sign-in on registry failure; the request stays legacy and

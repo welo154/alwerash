@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileSectionTabs } from "@/components/profile/ProfileSectionTabs";
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
@@ -25,8 +24,7 @@ export default async function ProfilePage({
   searchParams: Promise<{ tab?: string; edit?: string }>;
 }) {
   markPage("/profile");
-  const session = await auth();
-  if (!session?.user) redirect("/login?next=/profile");
+  const session = await requirePageSession("/profile");
 
   const userId = session.user.id as string;
   const sessionUser = session.user as {

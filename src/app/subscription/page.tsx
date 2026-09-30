@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { auth } from "@/auth";
+import { readLiveSession } from "@/server/auth/live-session";
 import { SubscriptionPricingCards } from "@/components/subscription/SubscriptionPricingCard";
 import { SubscriptionMobileCards } from "@/components/subscription/SubscriptionMobileCards";
 import { AUTH_SOCIAL_LINKS } from "@/components/auth/auth-theme";
@@ -19,8 +19,8 @@ export default async function SubscriptionPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  const homeHref = session?.user ? "/home" : "/";
+  const live = await readLiveSession();
+  const homeHref = live.state === "active" ? "/home" : "/";
 
   const params = (await searchParams) ?? {};
   const errorKey = Array.isArray(params.error) ? params.error[0] : params.error;

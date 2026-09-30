@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { auth } from "@/auth";
+import { requireApiSession, sessionErrorResponse } from "@/server/auth/live-session";
 import { prisma } from "@/server/db/prisma";
 import { isAllowedProfileImage } from "@/server/storage/object-storage";
 
@@ -20,9 +20,13 @@ const MAX_SKILL_LENGTH = 50;
 
 /** PATCH /api/profile — update name, profession, bio, skills, country, image (no email). */
 export async function PATCH(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let session;
+  try {
+    session = await requireApiSession();
+  } catch (error) {
+    const response = sessionErrorResponse(error);
+    if (response) return response;
+    throw error;
   }
 
   let body: {

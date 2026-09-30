@@ -119,13 +119,19 @@ users can request a new one.
 
 ## 7. Remaining limitations
 
-- Pages that call `auth()` directly (e.g. `/home`, `/profile`) still render for a
-  revoked device; protected content, playback, and every guarded API reject it.
-- Roles are read from the JWT, so removing a role takes effect when the user's
-  sessions are revoked, not immediately.
-- Sign-in with an unknown email skips the password hash, so response timing can
-  still distinguish unknown emails. The per-IP limit bounds how fast that can be
-  probed.
+- Member pages, profile and upload APIs, and the admin, mentor, and instructor
+  layouts now treat a revoked device as signed out and send it to
+  `/login?error=device_revoked`. Middleware still allows the first request through,
+  because it can only read the cookie.
+- Roles are re-read from the database on every server render. Middleware keeps
+  using the cookie, which the browser refreshes every five minutes, so a removed
+  admin can still be routed toward `/admin` for that long; the admin layout then
+  sends them away.
+- Unknown emails now run the same password hash as a wrong password, so timing
+  no longer shows which addresses exist. The first unknown attempt after a cold
+  start is slower, while that dummy hash is created.
+- When the one-device limit is on and a sign-in displaces another device, the
+  account email gets a short notice with a link to reset the password.
 - The CSP allows `'unsafe-inline'` scripts, because Next.js inlines its bootstrap
   script and no nonce is plumbed through.
 - No new-device email confirmation. The event log records displacements, which
@@ -133,7 +139,7 @@ users can request a new one.
 
 ## 8. Tests
 
-38 new tests (149 total): rate-limit windows, hashing, case-insensitivity,
+39 new tests (150 total): rate-limit windows, hashing, case-insensitivity,
 fail-open, and 429; file-type detection including HTML/SVG disguised as images;
 storage key traversal; profile image allow-list; reset single-use, expiry,
 supersession, cross-flow token rejection, device revocation; hashed verification

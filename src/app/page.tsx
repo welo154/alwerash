@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { readLiveSession } from "@/server/auth/live-session";
 import { GuestLanding } from "@/components/landing/GuestLanding";
 import { markPage } from "@/server/observability/query-timing";
 
@@ -10,7 +10,9 @@ export const dynamic = "force-dynamic";
  */
 export default async function GuestLandingPage() {
   markPage("/");
-  const session = await auth();
+  const live = await readLiveSession();
+  if (live.state === "revoked") redirect("/login?error=device_revoked");
+  const session = live.state === "active" ? live.session : null;
   if (session?.user) {
     const roles = (session.user.roles as string[]) ?? [];
     if (roles.includes("ADMIN")) redirect("/admin");

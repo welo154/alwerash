@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiSession, sessionErrorResponse } from "@/server/auth/live-session";
 import { AppError } from "@/server/lib/errors";
 import { prisma } from "@/server/db/prisma";
 import { addSubmissionFile } from "@/server/learning/submission.service";
@@ -16,9 +16,13 @@ export async function POST(
   request: NextRequest,
   ctx: { params: Promise<{ submissionId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  let session;
+  try {
+    session = await requireApiSession();
+  } catch (error) {
+    const response = sessionErrorResponse(error);
+    if (response) return response;
+    throw error;
   }
 
   const { submissionId } = await ctx.params;

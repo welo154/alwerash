@@ -95,6 +95,26 @@ export async function sendAccountExistsEmail(
   );
 }
 
+/**
+ * Tells the account owner that a new sign-in replaced an older device. Sent only
+ * when the one-device limit is on and a slot was actually taken.
+ */
+export async function sendDeviceDisplacedEmail(
+  to: string,
+  previousDevice: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  const base = getAppBaseUrl();
+  const device = previousDevice.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return sendHtmlEmail(
+    to,
+    "Signed out on another device — Alwerash",
+    [
+      `<p>Your Alwerash account just signed in on a new device, so <strong>${device}</strong> was signed out.</p>`,
+      `<p>If this was you, you can keep watching on the new device. If it was not, <a href="${base}/forgot-password">reset your password</a>. That signs the account out everywhere.</p>`,
+    ].join("\n")
+  );
+}
+
 export async function sendMentorCapstoneSubmittedEmail(input: {
   to: string;
   learnerName: string;

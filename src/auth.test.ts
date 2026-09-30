@@ -63,4 +63,9 @@ describe("jwt callback device registration", () => {
     expect(registerDeviceSession).not.toHaveBeenCalled();
     expect(token.sid).toBe("sid-kept");
   });
+
+  it("replaces roles kept in the cookie with the roles stored in the database", async () => {
+    const token = await runJwt(false, { token: { sub: "u1", roles: ["ADMIN"], sid: "sid-kept" } });
+    expect(token.roles).toEqual(["LEARNER"]);
+  });
 });
