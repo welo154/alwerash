@@ -4,7 +4,6 @@
  */
 import { prisma } from "@/server/db/prisma";
 import {
-  getCompletedLessonIds,
   getOrderedLessonIds,
   isCourseCompleted,
   type CourseWithOrderedLessons,
@@ -21,6 +20,11 @@ export type ContinueLearningCardDto = {
   lectureLine: string;
   topicTitle: string;
   continueHref: string;
+  lessonTitle: string;
+  lessonNumber: number;
+  courseTitle: string;
+  instructorName: string;
+  durationLabel: string;
 };
 
 function lessonKindLabel(type: string): string {
@@ -90,13 +94,33 @@ export async function getContinueLearningCardsForUser(
   const progressRows = await prisma.lessonProgress.findMany({
     where: { userId },
     select: {
+      lessonId: true,
+      completedAt: true,
       updatedAt: true,
       lesson: {
         select: {
           module: {
             select: {
               course: {
-                select: { id: true, published: true },
+                select: {
+                  id: true,
+                  title: true,
+                  published: true,
+                  instructorName: true,
+                  modules: {
+                    orderBy: { order: "asc" },
+                    select: {
+                      id: true,
+                      title: true,
+                      order: true,
+                      lessons: {
+                        where: { published: true },
+                        orderBy: { order: "asc" },
+                        select: { id: true, title: true, type: true, order: true },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -105,18 +129,31 @@ export async function getContinueLearningCardsForUser(
     },
   });
 
-  const lastTouchByCourse = new Map<string, Date>();
+  type CourseRow = (typeof progressRows)[number]["lesson"]["module"]["course"];
+  const lastTouchByCourse = new Map<string, { at: Date; course: CourseRow }>();
+  const completedByCourse = new Map<string, Set<string>>();
+
   for (const row of progressRows) {
     const course = row.lesson.module.course;
     if (!course.published) continue;
+
     const prev = lastTouchByCourse.get(course.id);
-    if (!prev || row.updatedAt > prev) {
-      lastTouchByCourse.set(course.id, row.updatedAt);
+    if (!prev || row.updatedAt > prev.at) {
+      lastTouchByCourse.set(course.id, { at: row.updatedAt, course });
+    }
+
+    if (row.completedAt) {
+      let completed = completedByCourse.get(course.id);
+      if (!completed) {
+        completed = new Set();
+        completedByCourse.set(course.id, completed);
+      }
+      completed.add(row.lessonId);
     }
   }
 
   const courseIdsOrdered = [...lastTouchByCourse.entries()]
-    .sort((a, b) => b[1].getTime() - a[1].getTime())
+    .sort((a, b) => b[1].at.getTime() - a[1].at.getTime())
     .map(([id]) => id);
 
   const cards: ContinueLearningCardDto[] = [];
@@ -124,36 +161,15 @@ export async function getContinueLearningCardsForUser(
   for (const courseId of courseIdsOrdered) {
     if (cards.length >= limit) break;
 
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      select: {
-        id: true,
-        title: true,
-        published: true,
-        instructorName: true,
-        modules: {
-          orderBy: { order: "asc" },
-          select: {
-            id: true,
-            title: true,
-            order: true,
-            lessons: {
-              where: { published: true },
-              orderBy: { order: "asc" },
-              select: { id: true, title: true, type: true, order: true },
-            },
-          },
-        },
-      },
-    });
+    const touched = lastTouchByCourse.get(courseId);
+    if (!touched) continue;
 
-    if (!course || !course.published) continue;
-
+    const course = touched.course;
     const shaped = toCourseWithOrderedLessons(course);
     const orderedIds = getOrderedLessonIds(shaped);
     if (orderedIds.length === 0) continue;
 
-    const completed = await getCompletedLessonIds(userId, orderedIds);
+    const completed = completedByCourse.get(courseId) ?? new Set();
     if (isCourseCompleted(orderedIds, completed)) continue;
 
     const nextLessonId = orderedIds.find((id) => !completed.has(id));
@@ -163,6 +179,7 @@ export async function getContinueLearningCardsForUser(
     if (!meta) continue;
 
     const who = instructorDisplayName(course);
+    const mins = ESTIMATED_MINUTES[meta.type] ?? 5;
     const titleLine = `${course.title.trim()} -\n${who}`;
 
     cards.push({
@@ -170,6 +187,11 @@ export async function getContinueLearningCardsForUser(
       lectureLine: formatLectureLine(meta.type),
       topicTitle: meta.title.toUpperCase(),
       continueHref: `/course/${course.id}`,
+      lessonTitle: meta.title,
+      lessonNumber: orderedIds.indexOf(nextLessonId) + 1,
+      courseTitle: course.title.trim(),
+      instructorName: who,
+      durationLabel: `${mins}mins`,
     });
   }
 

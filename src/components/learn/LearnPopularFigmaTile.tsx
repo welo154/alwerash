@@ -357,7 +357,7 @@ export function LearnPopularFigmaTile(
             ✕
           </button>
           <div
-            className="absolute left-0 top-0 z-10 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]"
+            className="absolute left-0 top-0 z-10 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 bg-[#E9E9E9]"
             style={{ width: "608px", height: "444px" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -369,7 +369,7 @@ export function LearnPopularFigmaTile(
             />
           </div>
           <div
-            className="absolute left-0 top-[195px] z-20 rounded-[50px] border border-black bg-[#89F496]"
+            className="absolute left-0 top-[195px] z-20 rounded-[50px] border border-black max-lg:border-black/20 bg-[#89F496]"
             style={{ width: "608px", height: "372px" }}
           >
             <div
@@ -602,7 +602,7 @@ export function LearnPopularFigmaTile(
 
       {isGrid ? (
       <div
-        className={`relative isolate shrink-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
+        className={`relative isolate shrink-0 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 bg-[#E9E9E9]${isStartHovered ? " opacity-0" : ""}`}
         style={{ width: "100%", aspectRatio: `${LEARN_POPULAR_FIGMA_TILE_W} / ${GRAY_H}` }}
         aria-hidden
       >
@@ -621,7 +621,7 @@ export function LearnPopularFigmaTile(
         aria-hidden
       >
         <div
-          className="absolute inset-x-0 top-0 overflow-hidden rounded-[50px] border border-black bg-[#E9E9E9]"
+          className="absolute inset-x-0 top-0 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 bg-[#E9E9E9]"
           style={{ height: GRAY_H }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -635,7 +635,7 @@ export function LearnPopularFigmaTile(
       </div>
       )}
       <div
-        className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black bg-white${isGrid ? " flex-1" : ""}${isStartHovered ? " opacity-0" : ""}`}
+        className={`relative z-10 flex w-full flex-col rounded-[50px] border border-black max-lg:border-black/20 bg-white${isGrid ? " flex-1" : ""}${isStartHovered ? " opacity-0" : ""}`}
         style={
           isGrid
             ? {
@@ -776,7 +776,7 @@ export function LearnPopularFigmaTile(
               </div>
 
               <div
-                className="absolute left-0 top-[407px] z-20 h-[751px] w-[1171px] rounded-[50px] border border-black bg-[#89F496]"
+                className="absolute left-0 top-[407px] z-20 h-[751px] w-[1171px] rounded-[50px] border border-black max-lg:border-black/20 bg-[#89F496]"
               >
                 <div className="pointer-events-none absolute left-[775px] top-0 h-full w-px bg-black opacity-60" />
                 <div
@@ -1287,7 +1287,7 @@ This course will take you from having little knowledge in digital painting and d
                     }}
                   />
                   <div
-                    className="absolute left-0 rounded-[50px] border border-black bg-white"
+                    className="absolute left-0 rounded-[50px] border border-black max-lg:border-black/20 bg-white"
                     style={{
                       top: `${customThumbTop}px`,
                       width: `${CUSTOM_SCROLL_BOX_WIDTH}px`,

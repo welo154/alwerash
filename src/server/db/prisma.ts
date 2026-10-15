@@ -30,22 +30,10 @@ function isPoolError(error: unknown): boolean {
   return isPoolExhaustedText(errorText(error));
 }
 
-function emptyQueryResult(operation: string): unknown {
-  switch (operation) {
-    case "findMany":
-    case "$queryRaw":
-    case "$queryRawUnsafe":
-      return [];
-    case "count":
-    case "$executeRaw":
-    case "$executeRawUnsafe":
-      return 0;
-    case "aggregate":
-    case "groupBy":
-      return {};
-    default:
-      return null;
-  }
+const POOL_RETRY_DELAYS_MS = [200, 500];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Avoid `new URL()` — passwords with `@` / `#` make that parser fail and skip pool settings. */
@@ -142,9 +130,11 @@ function resolveDirectUrl(databaseUrl: string): string {
   return raw ? rewriteDirectUrl(raw) : databaseUrl;
 }
 
+const PRISMA_CLIENT_REV = 2;
+
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
-  prismaPoolBroken?: boolean;
+  prismaRev?: number;
 };
 
 function createClient(): PrismaClient {
@@ -167,16 +157,21 @@ function createClient(): PrismaClient {
 
   const extended = base.$extends({
     query: {
-      async $allOperations({ operation, args, query }) {
-        if (globalForPrisma.prismaPoolBroken) {
-          return emptyQueryResult(operation);
-        }
+      async $allOperations({ args, query }) {
         try {
           return await query(args);
         } catch (error) {
           if (!isPoolError(error)) throw error;
-          globalForPrisma.prismaPoolBroken = true;
-          return emptyQueryResult(operation);
+          for (const delayMs of POOL_RETRY_DELAYS_MS) {
+            await sleep(delayMs);
+            try {
+              return await query(args);
+            } catch (retryError) {
+              if (!isPoolError(retryError)) throw retryError;
+              error = retryError;
+            }
+          }
+          throw error;
         }
       },
     },
@@ -186,6 +181,11 @@ function createClient(): PrismaClient {
 }
 
 function getClient(): PrismaClient {
+  if (globalForPrisma.prismaRev !== PRISMA_CLIENT_REV) {
+    void globalForPrisma.prisma?.$disconnect();
+    globalForPrisma.prisma = undefined;
+    globalForPrisma.prismaRev = PRISMA_CLIENT_REV;
+  }
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
   const client = createClient();
   globalForPrisma.prisma = client;

@@ -1,204 +1,603 @@
 "use client";
 
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
 
-const DESKTOP_CARD_WIDTH_PX = 321;
-const MOBILE_CARD_WIDTH_PX = 315;
-const MOBILE_SWIPER_GAP_PX = 20;
-const MOBILE_SECTION_INSET_PX = 30;
-const TABLET_CARD_WIDTH_PX = 345;
-const TABLET_SWIPER_GAP_PX = 33;
-const TABLET_SECTION_INSET_PX = 61;
-/** Overlap so the bottom card (260px) keeps 64px unintersected below the top card. */
-const COURSE_CARD_STACK_OVERLAP_PX = 260 - 64;
-
-const courseCardMetaMuted: CSSProperties = {
-  color: "var(--Black, #000)",
-  fontFamily: pangeaFont,
-  fontSize: "16px",
-  fontStyle: "normal",
-  fontWeight: 400,
-  lineHeight: "normal",
-  opacity: 0.6,
-  fontVariationSettings: '"wght" 400',
-};
-
-const courseCardTopicTitle: CSSProperties = {
-  color: "var(--Black, #000)",
-  fontFamily: pangeaFont,
-  fontSize: "18px",
-  fontStyle: "normal",
-  fontWeight: 400,
-  lineHeight: "normal",
-  fontVariationSettings: '"wght" 400',
-};
-
-function ContinueCourseChevronIcon() {
+function ContinueDesktopPlayIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 43 43"
-      fill="none"
-      width={36}
-      height={36}
-      className="block h-[36px] w-[36px] shrink-0 overflow-visible"
-      aria-hidden
-    >
-      <path
-        d="M21.25 41.75C32.5718 41.75 41.75 32.5718 41.75 21.25C41.75 9.92816 32.5718 0.75 21.25 0.75C9.92816 0.75 0.75 9.92816 0.75 21.25C0.75 32.5718 9.92816 41.75 21.25 41.75Z"
-        fill="var(--White, #FFF)"
-      />
-      <path
-        d="M21.25 29.45L29.45 21.25L21.25 13.05"
-        fill="var(--White, #FFF)"
-      />
-      <path
-        d="M21.25 29.45L29.45 21.25M29.45 21.25L21.25 13.05M29.45 21.25L13.05 21.25M41.75 21.25C41.75 32.5718 32.5718 41.75 21.25 41.75C9.92816 41.75 0.75 32.5718 0.75 21.25C0.75 9.92816 9.92816 0.75 21.25 0.75C32.5718 0.75 41.75 9.92816 41.75 21.25Z"
-        stroke="var(--Black, #000)"
-        strokeWidth={1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span className="relative block" style={{ width: 50, height: 50 }}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={50}
+        height={50}
+        viewBox="0 0 51 51"
+        fill="none"
+        className="block"
+        aria-hidden
+        style={{
+          width: 50,
+          height: 50,
+          fill: "#FFF",
+          stroke: "var(--Black, #000)",
+          strokeWidth: 0.3,
+        }}
+      >
+        <path
+          d="M25.1499 50.15C38.957 50.15 50.1499 38.9571 50.1499 25.15C50.1499 11.3429 38.957 0.149994 25.1499 0.149994C11.3428 0.149994 0.149902 11.3429 0.149902 25.15C0.149902 38.9571 11.3428 50.15 25.1499 50.15Z"
+          fill="white"
+        />
+        <path
+          d="M25.1499 50.15C38.957 50.15 50.1499 38.9571 50.1499 25.15C50.1499 11.3429 38.957 0.149994 25.1499 0.149994C11.3428 0.149994 0.149902 11.3429 0.149902 25.15C0.149902 38.9571 11.3428 50.15 25.1499 50.15Z"
+          stroke="black"
+          strokeWidth={0.3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={20}
+        height={20}
+        viewBox="0 0 22 22"
+        fill="none"
+        aria-hidden
+        className="pointer-events-none absolute"
+        style={{
+          top: "50%",
+          left: "50%",
+          width: 20,
+          height: 20,
+          fill: "#FFF",
+          stroke: "var(--Black, #000)",
+          strokeWidth: 1.5,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <path
+          d="M10.75 20.75L15.75 15.75L20.75 10.75L10.75 0.75"
+          fill="white"
+        />
+        <path
+          d="M10.75 0.75L20.75 10.75L15.75 15.75L10.75 20.75M20.75 10.75L0.75 10.75"
+          stroke="black"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
   );
 }
 
-function CourseStackCard({
-  titleInstructorLine,
-  lectureLine,
-  topicTitle,
-  continueHref,
-  widthPx = DESKTOP_CARD_WIDTH_PX,
-}: ContinueLearningCardDto & { widthPx?: number }) {
-  const scale = widthPx / DESKTOP_CARD_WIDTH_PX;
-  const topHeightPx = Math.round(350 * scale);
-  const bottomHeightPx = Math.round(260 * scale);
-  const overlapPx = Math.round(COURSE_CARD_STACK_OVERLAP_PX * scale);
+const TRACK_WIDTH_PX = 904;
+const TRACK_HEIGHT_PX = 18;
+const TRACK_FILL_WIDTH_PX = 402.698;
+const TRACK_TICK_COUNT = 9;
+const TRACK_TICK_FIRST_LEFT_PX = 76;
+const TRACK_TICK_GAP_PX = 94;
+const TRACK_TICK_WIDTH_PX = 0.3;
+const TRACK_TICK_HEIGHT_PX = 6.081;
 
-  const cardBase =
-    "box-border w-full rounded-[50px] border border-[var(--Black,#000)]";
+const MOBILE_TRACK_WIDTH_PX = 280;
+const MOBILE_TRACK_HEIGHT_PX = 9;
+const MOBILE_TRACK_FILL_WIDTH_PX =
+  (TRACK_FILL_WIDTH_PX / TRACK_WIDTH_PX) * MOBILE_TRACK_WIDTH_PX;
+const MOBILE_TRACK_TICK_FIRST_LEFT_PX = 24;
+const MOBILE_TRACK_TICK_GAP_PX = 29;
+const MOBILE_TRACK_TICK_HEIGHT_PX = 3.041;
 
+const TABLET_TRACK_WIDTH_PX = 343;
+const TABLET_TRACK_HEIGHT_PX = 15;
+const TABLET_TRACK_FILL_WIDTH_PX =
+  (TRACK_FILL_WIDTH_PX / TRACK_WIDTH_PX) * TABLET_TRACK_WIDTH_PX;
+const TABLET_TRACK_TICK_FIRST_LEFT_PX = 28;
+const TABLET_TRACK_TICK_GAP_PX = 35;
+const TABLET_TRACK_TICK_HEIGHT_PX = 5.068;
+const SOFT_BORDER = "0.3px solid rgba(0, 0, 0, 0.2)";
+
+function ContinueLearningCtaButton({
+  border = "0.3px solid var(--Black, #000)",
+}: {
+  border?: string;
+}) {
   return (
-    <div className="relative shrink-0" style={{ width: widthPx }}>
-      <div
-        className={`relative z-1 ${cardBase}`}
+    <span
+      className="relative box-border overflow-visible"
+      style={{
+        display: "flex",
+        width: 187,
+        height: 50,
+        padding: "0 16px",
+        alignItems: "center",
+        borderRadius: 23,
+        border,
+        background: "var(--Green, #8AF396)",
+      }}
+    >
+      <span
         style={{
-          height: topHeightPx,
-          background: "var(--Grey, #E9E9E9)",
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 24,
+          fontStyle: "normal",
+          fontWeight: 500,
+          lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          fontVariationSettings: '"wght" 500',
         }}
-      >        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ top: "48px", width: "78px", height: "78px" }}
-          aria-hidden
+      >
+        CONTINUE
+      </span>
+      <span
+        className="pointer-events-none absolute"
+        style={{ left: 146, top: 0, width: 50, height: 50 }}
+      >
+        <ContinueDesktopPlayIcon />
+      </span>
+    </span>
+  );
+}
+
+function ContinueLearningDesktopRow({
+  lessonTitle,
+  lessonNumber,
+  courseTitle,
+  instructorName,
+  durationLabel,
+  continueHref,
+}: ContinueLearningCardDto) {
+  return (
+    <Link
+      href={continueHref}
+      className="relative box-border no-underline transition-opacity hover:opacity-90"
+      style={{
+        display: "block",
+        width: 1201,
+        height: 118,
+        borderRadius: 50,
+        border: "0.3px solid var(--Black, #000)",
+        background: "var(--White, #FFF)",
+      }}
+    >
+      <span
+        className="absolute flex min-w-0 items-center"
+        style={{ top: 26, left: 21, right: 50 + 187 + 8 }}
+      >
+        <span
+          className="shrink-0"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 24,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 500',
+          }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 80 80"
-            fill="none"
-            className="h-full w-full"
-            style={{ color: "var(--White, #FFF)" }}
+          {lessonNumber}.{lessonTitle}
+        </span>
+        <span
+          className="min-w-0 truncate"
+          style={{
+            marginLeft: 16,
+            opacity: 0.6,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 16,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 400',
+          }}
+        >
+          {courseTitle} with{" "}
+          <span
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 16,
+              fontStyle: "normal",
+              fontWeight: 500,
+              lineHeight: "23px",
+              fontVariationSettings: '"wght" 500',
+            }}
           >
-            <path
-              d="M40 79C61.5391 79 79 61.5391 79 40C79 18.4609 61.5391 1 40 1C18.4609 1 1 18.4609 1 40C1 61.5391 18.4609 79 40 79Z"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M32.2 24.4L55.6 40L32.2 55.6V24.4Z"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-      <div
-        className={`relative z-2 flex w-full flex-col overflow-hidden ${cardBase}`}
+            {instructorName}
+          </span>
+          {"  -  "}
+          {durationLabel}
+        </span>
+      </span>
+
+      <span
+        className="absolute box-border overflow-hidden"
         style={{
-          height: bottomHeightPx,
-          marginTop: `-${overlapPx}px`,
-          background: "var(--White, #FFF)",
+          top: 26 + 23 + 25,
+          left: 21,
+          display: "flex",
+          width: TRACK_WIDTH_PX,
+          height: TRACK_HEIGHT_PX,
+          padding: "0 16px",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 24,
+          border: "0.3px solid #000",
         }}
-      >        <div className="flex min-h-0 flex-1 flex-col pt-[35px] pr-[35px] pl-[35px]">
-          <p className="m-0 whitespace-pre-line" style={courseCardMetaMuted}>
-            {titleInstructorLine}
-          </p>
-          <p className="m-0 mt-[61px]" style={courseCardMetaMuted}>
-            {lectureLine}
-          </p>
-          <p className="m-0 mt-[9px]" style={courseCardTopicTitle}>
-            {topicTitle}
-          </p>
-          <Link
-            href={continueHref}
-            className="relative mt-[9px] inline-flex shrink-0 pr-[18px] transition-opacity hover:opacity-90"
-          >
-            <span
-              className="relative flex h-[37px] w-[127px] shrink-0 items-center justify-start border-[0.3px] border-[var(--White,#FFF)] pl-4 pr-4"
-              style={{
-                borderRadius: "var(--Radius-MD, 8px)",
-                background: "var(--Dark-Green, #004B3C)",
-              }}
-            >
-              <span
-                className="leading-none"
-                style={{
-                  color: "var(--White, #FFF)",
-                  fontFamily: pangeaFont,
-                  fontSize: "16px",
-                  fontStyle: "normal",
-                  fontWeight: 700,
-                  lineHeight: "19.6px",
-                  fontVariationSettings: '"wght" 700',
-                }}
-              >
-                CONTINUE
-              </span>
-              <span
-                className="pointer-events-none absolute top-1/2 right-0 z-1 -translate-y-1/2 translate-x-[calc(50%-4px)]"
-                aria-hidden
-              >
-                <ContinueCourseChevronIcon />
-              </span>
-            </span>
-          </Link>
-        </div>
-      </div>
-    </div>
+        aria-hidden
+      >
+        <span
+          className="absolute"
+          style={{
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: TRACK_FILL_WIDTH_PX,
+            height: "auto",
+            padding: 0,
+            borderRadius: 24,
+            border: "none",
+            borderRight: "0.3px solid #000",
+            background:
+              "var(--gradient, linear-gradient(90deg, var(--Blue, #66E0F2) 0%, var(--Bright-Green, #89F496) 100%))",
+          }}
+        />
+        {Array.from({ length: TRACK_TICK_COUNT }, (_, index) => (
+          <span
+            key={index}
+            className="absolute"
+            style={{
+              left: TRACK_TICK_FIRST_LEFT_PX + index * TRACK_TICK_GAP_PX,
+              top: "50%",
+              width: TRACK_TICK_WIDTH_PX,
+              height: TRACK_TICK_HEIGHT_PX,
+              transform: "translateY(-50%)",
+              background: "#000",
+            }}
+          />
+        ))}
+      </span>
+
+      <span className="absolute" style={{ top: 42, right: 50 }}>
+        <ContinueLearningCtaButton />
+      </span>
+    </Link>
+  );
+}
+
+function ContinueLearningMobileCard({
+  lessonTitle,
+  lessonNumber,
+  courseTitle,
+  instructorName,
+  durationLabel,
+  continueHref,
+}: ContinueLearningCardDto) {
+  return (
+    <Link
+      href={continueHref}
+      className="relative box-border no-underline transition-opacity hover:opacity-90"
+      style={{
+        display: "flex",
+        width: 335,
+        height: 170,
+        paddingLeft: 27,
+        paddingRight: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 50,
+        border: "0.3px solid rgba(0, 0, 0, 0.2)",
+        background: "var(--White, #FFF)",
+      }}
+    >
+      <span
+        className="absolute flex min-w-0 items-center"
+        style={{ top: 23, left: 21, right: 21 }}
+      >
+        <span
+          className="min-w-0 truncate"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 24,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 500',
+          }}
+        >
+          {lessonNumber}.{lessonTitle}
+        </span>
+        <span
+          className="shrink-0"
+          style={{
+            marginLeft: 10,
+            opacity: 0.6,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 14,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 400',
+          }}
+        >
+          {durationLabel}
+        </span>
+      </span>
+
+      <span
+        className="absolute min-w-0 truncate"
+        style={{
+          top: 23 + 23 + 4,
+          left: 21,
+          right: 21,
+          opacity: 0.6,
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 14,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "23px",
+          fontVariationSettings: '"wght" 400',
+        }}
+      >
+        {courseTitle} -{" "}
+        <span
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 14,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 500',
+          }}
+        >
+          {instructorName}
+        </span>
+      </span>
+
+      <span
+        className="absolute box-border overflow-hidden"
+        style={{
+          top: 23 + 23 + 4 + 23 + 12,
+          left: 21,
+          display: "flex",
+          width: MOBILE_TRACK_WIDTH_PX,
+          height: MOBILE_TRACK_HEIGHT_PX,
+          padding: "0 16px",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 24,
+          border: "0.3px solid rgba(0, 0, 0, 0.2)",
+        }}
+        aria-hidden
+      >
+        <span
+          className="absolute"
+          style={{
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: MOBILE_TRACK_FILL_WIDTH_PX,
+            height: "auto",
+            borderRadius: 24,
+            border: "none",
+            borderRight: "0.3px solid rgba(0, 0, 0, 0.2)",
+            background:
+              "var(--gradient, linear-gradient(90deg, var(--Blue, #66E0F2) 0%, var(--Bright-Green, #89F496) 100%))",
+          }}
+        />
+        {Array.from({ length: TRACK_TICK_COUNT }, (_, index) => (
+          <span
+            key={index}
+            className="absolute"
+            style={{
+              left: MOBILE_TRACK_TICK_FIRST_LEFT_PX + index * MOBILE_TRACK_TICK_GAP_PX,
+              top: "50%",
+              width: TRACK_TICK_WIDTH_PX,
+              height: MOBILE_TRACK_TICK_HEIGHT_PX,
+              transform: "translateY(-50%)",
+              background: "#000",
+            }}
+          />
+        ))}
+      </span>
+
+      <span
+        className="absolute"
+        style={{ top: 23 + 23 + 4 + 23 + 12 + MOBILE_TRACK_HEIGHT_PX + 12, left: 21 }}
+      >
+        <ContinueLearningCtaButton border="0.3px solid rgba(0, 0, 0, 0.2)" />
+      </span>
+    </Link>
+  );
+}
+
+function ContinueLearningTabletCard({
+  lessonTitle,
+  lessonNumber,
+  courseTitle,
+  instructorName,
+  durationLabel,
+  continueHref,
+}: ContinueLearningCardDto) {
+  return (
+    <Link
+      href={continueHref}
+      className="relative box-border no-underline transition-opacity hover:opacity-90"
+      style={{
+        display: "flex",
+        width: 622,
+        height: 122,
+        padding: "0 16px",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 45,
+        border: SOFT_BORDER,
+        background: "var(--White, #FFF)",
+      }}
+    >
+      <span
+        className="absolute flex min-w-0 items-center"
+        style={{ top: 23, left: 27, right: 35 + 187 + 8 }}
+      >
+        <span
+          className="min-w-0 truncate"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 24,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 500',
+          }}
+        >
+          {lessonNumber}.{lessonTitle}
+        </span>
+        <span
+          className="shrink-0"
+          style={{
+            marginLeft: 18,
+            opacity: 0.6,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 16,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 400',
+          }}
+        >
+          {durationLabel}
+        </span>
+      </span>
+
+      <span
+        className="absolute min-w-0 truncate"
+        style={{
+          top: 23 + 23 + 3,
+          left: 27,
+          right: 35 + 187 + 8,
+          opacity: 0.6,
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 16,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "23px",
+          fontVariationSettings: '"wght" 400',
+        }}
+      >
+        {courseTitle} with{" "}
+        <span
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 16,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "23px",
+            fontVariationSettings: '"wght" 500',
+          }}
+        >
+          {instructorName}
+        </span>
+      </span>
+
+      <span
+        className="absolute box-border overflow-hidden"
+        style={{
+          top: 23 + 23 + 3 + 23 + 11,
+          left: 27,
+          display: "flex",
+          width: TABLET_TRACK_WIDTH_PX,
+          height: TABLET_TRACK_HEIGHT_PX,
+          padding: "0 16px",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 24,
+          border: SOFT_BORDER,
+        }}
+        aria-hidden
+      >
+        <span
+          className="absolute"
+          style={{
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: TABLET_TRACK_FILL_WIDTH_PX,
+            height: "auto",
+            borderRadius: 24,
+            border: "none",
+            borderRight: SOFT_BORDER,
+            background:
+              "var(--gradient, linear-gradient(90deg, var(--Blue, #66E0F2) 0%, var(--Bright-Green, #89F496) 100%))",
+          }}
+        />
+        {Array.from({ length: TRACK_TICK_COUNT }, (_, index) => (
+          <span
+            key={index}
+            className="absolute"
+            style={{
+              left: TABLET_TRACK_TICK_FIRST_LEFT_PX + index * TABLET_TRACK_TICK_GAP_PX,
+              top: "50%",
+              width: TRACK_TICK_WIDTH_PX,
+              height: TABLET_TRACK_TICK_HEIGHT_PX,
+              transform: "translateY(-50%)",
+              background: "#000",
+            }}
+          />
+        ))}
+      </span>
+
+      <span
+        className="absolute"
+        style={{ top: "50%", right: 35, transform: "translateY(-50%)" }}
+      >
+        <ContinueLearningCtaButton border={SOFT_BORDER} />
+      </span>
+    </Link>
   );
 }
 
 export function ContinueLearningSection({  courses,
   /** When false, skip the full-bleed rule above the heading (profile already has section rules). */
   showTopRule = true,
+  /** When false, desktop rule + heading are rendered by the parent (logged-in `/home`). */
+  showDesktopIntro = true,
   className = "",
 }: {
   courses: ContinueLearningCardDto[];
   showTopRule?: boolean;
+  showDesktopIntro?: boolean;
   className?: string;
 }) {
   if (courses.length === 0 && showTopRule) return null;
 
+  const showDesktopRule = showTopRule && showDesktopIntro;
+
   return (
     <div className={className}>
-      {showTopRule ? (
+      {showDesktopRule ? (
         <div
-          className="relative left-1/2 mt-[31px] hidden h-px w-screen max-w-[100vw] -translate-x-1/2 bg-black lg:block"
+          className="mx-auto mt-[31px] hidden lg:block"
+          style={{
+            width: 1440,
+            maxWidth: "100%",
+            height: 0.3,
+            background: "#000",
+          }}
           aria-hidden
         />
       ) : null}
 
-      <div className="max-[743px]:pl-[30px] max-[743px]:pr-0 min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]">
+      <div className="max-[743px]:pl-[27px] max-[743px]:pr-0 min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]">
         <h2
           className={`${showTopRule ? "max-lg:mt-0 lg:mt-[40px]" : ""} m-0 w-full uppercase min-[744px]:hidden`}
         >
@@ -257,79 +656,53 @@ export function ContinueLearningSection({  courses,
           </span>
         </h2>
 
-        <h2
-          className={`${showTopRule ? "mt-[40px]" : ""} hidden w-full uppercase lg:block`}
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: "36px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "120%",
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          CONTINUE{" "}
-          <span
+        {showDesktopIntro ? (
+          <h2
+            className={`${showTopRule ? "mt-[40px]" : ""} hidden w-full uppercase lg:block`}
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
               fontSize: "36px",
-              fontStyle: "italic",
-              fontWeight: 700,
+              fontStyle: "normal",
+              fontWeight: 400,
               lineHeight: "120%",
-              fontVariationSettings: '"wght" 700',
+              fontVariationSettings: '"wght" 400',
             }}
           >
-            LEARNING
-          </span>
-        </h2>
+            CONTINUE{" "}
+            <span
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "36px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                lineHeight: "120%",
+                fontVariationSettings: '"wght" 700',
+              }}
+            >
+              LEARNING
+            </span>
+          </h2>
+        ) : null}
       </div>
 
-      <div className="relative left-1/2 mt-[31px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:hidden">
-        <Swiper
-          slidesPerView="auto"
-          spaceBetween={MOBILE_SWIPER_GAP_PX}
-          slidesPerGroup={1}
-          slidesOffsetBefore={MOBILE_SECTION_INSET_PX}
-          speed={400}
-          grabCursor
-          allowTouchMove
-          simulateTouch
-          className="overflow-visible!"
-        >
-          {courses.map((course) => (
-            <SwiperSlide key={course.continueHref} className="w-[315px]!">
-              <CourseStackCard {...course} widthPx={MOBILE_CARD_WIDTH_PX} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+      <div className="mt-[31px] flex w-full flex-col items-center gap-[16px] min-[744px]:hidden">
+        {courses.map((course) => (
+          <ContinueLearningMobileCard key={course.continueHref} {...course} />
+        ))}
       </div>
 
-      <div className="relative left-1/2 mt-[48px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:block lg:hidden">
-        <Swiper
-          slidesPerView="auto"
-          spaceBetween={TABLET_SWIPER_GAP_PX}
-          slidesPerGroup={1}
-          slidesOffsetBefore={TABLET_SECTION_INSET_PX}
-          speed={400}
-          grabCursor
-          allowTouchMove
-          simulateTouch
-          className="overflow-visible!"
-        >
-          {courses.map((course) => (
-            <SwiperSlide key={`tablet-${course.continueHref}`} className="w-[345px]!">
-              <CourseStackCard {...course} widthPx={TABLET_CARD_WIDTH_PX} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+      <div className="mt-[31px] hidden w-full flex-col items-center gap-[16px] min-[744px]:flex lg:hidden">
+        {courses.map((course) => (
+          <ContinueLearningTabletCard key={course.continueHref} {...course} />
+        ))}
       </div>
 
-      <div className="lg:pl-[120px] lg:pr-[69px]">
-        <div className="mt-[34px] hidden flex-wrap gap-[30px] lg:flex">
+      <div className="hidden lg:block" style={{ marginTop: 40, paddingLeft: 120 }}>
+        <div className="flex flex-col gap-[25px]">
           {courses.map((course) => (
-            <CourseStackCard key={course.continueHref} {...course} />
+            <ContinueLearningDesktopRow key={course.continueHref} {...course} />
           ))}
         </div>
       </div>

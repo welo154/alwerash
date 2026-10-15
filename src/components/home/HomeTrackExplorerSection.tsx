@@ -171,7 +171,7 @@ function TrackLinkPill({
   return (
     <Link
       href={`/tracks/${encodeURIComponent(pill.slug)}`}
-      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border ${
+      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 max-lg:border-black/20 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border lg:border-black ${
         fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
       }`}
       style={{
@@ -179,7 +179,6 @@ function TrackLinkPill({
         lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
         borderRadius: "var(--Radius-MD, 8px)",
         padding: "0 16px",
-        border: "0.3px solid var(--Black, #000)",
       }}
     >
       <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>
@@ -203,7 +202,7 @@ function TrackSelectPill({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border ${
+      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors max-lg:border-black/20 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border lg:border-black ${
         fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
       } ${pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"}`}
       style={{
@@ -211,7 +210,6 @@ function TrackSelectPill({
         lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
         borderRadius: "var(--Radius-MD, 8px)",
         padding: "0 16px",
-        border: "0.3px solid var(--Black, #000)",
       }}
     >
       <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>

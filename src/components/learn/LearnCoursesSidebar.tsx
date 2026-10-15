@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CoursesPageExpandableNav } from "./CoursesPageExpandableNav";
 import { LearnCoursesSidebarAside } from "./LearnCoursesSidebarAside";
 
 const pangeaFont =
@@ -104,12 +105,28 @@ export function LearnCoursesSidebar({
   categories,
   activeCategoryKey,
   showCoursesSection = true,
+  headingsOnly = false,
 }: {
   categories: LearnCoursesSidebarCategory[];
   activeCategoryKey?: string;
   /** Library sidebar hides the courses filter list. */
   showCoursesSection?: boolean;
+  /** Courses page desktop: section titles only. */
+  headingsOnly?: boolean;
 }) {
+  if (headingsOnly) {
+    return (
+      <LearnCoursesSidebarAside>
+        <CoursesPageExpandableNav
+          courseFilters={sidebarCourseFilters}
+          categories={categories}
+          areaItems={sidebarExtraCategories}
+          activeCategoryKey={activeCategoryKey}
+        />
+      </LearnCoursesSidebarAside>
+    );
+  }
+
   const allCategories = showCoursesSection
     ? [...categories, ...sidebarExtraCategories]
     : categories;

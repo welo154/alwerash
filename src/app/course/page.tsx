@@ -72,21 +72,24 @@ export default async function LearnPage() {
 
   return (
     <div className="min-w-0 max-w-full overflow-x-visible bg-white pb-16 pt-[26px] font-sans lg:pt-[60px]">
-      <div className="w-full min-w-0 pl-6 sm:pl-8 lg:pl-10">
+      <div className="w-full min-w-0 pl-[70px] max-lg:pl-8 max-[743px]:pl-6">
         <main className="min-w-0 w-full overflow-x-visible">
           <div className="lg:hidden">
             <LearnCoursesPageFilterBar categories={sidebarCategories} />
           </div>
 
           <div className="flex min-w-0 max-w-full flex-col overflow-x-visible lg:flex-row lg:items-start lg:gap-[88px]">
-            <div className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start">
-              <LearnCoursesSidebar categories={sidebarCategories} />
+            <div
+              className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start"
+              style={{ marginTop: -14 }}
+            >
+              <LearnCoursesSidebar categories={sidebarCategories} headingsOnly />
             </div>
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
                 aria-label="Featured courses"
-                className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ml-[33px]"
+                className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ml-[73px]"
               >
                 <LearnFeaturedCoursesPanel
                   slides={trackShowcaseSlides.map((slide) => ({

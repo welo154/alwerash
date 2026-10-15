@@ -152,12 +152,13 @@ export function LoggedInHome({
         </div>
 
         <hr
-          className="absolute left-1/2 border-0 bg-black min-[744px]:hidden"
+          className="absolute left-1/2 border-0 min-[744px]:hidden"
           style={{
             top: MOBILE_USER_INFO_HR_TOP_PX - MOBILE_HEADER_HEIGHT_PX,
             width: "100vw",
             maxWidth: "100vw",
             height: "0.3px",
+            background: "rgba(0, 0, 0, 0.2)",
             transform: "translateX(-50%)",
           }}
           aria-hidden
@@ -264,11 +265,11 @@ export function LoggedInHome({
         </div>
 
         <hr
-          className="mt-[40px] hidden border-0 bg-black min-[744px]:block lg:hidden"
+          className="mt-[40px] hidden border-0 min-[744px]:block lg:hidden"
           style={{
             width: "100%",
             height: "0.3px",
-            background: "#000",
+            background: "rgba(0, 0, 0, 0.2)",
           }}
           aria-hidden
         />
@@ -362,8 +363,51 @@ export function LoggedInHome({
           </div>
         </div>
 
+        <div className="hidden lg:block">
+          <div
+            className="relative mt-[31px]"
+            style={{
+              width: "100vw",
+              marginLeft: "calc(50% - 50vw)",
+              height: 0.3,
+              background: "#000",
+            }}
+            aria-hidden
+          />
+          <h2
+            className="m-0 mt-[40px] uppercase"
+            style={{ paddingLeft: 120 }}
+          >
+            <span
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "36px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }}
+            >
+              CONTINUE{" "}
+            </span>
+            <span
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "36px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                lineHeight: "120%",
+              }}
+            >
+              LEARNING
+            </span>
+          </h2>
+        </div>
+
         <ContinueLearningSection
           courses={continueLearningCourses}
+          showDesktopIntro={false}
           className="max-[743px]:mt-[62px] min-[744px]:max-lg:mt-[48px]"
         />
 

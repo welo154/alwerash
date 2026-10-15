@@ -1016,8 +1016,10 @@ export function ActivityScheduleMobileCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`relative box-border max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
-          isTablet ? "h-[401px] w-[445px] border" : "h-[305px] w-[315px] border-[0.3px]"
+        className={`relative box-border max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
+          isTablet
+            ? "h-[401px] w-[445px] border-[0.3px] border-black/20"
+            : "h-[305px] w-[315px] border-[0.3px] border-black/20"
         }`}
         aria-label="Activity schedule"
       >
@@ -1093,7 +1095,7 @@ export function ActivityScheduleMobileCard({
         </div>
 
         <div
-          className="absolute box-border flex flex-col items-center justify-center border-[0.3px] border-[var(--Black,#000)]"
+          className="absolute box-border flex flex-col items-center justify-center border-[0.3px] border-black/20"
           style={{
             top: eventTop,
             right: layout.eventRight,

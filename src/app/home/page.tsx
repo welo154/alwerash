@@ -46,12 +46,15 @@ export default async function LoggedInHomePage() {
 
   const now = new Date();
 
-  const [continueLearningCourses, landingMostsMentors, trackBundle, weeklyActivity, learningProgressPercent] =
+  let continueLearningCourses: Awaited<ReturnType<typeof getContinueLearningCardsForUser>> = [];
+  try {
+    continueLearningCourses = await getContinueLearningCardsForUser(userId, 3);
+  } catch (err) {
+    console.warn("[home] continue learning unavailable", err instanceof Error ? err.message : err);
+  }
+
+  const [landingMostsMentors, trackBundle, weeklyActivity, learningProgressPercent] =
     await Promise.all([
-      getContinueLearningCardsForUser(userId, 3).catch((err) => {
-        console.warn("[home] continue learning unavailable", err instanceof Error ? err.message : err);
-        return [];
-      }),
       publicListLandingMostsMentors().catch((err) => {
         console.warn("[home] mosts mentors unavailable", err instanceof Error ? err.message : err);
         return [];
