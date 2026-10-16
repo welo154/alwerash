@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { adminCreateCourse, adminDeleteTrack, adminGetTrack, adminUpdateTrack } from "@/server/content/admin.service";
 import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
 import { ConfirmDeleteButton } from "@/app/admin/content/components/ConfirmDeleteButton";
+import { ArabicNameField } from "@/app/admin/content/components/ArabicNameField";
 
 import { requireRole } from "@/server/auth/require";
 
@@ -37,6 +38,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     if (!id) return;
     await adminUpdateTrack(id, {
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       slug: String(formData.get("slug") ?? ""),
       description: String(formData.get("description") ?? "") || undefined,
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
@@ -58,6 +60,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
     await adminCreateCourse({
       trackId: id,
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       summary: String(formData.get("summary") ?? "") || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
@@ -121,7 +124,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
           <input type="hidden" name="trackId" value={trackId} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">English title</label>
               <input
                 name="title"
                 defaultValue={track.title}
@@ -142,6 +145,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
               </p>
             </div>
           </div>
+          <ArabicNameField label="Arabic title" defaultValue={track.titleAr} placeholder="اسم المسار بالعربية" />
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
             <input
@@ -247,13 +251,16 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
             <input type="hidden" name="trackId" value={trackId} />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Course title</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Course title (English)</label>
                 <input
                   name="title"
                   placeholder="e.g. Geometric Ornamentation"
                   required
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
+              </div>
+              <div>
+                <ArabicNameField label="Course title (Arabic)" placeholder="اسم الدورة بالعربية" />
               </div>
               <div>
                 <label className="mb-1 block text-xs text-slate-500">Order</label>

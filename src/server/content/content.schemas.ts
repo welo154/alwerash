@@ -42,6 +42,17 @@ export const OptionalUrl = z
     }
   });
 
+/** Optional Arabic name. An empty field clears it; an omitted field is left unchanged. */
+export const OptionalArabicName = z
+  .string()
+  .max(200)
+  .optional()
+  .transform((value) => {
+    if (value == null) return undefined;
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : null;
+  });
+
 /** Pagination query params */
 export const PaginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -54,6 +65,7 @@ const HomeFilterOrder = z.number().int().min(0).max(1_000_000).nullable().option
 
 export const TrackCreateSchema = z.object({
   title: z.string().min(2, "Title too short").max(200),
+  titleAr: OptionalArabicName,
   slug: Slug,
   description: z.string().max(2000).optional(),
   coverImage: OptionalUrl,
@@ -74,10 +86,12 @@ export const CourseCreateSchema = z.object({
   trackId: OptionalCuid,
   mentorId: OptionalCuid,
   title: z.string().min(2, "Title too short").max(200),
+  titleAr: OptionalArabicName,
   summary: z.string().max(2000).optional(),
   requirements: z.array(z.string().trim().min(1).max(200)).max(30).optional(),
   coverImage: OptionalUrl,
   instructorName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
+  instructorNameAr: OptionalArabicName,
   instructorImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
@@ -103,6 +117,7 @@ export const CourseUpdateSchema = CourseCreateSchema.partial().extend({
 export const ModuleCreateSchema = z.object({
   courseId: Cuid,
   title: z.string().min(2, "Title too short").max(200),
+  titleAr: OptionalArabicName,
   order: z.number().int().min(0).max(1_000_000).optional(),
 });
 
@@ -115,6 +130,7 @@ export const LessonTypeEnum = z.enum(["VIDEO", "ARTICLE", "RESOURCE", "INTRO"]);
 export const LessonCreateSchema = z.object({
   moduleId: Cuid,
   title: z.string().min(2, "Title too short").max(200),
+  titleAr: OptionalArabicName,
   type: LessonTypeEnum.optional(),
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
@@ -131,6 +147,7 @@ export const LessonArticleUpsertSchema = z.object({
 export const AssignmentCreateSchema = z.object({
   courseId: Cuid,
   title: z.string().min(2, "Title too short").max(200),
+  titleAr: OptionalArabicName,
   instructions: z.string().max(10_000).optional(),
   rubricJson: z.record(z.unknown()).optional(),
   published: z.boolean().optional(),
@@ -150,6 +167,7 @@ const MentorPasswordSchema = z
 
 export const MentorCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
+  nameAr: OptionalArabicName,
   photo: z.string().max(500).optional(),
   certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
   aboutMe: z
@@ -166,6 +184,7 @@ export const MentorCreateSchema = z.object({
 /** Profile-only updates (no email/password on edit). */
 export const MentorUpdateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200).optional(),
+  nameAr: OptionalArabicName,
   photo: z.string().max(500).optional(),
   certificateName: z.string().max(200).optional().transform((v) => (v?.trim() || undefined)),
   aboutMe: z

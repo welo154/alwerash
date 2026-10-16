@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const FULL_BLEED =
   "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2";
@@ -85,12 +86,15 @@ function TrackTagsMarqueeRow({
   autoplayDelayMs: number;
   className?: string;
 }) {
+  const arabic = useArabicLayout();
   const loopTags = useMemo(() => tagsForLoopRow(tags), [tags]);
   if (loopTags.length === 0) return null;
 
   return (
-    <div className={`${FULL_BLEED} overflow-hidden pl-6 sm:pl-8 ${className}`.trim()}>
+    <div className={`${FULL_BLEED} overflow-hidden ${arabic ? "pr-6 sm:pr-8" : "pl-6 sm:pl-8"} ${className}`.trim()}>
       <Swiper
+        key={arabic ? "rtl" : "ltr"}
+        dir={arabic ? "rtl" : "ltr"}
         {...TAG_SWIPER_BASE}
         loopAdditionalSlides={Math.max(tags.length * 2, 8)}
         autoplay={{

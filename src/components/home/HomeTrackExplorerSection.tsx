@@ -12,6 +12,8 @@ import {
 } from "@/components/cards";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useT } from "@/components/i18n/Tr";
 import {
   learnCarouselMousewheel,
 } from "@/components/learn/learn-carousel-swiper-config";
@@ -40,6 +42,7 @@ const TABLET_SWIPER_CARD_GAP_PX = 33;
 const DESKTOP_SWIPER_CARD_GAP_PX = 27;
 const MOBILE_SECTION_INSET_PX = 30;
 const TABLET_SECTION_INSET_PX = 61;
+const DESKTOP_SECTION_INSET_PX = 120;
 
 function useSwiperCardGap() {
   const [gap, setGap] = useState(MOBILE_SWIPER_CARD_GAP_PX);
@@ -128,6 +131,7 @@ function MobileDiscoverCta({
   className?: string;
   onDark?: boolean;
 }) {
+  const t = useT();
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
       <p
@@ -141,8 +145,9 @@ function MobileDiscoverCta({
           lineHeight: "127%",
         }}
       >
-        Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
-        industry professionals.
+        {t(
+          "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+        )}
       </p>
       <Link
         href="/course"
@@ -155,7 +160,7 @@ function MobileDiscoverCta({
           lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
         }}
       >
-        Discover
+        {t("Discover")}
       </Link>
     </div>
   );
@@ -168,20 +173,23 @@ function TrackLinkPill({
   pill: HomeTrackPill;
   fillRow?: boolean;
 }) {
+  const t = useT();
   return (
     <Link
       href={`/tracks/${encodeURIComponent(pill.slug)}`}
-      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black bg-white px-4 text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 max-lg:border-black/20 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border lg:border-black ${
-        fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
+      className={`flex h-[27px] w-auto items-center justify-center bg-white text-center text-[18px] font-bold leading-[19.6px] text-black no-underline transition-colors hover:bg-slate-50 min-[744px]:h-[45px] min-[744px]:text-[24px] ${
+        fillRow ? "min-w-0 flex-1 overflow-hidden" : "shrink-0"
       }`}
       style={{
         ...pillFont,
         lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-        borderRadius: "var(--Radius-MD, 8px)",
         padding: "0 16px",
+        borderRadius: 23,
+        border: "0.3px solid rgb(0 0 0 / 40%)",
+        boxSizing: "border-box",
       }}
     >
-      <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>
+      <span className={fillRow ? "min-w-0 truncate" : undefined}>{t(pill.label)}</span>
     </Link>
   );
 }
@@ -197,22 +205,25 @@ function TrackSelectPill({
   onClick: () => void;
   fillRow?: boolean;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`inline-flex h-[27px] items-center justify-center rounded-[8px] border-[0.3px] border-black px-4 text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors max-lg:border-black/20 min-[744px]:h-[45px] min-[744px]:text-[24px] lg:border lg:border-black ${
-        fillRow ? "min-w-0 flex-1 overflow-hidden" : "w-fit shrink-0"
+      className={`flex h-[27px] w-auto items-center justify-center text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] ${
+        fillRow ? "min-w-0 flex-1 overflow-hidden" : "shrink-0"
       } ${pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"}`}
       style={{
         ...pillFont,
         lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-        borderRadius: "var(--Radius-MD, 8px)",
         padding: "0 16px",
+        borderRadius: 23,
+        border: "0.3px solid rgb(0 0 0 / 40%)",
+        boxSizing: "border-box",
       }}
     >
-      <span className={fillRow ? "min-w-0 truncate" : undefined}>{pill.label}</span>
+      <span className={fillRow ? "min-w-0 truncate" : undefined}>{t(pill.label)}</span>
     </button>
   );
 }
@@ -490,6 +501,8 @@ export function HomeTrackExplorerSection({
   showWhatToLearnNextHeading = false,
   landingMostsMentors = [],
 }: HomeTrackExplorerSectionProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const {
     scrollAreaRef,
     atBeginning,
@@ -622,20 +635,29 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading ? (
         <div
-          className={`flex items-center max-[743px]:mt-[60px] max-[743px]:gap-[13px] min-[744px]:max-lg:mt-[84px] min-[744px]:max-lg:gap-[20px] lg:mt-[76px] lg:gap-[26px] ${contentInsetClass}`}
+          dir="ltr"
+          className={`flex items-center max-[743px]:mt-[60px] max-[743px]:gap-[13px] min-[744px]:max-lg:mt-[84px] min-[744px]:max-lg:gap-[20px] lg:mt-[76px] lg:gap-[26px] ${
+            arabic
+              ? `w-full flex-row-reverse justify-start ${
+                  contentLeftPx != null
+                    ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] lg:pr-[120px]"
+                    : ""
+                }`
+              : contentInsetClass
+          }`}
         >
           <h2
             className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
             style={{ fontFamily: pangeaFontFamily }}
           >
-            WHAT TO LEARN NEXT
+            {t("WHAT TO LEARN NEXT")}
           </h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 45 45"
             fill="none"
             aria-hidden
-            className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
+            className={`size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px] ${arabic ? "scale-x-[-1]" : ""}`}
           >
             <path
               d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -655,7 +677,15 @@ export function HomeTrackExplorerSection({
 
       {showWhatToLearnNextHeading ? (
         <p
-          className={`m-0 mt-[2px] text-[16px] font-normal leading-[127%] text-black min-[744px]:max-lg:mt-[8px] min-[744px]:max-lg:text-[18px] lg:mt-[5px] lg:text-[18px] ${contentInsetClass}`}
+          className={`m-0 mt-[2px] text-[16px] font-normal leading-[127%] text-black min-[744px]:max-lg:mt-[8px] min-[744px]:max-lg:text-[18px] lg:mt-[5px] lg:text-[18px] ${
+            arabic
+              ? `text-right ${
+                  contentLeftPx != null
+                    ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] lg:pr-[120px]"
+                    : ""
+                }`
+              : contentInsetClass
+          }`}
           style={{
             fontFamily: pangeaFontFamily,
           }}
@@ -668,7 +698,13 @@ export function HomeTrackExplorerSection({
         <div
           key={cardGridKey}
           className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
-            contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : "pr-6"
+            contentLeftPx != null
+              ? arabic
+                ? "lg:pr-[120px] lg:pl-6"
+                : "lg:pl-[120px] lg:pr-6"
+              : arabic
+                ? "pl-6"
+                : "pr-6"
           }`}
         >
           <div
@@ -676,7 +712,7 @@ export function HomeTrackExplorerSection({
             className="relative w-full min-w-0 overflow-x-visible overflow-y-visible max-[743px]:min-h-[447px] lg:min-h-[447px]"
             style={{
               /* Allow hover expand card to paint outside the slide without page scroll. */
-              clipPath: "inset(-160px -320px -160px 0)",
+              clipPath: arabic ? "inset(-160px 0 -160px -320px)" : "inset(-160px -320px -160px 0)",
             }}
           >
             {isEmpty ? (
@@ -685,14 +721,14 @@ export function HomeTrackExplorerSection({
                 style={pillFont}
               >
                 {trackPillSelectsCourses && activeTrackSlug
-                  ? "No published courses in this track yet."
-                  : "No tracks to show."}
+                  ? t("No published courses in this track yet.")
+                  : t("No tracks to show.")}
               </p>
             ) : (
               <>
                 <Swiper
-                  key={cardGridKey}
-                  dir="ltr"
+                  key={`${cardGridKey}-${arabic ? "ar" : "en"}`}
+                  dir={arabic ? "rtl" : "ltr"}
                   modules={[Mousewheel]}
                   slidesPerView="auto"
                   spaceBetween={swiperCardGap}
@@ -752,13 +788,13 @@ export function HomeTrackExplorerSection({
       ) : (
       <div
         key={cardGridKey}
-        className={`${FULL_BLEED} relative mt-[50px] overflow-x-clip overflow-y-visible min-[744px]:mt-[73px] lg:mt-[64px]`}
+        className={`${FULL_BLEED} relative mt-[50px] overflow-x-clip overflow-y-visible min-[744px]:mt-[73px] lg:ml-0 lg:mt-[64px] lg:w-full lg:max-w-none`}
       >
         <div
           ref={scrollAreaRef}
           className="home-learn-next-track relative w-full min-w-0 overflow-x-visible overflow-y-visible"
           style={{
-            clipPath: "inset(-160px -320px -160px 0)",
+            clipPath: arabic ? "inset(-160px 0 -160px -320px)" : "inset(-160px -320px -160px 0)",
           }}
         >
           {isEmpty ? (
@@ -767,19 +803,19 @@ export function HomeTrackExplorerSection({
               style={pillFont}
             >
               {trackPillSelectsCourses && activeTrackSlug
-                ? "No published courses in this track yet."
-                : "No tracks to show."}
+                ? t("No published courses in this track yet.")
+                : t("No tracks to show.")}
             </p>
           ) : (
             <>
               <Swiper
-                key={cardGridKey}
-                dir="ltr"
+                key={`${cardGridKey}-${arabic ? "ar" : "en"}-${mobileSwiperInset || DESKTOP_SECTION_INSET_PX}`}
+                dir={arabic ? "rtl" : "ltr"}
                 modules={[Mousewheel]}
                 slidesPerView="auto"
                 spaceBetween={swiperCardGap}
                 slidesPerGroup={1}
-                slidesOffsetBefore={mobileSwiperInset}
+                slidesOffsetBefore={mobileSwiperInset || DESKTOP_SECTION_INSET_PX}
                 speed={400}
                 grabCursor
                 allowTouchMove
@@ -861,7 +897,7 @@ export function HomeTrackExplorerSection({
             className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-black hover:text-white"
             style={pillFont}
           >
-            View more
+            {t("View more")}
           </Link>
         </div>
       ) : null}
@@ -1197,7 +1233,7 @@ export function HomeTrackExplorerSection({
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-white px-8 text-[24px] font-bold text-black no-underline transition-colors hover:bg-black hover:text-white"
                 style={pillFont}
               >
-                View more
+                {t("View more")}
               </Link>
             </div>
           ) : null}
@@ -1210,15 +1246,16 @@ export function HomeTrackExplorerSection({
                 className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
                 style={bodyTextFont}
               >
-                Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
-                industry professionals.
+                {t(
+                  "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+                )}
               </p>
               <Link
                 href="/course"
                 className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
                 style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
               >
-                Discover
+                {t("Discover")}
               </Link>
             </div>
           </div>
@@ -1248,8 +1285,9 @@ export function HomeTrackExplorerSection({
                   className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white"
                   style={{ ...bodyTextFont, marginLeft: 90 }}
                 >
-                  Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
-                  industry professionals.
+                  {t(
+                    "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+                  )}
                 </p>
                 <Link
                   href="/course"
@@ -1260,7 +1298,7 @@ export function HomeTrackExplorerSection({
                     marginRight: 65,
                   }}
                 >
-                  Discover
+                  {t("Discover")}
                 </Link>
               </div>
             </div>

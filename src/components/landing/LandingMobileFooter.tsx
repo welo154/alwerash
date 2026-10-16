@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { Tr } from "@/components/i18n/Tr";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -113,7 +114,7 @@ function MobileFooterColumn({
           fontWeight: 700,
         }}
       >
-        {title}
+        <Tr>{title}</Tr>
       </h3>
       <ul className="mt-3 space-y-0">
         {links.map((item, index) => (
@@ -131,7 +132,7 @@ function MobileFooterColumn({
                 fontWeight: 400,
               }}
             >
-              {item.label}
+              <Tr>{item.label}</Tr>
             </Link>
           </li>
         ))}
@@ -142,7 +143,7 @@ function MobileFooterColumn({
               className="transition-opacity hover:opacity-70"
               style={mobileFooterViewMoreStyle}
             >
-              {viewMoreLabel}
+              <Tr>{viewMoreLabel}</Tr>
             </Link>
           </li>
         ) : null}
@@ -184,7 +185,7 @@ export function LandingMobileFooter() {
               fontWeight: 700,
             }}
           >
-            How can we help?
+            <Tr>How can we help?</Tr>
           </p>
           <Link
             href="/subscription"
@@ -197,7 +198,7 @@ export function LandingMobileFooter() {
               fontWeight: 400,
             }}
           >
-            Contact Us
+            <Tr>Contact Us</Tr>
           </Link>
           <Link
             href="/subscription"
@@ -210,7 +211,7 @@ export function LandingMobileFooter() {
               fontWeight: 400,
             }}
           >
-            Help Center
+            <Tr>Help Center</Tr>
           </Link>
         </div>
 
@@ -312,7 +313,7 @@ export function LandingMobileFooter() {
               className="whitespace-nowrap text-[12px] font-normal leading-[120%] text-black transition-opacity hover:opacity-80 min-[744px]:text-[18px]"
               style={{ fontFamily: pangeaFont, opacity: 0.6 }}
             >
-              Terms of use
+              <Tr>Terms of use</Tr>
             </Link>
             <MobileFooterLegalDot />
             <Link
@@ -320,7 +321,7 @@ export function LandingMobileFooter() {
               className="whitespace-nowrap text-[12px] font-normal leading-[120%] text-black transition-opacity hover:opacity-80 min-[744px]:text-[18px]"
               style={{ fontFamily: pangeaFont, opacity: 0.6 }}
             >
-              Privacy policy
+              <Tr>Privacy policy</Tr>
             </Link>
             <MobileFooterLegalDot />
             <Link
@@ -328,7 +329,7 @@ export function LandingMobileFooter() {
               className="whitespace-nowrap text-[12px] font-normal leading-[120%] text-black transition-opacity hover:opacity-80 min-[744px]:text-[18px]"
               style={{ fontFamily: pangeaFont, opacity: 0.6 }}
             >
-              Cookies policy
+              <Tr>Cookies policy</Tr>
             </Link>
           </div>
         </div>

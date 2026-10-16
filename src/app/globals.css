@@ -1356,6 +1356,11 @@ label:has(input[type="radio"]) {
   touch-action: pan-y pinch-zoom;
 }
 
+/* Slider tracks run from the right. Slide interiors keep their original layout. */
+.swiper[dir="rtl"] > .swiper-wrapper > .swiper-slide {
+  direction: ltr;
+}
+
 .learn-featured-swiper .swiper-wrapper {
   align-items: stretch;
 }
@@ -1391,46 +1396,7 @@ label:has(input[type="radio"]) {
   height: auto !important;
 }
 
-/* Learn more modal: custom scrollbar for bottom section only */
-.learn-more-bottom-scroll {
-  scrollbar-width: thin !important;
-  scrollbar-color: #ffffff #07423c !important;
-}
-
-.learn-more-bottom-scroll::-webkit-scrollbar {
-  width: 16px !important;
-  background: transparent !important;
-}
-
-.learn-more-bottom-scroll::-webkit-scrollbar-track {
-  background: #07423c !important;
-  border-radius: 50px !important;
-  border: 1px solid #000 !important;
-}
-
-.learn-more-bottom-scroll::-webkit-scrollbar-thumb {
-  background: #ffffff !important;
-  border-radius: 50px !important;
-  border: 1px solid #000 !important;
-}
-
-.learn-more-bottom-scroll::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  background: transparent !important;
-}
-
-.learn-more-bottom-scroll::-webkit-scrollbar-button:single-button,
-.learn-more-bottom-scroll::-webkit-scrollbar-button:vertical:decrement,
-.learn-more-bottom-scroll::-webkit-scrollbar-button:vertical:increment {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  background: transparent !important;
-}
-
-/* Schedule add modal: slim variant of learn-more scrollbar (vertical only).
+/* Schedule add modal: slim vertical scrollbar.
    Do NOT set scrollbar-width/color on Chromium — they override ::-webkit-* and bring back OS arrows. */
 .schedule-add-scroll {
   overflow-x: hidden;

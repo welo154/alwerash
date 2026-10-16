@@ -8,6 +8,7 @@ import { hashPassword } from "./password";
 const CreateInstructorSchema = z.object({
   email: z.string().email().transform((v) => v.toLowerCase().trim()),
   name: z.string().min(1).max(100).optional(),
+  nameAr: z.string().max(100).optional().transform((value) => value?.trim() || undefined),
   country: z.string().length(2).optional(),
 });
 
@@ -69,6 +70,7 @@ export async function adminCreateInstructor(input: unknown) {
       data: {
         email: data.email,
         name: data.name,
+        nameAr: data.nameAr,
         country: data.country,
         passwordHash,
         emailVerified: new Date(),

@@ -3,8 +3,15 @@
 import Link from "next/link";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { Tr } from "@/components/i18n/Tr";
+import { LocalizedText } from "@/components/i18n/LocalizedText";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
+
+function WithWord() {
+  return useArabicLayout() ? "مع" : "with";
+}
 
 function ContinueDesktopPlayIcon() {
   return (
@@ -128,7 +135,7 @@ function ContinueLearningCtaButton({
           fontVariationSettings: '"wght" 500',
         }}
       >
-        CONTINUE
+        <Tr>CONTINUE</Tr>
       </span>
       <span
         className="pointer-events-none absolute"
@@ -142,9 +149,12 @@ function ContinueLearningCtaButton({
 
 function ContinueLearningDesktopRow({
   lessonTitle,
+  lessonTitleAr,
   lessonNumber,
   courseTitle,
+  courseTitleAr,
   instructorName,
+  instructorNameAr,
   durationLabel,
   continueHref,
 }: ContinueLearningCardDto) {
@@ -177,7 +187,7 @@ function ContinueLearningDesktopRow({
             fontVariationSettings: '"wght" 500',
           }}
         >
-          {lessonNumber}.{lessonTitle}
+          {lessonNumber}.<LocalizedText en={lessonTitle} ar={lessonTitleAr} />
         </span>
         <span
           className="min-w-0 truncate"
@@ -193,7 +203,7 @@ function ContinueLearningDesktopRow({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          {courseTitle} with{" "}
+          <LocalizedText en={courseTitle} ar={courseTitleAr} /> <WithWord />{" "}
           <span
             style={{
               color: "var(--Black, #000)",
@@ -205,7 +215,7 @@ function ContinueLearningDesktopRow({
               fontVariationSettings: '"wght" 500',
             }}
           >
-            {instructorName}
+            <LocalizedText en={instructorName} ar={instructorNameAr} />
           </span>
           {"  -  "}
           {durationLabel}
@@ -269,9 +279,12 @@ function ContinueLearningDesktopRow({
 
 function ContinueLearningMobileCard({
   lessonTitle,
+  lessonTitleAr,
   lessonNumber,
   courseTitle,
+  courseTitleAr,
   instructorName,
+  instructorNameAr,
   durationLabel,
   continueHref,
 }: ContinueLearningCardDto) {
@@ -308,7 +321,7 @@ function ContinueLearningMobileCard({
             fontVariationSettings: '"wght" 500',
           }}
         >
-          {lessonNumber}.{lessonTitle}
+          {lessonNumber}.<LocalizedText en={lessonTitle} ar={lessonTitleAr} />
         </span>
         <span
           className="shrink-0"
@@ -344,7 +357,7 @@ function ContinueLearningMobileCard({
           fontVariationSettings: '"wght" 400',
         }}
       >
-        {courseTitle} -{" "}
+        <LocalizedText en={courseTitle} ar={courseTitleAr} /> -{" "}
         <span
           style={{
             color: "var(--Black, #000)",
@@ -356,7 +369,7 @@ function ContinueLearningMobileCard({
             fontVariationSettings: '"wght" 500',
           }}
         >
-          {instructorName}
+          <LocalizedText en={instructorName} ar={instructorNameAr} />
         </span>
       </span>
 
@@ -419,9 +432,12 @@ function ContinueLearningMobileCard({
 
 function ContinueLearningTabletCard({
   lessonTitle,
+  lessonTitleAr,
   lessonNumber,
   courseTitle,
+  courseTitleAr,
   instructorName,
+  instructorNameAr,
   durationLabel,
   continueHref,
 }: ContinueLearningCardDto) {
@@ -457,7 +473,7 @@ function ContinueLearningTabletCard({
             fontVariationSettings: '"wght" 500',
           }}
         >
-          {lessonNumber}.{lessonTitle}
+          {lessonNumber}.<LocalizedText en={lessonTitle} ar={lessonTitleAr} />
         </span>
         <span
           className="shrink-0"
@@ -493,7 +509,7 @@ function ContinueLearningTabletCard({
           fontVariationSettings: '"wght" 400',
         }}
       >
-        {courseTitle} with{" "}
+        <LocalizedText en={courseTitle} ar={courseTitleAr} /> <WithWord />{" "}
         <span
           style={{
             color: "var(--Black, #000)",
@@ -505,7 +521,7 @@ function ContinueLearningTabletCard({
             fontVariationSettings: '"wght" 500',
           }}
         >
-          {instructorName}
+          <LocalizedText en={instructorName} ar={instructorNameAr} />
         </span>
       </span>
 
@@ -611,7 +627,7 @@ export function ContinueLearningSection({  courses,
               lineHeight: "120%",
             }}
           >
-            CONTINUE{" "}
+            <Tr>CONTINUE</Tr>{" "}
           </span>
           <span
             style={{
@@ -623,7 +639,7 @@ export function ContinueLearningSection({  courses,
               lineHeight: "120%",
             }}
           >
-            LEARNING
+            <Tr>LEARNING</Tr>
           </span>
         </h2>
 
@@ -640,7 +656,7 @@ export function ContinueLearningSection({  courses,
               lineHeight: "120%",
             }}
           >
-            CONTINUE{" "}
+            <Tr>CONTINUE</Tr>{" "}
           </span>
           <span
             style={{
@@ -652,7 +668,7 @@ export function ContinueLearningSection({  courses,
               lineHeight: "120%",
             }}
           >
-            LEARNING
+            <Tr>LEARNING</Tr>
           </span>
         </h2>
 
@@ -669,7 +685,7 @@ export function ContinueLearningSection({  courses,
               fontVariationSettings: '"wght" 400',
             }}
           >
-            CONTINUE{" "}
+            <Tr>CONTINUE</Tr>{" "}
             <span
               style={{
                 color: "var(--Black, #000)",
@@ -681,7 +697,7 @@ export function ContinueLearningSection({  courses,
                 fontVariationSettings: '"wght" 700',
               }}
             >
-              LEARNING
+              <Tr>LEARNING</Tr>
             </span>
           </h2>
         ) : null}

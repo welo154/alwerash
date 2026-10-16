@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 export type RelatedCourseCard = {
   titleInstructorLine: string;
@@ -102,6 +103,7 @@ function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continu
 }
 
 export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClassesSectionProps) {
+  const arabic = useArabicLayout();
   const swiperRef = useRef<SwiperType | null>(null);
   const [atBeginning, setAtBeginning] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -110,7 +112,10 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
 
   return (
     <section className="mt-[70px] w-full">
-      <div className="flex items-center">
+      <div
+        dir="ltr"
+        className={arabic ? "flex w-full flex-row-reverse items-center justify-start" : "flex items-center"}
+      >
         <h2
           className="m-0"
           style={{
@@ -124,7 +129,7 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
         >
           RELATED <span style={{ fontStyle: "normal", fontWeight: 400 }}>CLASSES</span>
         </h2>
-        <svg className="ml-[27px]" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
+        <svg className={arabic ? "mr-[27px] scale-x-[-1]" : "ml-[27px]"} xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
           <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
           <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
           <path
@@ -137,8 +142,10 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
         </svg>
       </div>
 
-      <div className="relative left-1/2 mt-[50px] w-screen -translate-x-1/2 overflow-hidden pl-[55px] pr-[60px]">
+      <div className={`relative left-1/2 mt-[50px] w-screen -translate-x-1/2 overflow-hidden ${arabic ? "pl-[60px] pr-[55px]" : "pl-[55px] pr-[60px]"}`}>
         <Swiper
+          key={arabic ? "rtl" : "ltr"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={30}
           slidesPerGroup={1}
@@ -170,9 +177,9 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
 
         <button
           type="button"
-          aria-label="Previous related classes"
-          disabled={atBeginning}
-          onClick={() => swiperRef.current?.slidePrev(450)}
+          aria-label={arabic ? "Next related classes" : "Previous related classes"}
+          disabled={arabic ? atEnd : atBeginning}
+          onClick={() => (arabic ? swiperRef.current?.slideNext(450) : swiperRef.current?.slidePrev(450))}
           className="absolute left-[8px] top-1/2 z-20 -translate-y-1/2 disabled:opacity-40"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden className="scale-x-[-1]">
@@ -190,9 +197,9 @@ export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClasses
 
         <button
           type="button"
-          aria-label="Next related classes"
-          disabled={atEnd}
-          onClick={() => swiperRef.current?.slideNext(450)}
+          aria-label={arabic ? "Previous related classes" : "Next related classes"}
+          disabled={arabic ? atBeginning : atEnd}
+          onClick={() => (arabic ? swiperRef.current?.slidePrev(450) : swiperRef.current?.slideNext(450))}
           className="absolute right-[8px] top-1/2 z-20 -translate-y-1/2 disabled:opacity-40"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>

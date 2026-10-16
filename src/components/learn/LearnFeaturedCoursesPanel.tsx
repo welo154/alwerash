@@ -18,6 +18,7 @@ import {
 } from "@/components/learn/learn-carousel-swiper-config";
 import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -84,6 +85,7 @@ export function LearnFeaturedCoursesPanel({
   slides: LearnFeaturedSlide[];
   hideNavOnMobile?: boolean;
 }) {
+  const arabic = useArabicLayout();
   const swiperRef = useRef<SwiperType | null>(null);
   const bleedWrapRef = useRef<HTMLDivElement | null>(null);
   const bp = useFeaturedBreakpoint();
@@ -127,7 +129,7 @@ export function LearnFeaturedCoursesPanel({
   return (
     <div
       ref={bleedWrapRef}
-      className="relative max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)] max-[743px]:h-[674px] min-[744px]:max-lg:h-[646px] max-lg:overflow-x-visible max-lg:overflow-y-visible lg:ml-0 lg:min-w-0 lg:overflow-x-clip"
+      className="relative max-lg:-ms-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ms-8 sm:max-lg:w-[calc(100%+2rem)] max-[743px]:h-[674px] min-[744px]:max-lg:h-[646px] max-lg:overflow-x-visible max-lg:overflow-y-visible lg:ms-0 lg:min-w-0 lg:overflow-x-clip"
       style={
         isLgUp && bleedWidth
           ? { width: bleedWidth, height: DESKTOP_PANEL_H }
@@ -143,7 +145,7 @@ export function LearnFeaturedCoursesPanel({
         fill="none"
         className="pointer-events-none absolute top-0 z-0 hidden max-[743px]:block"
         style={{
-          left: MOBILE_SVG_LEFT_PX,
+          ...(arabic ? { right: MOBILE_SVG_LEFT_PX, transform: "scaleX(-1)" } : { left: MOBILE_SVG_LEFT_PX }),
           width: MOBILE_SVG_W,
           height: MOBILE_PANEL_H,
         }}
@@ -161,7 +163,7 @@ export function LearnFeaturedCoursesPanel({
         fill="none"
         className="pointer-events-none absolute top-0 z-0 hidden min-[744px]:max-lg:block"
         style={{
-          left: TABLET_SVG_LEFT_PX,
+          ...(arabic ? { right: TABLET_SVG_LEFT_PX, transform: "scaleX(-1)" } : { left: TABLET_SVG_LEFT_PX }),
           width: TABLET_PANEL_W,
           height: TABLET_PANEL_H,
         }}
@@ -179,7 +181,9 @@ export function LearnFeaturedCoursesPanel({
         fill="none"
         className="pointer-events-none absolute top-0 z-0 hidden h-[646px] lg:block"
         style={{
-          left: DESKTOP_SVG_LEFT_PX,
+          ...(arabic
+            ? { right: DESKTOP_SVG_LEFT_PX, transform: "scaleX(-1)" }
+            : { left: DESKTOP_SVG_LEFT_PX }),
           width: `calc(100% - ${DESKTOP_SVG_LEFT_PX}px + ${DESKTOP_CURVE_HIDE_PX}px)`,
           height: DESKTOP_PANEL_H,
         }}
@@ -190,7 +194,11 @@ export function LearnFeaturedCoursesPanel({
       </svg>
 
       <div
-        className="absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-[743px]:pt-[136px] max-[743px]:pb-[50px] max-[743px]:pl-[30px] min-[744px]:max-lg:justify-end min-[744px]:max-lg:pb-[41px] min-[744px]:max-lg:pl-[48px] lg:pt-[116px] lg:pb-[42px] lg:pl-[81px]"
+        className={`absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-[743px]:pt-[136px] max-[743px]:pb-[50px] min-[744px]:max-lg:justify-end min-[744px]:max-lg:pb-[41px] lg:pt-[116px] lg:pb-[42px] ${
+          arabic
+            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[48px] lg:pr-[81px]"
+            : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[48px] lg:pl-[81px]"
+        }`}
       >
         <div
           ref={scrollAreaRef}
@@ -199,12 +207,15 @@ export function LearnFeaturedCoursesPanel({
             minHeight: cardH,
             clipPath: isLgUp
               ? "inset(-200px 0 -200px 0)"
-              : "inset(-200px -100vw -200px 0)",
+              : arabic
+                ? "inset(-200px 0 -200px -100vw)"
+                : "inset(-200px -100vw -200px 0)",
             ...cardSwiperStyle,
           }}
         >
           <Swiper
-            dir="ltr"
+            key={arabic ? "rtl" : "ltr"}
+            dir={arabic ? "rtl" : "ltr"}
             modules={[Mousewheel]}
             {...learnCarouselSwiperBehavior}
             spaceBetween={cardGap}
@@ -250,7 +261,12 @@ export function LearnFeaturedCoursesPanel({
 
       <div className="pointer-events-none absolute left-0 top-0 z-30 w-full min-w-0">
         <div
-          className="pointer-events-auto absolute inline-flex w-fit flex-row items-center gap-[11px] max-[743px]:left-[30px] max-[743px]:top-[30px] min-[744px]:max-lg:left-[61px] min-[744px]:max-lg:top-[20px] min-[744px]:max-lg:h-[41px] min-[744px]:max-lg:gap-[29px] lg:left-[57px] lg:top-[10px] lg:gap-[30px]"
+          className={`pointer-events-auto absolute inline-flex w-fit items-center gap-[11px] max-[743px]:top-[30px] min-[744px]:max-lg:top-[20px] min-[744px]:max-lg:h-[41px] min-[744px]:max-lg:gap-[29px] lg:top-[10px] lg:gap-[30px] ${
+            arabic
+              ? "flex-row-reverse max-[743px]:right-[30px] min-[744px]:max-lg:right-[61px] lg:right-[57px]"
+              : "flex-row max-[743px]:left-[30px] min-[744px]:max-lg:left-[61px] lg:left-[57px]"
+          }`}
+          dir="ltr"
         >
           <h1
             className="m-0 flex w-fit items-center uppercase leading-[120%] text-[color:var(--Black,#000)] min-[744px]:max-lg:h-[41px] min-[744px]:max-lg:leading-none"
@@ -282,7 +298,7 @@ export function LearnFeaturedCoursesPanel({
               viewBox="0 0 48 48"
               fill="none"
               aria-hidden
-              className="block size-[28px] min-[744px]:max-lg:size-[41px] lg:size-full"
+              className={`block size-[28px] min-[744px]:max-lg:size-[41px] lg:size-full ${arabic ? "scale-x-[-1]" : ""}`}
             >
               <path
                 d="M24 47C36.7025 47 47 36.7025 47 24C47 11.2975 36.7025 1 24 1C11.2975 1 1 11.2975 1 24C1 36.7025 11.2975 47 24 47Z"

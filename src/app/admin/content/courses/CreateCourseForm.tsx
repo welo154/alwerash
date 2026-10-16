@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
 import { adminCreateCourse, adminListTracks, adminListMentors } from "@/server/content/admin.service";
 import { parseRequirementLines } from "@/server/content/course-requirements-sql";
+import { ArabicNameField } from "@/app/admin/content/components/ArabicNameField";
 
 type TrackItem = Awaited<ReturnType<typeof adminListTracks>>[number];
 type MentorItem = Awaited<ReturnType<typeof adminListMentors>>[number];
@@ -22,10 +23,12 @@ export async function CreateCourseForm() {
       trackId: trackId || undefined,
       mentorId: mentorId || undefined,
       title,
+      titleAr: String(formData.get("titleAr") ?? ""),
       summary: String(formData.get("summary") ?? "").trim() || undefined,
       requirements: parseRequirementLines(String(formData.get("requirements") ?? "")),
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
       instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
+      instructorNameAr: String(formData.get("instructorNameAr") ?? ""),
       instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
@@ -65,7 +68,7 @@ export async function CreateCourseForm() {
         <p className="mt-1 text-xs text-slate-500">Assign a mentor from the list; their name and photo will be used for this course.</p>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
+        <label className="mb-1 block text-sm font-medium text-slate-700">English title</label>
         <input
           name="title"
           placeholder="Course title"
@@ -73,6 +76,7 @@ export async function CreateCourseForm() {
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
+      <ArabicNameField label="Arabic title" placeholder="اسم الدورة بالعربية" />
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
         <input
@@ -83,13 +87,14 @@ export async function CreateCourseForm() {
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name</label>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name (English)</label>
         <input
           name="instructorName"
           placeholder="e.g. Ahmed Radwan"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
+      <ArabicNameField name="instructorNameAr" label="Instructor name (Arabic)" placeholder="اسم المدرّس بالعربية" />
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Instructor photo URL</label>
         <input

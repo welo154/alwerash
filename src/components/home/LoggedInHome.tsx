@@ -9,6 +9,7 @@ import type { WeeklyActivitySummary } from "@/lib/learning-activity";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { Tr } from "@/components/i18n/Tr";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -98,7 +99,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                WELCOME BACK,{" "}
+                <Tr>WELCOME BACK,</Tr>{" "}
               </span>
               <span
                 style={{
@@ -145,7 +146,7 @@ export function LoggedInHome({
                   textDecorationSkipInk: "auto",
                 }}
               >
-                Edit
+                <Tr>Edit</Tr>
               </Link>
             </p>
           </div>
@@ -211,7 +212,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                WELCOME BACK,{" "}
+                <Tr>WELCOME BACK,</Tr>{" "}
               </span>
               <span
                 style={{
@@ -258,7 +259,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                Edit
+                <Tr>Edit</Tr>
               </Link>
             </p>
           </div>
@@ -307,7 +308,7 @@ export function LoggedInHome({
                   fontVariationSettings: '"wght" 400',
                 }}
               >
-                WELCOME BACK,{" "}
+                <Tr>WELCOME BACK,</Tr>{" "}
               </span>
               <span
                 style={{
@@ -357,7 +358,7 @@ export function LoggedInHome({
                   fontVariationSettings: '"wght" 400',
                 }}
               >
-                Edit
+                <Tr>Edit</Tr>
               </Link>
             </p>
           </div>
@@ -388,7 +389,7 @@ export function LoggedInHome({
                 lineHeight: "120%",
               }}
             >
-              CONTINUE{" "}
+              <Tr>CONTINUE</Tr>{" "}
             </span>
             <span
               style={{
@@ -400,7 +401,7 @@ export function LoggedInHome({
                 lineHeight: "120%",
               }}
             >
-              LEARNING
+              <Tr>LEARNING</Tr>
             </span>
           </h2>
         </div>

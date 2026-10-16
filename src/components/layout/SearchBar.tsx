@@ -3,10 +3,17 @@
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { useT } from "@/components/i18n/Tr";
+import { LocalizedText } from "@/components/i18n/LocalizedText";
 
 type SearchResult = {
-  tracks: { id: string; title: string; slug: string }[];
-  courses: { id: string; title: string; track: { slug: string; title: string } | null }[];
+  tracks: { id: string; title: string; titleAr?: string | null; slug: string }[];
+  courses: {
+    id: string;
+    title: string;
+    titleAr?: string | null;
+    track: { slug: string; title: string; titleAr?: string | null } | null;
+  }[];
 };
 
 function SearchIcon({ className }: { className?: string }) {
@@ -60,6 +67,7 @@ export function SearchBar({
   layout = "mobile",
   tabletSearch = "home",
 }: SearchBarProps) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [open, setOpen] = useState(false);
@@ -155,7 +163,7 @@ export function SearchBar({
         }}
       >
         <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
-          Search for courses
+          {t("Search for courses")}
         </label>
         <div
           className="flex shrink-0 items-center justify-center"
@@ -182,7 +190,7 @@ export function SearchBar({
             ref={inputRef}
             id={inputId}
             type="search"
-            placeholder="Search for courses"
+            placeholder={t("Search for courses")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => query.trim() && setOpen(true)}
@@ -200,7 +208,7 @@ export function SearchBar({
               fontWeight: 400,
               lineHeight: "19.6px",
             }}
-            aria-label="Search for courses"
+            aria-label={t("Search for courses")}
             role="combobox"
             aria-expanded={showDropdown}
             aria-controls={listboxId}
@@ -232,7 +240,7 @@ export function SearchBar({
                     className="block px-3 py-2 text-sm text-slate-800 hover:bg-blue-50"
                     onClick={() => setOpen(false)}
                   >
-                    {track.title}
+                    <LocalizedText en={track.title} ar={track.titleAr} />
                   </Link>
                 ))}
                 {results.courses.map((course) => (
@@ -242,7 +250,7 @@ export function SearchBar({
                     className="block px-3 py-2 text-sm text-slate-800 hover:bg-blue-50"
                     onClick={() => setOpen(false)}
                   >
-                    {course.title}
+                    <LocalizedText en={course.title} ar={course.titleAr} />
                   </Link>
                 ))}
               </div>
@@ -255,24 +263,32 @@ export function SearchBar({
 
   if (variant === "toolbar") {
     return (
-      <div
-        ref={containerRef}
-        className="relative flex h-10 w-full min-w-0 items-center justify-center"
-      >
+      <div ref={containerRef} className="relative shrink-0">
         <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
-          Search for courses
+          {t("Search for courses")}
         </label>
-        <div className="relative min-w-0 flex-1">
+        <div
+          className="relative flex items-center justify-center bg-white"
+          style={{
+            width: 350,
+            height: 40,
+            padding: "0 12px",
+            gap: 10,
+            borderRadius: 20,
+            border: "0.3px solid rgb(0 0 0 / 40%)",
+            background: "#FFF",
+            boxSizing: "border-box",
+          }}
+        >
           <input
             id={inputId}
             type="search"
-            placeholder="Search for courses"
+            placeholder={t("Search for courses")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => query.trim() && setOpen(true)}
-            className="h-10 w-full bg-white px-3 py-2 text-sm font-medium text-black outline-none placeholder:text-gray-500 focus:ring-2 focus:ring-black/20"
-            style={{ borderRadius: "8px", border: "1px solid #000", background: "#FFF" }}
-            aria-label="Search for courses"
+            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-black outline-none placeholder:text-gray-500"
+            aria-label={t("Search for courses")}
             role="combobox"
             aria-expanded={showDropdown}
             aria-controls={listboxId}
@@ -316,7 +332,7 @@ export function SearchBar({
                             className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                             onClick={() => setOpen(false)}
                           >
-                            {track.title}
+                            <LocalizedText en={track.title} ar={track.titleAr} />
                           </Link>
                         </li>
                       ))}
@@ -336,9 +352,13 @@ export function SearchBar({
                             className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                             onClick={() => setOpen(false)}
                           >
-                            <span className="font-medium">{course.title}</span>
+                            <span className="font-medium">
+                              <LocalizedText en={course.title} ar={course.titleAr} />
+                            </span>
                             {course.track && (
-                              <span className="ml-2 text-slate-400">· {course.track.title}</span>
+                              <span className="ml-2 text-slate-400">
+                                · <LocalizedText en={course.track.title} ar={course.track.titleAr} />
+                              </span>
                             )}
                           </Link>
                         </li>
@@ -357,7 +377,7 @@ export function SearchBar({
   return (
     <div ref={containerRef} className="relative flex w-full flex-1">
       <label htmlFor={inputId} className="sr-only" suppressHydrationWarning>
-          Search for courses
+          {t("Search for courses")}
         </label>
       <div className="relative w-full">
         <span className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500">
@@ -366,12 +386,12 @@ export function SearchBar({
         <input
           id={inputId}
           type="search"
-          placeholder="Search for courses"
+          placeholder={t("Search for courses")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.trim() && setOpen(true)}
           className="w-full rounded-full border-0 bg-white py-2 pl-11 pr-10 text-sm font-medium text-black outline-none transition-all placeholder:text-gray-500 focus:ring-2 focus:ring-yellow-400"
-          aria-label="Search for courses"
+          aria-label={t("Search for courses")}
           role="combobox"
           aria-expanded={showDropdown}
           aria-controls={listboxId}
@@ -416,7 +436,7 @@ export function SearchBar({
                           className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                           onClick={() => setOpen(false)}
                         >
-                          {track.title}
+                          <LocalizedText en={track.title} ar={track.titleAr} />
                         </Link>
                       </li>
                     ))}
@@ -436,9 +456,13 @@ export function SearchBar({
                           className="block px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none"
                           onClick={() => setOpen(false)}
                         >
-                          <span className="font-medium">{course.title}</span>
+                          <span className="font-medium">
+                            <LocalizedText en={course.title} ar={course.titleAr} />
+                          </span>
                           {course.track && (
-                            <span className="ml-2 text-slate-400">· {course.track.title}</span>
+                            <span className="ml-2 text-slate-400">
+                              · <LocalizedText en={course.track.title} ar={course.track.titleAr} />
+                            </span>
                           )}
                         </Link>
                       </li>

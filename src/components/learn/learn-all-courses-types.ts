@@ -2,8 +2,11 @@ export type LearnAllCourseItem = {
   id: string;
   href: string;
   title: string;
+  titleAr?: string | null;
   authorLabel: string;
+  authorLabelAr?: string | null;
   tagPrimary: string;
+  typeLabel?: string | null;
   coverImageSrc: string | null;
   trackSlug: string | null;
   rating: number | null;

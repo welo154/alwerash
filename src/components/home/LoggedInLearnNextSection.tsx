@@ -6,6 +6,8 @@ import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 
 import { CatalogShowcaseCard } from "@/components/cards";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useT } from "@/components/i18n/Tr";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 
 const pangeaFont =
@@ -79,6 +81,8 @@ function HeaderArrowIcon() {
 }
 
 export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: LandingShowcaseSlide[] }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const cardsSwiperRef = useRef<SwiperType | null>(null);
   const [cardsAtEnd, setCardsAtEnd] = useState(false);
   const [cardsAtBeginning, setCardsAtBeginning] = useState(true);
@@ -92,7 +96,10 @@ export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: L
   return (
     <section className="mt-[88px] w-full bg-white py-[38px]" aria-label="What to learn next">
       <div className="mx-auto w-full max-w-[1339px]">
-        <div className="flex items-center gap-[30px]">
+        <div
+          dir="ltr"
+          className={`flex items-center gap-[30px] ${arabic ? "w-full flex-row-reverse justify-start" : ""}`}
+        >
           <h2
             className="m-0 uppercase"
             style={{
@@ -105,12 +112,14 @@ export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: L
               fontVariationSettings: '"wght" 400',
             }}
           >
-            WHAT TO LEARN NEXT
+            {t("WHAT TO LEARN NEXT")}
           </h2>
-          <HeaderArrowIcon />
+          <span className={`inline-flex ${arabic ? "scale-x-[-1]" : ""}`}>
+            <HeaderArrowIcon />
+          </span>
         </div>
         <p
-          className="mt-[6px] m-0"
+          className={`mt-[6px] m-0 ${arabic ? "text-right" : ""}`}
           style={{
             color: "#000",
             fontFamily: pangeaFont,
@@ -121,13 +130,14 @@ export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: L
             fontVariationSettings: '"wght" 400',
           }}
         >
-          Recommended for you
+          {t("Recommended for you")}
         </p>
       </div>
 
-      <div className="relative left-1/2 mt-[36px] w-screen -translate-x-1/2 overflow-hidden pl-[116px] pr-[88px]">
+      <div className={`relative left-1/2 mt-[36px] w-screen -translate-x-1/2 overflow-hidden ${arabic ? "pl-[88px] pr-[116px]" : "pl-[116px] pr-[88px]"}`}>
         <Swiper
-          dir="ltr"
+          key={arabic ? "rtl" : "ltr"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={30}
           slidesPerGroup={1}
@@ -162,15 +172,16 @@ export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: L
         <button
           type="button"
           className="absolute top-1/2 left-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-          aria-label="Previous tracks"
-          disabled={cardsAtBeginning}
+          aria-label={arabic ? "Next tracks" : "Previous tracks"}
+          disabled={arabic ? cardsAtEnd : cardsAtBeginning}
           suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             const swiper = cardsSwiperRef.current;
             if (!swiper) return;
-            swiper.slidePrev(CARDS_SLIDE_MS);
+            if (arabic) swiper.slideNext(CARDS_SLIDE_MS);
+            else swiper.slidePrev(CARDS_SLIDE_MS);
           }}
         >
           <CardsPrevIcon />
@@ -179,15 +190,16 @@ export function LoggedInLearnNextSection({ showcaseSlides }: { showcaseSlides: L
         <button
           type="button"
           className="absolute top-1/2 right-6 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-          aria-label="Next tracks"
-          disabled={cardsAtEnd}
+          aria-label={arabic ? "Previous tracks" : "Next tracks"}
+          disabled={arabic ? cardsAtBeginning : cardsAtEnd}
           suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             const swiper = cardsSwiperRef.current;
             if (!swiper) return;
-            swiper.slideNext(CARDS_SLIDE_MS);
+            if (arabic) swiper.slidePrev(CARDS_SLIDE_MS);
+            else swiper.slideNext(CARDS_SLIDE_MS);
           }}
         >
           <CardsNextIcon />

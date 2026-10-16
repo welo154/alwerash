@@ -388,6 +388,7 @@ export function CatalogShowcaseCard({
     <>
       <div
         ref={cardShellRef}
+        dir="ltr"
         className={shellClass}
         style={{ height: SHOWCASE_CARD_H }}
         {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}

@@ -56,6 +56,7 @@ export async function adminCreateCourseAssignment(input: unknown) {
       data: {
         courseId: data.courseId,
         title: data.title,
+        titleAr: data.titleAr,
         instructions: data.instructions,
         rubricJson: data.rubricJson as Prisma.InputJsonValue | undefined,
         published: data.published ?? false,
@@ -82,6 +83,7 @@ export async function adminUpdateCourseAssignment(courseId: string, input: unkno
     where: { id: assignment.id },
     data: {
       ...(data.title !== undefined ? { title: data.title } : {}),
+      ...(data.titleAr !== undefined ? { titleAr: data.titleAr } : {}),
       ...(data.instructions !== undefined ? { instructions: data.instructions } : {}),
       ...(data.rubricJson !== undefined
         ? { rubricJson: data.rubricJson as Prisma.InputJsonValue }

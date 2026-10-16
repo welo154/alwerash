@@ -221,9 +221,11 @@ export async function getCourseForLearning(courseId: string) {
     select: {
       id: true,
       title: true,
+      titleAr: true,
       summary: true,
       coverImage: true,
       instructorName: true,
+      instructorNameAr: true,
       published: true,
       track: { select: { id: true, published: true, slug: true, title: true } },
       instructors: {
@@ -231,7 +233,7 @@ export async function getCourseForLearning(courseId: string) {
         take: 1,
         select: {
           instructor: {
-            select: { name: true, profession: true },
+            select: { name: true, nameAr: true, profession: true },
           },
         },
       },
@@ -240,6 +242,7 @@ export async function getCourseForLearning(courseId: string) {
         select: {
           id: true,
           title: true,
+          titleAr: true,
           order: true,
           lessons: {
             where: { published: true },
@@ -247,6 +250,7 @@ export async function getCourseForLearning(courseId: string) {
             select: {
               id: true,
               title: true,
+              titleAr: true,
               type: true,
               order: true,
               video: { select: { lessonId: true } },
@@ -264,10 +268,12 @@ export async function getCourseForLearning(courseId: string) {
   const modules = (course.modules ?? []).map((m) => ({
     id: m.id,
     title: m.title,
+    titleAr: m.titleAr,
     order: m.order,
     lessons: (m.lessons ?? []).map((l) => ({
       id: l.id,
       title: l.title,
+      titleAr: l.titleAr,
       type: String(l.type),
       order: l.order,
       video: l.video ? { hasVideo: true } : null,
@@ -277,6 +283,7 @@ export async function getCourseForLearning(courseId: string) {
   return {
     id: course.id,
     title: course.title,
+    titleAr: course.titleAr,
     summary: course.summary,
     coverImage: resolveCourseCoverImage({
       coverImage: course.coverImage,
@@ -288,6 +295,10 @@ export async function getCourseForLearning(courseId: string) {
     instructorName:
       course.instructors[0]?.instructor.name?.trim() ||
       course.instructorName?.trim() ||
+      null,
+    instructorNameAr:
+      course.instructors[0]?.instructor.nameAr?.trim() ||
+      course.instructorNameAr?.trim() ||
       null,
     instructorProfession: course.instructors[0]?.instructor.profession?.trim() || null,
     modules,

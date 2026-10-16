@@ -6,6 +6,7 @@ import "swiper/css";
 
 import Link from "next/link";
 import { CatalogShowcaseCard, catalogShowcasePropsFromCourse } from "@/components/cards";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { CourseModal } from "./CourseModal";
 import type { CourseForCard } from "@/server/content/public.service";
 
@@ -146,6 +147,7 @@ type Props = {
 };
 
 export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Props) {
+  const arabic = useArabicLayout();
   const [modalCourse, setModalCourse] = useState<CourseForCard | null>(null);
   const fieldList = fields.length > 0 ? fields : FIELDS_FALLBACK;
   const newDisplay = newCourses.length > 0 ? newCourses : STATIC_NEW_CARDS;
@@ -183,11 +185,10 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
             <div className="min-w-0 flex-1 space-y-12">
               {/* NEW: yellow background, "New" label on the left, horizontal scroll cards */}
               <div
-                className="flex flex-row overflow-hidden rounded-[24px] p-4 md:gap-6 md:p-6"
+                className={`flex overflow-hidden rounded-[24px] p-4 md:gap-6 md:p-6 ${arabic ? "flex-row-reverse" : "flex-row"}`}
                 style={{ backgroundColor: "#FFD700" }}
               >
-                {/* Left: vertical "New" label - black, 5xl */}
-                <div className="flex min-w-[100px] shrink-0 items-center justify-center border-black/10 pr-2 sm:min-w-[120px] md:min-w-[140px] md:border-r md:pr-4">
+                <div className={`flex min-w-[100px] shrink-0 items-center justify-center border-black/10 sm:min-w-[120px] md:min-w-[140px] ${arabic ? "pl-2 md:border-l md:pl-4" : "pr-2 md:border-r md:pr-4"}`}>
                   <h2
                     className="select-none text-5xl font-black uppercase leading-none tracking-tighter text-black"
                     style={{
@@ -199,7 +200,7 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                     New
                   </h2>
                 </div>
-                <div className="flex flex-1 items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
+                <div dir={arabic ? "rtl" : "ltr"} className="flex flex-1 items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
                   {newDisplay.map((course) => (
                     <CatalogShowcaseCard
                       key={course.id}
@@ -215,7 +216,7 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
 
               {/* MOST PLAYED: grid with pagination */}
               <div>
-                <h3 className="mb-4 text-lg font-bold uppercase tracking-tight text-slate-900">
+                <h3 className={`mb-4 text-lg font-bold uppercase tracking-tight text-slate-900 ${arabic ? "text-right" : ""}`}>
                   MOST PLAYED
                 </h3>
                 {mostPlayedDisplay.length === 0 ? (
@@ -225,6 +226,8 @@ export function HomeCoursesSection({ newCourses, mostPlayedCourses, fields }: Pr
                 ) : (
                   <div className="relative w-full overflow-hidden">
                     <Swiper
+                      key={arabic ? "rtl" : "ltr"}
+                      dir={arabic ? "rtl" : "ltr"}
                       slidesPerView="auto"
                       spaceBetween={30}
                       grabCursor

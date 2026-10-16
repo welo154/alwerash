@@ -6,6 +6,7 @@ import { useState } from "react";
 type AssignmentData = {
   id: string;
   title: string;
+  titleAr?: string | null;
   instructions: string | null;
   published: boolean;
   _count: { submissions: number };
@@ -32,6 +33,7 @@ export function CourseAssignmentEditor({
     setError(null);
     const fd = new FormData(e.currentTarget);
     const title = String(fd.get("title") ?? "").trim();
+    const titleAr = String(fd.get("titleAr") ?? "").trim();
     const instructions = String(fd.get("instructions") ?? "").trim() || undefined;
     const published = fd.get("published") === "on";
 
@@ -40,7 +42,7 @@ export function CourseAssignmentEditor({
       const res = await fetch(`/api/admin/courses/${courseId}/assignment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions, published }),
+        body: JSON.stringify({ title, titleAr, instructions, published }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -63,6 +65,7 @@ export function CourseAssignmentEditor({
     setError(null);
     const fd = new FormData(e.currentTarget);
     const title = String(fd.get("title") ?? "").trim();
+    const titleAr = String(fd.get("titleAr") ?? "").trim();
     const instructions = String(fd.get("instructions") ?? "").trim() || undefined;
     const published = fd.get("published") === "on";
 
@@ -71,7 +74,7 @@ export function CourseAssignmentEditor({
       const res = await fetch(`/api/admin/courses/${courseId}/assignment`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions, published }),
+        body: JSON.stringify({ title, titleAr, instructions, published }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -120,6 +123,14 @@ export function CourseAssignmentEditor({
             name="title"
             defaultValue={assignment.title}
             required
+            placeholder="English title"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            name="titleAr"
+            defaultValue={assignment.titleAr ?? ""}
+            placeholder="العنوان بالعربية"
+            dir="rtl"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <textarea
@@ -158,8 +169,14 @@ export function CourseAssignmentEditor({
         <form onSubmit={onCreate} className="mt-4 space-y-3">
           <input
             name="title"
-            placeholder="Assignment title"
+            placeholder="Assignment title (English)"
             required
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            name="titleAr"
+            placeholder="عنوان التكليف بالعربية"
+            dir="rtl"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <textarea

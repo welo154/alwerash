@@ -16,6 +16,7 @@ export function AddMentorForm() {
     setSubmitting(true);
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
+    const nameAr = (form.elements.namedItem("nameAr") as HTMLInputElement).value.trim() || undefined;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const certificateName =
@@ -32,7 +33,7 @@ export function AddMentorForm() {
       const res = await fetch("/api/admin/mentors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, certificateName, aboutMe }),
+        body: JSON.stringify({ name, nameAr, email, password, certificateName, aboutMe }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -73,11 +74,20 @@ export function AddMentorForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+        <label className="mb-1 block text-sm font-medium text-slate-700">English name</label>
         <input
           name="name"
           placeholder="Mentor full name"
           required
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">Arabic name</label>
+        <input
+          name="nameAr"
+          placeholder="اسم المدرّس بالعربية"
+          dir="rtl"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>

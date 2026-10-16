@@ -38,9 +38,11 @@ export function InstructorsAdminClient({
     const form = e.currentTarget;
     const email = String(new FormData(form).get("email") ?? "").trim();
     const name = String(new FormData(form).get("name") ?? "").trim() || undefined;
+    const nameAr = String(new FormData(form).get("nameAr") ?? "").trim() || undefined;
     const country = String(new FormData(form).get("country") ?? "").trim().toUpperCase() || undefined;
-    const body: { email: string; name?: string; country?: string } = { email };
+    const body: { email: string; name?: string; nameAr?: string; country?: string } = { email };
     if (name) body.name = name;
+    if (nameAr) body.nameAr = nameAr;
     if (country) {
       if (country.length !== 2) {
         setCreateError("Country must be a 2-letter code (e.g. EG) or leave blank.");
@@ -125,10 +127,20 @@ export function InstructorsAdminClient({
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Name (optional)</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">English name (optional)</label>
             <input
               name="name"
               type="text"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Arabic name (optional)</label>
+            <input
+              name="nameAr"
+              type="text"
+              dir="rtl"
+              placeholder="الاسم بالعربية"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>

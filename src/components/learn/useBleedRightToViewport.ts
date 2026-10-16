@@ -23,8 +23,11 @@ export function useBleedRightToViewport(
     if (!el) return;
 
     const update = () => {
-      const left = el.getBoundingClientRect().left;
-      setWidth(Math.max(0, Math.round(window.innerWidth - left)));
+      const rect = el.getBoundingClientRect();
+      const rtl = getComputedStyle(el).direction === "rtl";
+      setWidth(
+        Math.max(0, Math.round(rtl ? rect.right : window.innerWidth - rect.left))
+      );
     };
 
     update();

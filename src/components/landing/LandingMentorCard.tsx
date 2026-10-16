@@ -83,6 +83,7 @@ export function LandingMentorCard({
 
   const card = (
     <article
+      dir="ltr"
       className={`group relative max-w-full shrink-0 overflow-hidden${fillWidth ? " mx-auto w-full" : isMobile ? " mx-auto" : " ml-0"}`}
       style={sizeStyle}
       aria-hidden={isInteractive ? true : undefined}

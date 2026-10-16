@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/server/auth/require";
 import { adminCreateTrack } from "@/server/content/admin.service";
 import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
+import { ArabicNameField } from "@/app/admin/content/components/ArabicNameField";
 
 export async function CreateTrackForm() {
   await requireRole(["ADMIN"]);
@@ -16,6 +17,7 @@ export async function CreateTrackForm() {
     };
     await adminCreateTrack({
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       slug: String(formData.get("slug") ?? "").trim().toLowerCase(),
       description: String(formData.get("description") ?? "").trim() || undefined,
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
@@ -33,7 +35,7 @@ export async function CreateTrackForm() {
     <form action={create} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">English title</label>
           <input
             name="title"
             placeholder="e.g. Graphic Design"
@@ -51,6 +53,7 @@ export async function CreateTrackForm() {
           />
         </div>
       </div>
+      <ArabicNameField label="Arabic title" placeholder="اسم المسار بالعربية" />
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
         <input

@@ -23,7 +23,10 @@ export type ContinueLearningCardDto = {
   lessonTitle: string;
   lessonNumber: number;
   courseTitle: string;
+  courseTitleAr?: string | null;
   instructorName: string;
+  instructorNameAr?: string | null;
+  lessonTitleAr?: string | null;
   durationLabel: string;
 };
 
@@ -83,6 +86,18 @@ function findLessonMeta(
   return null;
 }
 
+function lessonArabicTitle(
+  course: { modules: Array<{ lessons: Array<{ id: string; titleAr?: string | null }> }> },
+  lessonId: string
+): string | null {
+  for (const mod of course.modules) {
+    for (const lesson of mod.lessons) {
+      if (lesson.id === lessonId) return lesson.titleAr ?? null;
+    }
+  }
+  return null;
+}
+
 /**
  * Up to `limit` (default 3) published courses where the user has any lesson progress,
  * most recently touched first, each pointing at the first incomplete lesson in course order.
@@ -105,8 +120,10 @@ export async function getContinueLearningCardsForUser(
                 select: {
                   id: true,
                   title: true,
+                  titleAr: true,
                   published: true,
                   instructorName: true,
+                  instructorNameAr: true,
                   modules: {
                     orderBy: { order: "asc" },
                     select: {
@@ -116,7 +133,7 @@ export async function getContinueLearningCardsForUser(
                       lessons: {
                         where: { published: true },
                         orderBy: { order: "asc" },
-                        select: { id: true, title: true, type: true, order: true },
+                        select: { id: true, title: true, titleAr: true, type: true, order: true },
                       },
                     },
                   },
@@ -190,7 +207,10 @@ export async function getContinueLearningCardsForUser(
       lessonTitle: meta.title,
       lessonNumber: orderedIds.indexOf(nextLessonId) + 1,
       courseTitle: course.title.trim(),
+      courseTitleAr: course.titleAr,
       instructorName: who,
+      instructorNameAr: course.instructorNameAr,
+      lessonTitleAr: lessonArabicTitle(course, nextLessonId),
       durationLabel: `${mins}mins`,
     });
   }
