@@ -5,7 +5,9 @@ import Link from "next/link";
 import { UserMenu } from "./UserMenu";
 import { SearchBar } from "./SearchBar";
 import { CoursesMegaMenuPanel } from "./CoursesMegaMenu";
+import { HeaderLanguageToggle } from "./HeaderLanguageToggle";
 import { MobileSiteNavBar } from "./MobileSiteNavBar";
+import { useT } from "@/components/i18n/Tr";
 
 export type LoggedInAppHeaderProps = {
   user?: { name?: string | null; email?: string | null; image?: string | null } | null;
@@ -27,6 +29,7 @@ export function LoggedInAppHeader({
   flushBottom = false,
 }: LoggedInAppHeaderProps) {
   const isGuest = !user;
+  const t = useT();
   const homeHref = isGuest ? "/" : "/home";
 
   return (
@@ -121,14 +124,14 @@ export function LoggedInAppHeader({
           className="absolute inset-0 z-40 flex min-w-0 items-center justify-between pl-[280px] pr-[55px] text-white"
           style={{ fontFamily: pangeaFont }}
         >
-          <div className="flex min-w-0 items-center">
+          <div className="flex shrink-0 items-center">
             <nav className="hidden items-center gap-[30px] text-[18px] font-normal leading-normal text-white lg:flex">
               <div className="group relative">
                 <Link
                   href="/course"
-                  className="inline-flex items-center gap-0 text-[18px] font-normal leading-[33px] text-white hover:opacity-90"
+                  className="inline-flex w-[82px] min-w-[82px] max-w-[82px] shrink-0 items-center gap-0 whitespace-nowrap text-[18px] font-normal leading-[33px] text-white hover:opacity-90"
                 >
-                  Courses
+                  {t("Courses")}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -150,37 +153,38 @@ export function LoggedInAppHeader({
                   <CoursesMegaMenuPanel />
                 </div>
               </div>
-              <Link href="/library" className="text-white hover:opacity-90">
-                Library
+              <Link href="/library" className="inline-flex w-[54px] min-w-[54px] max-w-[54px] shrink-0 items-center whitespace-nowrap text-white hover:opacity-90">
+                {t("Library")}
               </Link>
-              <Link href="/events" className="text-white hover:opacity-90">
-                Events
+              <Link href="/events" className="inline-flex w-[53px] min-w-[53px] max-w-[53px] shrink-0 items-center whitespace-nowrap text-white hover:opacity-90">
+                {t("Events")}
               </Link>
             </nav>
 
-            <div className="ml-[30px] hidden h-10 w-[350px] shrink-0 items-center justify-center px-3 lg:flex">
+            <div className="ml-[30px] hidden shrink-0 lg:flex">
               <SearchBar variant="toolbar" />
             </div>
             <button
               type="button"
               aria-label="Search"
-              className="ml-[15px] hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 lg:flex"
+              className="ml-[15px] hidden h-10 w-10 shrink-0 items-center justify-center lg:flex"
             >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 42 42"
-              fill="none"
-              className="h-10 w-10"
-              aria-hidden
-            >
-              <path
-                d="M20.75 28.75L28.75 20.75M28.75 20.75L20.75 12.75M28.75 20.75H12.75M40.75 20.75C40.75 31.7957 31.7957 40.75 20.75 40.75C9.7043 40.75 0.75 31.7957 0.75 20.75C0.75 9.7043 9.7043 0.75 20.75 0.75C31.7957 0.75 40.75 9.7043 40.75 20.75Z"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 41 41"
+                fill="none"
+                aria-hidden
+              >
+                <path
+                  d="M20.25 12.25L28.25 20.25L20.25 28.25M28.25 20.25H12.25M40.25 20.25C40.25 31.2957 31.2957 40.25 20.25 40.25C9.2043 40.25 0.25 31.2957 0.25 20.25C0.25 9.2043 9.2043 0.25 20.25 0.25C31.2957 0.25 40.25 9.2043 40.25 20.25Z"
+                  stroke="var(--Black, #000)"
+                  strokeWidth="0.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </div>
 
@@ -189,16 +193,40 @@ export function LoggedInAppHeader({
               <>
                 <Link
                   href="/login"
-                  className="mr-[15px] inline-flex h-[36px] items-center justify-center rounded-md border border-white bg-transparent px-4 text-[18px] font-bold leading-none text-white hover:opacity-90"
+                  className="mr-[15px] inline-flex items-center justify-center bg-transparent text-[18px] font-bold leading-none text-white hover:opacity-90"
+                  style={{
+                    display: "inline-flex",
+                    height: 36,
+                    padding: "0 16px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 25,
+                    border: "0.3px solid rgb(0 0 0 / 40%)",
+                  }}
                 >
-                  Log in
+                  {t("Log in")}
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex h-[36px] items-center justify-center rounded-md border border-black bg-[#EA83F0] px-4 text-[18px] font-bold leading-none text-[#141413] hover:opacity-90"
+                  className="items-center justify-center whitespace-nowrap text-[18px] font-bold leading-none text-[#141413] hover:opacity-90"
+                  style={{
+                    display: "flex",
+                    width: 85,
+                    height: 36,
+                    padding: "0 16px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 25,
+                    border: "0.3px solid rgb(0 0 0 / 40%)",
+                    background: "var(--Purple, #EA83F0)",
+                    boxSizing: "border-box",
+                  }}
                 >
-                  Sign up
+                  {t("Sign up")}
                 </Link>
+                <span className="ml-[15px] inline-flex">
+                  <HeaderLanguageToggle tone="light" />
+                </span>
               </>
             ) : (
               <>
@@ -206,7 +234,7 @@ export function LoggedInAppHeader({
               href="/course"
               className="mr-[8px] hidden whitespace-nowrap text-[18px] font-normal leading-normal text-white hover:opacity-90 md:inline"
             >
-              My Learning
+              {t("My Learning")}
             </Link>
             <Link
               href="/course"
@@ -251,6 +279,9 @@ export function LoggedInAppHeader({
               </svg>
             </button>
             <UserMenu user={user!} theme="green" />
+            <span className="ml-[15px] inline-flex">
+              <HeaderLanguageToggle tone="light" />
+            </span>
               </>
             )}
           </div>

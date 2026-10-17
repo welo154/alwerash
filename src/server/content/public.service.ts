@@ -23,6 +23,7 @@ import { sqlGetLandingPopularMentorIds } from "./landing-popular-mentor-sql";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { getFreeLessonIds, isFreeLesson } from "@/lib/course-access";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { courseTypeBadgeLabel, courseTypeBadgeSelect } from "@/lib/content/course-type-badge";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
 import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
 import { sqlGetCourseRequirements } from "@/server/content/course-requirements-sql";
@@ -131,7 +132,9 @@ function publishedWhere(requirePublished: boolean): { published: true } | Record
 type TrackCourseRow = {
   id: string;
   title: string;
+  titleAr: string | null;
   instructorName: string | null;
+  instructorNameAr: string | null;
   coverImage: string | null;
   introVideoMuxPlaybackId: string | null;
   totalDurationMinutes: number | null;
@@ -158,10 +161,12 @@ const trackCourseSelect = {
     id: true,
     title: true,
     instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
     coverImage: true,
     introVideoMuxPlaybackId: true,
     totalDurationMinutes: true,
-    featuredMostPlayedOrder: true,
+    ...courseTypeBadgeSelect,
     modules: { select: { _count: { select: { lessons: true } } } },
   },
 };
@@ -183,8 +188,11 @@ function buildCourseTilesForTrack(
     id: course.id,
     href: `/course/${course.id}`,
     title: course.title,
+    titleAr: course.titleAr,
     authorLabel: course.instructorName?.trim() || "Instructor",
+    authorLabelAr: course.instructorNameAr,
     tagPrimary,
+    typeLabel: courseTypeBadgeLabel(course),
     coverImageSrc: effectiveCoverImage(
       course.coverImage,
       course.introVideoMuxPlaybackId,
@@ -273,8 +281,8 @@ async function fetchTracksWithCoursesFallback(
     ? `SELECT id, title, slug, description, "order" FROM tracks WHERE published = true ORDER BY "order" ASC, created_at ASC`
     : `SELECT id, title, slug, description, "order" FROM tracks ORDER BY "order" ASC, created_at ASC`;
   const courseSql = requirePublished
-    ? `SELECT id, title, instructor_name, cover_image, track_id FROM courses WHERE published = true ORDER BY created_at ASC`
-    : `SELECT id, title, instructor_name, cover_image, track_id FROM courses ORDER BY created_at ASC`;
+    ? `SELECT id, title, title_ar, instructor_name, instructor_name_ar, cover_image, track_id FROM courses WHERE published = true ORDER BY created_at ASC`
+    : `SELECT id, title, title_ar, instructor_name, instructor_name_ar, cover_image, track_id FROM courses ORDER BY created_at ASC`;
 
   const [trackRows, courseRows] = await Promise.all([
     prisma.$queryRawUnsafe<
@@ -284,7 +292,9 @@ async function fetchTracksWithCoursesFallback(
       {
         id: string;
         title: string;
+        title_ar: string | null;
         instructor_name: string | null;
+        instructor_name_ar: string | null;
         cover_image: string | null;
         track_id: string | null;
       }[]
@@ -298,7 +308,9 @@ async function fetchTracksWithCoursesFallback(
     list.push({
       id: course.id,
       title: course.title,
+      titleAr: course.title_ar,
       instructorName: course.instructor_name,
+      instructorNameAr: course.instructor_name_ar,
       coverImage: course.cover_image,
       introVideoMuxPlaybackId: null,
       totalDurationMinutes: null,
@@ -584,8 +596,10 @@ export async function publicGetTrackBySlug(slug: string) {
           coverImage: true,
           introVideoMuxPlaybackId: true,
           instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+          ...courseTypeBadgeSelect,
           rating: true,
-          featuredMostPlayedOrder: true,
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       },
@@ -612,8 +626,11 @@ export async function publicListTrackCoursesForTile(trackSlug: string): Promise<
     id: c.id,
     href: `/course/${c.id}`,
     title: c.title,
+    titleAr: c.titleAr,
     authorLabel: c.instructorName?.trim() || "Instructor",
+    authorLabelAr: c.instructorNameAr,
     tagPrimary: track.title.toUpperCase(),
+    typeLabel: courseTypeBadgeLabel(c),
     coverImageSrc: c.coverImage,
   }));
 }
@@ -627,6 +644,8 @@ export async function publicGetCourseById(courseId: string) {
       summary: true,
       coverImage: true,
       instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
       instructorImage: true,
       introVideoMuxPlaybackId: true,
       totalDurationMinutes: true,
@@ -641,11 +660,12 @@ export async function publicGetCourseById(courseId: string) {
         select: {
           id: true,
           title: true,
+          titleAr: true,
           order: true,
           lessons: {
             where: { published: true },
             orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-            select: { id: true, title: true, type: true, order: true },
+            select: { id: true, title: true, titleAr: true, type: true, order: true },
           },
         },
       },
@@ -782,9 +802,12 @@ async function getStudentCountsByCourseId(courseIds: string[]): Promise<Map<stri
 export type CourseForCard = {
   id: string;
   title: string;
+  titleAr?: string | null;
   summary: string | null;
   coverImage: string | null;
   instructorName: string | null;
+  instructorNameAr?: string | null;
+  typeLabel?: string | null;
   instructorImage: string | null;
   track: { title: string; slug: string } | null;
   lessonCount: number;
@@ -798,10 +821,19 @@ function mapCourseToCard(
   c: {
     id: string;
     title: string;
+    titleAr?: string | null;
     summary: string | null;
     coverImage: string | null;
     introVideoMuxPlaybackId?: string | null;
     instructorName: string | null;
+    instructorNameAr?: string | null;
+    tagNew?: boolean | null;
+    tagTopRated?: boolean | null;
+    tagDeepDive?: boolean | null;
+    tagBasics?: boolean | null;
+    tagGuided?: boolean | null;
+    featuredMostPlayedOrder?: number | null;
+    featuredTrendingOrder?: number | null;
     instructorImage: string | null;
     track: { title: string; slug: string } | null;
     modules: { _count: { lessons: number } }[];
@@ -815,9 +847,12 @@ function mapCourseToCard(
   return {
     id: c.id,
     title: c.title,
+    titleAr: c.titleAr ?? null,
     summary: c.summary,
     coverImage: effectiveCoverImage(c.coverImage, c.introVideoMuxPlaybackId, c.title, c.track?.slug),
     instructorName: c.instructorName,
+    instructorNameAr: c.instructorNameAr ?? null,
+    typeLabel: courseTypeBadgeLabel(c),
     instructorImage: c.instructorImage,
     track: c.track,
     lessonCount,
@@ -841,6 +876,9 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
         coverImage: true,
         introVideoMuxPlaybackId: true,
         instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+        ...courseTypeBadgeSelect,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         modules: { select: { _count: { select: { lessons: true } } } },
@@ -888,6 +926,9 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
         coverImage: true,
         introVideoMuxPlaybackId: true,
         instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+        ...courseTypeBadgeSelect,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         modules: { select: { _count: { select: { lessons: true } } } },
@@ -934,6 +975,9 @@ export async function publicListTrendingCourses(
         coverImage: true,
         introVideoMuxPlaybackId: true,
         instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+        ...courseTypeBadgeSelect,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         modules: { select: { _count: { select: { lessons: true } } } },
@@ -964,7 +1008,10 @@ const publishedCourseCardSelect = {
   coverImage: true,
   introVideoMuxPlaybackId: true,
   instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
   instructorImage: true,
+  ...courseTypeBadgeSelect,
   totalDurationMinutes: true,
   rating: true,
   comingSoon: true,
@@ -1054,6 +1101,9 @@ export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCar
         coverImage: true,
         introVideoMuxPlaybackId: true,
         instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+        ...courseTypeBadgeSelect,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         totalDurationMinutes: true,
@@ -1100,6 +1150,9 @@ export async function publicGetSimilarCourses(
         coverImage: true,
         introVideoMuxPlaybackId: true,
         instructorName: true,
+        instructorNameAr: true,
+        titleAr: true,
+        ...courseTypeBadgeSelect,
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         totalDurationMinutes: true,
@@ -1132,23 +1185,30 @@ export async function publicSearch(query: string, limit = 10) {
     prisma.track.findMany({
       where: {
         ...where,
-        title: { contains: q, mode: "insensitive" },
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { titleAr: { contains: q, mode: "insensitive" } },
+        ],
       },
       take: limit,
       orderBy: { title: "asc" },
-      select: { id: true, title: true, slug: true },
+      select: { id: true, title: true, titleAr: true, slug: true },
     }),
     prisma.course.findMany({
       where: {
         ...where,
-        title: { contains: q, mode: "insensitive" },
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { titleAr: { contains: q, mode: "insensitive" } },
+        ],
       },
       take: limit,
       orderBy: { title: "asc" },
       select: {
         id: true,
         title: true,
-        track: { select: { slug: true, title: true } },
+        titleAr: true,
+        track: { select: { slug: true, title: true, titleAr: true } },
       },
     }),
   ]);

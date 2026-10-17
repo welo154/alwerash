@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { LearnCourseTypeFilter } from "@/components/learn/learn-all-courses-types";
+import { COURSE_FILTER_ACTIONS } from "@/components/learn/course-filter-actions";
 import {
   LEARN_SIDEBAR_COURSE_FILTERS,
   LEARN_SIDEBAR_EXTRA_CATEGORIES,
@@ -15,18 +15,6 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 const pangeaFont = pangeaFontFamily;
 
 type OpenMenu = "courses" | "categories" | null;
-
-type CourseFilterAction = {
-  type?: LearnCourseTypeFilter;
-  scrollTargetId?: string;
-};
-
-const COURSE_FILTER_ACTIONS: Record<string, CourseFilterAction> = {
-  "All Couses": { type: "all", scrollTargetId: "all-courses" },
-  "Top Rated": { type: "topRated", scrollTargetId: "all-courses" },
-  "Deep Dive": { type: "deepDive", scrollTargetId: "all-courses" },
-  "Popular Courses": { scrollTargetId: "popular-classes" },
-};
 
 function FilterChevron({ open }: { open: boolean }) {
   return (

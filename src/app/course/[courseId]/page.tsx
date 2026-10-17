@@ -27,6 +27,7 @@ import {
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { CourseBreadcrumb } from "./CourseBreadcrumb";
+import { LocalizedText } from "@/components/i18n/LocalizedText";
 import { LandingEverythingInOneSection } from "@/components/landing/LandingEverythingInOneSection";
 import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
 
@@ -97,6 +98,7 @@ export default async function PublicCoursePage({
       <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[34px] min-[744px]:max-lg:pt-[100px] min-[744px]:max-lg:-mt-[75.6px]">
         <CourseBreadcrumb
           courseTitle={course.title}
+          courseTitleAr={course.titleAr}
           fontFamily={pangeaVar.style.fontFamily}
         />
       </div>
@@ -116,7 +118,7 @@ export default async function PublicCoursePage({
               lineHeight: "normal",
             }}
           >
-            {course.title}
+            <LocalizedText en={course.title} ar={course.titleAr} />
           </h1>
 
           {isComingSoon ? (
@@ -209,7 +211,7 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  {instructorName.toUpperCase()}
+                  <LocalizedText en={instructorName} ar={course.instructorNameAr} uppercase />
                 </p>
                 <p
                   className="m-0 text-[16px] min-[744px]:max-lg:text-[24px] lg:text-[24px]"
@@ -734,7 +736,7 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  {instructorName.toUpperCase()}
+                  <LocalizedText en={instructorName} ar={course.instructorNameAr} uppercase />
                 </p>
                 <p
                   className="m-0 text-[14px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px]"

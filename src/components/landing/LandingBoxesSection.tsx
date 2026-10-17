@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { CatalogShowcaseCard, CATALOG_SHOWCASE_CARD_H, CATALOG_SHOWCASE_CARD_W } from "@/components/cards";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import type { LandingShowcaseSlide } from "@/components/cards/catalog-showcase-map";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import "swiper/css";
@@ -142,12 +143,15 @@ function LandingTagMarqueeRow({
   onSelectTag: (tag: string) => void;
   className?: string;
 }) {
+  const arabic = useArabicLayout();
   const loopTags = useMemo(() => tagsForLoopRow(tags), [tags]);
   if (loopTags.length === 0) return null;
 
   return (
-    <div className={`${FULL_BLEED} overflow-hidden pl-6 sm:pl-8 ${className}`.trim()}>
+    <div className={`${FULL_BLEED} overflow-hidden ${arabic ? "pr-6 sm:pr-8" : "pl-6 sm:pl-8"} ${className}`.trim()}>
       <Swiper
+        key={arabic ? "rtl" : "ltr"}
+        dir={arabic ? "rtl" : "ltr"}
         {...TAG_SWIPER_BASE}
         loopAdditionalSlides={Math.max(tags.length * 2, 8)}
         autoplay={{ delay: autoplayDelayMs, disableOnInteraction: false, pauseOnMouseEnter: true }}
@@ -174,6 +178,7 @@ export function LandingBoxesSection({
   showcaseTagRow1?: string[];
   showcaseTagRow2?: string[];
 }) {
+  const arabic = useArabicLayout();
   const slides = showcaseSlides;
   const hasTagRows = showcaseTagRow1.length > 0 || showcaseTagRow2.length > 0;
   /** Row 1 only gets half the tracks — merge both rows so short rows still fill the viewport. */
@@ -233,7 +238,8 @@ export function LandingBoxesSection({
         style={{ minHeight: CATALOG_SHOWCASE_CARD_H, ...cardSwiperStyle }}
       >
         <Swiper
-          dir="ltr"
+          key={arabic ? "rtl" : "ltr"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={30}
           slidesPerGroup={1}
@@ -271,13 +277,14 @@ export function LandingBoxesSection({
         <button
           type="button"
           className="absolute top-1/2 left-4 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 sm:left-6"
-          aria-label="Previous tracks"
-          disabled={cardsAtBeginning}
+          aria-label={arabic ? "Next tracks" : "Previous tracks"}
+          disabled={arabic ? cardsAtEnd : cardsAtBeginning}
           suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            cardsSwiperRef.current?.slidePrev(CARDS_SLIDE_MS);
+            if (arabic) cardsSwiperRef.current?.slideNext(CARDS_SLIDE_MS);
+            else cardsSwiperRef.current?.slidePrev(CARDS_SLIDE_MS);
           }}
         >
           <CardsPrevIcon />
@@ -286,13 +293,14 @@ export function LandingBoxesSection({
         <button
           type="button"
           className="absolute top-1/2 right-4 z-30 flex h-[43px] w-[43px] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 sm:right-6"
-          aria-label="Next tracks"
-          disabled={cardsAtEnd}
+          aria-label={arabic ? "Previous tracks" : "Next tracks"}
+          disabled={arabic ? cardsAtBeginning : cardsAtEnd}
           suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            cardsSwiperRef.current?.slideNext(CARDS_SLIDE_MS);
+            if (arabic) cardsSwiperRef.current?.slidePrev(CARDS_SLIDE_MS);
+            else cardsSwiperRef.current?.slideNext(CARDS_SLIDE_MS);
           }}
         >
           <CardsNextIcon />

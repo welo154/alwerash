@@ -95,6 +95,7 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
+  nameAr        String?   @map("name_ar")
   /// e.g. "Frontend developer" — shown under name on /home
   profession    String?   @map("profession")
   bio           String?
@@ -246,6 +247,7 @@ model SecurityEvent {
 model Track {
   id          String   @id @default(cuid())
   title       String
+  titleAr     String?  @map("title_ar")
   slug        String   @unique
   description String?
   coverImage  String?  @map("cover_image")
@@ -271,10 +273,12 @@ model Course {
   trackId                String?  @map("track_id")
   mentorId                String?  @map("mentor_id")
   title                  String
+  titleAr                String?  @map("title_ar")
   summary                String?
   requirements           String[] @default([])
   coverImage             String?  @map("cover_image")
   instructorName         String?  @map("instructor_name")
+  instructorNameAr       String?  @map("instructor_name_ar")
   instructorImage        String?  @map("instructor_image")
   introVideoMuxPlaybackId String?  @map("intro_video_mux_playback_id")
   order                  Int      @default(0)
@@ -339,6 +343,7 @@ model Module {
   id        String   @id @default(cuid())
   courseId  String   @map("course_id")
   title     String
+  titleAr   String?  @map("title_ar")
   order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -354,6 +359,7 @@ model Lesson {
   id        String     @id @default(cuid())
   moduleId  String     @map("module_id")
   title     String
+  titleAr   String?    @map("title_ar")
   type      LessonType @default(VIDEO)
   order     Int        @default(0)
   published Boolean    @default(false)
@@ -444,6 +450,7 @@ model Assignment {
   /// Optional for later lesson-scoped assignments.
   lessonId     String?  @map("lesson_id")
   title        String
+  titleAr      String?  @map("title_ar")
   instructions String?
   rubricJson   Json?    @map("rubric_json")
   published    Boolean  @default(false)
@@ -618,6 +625,7 @@ model Mentor {
   id              String   @id @default(cuid())
   userId          String?  @unique @map("user_id")
   name            String
+  nameAr          String?  @map("name_ar")
   photo           String?  // URL path e.g. /mentor-photos/xxx.jpg
   certificateName String?  @map("certificate_name")
   aboutMe         String?  @map("about_me") @db.Text

@@ -53,6 +53,7 @@ function withTestTextLessons(
     lessons.unshift({
       id: `demo-intro-${first.id}`,
       title: "Introduction",
+      titleAr: "مقدمة",
       type: "INTRO",
       moduleId: first.id,
       moduleTitle: first.title,
@@ -67,6 +68,7 @@ function withTestTextLessons(
     lessons.push({
       id: `demo-article-${first.id}`,
       title: "Course materials",
+      titleAr: "مواد الدورة",
       type: "ARTICLE",
       moduleId: first.id,
       moduleTitle: first.title,
@@ -114,12 +116,15 @@ export default async function PrivateCoursePage({
   const modulesBase: FullAccessModule[] = course.modules.map((module) => ({
     id: module.id,
     title: module.title,
+    titleAr: module.titleAr,
     lessons: module.lessons.map((lesson) => ({
       id: lesson.id,
       title: lesson.title,
+      titleAr: lesson.titleAr,
       type: lesson.type,
       moduleId: module.id,
       moduleTitle: module.title,
+      moduleTitleAr: module.titleAr,
       hasVideo: Boolean(lesson.video),
       posterUrl: course.coverImage,
       articleBody: articleBodies.get(lesson.id) ?? null,
@@ -134,11 +139,13 @@ export default async function PrivateCoursePage({
       <FullCourseLearningExperience
         courseId={course.id}
         courseTitle={course.title}
+        courseTitleAr={course.titleAr}
         coverImage={course.coverImage}
         modules={modules}
         fontFamily={pangeaVar.style.fontFamily}
         progressPercent={courseProgress?.progressPercent ?? 0}
         instructorName={course.instructorName}
+        instructorNameAr={course.instructorNameAr}
         instructorProfession={course.instructorProfession}
         completedLessonIds={courseProgress?.completedLessonIds ?? []}
       />

@@ -5,6 +5,7 @@ import { ToastFromUrl } from "@/components/ToastFromUrl";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { LenisProvider } from "@/components/providers/LenisProvider";
+import { LocaleProvider } from "@/components/providers/LocaleProvider";
 import { pangeaVar } from "@/lib/fonts/pangea";
 import "./globals.css";
 
@@ -38,10 +39,12 @@ export default async function RootLayout({
             <ToastFromUrl />
           </Suspense>
           <SessionProvider>
-            <MicrosoftClarity />
-            <LenisProvider>
-              <ConditionalLayout>{children}</ConditionalLayout>
-            </LenisProvider>
+            <LocaleProvider>
+              <MicrosoftClarity />
+              <LenisProvider>
+                <ConditionalLayout>{children}</ConditionalLayout>
+              </LenisProvider>
+            </LocaleProvider>
           </SessionProvider>
         </ToastProvider>
       </body>

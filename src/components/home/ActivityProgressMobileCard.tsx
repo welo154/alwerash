@@ -156,12 +156,12 @@ export function ActivityProgressMobileCard({
 
   return (
     <div
-      className={`relative box-border max-w-full shrink-0 overflow-hidden rounded-[50px] border-[var(--Black,#000)] ${
+      className={`relative box-border max-w-full shrink-0 overflow-hidden rounded-[50px] ${
         isWide
-          ? "h-[401px] w-[622px] border-[0.3px]"
+          ? "h-[401px] w-[622px] border-[0.3px] border-[var(--Black,#000)]"
           : isTablet
-            ? "h-[401px] w-[445px] border"
-            : "h-[305px] w-[315px] border-[0.3px]"
+            ? "h-[401px] w-[445px] border-[0.3px] border-black/20"
+            : "h-[305px] w-[315px] border-[0.3px] border-black/20"
       }`}
       style={{ background: "var(--White, #FFF)" }}
       aria-label={`Learning progress ${displayPercent} percent`}

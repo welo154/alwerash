@@ -18,6 +18,7 @@ import {
 import { adminGetCourseAssignment } from "@/server/content/assignment.service";
 import { CourseAssignmentEditor } from "@/app/admin/content/components/CourseAssignmentEditor";
 import { DeleteModuleButton } from "@/app/admin/content/components/DeleteModuleButton";
+import { ArabicNameField } from "@/app/admin/content/components/ArabicNameField";
 import {
   COURSE_CATALOG_TAGS,
   type CourseCatalogTagKey,
@@ -90,10 +91,12 @@ export default async function AdminCourseDetail({
     const mentorIdVal = String(formData.get("mentorId") ?? "").trim();
     await adminUpdateCourse(id, {
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       summary: String(formData.get("summary") ?? "").trim() || undefined,
       requirements: parseRequirementLines(String(formData.get("requirements") ?? "")),
       coverImage: String(formData.get("coverImage") ?? "").trim() || undefined,
       instructorName: String(formData.get("instructorName") ?? "").trim() || undefined,
+      instructorNameAr: String(formData.get("instructorNameAr") ?? ""),
       instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       trackId: trackIdVal || "",
       mentorId: mentorIdVal || undefined,
@@ -139,6 +142,7 @@ export default async function AdminCourseDetail({
     await adminCreateModule({
       courseId: id,
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       order: Number(formData.get("order") ?? 0),
     });
     redirect(`/admin/content/courses/${id}?toast=Module+added`);
@@ -247,7 +251,7 @@ export default async function AdminCourseDetail({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">English title</label>
             <input
               name="title"
               defaultValue={course.title}
@@ -255,6 +259,7 @@ export default async function AdminCourseDetail({
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
+          <ArabicNameField label="Arabic title" defaultValue={course.titleAr} placeholder="اسم الدورة بالعربية" />
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Cover image URL</label>
             <input
@@ -282,7 +287,7 @@ export default async function AdminCourseDetail({
             <p className="mt-1 text-xs text-slate-500">Assign a mentor; their name and photo will be used for this course.</p>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Instructor name (English)</label>
             <input
               name="instructorName"
               defaultValue={course.instructorName ?? ""}
@@ -290,6 +295,12 @@ export default async function AdminCourseDetail({
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>
+          <ArabicNameField
+            name="instructorNameAr"
+            label="Instructor name (Arabic)"
+            defaultValue={course.instructorNameAr}
+            placeholder="اسم المدرّس بالعربية"
+          />
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Instructor photo URL</label>
             <input
@@ -496,13 +507,16 @@ export default async function AdminCourseDetail({
           <form action={createModule} className="flex flex-wrap gap-4">
             <input type="hidden" name="courseId" value={courseId} />
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Module title</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Module title (English)</label>
               <input
                 name="title"
                 placeholder="e.g. Course brief, What is geometric ornamentation"
                 required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
+            </div>
+            <div className="min-w-0 flex-1">
+              <ArabicNameField label="Module title (Arabic)" placeholder="عنوان الوحدة بالعربية" />
             </div>
             <div>
               <label className="mb-1 block text-xs text-slate-500">Order</label>

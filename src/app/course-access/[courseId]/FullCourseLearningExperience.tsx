@@ -7,13 +7,20 @@ import { ProgressTracker } from "@/components/video/ProgressTracker";
 import { CourseBreadcrumb } from "@/app/course/[courseId]/CourseBreadcrumb";
 import { ActivityProgressMobileCard } from "@/components/home/ActivityProgressMobileCard";
 import { completeLessonAndGetProgress } from "./actions";
+import { useLocalizedText } from "@/components/i18n/LocalizedText";
+
+function LocalName({ en, ar }: { en: string; ar?: string | null }) {
+  return <>{useLocalizedText(en, ar)}</>;
+}
 
 export type FullAccessLesson = {
   id: string;
   title: string;
+  titleAr?: string | null;
   type: string;
   moduleId: string;
   moduleTitle: string;
+  moduleTitleAr?: string | null;
   hasVideo: boolean;
   posterUrl: string | null;
   articleBody: string | null;
@@ -23,17 +30,20 @@ export type FullAccessLesson = {
 export type FullAccessModule = {
   id: string;
   title: string;
+  titleAr?: string | null;
   lessons: FullAccessLesson[];
 };
 
 type FullCourseLearningExperienceProps = {
   courseId: string;
   courseTitle: string;
+  courseTitleAr?: string | null;
   coverImage: string | null;
   modules: FullAccessModule[];
   fontFamily: string;
   progressPercent: number;
   instructorName: string | null;
+  instructorNameAr?: string | null;
   instructorProfession: string | null;
   completedLessonIds: string[];
 };
@@ -244,17 +254,23 @@ function NextUnitArrowIcon() {
 
 function SectionHeader({
   courseTitle,
+  courseTitleAr,
   instructorName,
+  instructorNameAr,
   instructorProfession,
   fontFamily,
 }: {
   courseTitle: string;
+  courseTitleAr?: string | null;
   instructorName: string | null;
+  instructorNameAr?: string | null;
   instructorProfession: string | null;
   fontFamily: string;
 }) {
+  const displayTitle = useLocalizedText(courseTitle, courseTitleAr);
+  const displayInstructor = useLocalizedText(instructorName?.trim() || "Instructor", instructorNameAr);
   const bylineParts = [
-    instructorName?.trim() || "Instructor",
+    displayInstructor,
     instructorProfession?.trim() || null,
   ].filter(Boolean);
 
@@ -270,7 +286,7 @@ function SectionHeader({
           lineHeight: "normal",
         }}
       >
-        {courseTitle}
+        {displayTitle}
       </h1>
       <p
         className="m-0 mt-[3px] text-[14px] leading-[127%] min-[744px]:max-lg:text-[18px] lg:mt-[7px] lg:text-[18px]"
@@ -377,7 +393,7 @@ function TextContentLessonBlock({
           lineHeight: "normal",
         }}
       >
-        {lesson.title}
+        <LocalName en={lesson.title} ar={lesson.titleAr} />
       </h2>
 
       <div className="lg:mt-[22px]">
@@ -489,7 +505,7 @@ function VideoLessonBlock({
             lineHeight: "normal",
           }}
         >
-          {lesson.title}
+          <LocalName en={lesson.title} ar={lesson.titleAr} />
         </h2>
         {durationSeconds != null && durationSeconds > 0 ? (
           <div className="inline-flex shrink-0 items-center">
@@ -594,11 +610,13 @@ function VideoLessonBlock({
 export function FullCourseLearningExperience({
   courseId,
   courseTitle,
+  courseTitleAr,
   coverImage,
   modules,
   fontFamily,
   progressPercent: initialProgressPercent,
   instructorName,
+  instructorNameAr,
   instructorProfession,
   completedLessonIds: initialCompletedLessonIds,
 }: FullCourseLearningExperienceProps) {
@@ -851,7 +869,7 @@ export function FullCourseLearningExperience({
   return (
     <div className="fcl-page mx-auto max-w-[1600px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:pt-[28px]">
       <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px]">
-        <CourseBreadcrumb courseTitle={courseTitle} fontFamily={fontFamily} />
+        <CourseBreadcrumb courseTitle={courseTitle} courseTitleAr={courseTitleAr} fontFamily={fontFamily} />
       </div>
 
       <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:max-lg:mt-[13px] min-[744px]:max-lg:w-[1440px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:opacity-60 lg:mt-[13px] lg:w-full lg:opacity-60" />
@@ -956,7 +974,9 @@ export function FullCourseLearningExperience({
             <div className="flex flex-col">
               <SectionHeader
                 courseTitle={courseTitle}
+                courseTitleAr={courseTitleAr}
                 instructorName={instructorName}
+                instructorNameAr={instructorNameAr}
                 instructorProfession={instructorProfession}
                 fontFamily={fontFamily}
               />
@@ -1122,7 +1142,7 @@ export function FullCourseLearningExperience({
                             fontWeight: 400,
                           }}
                         >
-                          {lessonIndex + 1}. {lesson.title}
+                          {lessonIndex + 1}. <LocalName en={lesson.title} ar={lesson.titleAr} />
                         </p>
                         <span
                           className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center"

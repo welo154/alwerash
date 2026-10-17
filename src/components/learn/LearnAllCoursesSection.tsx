@@ -14,6 +14,7 @@ import {
 import { useBleedRightToViewport } from "@/components/learn/useBleedRightToViewport";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
 import { useCourseCarouselMetrics } from "@/components/learn/useCourseCarouselMetrics";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
 import type {
   LearnAllCourseItem,
@@ -191,6 +192,7 @@ export default function LearnAllCoursesSection({
   fullBleed?: boolean | "right";
   hideNavOnMobile?: boolean;
 }) {
+  const arabic = useArabicLayout();
   const { width: slideW, gap: slideGap, inset: slidesOffsetBefore } = useCourseCarouselMetrics();
   const searchParams = useSearchParams();
   const [trackSlug, setTrackSlug] = useState("all");
@@ -273,7 +275,7 @@ export default function LearnAllCoursesSection({
     fullBleed === true
       ? "relative left-1/2 mt-8 w-screen max-w-[100vw] -translate-x-1/2"
       : bleedRight
-        ? "relative max-[743px]:-ml-6 max-[743px]:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:mt-[40px] lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
+        ? "relative max-[743px]:-ms-6 max-[743px]:mt-[35px] max-lg:w-screen max-lg:max-w-[100vw] max-lg:overflow-x-visible sm:max-[743px]:-ms-8 min-[744px]:max-lg:-ms-8 min-[744px]:max-lg:mt-[40px] lg:mt-8 lg:max-w-none lg:overflow-x-clip lg:overflow-y-visible"
         : "relative mt-8 w-full min-w-0 max-w-full overflow-x-clip";
 
   const bleedWrapStyle =
@@ -343,11 +345,14 @@ export default function LearnAllCoursesSection({
               clipPath:
                 fullBleed === false
                   ? "inset(-200px 0 -200px 0)"
-                  : "inset(-200px -100vw -200px 0)",
+                  : arabic
+                    ? "inset(-200px 0 -200px -100vw)"
+                    : "inset(-200px -100vw -200px 0)",
             }}
           >
             <Swiper
-              dir="ltr"
+              key={arabic ? "rtl" : "ltr"}
+              dir={arabic ? "rtl" : "ltr"}
               modules={[Mousewheel]}
               {...learnCarouselSwiperBehavior}
               spaceBetween={slideGap}

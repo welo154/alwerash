@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { Tr } from "@/components/i18n/Tr";
 
 const FOOTER_BG = "#89F496";
 
@@ -68,14 +69,14 @@ function FooterColumn({
         className="text-[18px] font-bold uppercase leading-[120%] tracking-[0] text-black sm:whitespace-nowrap"
         style={{ fontFamily: pangeaFont }}
       >
-        {title}
+        <Tr>{title}</Tr>
       </h3>
       {/* 4px vertical gap between rows (Figma line-height 4px on list items) */}
       <ul className="mt-4 space-y-1">
         {links.map((item) => (
           <li key={item.label}>
             <Link href={item.href} className={footerColumnLinkClassName} style={{ fontFamily: pangeaFont }}>
-              {item.label}
+              <Tr>{item.label}</Tr>
             </Link>
           </li>
         ))}
@@ -86,7 +87,7 @@ function FooterColumn({
               className={`${footerColumnLinkClassName} underline transition-opacity hover:opacity-70`}
               style={{ fontFamily: pangeaFont }}
             >
-              {viewMoreLabel}
+              <Tr>{viewMoreLabel}</Tr>
             </Link>
           </li>
         ) : null}
@@ -111,21 +112,21 @@ export function SiteFooter() {
               className="text-center text-[24px] font-bold leading-[120%] tracking-[0] text-[#000000]"
               style={{ fontFamily: pangeaFont }}
             >
-              How can we help?
+              <Tr>How can we help?</Tr>
             </span>
             <Link
               href="/subscription"
               className="text-center text-[18px] font-normal leading-[120%] tracking-[0] text-[#000000] underline-offset-2 hover:opacity-70"
               style={{ fontFamily: pangeaFont }}
             >
-              Contact Us
+              <Tr>Contact Us</Tr>
             </Link>
             <Link
               href="/subscription"
               className="text-center text-[18px] font-normal leading-[120%] tracking-[0] text-[#000000] underline-offset-2 hover:opacity-70"
               style={{ fontFamily: pangeaFont }}
             >
-              Help Center
+              <Tr>Help Center</Tr>
             </Link>
           </div>
           <div className="flex shrink-0 flex-row flex-nowrap items-center gap-[40px]">
@@ -181,7 +182,7 @@ export function SiteFooter() {
               className="inline-flex h-[40px] w-[131px] shrink-0 items-center justify-center gap-[10px] rounded-[8px] border border-black bg-transparent px-[12px] text-sm font-normal text-black opacity-100"
               suppressHydrationWarning
             >
-              English
+              <Tr>English</Tr>
               <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
             </button>
           </div>
@@ -228,13 +229,13 @@ export function SiteFooter() {
         >
           <span suppressHydrationWarning>© {year} AlWerash</span>
           <Link href="/" className="text-center hover:opacity-70">
-            Terms of use
+            <Tr>Terms of use</Tr>
           </Link>
           <Link href="/" className="text-center hover:opacity-70">
-            Privacy policy
+            <Tr>Privacy policy</Tr>
           </Link>
           <Link href="/" className="text-center hover:opacity-70">
-            Cookies policy
+            <Tr>Cookies policy</Tr>
           </Link>
         </div>
       </div>

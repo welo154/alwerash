@@ -50,6 +50,12 @@ function isPoolError(error: unknown): boolean {
   return isPoolExhaustedText(errorText(error));
 }
 
+const POOL_RETRY_DELAYS_MS = [200, 500];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function emptyQueryResult(operation: string): unknown {
   switch (operation) {
     case "findMany":
@@ -168,8 +174,11 @@ function resolveDirectUrl(databaseUrl: string): string {
   return raw ? rewriteDirectUrl(raw) : databaseUrl;
 }
 
+const PRISMA_CLIENT_REV = 2;
+
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
+  prismaRev?: number;
   prismaPoolBroken?: boolean;
 };
 
@@ -209,6 +218,20 @@ function createClient(): PrismaClient {
             finish?.({ failed: true });
             throw error;
           }
+          for (const delayMs of POOL_RETRY_DELAYS_MS) {
+            await sleep(delayMs);
+            try {
+              const result = await query(args);
+              finish?.({ rows: Array.isArray(result) ? result.length : undefined });
+              return result;
+            } catch (retryError) {
+              if (!isPoolError(retryError)) {
+                finish?.({ failed: true });
+                throw retryError;
+              }
+              error = retryError;
+            }
+          }
           globalForPrisma.prismaPoolBroken = true;
           finish?.({ failed: true });
           reportPoolDegraded();
@@ -222,6 +245,11 @@ function createClient(): PrismaClient {
 }
 
 function getClient(): PrismaClient {
+  if (globalForPrisma.prismaRev !== PRISMA_CLIENT_REV) {
+    void globalForPrisma.prisma?.$disconnect();
+    globalForPrisma.prisma = undefined;
+    globalForPrisma.prismaRev = PRISMA_CLIENT_REV;
+  }
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
   const client = createClient();
   globalForPrisma.prisma = client;

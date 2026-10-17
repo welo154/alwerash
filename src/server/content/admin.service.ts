@@ -195,9 +195,11 @@ export async function adminGetCourse(id: string) {
         id: true,
         trackId: true,
         title: true,
+        titleAr: true,
         summary: true,
         coverImage: true,
         instructorName: true,
+        instructorNameAr: true,
         instructorImage: true,
         introVideoMuxPlaybackId: true,
         order: true,
@@ -247,10 +249,11 @@ export async function adminCreateCourse(input: unknown) {
     let instructorName = data.instructorName ?? null;
     let instructorImage = data.instructorImage ?? null;
     if (mentorId) {
-      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, photo: true } });
+      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, nameAr: true, photo: true } });
       if (mentor) {
         instructorName = mentor.name;
         instructorImage = mentor.photo;
+        data.instructorNameAr = mentor.nameAr;
       }
     }
     const { mentorId: _m, trackId, requirements, ...rest } = data;
@@ -292,6 +295,8 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   };
   set("track_id", data.trackId ?? null);
   set("title", data.title);
+  set("title_ar", data.titleAr);
+  set("instructor_name_ar", data.instructorNameAr);
   set("summary", data.summary);
   set("cover_image", data.coverImage);
   set("published", Boolean(data.published));
@@ -391,6 +396,8 @@ async function courseFindRawSafe(courseId: string) {
     summary: row.summary,
     coverImage: row.cover_image,
     instructorName: null as string | null,
+    instructorNameAr: null as string | null,
+    titleAr: null as string | null,
     instructorImage: null as string | null,
     introVideoMuxPlaybackId: null as string | null,
     order: 0,
@@ -432,9 +439,14 @@ export async function adminUpdateCourse(courseId: string, input: unknown) {
   if (data.mentorId !== undefined) {
     const mentorId = data.mentorId || null;
     if (mentorId) {
-      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, photo: true } });
+      const mentor = await prisma.mentor.findUnique({ where: { id: mentorId }, select: { name: true, nameAr: true, photo: true } });
       if (mentor) {
-        updateData = { ...updateData, instructorName: mentor.name, instructorImage: mentor.photo };
+        updateData = {
+          ...updateData,
+          instructorName: mentor.name,
+          instructorNameAr: mentor.nameAr,
+          instructorImage: mentor.photo,
+        };
       }
     }
   }
@@ -846,6 +858,7 @@ export async function adminCreateMentor(input: unknown) {
         data: {
           email: data.email,
           name: data.name,
+          nameAr: data.nameAr,
           passwordHash,
           emailVerified: new Date(),
           roles: { create: { role: Role.MENTOR } },
@@ -856,6 +869,7 @@ export async function adminCreateMentor(input: unknown) {
       return tx.mentor.create({
         data: {
           name: data.name,
+          nameAr: data.nameAr,
           photo: data.photo,
           certificateName: data.certificateName,
           aboutMe: data.aboutMe,

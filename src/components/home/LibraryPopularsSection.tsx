@@ -7,6 +7,8 @@ import "swiper/css";
 
 import { learnCarouselMousewheel } from "@/components/learn/learn-carousel-swiper-config";
 import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useT } from "@/components/i18n/Tr";
 import {
   ARTICLE_COVER_WIDTH,
   LibraryArticleCardVisual,
@@ -106,6 +108,7 @@ function ArticleCardFavoriteIcon() {
 }
 
 function LibraryPopularArticleCard({ slide }: { slide: PopularArticleSlide }) {
+  const t = useT();
   return (
     <article className="w-fit shrink-0">
       <LibraryArticleCardVisual clipId={slide.id} />
@@ -118,7 +121,7 @@ function LibraryPopularArticleCard({ slide }: { slide: PopularArticleSlide }) {
             className="m-0 mt-0.5"
             style={{ ...META_TEXT_STYLE, color: "rgba(0, 0, 0, 0.60)" }}
           >
-            {slide.priceLabel}
+            {t(slide.priceLabel)}
           </p>
         </div>
         <button
@@ -164,6 +167,8 @@ export type LibraryPopularsSectionProps = {
 };
 
 export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSectionProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const { scrollAreaRef, handleSwiper, handleNavSync } = useLearnCarouselSwiper();
   const inset = useLibrarySwiperInset();
 
@@ -175,20 +180,29 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
   return (
     <div className="mt-[60px] -mb-[70px] last:mb-[60px] min-[744px]:max-lg:mt-[84px] min-[744px]:max-lg:mb-0 lg:mt-[72px]">
       <div
-        className={`flex items-center max-[743px]:gap-[13px] min-[744px]:max-lg:gap-[20px] lg:gap-[26px] ${contentInsetClass}`}
+        dir="ltr"
+        className={`flex items-center max-[743px]:gap-[13px] min-[744px]:max-lg:gap-[20px] lg:gap-[26px] ${
+          arabic
+            ? `w-full flex-row-reverse justify-start ${
+                contentLeftPx != null
+                  ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] lg:pr-[120px]"
+                  : ""
+              }`
+            : contentInsetClass
+        }`}
       >
         <h2
           className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
           style={{ fontFamily: pangeaFont }}
         >
-          LIBRARY POPULARS
+          {t("LIBRARY POPULARS")}
         </h2>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 45 45"
           fill="none"
           aria-hidden
-          className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
+          className={`size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px] ${arabic ? "scale-x-[-1]" : ""}`}
         >
           <path
             d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -207,16 +221,23 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
 
       <div
         className={`${FULL_BLEED} relative mt-[64px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[65px] lg:ml-0 lg:w-full lg:max-w-none ${
-          contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : "pr-6"
+          contentLeftPx != null
+            ? arabic
+              ? "lg:pr-[120px] lg:pl-6"
+              : "lg:pl-[120px] lg:pr-6"
+            : arabic
+              ? "pl-6"
+              : "pr-6"
         }`}
       >
         <div
           ref={scrollAreaRef}
           className="relative w-full min-w-0 overflow-x-visible overflow-y-visible"
-          style={{ clipPath: "inset(-160px -320px -160px 0)" }}
+          style={{ clipPath: arabic ? "inset(-160px 0 -160px -320px)" : "inset(-160px -320px -160px 0)" }}
         >
           <Swiper
-            dir="ltr"
+            key={arabic ? "rtl" : "ltr"}
+            dir={arabic ? "rtl" : "ltr"}
             modules={[Mousewheel]}
             slidesPerView="auto"
             spaceBetween={SWIPER_GAP_PX}

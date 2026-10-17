@@ -19,6 +19,7 @@ export function WeeklyActivityBarCard({
   variant = "desktop",
 }: Props) {
   const isMobile = variant === "mobile";
+  const isTablet = variant === "tablet";
   const BAR_MAX_PX = isMobile ? 122 : 202;
   const MIN_SCALE_SECONDS = 3600;
   const barColWidth = isMobile ? 34 : 49;
@@ -34,10 +35,12 @@ export function WeeklyActivityBarCard({
 
   return (
     <div
-      className={`relative box-border flex max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] border-[var(--Black,#000)] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
+      className={`relative box-border flex max-w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[50px] transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)] ${
         isMobile
-          ? "h-[305px] w-[315px] border-[0.3px] pt-[23px] pr-[24px] pb-[15px] pl-[24px]"
-          : "h-[401px] w-[445px] border pt-[31px] px-[31px] pb-[21px]"
+          ? "h-[305px] w-[315px] border-[0.3px] border-black/20 pt-[23px] pr-[24px] pb-[15px] pl-[24px]"
+          : isTablet
+            ? "h-[401px] w-[445px] border-[0.3px] border-black/20 pt-[31px] px-[31px] pb-[21px]"
+            : "h-[401px] w-[445px] border border-[var(--Black,#000)] pt-[31px] px-[31px] pb-[21px]"
       }`}
       style={{ background: "var(--White, #FFF)" }}
       aria-label="Weekly activity"

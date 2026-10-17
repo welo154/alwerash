@@ -31,9 +31,10 @@ export async function getUserAggregateLearningProgressPercent(
 
   if (courseIds.size === 0) return 0;
 
-  const summaries = await Promise.all(
-    [...courseIds].map((courseId) => getCourseProgress(userId, courseId))
-  );
+  const summaries = [];
+  for (const courseId of courseIds) {
+    summaries.push(await getCourseProgress(userId, courseId));
+  }
 
   let completedCount = 0;
   let totalCount = 0;

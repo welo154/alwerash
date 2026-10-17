@@ -30,6 +30,7 @@ export default async function AdminMentorEditPage({
     const landingPopularOrder = formData.get("landingPopularOrder");
     await adminUpdateMentor(mentorId, {
       name: String(formData.get("name") ?? ""),
+      nameAr: String(formData.get("nameAr") ?? ""),
       certificateName: String(formData.get("certificateName") ?? "").trim() || undefined,
       aboutMe: String(formData.get("aboutMe") ?? "").trim(),
       featuredOrder:
@@ -86,11 +87,21 @@ export default async function AdminMentorEditPage({
         <form action={update} className="space-y-4">
           <input type="hidden" name="mentorId" value={mentor.id} />
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">English name</label>
             <input
               name="name"
               defaultValue={mentor.name}
               required
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Arabic name</label>
+            <input
+              name="nameAr"
+              defaultValue={mentor.nameAr ?? ""}
+              placeholder="اسم المدرّس بالعربية"
+              dir="rtl"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             />
           </div>

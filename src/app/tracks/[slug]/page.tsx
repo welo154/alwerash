@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { publicGetTrackBySlug, publicListTracks } from "@/server/content/public.service";
+import { courseTypeBadgeLabel } from "@/lib/content/course-type-badge";
 import { AppError } from "@/server/lib/errors";
 import {
   LearnCoursesSidebar,
@@ -29,8 +30,11 @@ export default async function TrackPage({
     id: c.id,
     href: `/course/${c.id}`,
     title: c.title,
+    titleAr: c.titleAr,
     authorLabel: c.instructorName?.trim() || "Instructor",
+    authorLabelAr: c.instructorNameAr,
     tagPrimary: track.title.toUpperCase(),
+    typeLabel: courseTypeBadgeLabel(c),
     coverImageSrc: c.coverImage,
     rating: c.rating ?? null,
     popularOrder: c.featuredMostPlayedOrder ?? null,

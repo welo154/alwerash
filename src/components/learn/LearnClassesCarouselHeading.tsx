@@ -1,11 +1,14 @@
 "use client";
 
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
 
 /** Shared circle arrow used next to learn-page section titles. */
 function LearnHeadingArrowIcon({ size }: { size: 28 | 41 | 46 | 47 }) {
+  const arabic = useArabicLayout();
+  const arrowClass = arabic ? "block scale-x-[-1]" : "block";
   if (size === 47) {
     return (
       <svg
@@ -15,7 +18,7 @@ function LearnHeadingArrowIcon({ size }: { size: 28 | 41 | 46 | 47 }) {
         viewBox="0 0 49 49"
         fill="none"
         aria-hidden
-        className="block"
+        className={arrowClass}
       >
         <path
           d="M24.5 48C37.4787 48 48 37.4787 48 24.5C48 11.5213 37.4787 1 24.5 1C11.5213 1 1 11.5213 1 24.5C1 37.4787 11.5213 48 24.5 48Z"
@@ -41,7 +44,7 @@ function LearnHeadingArrowIcon({ size }: { size: 28 | 41 | 46 | 47 }) {
       viewBox="0 0 48 48"
       fill="none"
       aria-hidden
-      className="block"
+      className={arrowClass}
     >
       <path
         d="M24 47C36.7025 47 47 36.7025 47 24C47 11.2975 36.7025 1 24 1C11.2975 1 1 11.2975 1 24C1 36.7025 11.2975 47 24 47Z"

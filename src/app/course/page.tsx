@@ -13,14 +13,18 @@ import {
 } from "@/components/learn/LearnCoursesSidebar";
 import { LearnCoursesPageFilterBar } from "@/components/learn/LearnCoursesPageFilterBar";
 import { markPage } from "@/server/observability/query-timing";
+import { LocaleMirror } from "@/components/providers/LocaleProvider";
 
 function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
   return courses.map((c) => ({
     id: c.id,
     href: `/course/${c.id}`,
     title: c.title.trim(),
+    titleAr: c.titleAr,
     authorLabel: c.instructorName?.trim() || "Instructor",
+    authorLabelAr: c.instructorNameAr,
     tagPrimary: c.track?.title?.trim().toUpperCase() || "COURSE",
+    typeLabel: c.typeLabel,
     coverImageSrc: c.coverImage,
     comingSoon: c.comingSoon,
   }));
@@ -31,8 +35,11 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
     id: c.id,
     href: `/course/${c.id}`,
     title: c.title.trim(),
+    titleAr: c.titleAr,
     authorLabel: c.instructorName?.trim() || "Instructor",
+    authorLabelAr: c.instructorNameAr,
     tagPrimary: c.track?.title?.trim().toUpperCase() || "COURSE",
+    typeLabel: c.typeLabel,
     coverImageSrc: c.coverImage,
     trackSlug: c.track?.slug ?? null,
     rating: c.rating,
@@ -75,22 +82,25 @@ export default async function LearnPage() {
   const sidebarCategories = buildLearnSidebarCategories(tracks);
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-visible bg-white pb-16 pt-[26px] font-sans lg:pt-[60px]">
-      <div className="w-full min-w-0 pl-6 sm:pl-8 lg:pl-10">
+    <LocaleMirror className="min-w-0 max-w-full overflow-x-visible bg-white pb-16 pt-[26px] font-sans lg:pt-[60px]">
+      <div className="w-full min-w-0 ps-[70px] max-lg:ps-8 max-[743px]:ps-6">
         <main className="min-w-0 w-full overflow-x-visible">
           <div className="lg:hidden">
             <LearnCoursesPageFilterBar categories={sidebarCategories} />
           </div>
 
           <div className="flex min-w-0 max-w-full flex-col overflow-x-visible lg:flex-row lg:items-start lg:gap-[88px]">
-            <div className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start">
-              <LearnCoursesSidebar categories={sidebarCategories} />
+            <div
+              className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start"
+              style={{ marginTop: -14 }}
+            >
+              <LearnCoursesSidebar categories={sidebarCategories} headingsOnly />
             </div>
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
                 aria-label="Featured courses"
-                className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ml-[33px]"
+                className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ms-[73px]"
               >
                 <LearnFeaturedCoursesPanel
                   slides={trackShowcaseSlides.map((slide) => ({
@@ -134,11 +144,11 @@ export default async function LearnPage() {
 
           {featuredMentors.length > 0 ? (
             <div
-              className={`max-lg:pr-0 lg:pr-10 ${
+              className={`max-lg:pe-0 lg:pe-10 ${
                 hasCarouselSections || allCourseItems.length > 0
                   ? "mt-[45px] lg:mt-[90px]"
                   : ""
-              } max-lg:-ml-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ml-8 sm:max-lg:w-[calc(100%+2rem)]`}
+              } max-lg:-ms-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ms-8 sm:max-lg:w-[calc(100%+2rem)]`}
             >
               <LandingCurrentMostsSection
                 mentors={featuredMentors}
@@ -155,6 +165,6 @@ export default async function LearnPage() {
           ) : null}
         </main>
       </div>
-    </div>
+    </LocaleMirror>
   );
 }

@@ -6,6 +6,8 @@ import {
   ActivityScheduleCard,
   ActivityScheduleMobileCard,
 } from "@/components/home/ActivityScheduleCard";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useT } from "@/components/i18n/Tr";
 import { ActivityProgressMobileCard } from "@/components/home/ActivityProgressMobileCard";
 import { WeeklyActivityBarCard } from "@/components/home/WeeklyActivityBarCard";
 import type { WeeklyActivitySummary } from "@/lib/learning-activity";
@@ -29,12 +31,14 @@ export function TrackActivitySection({
   learningProgressPercent: number;
   className?: string;
 }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
     <section
-      className={`w-full max-lg:px-0 lg:pl-[120px] lg:pr-6 ${className}`.trim()}
+      className={`w-full max-lg:px-0 ${arabic ? "lg:pr-[120px] lg:pl-6" : "lg:pl-[120px] lg:pr-6"} ${className}`.trim()}
       aria-label="Activity tracking"
     >
-      <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px] max-lg:pr-0">
+      <div className={arabic ? "text-right max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] max-lg:pl-0" : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px] max-lg:pr-0"}>
         <h2
           className="m-0 uppercase min-[744px]:hidden"
           style={{
@@ -47,7 +51,7 @@ export function TrackActivitySection({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          TRACK YOUR ACTIVITY
+          {t("TRACK YOUR ACTIVITY")}
         </h2>
 
         <h2
@@ -61,7 +65,7 @@ export function TrackActivitySection({
             lineHeight: "120%",
           }}
         >
-          TRACK YOUR ACTIVITY
+          {t("TRACK YOUR ACTIVITY")}
         </h2>
 
         <h2
@@ -76,12 +80,14 @@ export function TrackActivitySection({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          TRACK YOUR ACTIVITY
+          {t("TRACK YOUR ACTIVITY")}
         </h2>
       </div>
 
       <div className="relative left-1/2 mt-[28px] w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:hidden">
         <Swiper
+          key={arabic ? "rtl" : "ltr"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={MOBILE_SWIPER_GAP_PX}
           slidesPerGroup={1}
@@ -113,6 +119,8 @@ export function TrackActivitySection({
 
       <div className="relative left-1/2 mt-[45px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:block lg:hidden">
         <Swiper
+          key={arabic ? "rtl-tablet" : "ltr-tablet"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={TABLET_SWIPER_GAP_PX}
           slidesPerGroup={1}

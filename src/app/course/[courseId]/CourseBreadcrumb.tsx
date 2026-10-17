@@ -1,7 +1,10 @@
 import Link from "next/link";
 
+import { LocalizedText } from "@/components/i18n/LocalizedText";
+
 type CourseBreadcrumbProps = {
   courseTitle: string;
+  courseTitleAr?: string | null;
   fontFamily: string;
 };
 
@@ -48,7 +51,7 @@ function BreadcrumbChevron() {
   );
 }
 
-export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbProps) {
+export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: CourseBreadcrumbProps) {
   const textStyle = {
     color: "var(--Black, #000)",
     fontFamily,
@@ -82,7 +85,7 @@ export function CourseBreadcrumb({ courseTitle, fontFamily }: CourseBreadcrumbPr
         className="text-[14px] leading-[127%] min-[744px]:text-[18px] min-[744px]:leading-normal"
         style={textStyle}
       >
-        {courseTitle}
+        <LocalizedText en={courseTitle} ar={courseTitleAr} />
       </span>
     </nav>
   );

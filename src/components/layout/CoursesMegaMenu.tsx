@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useT } from "@/components/i18n/Tr";
 
 type CoursesMenuLink = { label: string; href: string };
 type CoursesMenuPayload = {
@@ -35,6 +36,7 @@ function visibleLinks(items: CoursesMenuLink[]) {
 }
 
 export function CoursesMegaMenuPanel() {
+  const t = useT();
   const [menu, setMenu] = useState<CoursesMenuPayload | null>(null);
 
   useEffect(() => {
@@ -68,14 +70,14 @@ export function CoursesMegaMenuPanel() {
       <div className="grid grid-cols-2 gap-x-8 text-black">
         <div className="min-w-0 overflow-hidden">
           <Link href="/course" className={headingClassName}>
-            ALL COURSES <span aria-hidden>↗</span>
+            {t("ALL COURSES")} <span aria-hidden>↗</span>
           </Link>
           {allCourses.length > 0 ? (
             <ul className="space-y-0 text-[18px] font-normal text-black">
               {allCourses.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={itemClassName}>
-                    {item.label}
+                    {t(item.label)}
                   </Link>
                 </li>
               ))}
@@ -85,14 +87,14 @@ export function CoursesMegaMenuPanel() {
 
         <div className="min-w-0 overflow-hidden">
           <Link href="/tracks/design-softwares" className={headingClassName}>
-            SOFTWARE <span aria-hidden>↗</span>
+            {t("SOFTWARE")} <span aria-hidden>↗</span>
           </Link>
           {software.length > 0 ? (
             <ul className="space-y-0 text-[18px] font-normal text-black">
               {software.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={itemClassName}>
-                    {item.label}
+                    {t(item.label)}
                   </Link>
                 </li>
               ))}
@@ -102,7 +104,7 @@ export function CoursesMegaMenuPanel() {
       </div>
 
       <Link href="/course" className={`${viewMoreClassName} mt-[12px]`}>
-        View more
+        {t("View more")}
       </Link>
     </div>
   );

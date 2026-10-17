@@ -5,6 +5,7 @@ import "swiper/css";
 import { ChoosePlanForm } from "@/components/subscription/ChoosePlanForm";
 import { PRICING_FEATURES } from "@/components/subscription/SubscriptionPricingCard";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import type { SubscriptionPlanId } from "@/lib/subscription-plans";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 
@@ -228,8 +229,11 @@ function MobilePricingCard({
 }
 
 export function SubscriptionMobileCards() {
+  const arabic = useArabicLayout();
   return (
     <Swiper
+      key={arabic ? "rtl" : "ltr"}
+      dir={arabic ? "rtl" : "ltr"}
       slidesPerView="auto"
       spaceBetween={15}
       slidesPerGroup={1}

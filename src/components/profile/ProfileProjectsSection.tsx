@@ -3,6 +3,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import {
   MobileStudentRatingCard,
   TabletStudentRatingCard,
@@ -115,10 +116,15 @@ export function ProfileProjectsSection({
   className?: string;
 }) {
   const visible = cards.slice(0, 2);
+  const arabic = useArabicLayout();
 
   return (
     <div
-      className={`max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px] lg:pr-[120px] ${className}`.trim()}
+      className={`${
+        arabic
+          ? "text-right max-[743px]:pr-[30px] max-lg:pl-0 min-[744px]:max-lg:pr-[61px] lg:pr-[120px] lg:pl-[120px]"
+          : "max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px] lg:pr-[120px]"
+      } ${className}`.trim()}
       aria-label="Projects"
     >
       <h2
@@ -174,6 +180,8 @@ export function ProfileProjectsSection({
 
       <div className="relative left-1/2 mt-[27px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:max-lg:block">
         <Swiper
+          key={arabic ? "rtl" : "ltr"}
+          dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={31}
           slidesPerGroup={1}

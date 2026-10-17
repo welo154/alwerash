@@ -20,6 +20,7 @@ import { AdminVideoPreview } from "@/app/admin/content/components/AdminVideoPrev
 import { DeleteLessonButton } from "@/app/admin/content/components/DeleteLessonButton";
 import { ReplaceVideoButton } from "@/app/admin/content/components/ReplaceVideoButton";
 import { isMuxApiConfigured } from "@/server/mux/config";
+import { ArabicNameField } from "@/app/admin/content/components/ArabicNameField";
 
 export default async function AdminModuleDetail({
   params,
@@ -39,6 +40,7 @@ export default async function AdminModuleDetail({
     if (!id) return;
     await adminUpdateModule(id, {
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       order: Number(formData.get("order") ?? 0),
     });
     revalidatePath(`/admin/content/modules/${id}`);
@@ -53,6 +55,7 @@ export default async function AdminModuleDetail({
     await adminCreateLesson({
       moduleId: id,
       title: String(formData.get("title") ?? ""),
+      titleAr: String(formData.get("titleAr") ?? ""),
       type: (formData.get("type") as "VIDEO" | "ARTICLE" | "RESOURCE" | "INTRO") ?? "VIDEO",
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
@@ -75,6 +78,7 @@ export default async function AdminModuleDetail({
         : "VIDEO";
     await adminUpdateLesson(lessonId, {
       title: String(formData.get("title") ?? "").trim() || undefined,
+      titleAr: String(formData.get("titleAr") ?? ""),
       type,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
@@ -166,13 +170,16 @@ export default async function AdminModuleDetail({
           <input type="hidden" name="moduleId" value={moduleId} />
           <div className="flex flex-wrap gap-4">
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Module title</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Module title (English)</label>
               <input
                 name="title"
                 defaultValue={courseModule.title}
                 required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
+            </div>
+            <div className="min-w-0 flex-1">
+              <ArabicNameField label="Module title (Arabic)" defaultValue={courseModule.titleAr} placeholder="عنوان الوحدة بالعربية" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Order (for sorting)</label>
@@ -213,13 +220,16 @@ export default async function AdminModuleDetail({
             <input type="hidden" name="moduleId" value={moduleId} />
             <div className="flex flex-wrap gap-4 items-end">
               <div className="min-w-[200px] flex-1">
-                <label className="mb-1 block text-sm font-medium text-slate-700">Lesson title</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Lesson title (English)</label>
                 <input
                   name="title"
                   placeholder="e.g. Drawing the lines"
                   required
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
+              </div>
+              <div className="min-w-[200px] flex-1">
+                <ArabicNameField label="Lesson title (Arabic)" placeholder="عنوان الدرس بالعربية" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
@@ -278,7 +288,7 @@ export default async function AdminModuleDetail({
                 <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1 space-y-3">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-500">Lesson title</label>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">Lesson title (English)</label>
                       <input
                         name="title"
                         defaultValue={l.title}
@@ -286,6 +296,7 @@ export default async function AdminModuleDetail({
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
+                    <ArabicNameField label="Lesson title (Arabic)" defaultValue={l.titleAr} placeholder="عنوان الدرس بالعربية" />
                     <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
                       {l.type === "VIDEO" && l.video?.hasVideo && (
                         <span className="text-emerald-600">Video ready</span>

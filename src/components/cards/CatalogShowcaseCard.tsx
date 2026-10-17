@@ -181,12 +181,12 @@ function CatalogShowcaseHoverCard({
       </button>
 
       <div
-        className="absolute inset-x-0 top-0 z-1 rounded-[50px] border border-black"
+        className="absolute inset-x-0 top-0 z-1 rounded-[50px] border border-black max-lg:border-black/20"
         style={{ height: HOVER_EXPAND_TOP_H, backgroundColor: BRIGHT_GREEN }}
       />
 
       <div
-        className="absolute inset-x-0 z-2 rounded-[50px] border border-black bg-white"
+        className="absolute inset-x-0 z-2 rounded-[50px] border border-black max-lg:border-black/20 bg-white"
         style={{ top: HOVER_EXPAND_WHITE_TOP, height: HOVER_EXPAND_BOTTOM_H }}
       />
 
@@ -388,20 +388,21 @@ export function CatalogShowcaseCard({
     <>
       <div
         ref={cardShellRef}
+        dir="ltr"
         className={shellClass}
         style={{ height: SHOWCASE_CARD_H }}
         {...(showcaseSlug ? { "data-showcase-slug": showcaseSlug } : {})}
       >
         {/* Upper white text panel */}
         <div
-          className="absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black bg-white"
+          className="absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 bg-white"
           style={{ height: SHOWCASE_TOP_H }}
           aria-hidden
         />
 
         {/* Lower photo panel — Figma 323×289.744 */}
         <div
-          className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black ${photoSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
+          className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 ${photoSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
           style={{ top: SHOWCASE_PHOTO_TOP, height: SHOWCASE_PHOTO_H }}
           aria-hidden
         >

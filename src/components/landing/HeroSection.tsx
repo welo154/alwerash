@@ -6,6 +6,9 @@ import Link from "next/link";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 import { CoursesMegaMenuPanel } from "@/components/layout/CoursesMegaMenu";
 import { MobileSiteNavActions, MobileSiteNavLogo } from "@/components/layout/MobileSiteNavBar";
+import { HeaderLanguageToggle } from "@/components/layout/HeaderLanguageToggle";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
 export type HeroTrack = { id: string; title: string; slug: string };
@@ -14,11 +17,11 @@ const GUEST_SHELL_GREEN = "#8AF396";
 const LOGO_W = 220;
 const pangeaFont = pangeaFontFamily;
 
-/** Exact Subtract path from Figma 710:1466 — viewBox 1301×762. */
+/** Desktop header shell — viewBox 1360×780. */
 const HERO_SHELL_PATH =
-  "M1246 0C1276.38 1.22409e-05 1301 24.6243 1301 55V707C1301 737.376 1276.38 762 1246 762H55C24.6244 762 0 737.376 0 707V132.636C0 105.022 22.3858 82.6357 50 82.6357H176.023C200.324 82.6357 220.023 62.9363 220.023 38.6357C220.023 17.2978 237.321 0 258.659 0H1246Z";
+  "M1305 0C1335.38 0 1360 24.6243 1360 55V725C1360 755.376 1335.38 780 1305 780H55C24.6243 780 1.36923e-06 755.376 0 725V132.636C0 105.022 22.3858 82.6357 50 82.6357H186.002C210.302 82.6356 230.002 62.9361 230.002 38.6357C230.002 17.2978 247.3 0 268.638 0H1305Z";
 
-const HERO_SHELL = { width: 1301, height: 762 } as const;
+const HERO_SHELL = { width: 1360, height: 780 } as const;
 const HERO_SHELL_MOBILE = { width: 382, height: 801 } as const;
 const HERO_SHELL_TABLET = { width: 732, height: 1049 } as const;
 
@@ -34,6 +37,8 @@ const HERO_SHELL_TABLET_PATH =
   "M670 0C673.491 0 673.177 3 669.687 3H645C632.85 3 623 12.8497 623 25V41C623 56.464 635.536 69 651 69H682C709.614 69 732 91.3858 732 119V987C732 1021.24 704.242 1049 670 1049H62C27.7583 1049 0 1021.24 0 987V118C0 90.3857 22.3858 68 50 68H129.5C147.449 68 162 53.4493 162 35.5V19.2294C162 10.2662 154.734 3 145.771 3H62.3134C58.8228 3 58.5094 0 62 0H670Z";
 
 export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
     <section className={`${pangeaVar.className} bg-white px-0 pb-0 pt-[37px] max-[743px]:sm:px-6 min-[744px]:pt-[7px] lg:px-8 lg:pt-[32px]`}>
       {/* Mobile shell — 382px centered in ~393 viewport */}
@@ -90,13 +95,15 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
         style={{ width: HERO_SHELL.width, height: HERO_SHELL.height }}
       >
         <svg
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full"
-          viewBox="0 0 1301 762"
-          fill="none"
+          className="pointer-events-none absolute inset-0 z-0"
           xmlns="http://www.w3.org/2000/svg"
+          width={HERO_SHELL.width}
+          height={HERO_SHELL.height}
+          viewBox={`0 0 ${HERO_SHELL.width} ${HERO_SHELL.height}`}
+          fill="none"
           aria-hidden
         >
-          <path d={HERO_SHELL_PATH} fill={GUEST_SHELL_GREEN} />
+          <path d={HERO_SHELL_PATH} fill="var(--Green, #8AF396)" />
         </svg>
 
         <Link
@@ -124,9 +131,9 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 <div className="group relative">
                   <Link
                     href="/course"
-                    className="inline-flex items-center gap-0 text-[18px] font-normal leading-[33px] text-black transition-opacity hover:opacity-75"
+                    className="inline-flex w-[82px] min-w-[82px] max-w-[82px] shrink-0 items-center gap-0 whitespace-nowrap text-[18px] font-normal leading-[33px] text-black transition-opacity hover:opacity-75"
                   >
-                    Courses
+                    {t("Courses")}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -153,17 +160,29 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                     <CoursesMegaMenuPanel />
                   </div>
                 </div>
-                <Link href="/library" className="transition-opacity hover:opacity-75">Library</Link>
-                <Link href="/events" className="transition-opacity hover:opacity-75">Events</Link>
+                <Link href="/library" className="inline-flex w-[54px] min-w-[54px] max-w-[54px] shrink-0 items-center whitespace-nowrap transition-opacity hover:opacity-75">{t("Library")}</Link>
+                <Link href="/events" className="inline-flex w-[53px] min-w-[53px] max-w-[53px] shrink-0 items-center whitespace-nowrap transition-opacity hover:opacity-75">{t("Events")}</Link>
               </nav>
 
               <div className="ml-[30px] hidden flex-wrap items-center lg:flex">
                 <div className="flex items-center gap-[15px]">
-                  <div className="flex h-10 w-[350px] items-center rounded-[8px] border border-black bg-white px-3">
+                  <div
+                    className="flex shrink-0 items-center justify-center bg-white"
+                    style={{
+                      width: 350,
+                      height: 40,
+                      padding: "0 12px",
+                      gap: 10,
+                      borderRadius: 20,
+                      border: "0.3px solid rgb(0 0 0 / 40%)",
+                      background: "#FFF",
+                      boxSizing: "border-box",
+                    }}
+                  >
                     <input
                       type="text"
-                      placeholder="Search for courses"
-                      className="w-full bg-transparent text-[18px] text-[#73726C] placeholder:text-[#73726C] focus:outline-none"
+                      placeholder={t("Search for courses")}
+                      className="min-w-0 flex-1 bg-transparent text-[18px] text-[#73726C] placeholder:text-[#73726C] focus:outline-none"
                       style={{ fontFamily: pangeaFont }}
                       suppressHydrationWarning
                     />
@@ -172,35 +191,65 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                   <button
                     type="button"
                     aria-label="Search"
-                    className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-black text-black"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center"
                     suppressHydrationWarning
                   >
-                    <ArrowRightIcon className="h-5 w-5" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="40"
+                      height="40"
+                      viewBox="0 0 41 41"
+                      fill="none"
+                      aria-hidden
+                    >
+                      <path
+                        d="M20.25 12.25L28.25 20.25L20.25 28.25M28.25 20.25H12.25M40.25 20.25C40.25 31.2957 31.2957 40.25 20.25 40.25C9.2043 40.25 0.25 31.2957 0.25 20.25C0.25 9.2043 9.2043 0.25 20.25 0.25C31.2957 0.25 40.25 9.2043 40.25 20.25Z"
+                        stroke="var(--Black, #000)"
+                        strokeWidth="0.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </button>
                 </div>
 
-                <div className="ml-[75px] flex items-center gap-[15px]">
+                <div className="ml-[75px] flex w-[238px] min-w-[238px] max-w-[238px] shrink-0 items-center justify-end gap-[15px] overflow-visible">
                   <Link
                     href="/login"
-                    className="inline-flex h-[36px] w-[81px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-white px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
-                    style={{ fontFamily: pangeaFont }}
+                    className="inline-flex shrink-0 items-center justify-center whitespace-nowrap bg-white text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
+                    style={{
+                      fontFamily: pangeaFont,
+                      display: "inline-flex",
+                      height: 36,
+                      padding: "0 16px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 25,
+                      border: "0.3px solid rgb(0 0 0 / 40%)",
+                    }}
                   >
-                    Log in
+                    {t("Log in")}
                   </Link>
                   <Link
                     href="/register"
-                    className="inline-flex h-[36px] w-[85px] items-center justify-center whitespace-nowrap rounded-md border border-black bg-[#EA83F0] px-4 text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
-                    style={{ fontFamily: pangeaFont }}
+                    className="shrink-0 items-center justify-center whitespace-nowrap text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
+                    style={{
+                      fontFamily: pangeaFont,
+                      display: "flex",
+                      width: 85,
+                      height: 36,
+                      padding: "0 16px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 25,
+                      border: "0.3px solid rgb(0 0 0 / 40%)",
+                      background: "var(--Purple, #EA83F0)",
+                      boxSizing: "border-box",
+                    }}
                   >
-                    Sign up
+                    {t("Sign up")}
                   </Link>
-                  <div
-                    className="flex h-[40px] w-[40px] items-center justify-center rounded-full border border-black text-[20px] font-normal leading-[100%] tracking-[0] text-black"
-                    style={{ fontFamily: "Inter, var(--font-dm-sans), sans-serif" }}
-                    aria-hidden
-                  >
-                    ع
-                  </div>
+                  <HeaderLanguageToggle />
                 </div>
               </div>
             </div>
@@ -208,48 +257,100 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 
           <div
             className="z-20"
+            dir={arabic ? "rtl" : undefined}
             style={{
               position: "absolute",
-              top: 151,
-              left: 50,
-              width: 612,
+              top: 124,
+              ...(arabic ? { right: 50 } : { left: 50 }),
+              width: arabic ? 678 : 612,
               maxWidth: "calc(100% - 50px)",
             }}
           >
-            <h1
-              className="m-0 max-w-full uppercase tracking-[0] text-black"
+            <div
               style={{
-                width: 610,
-                color: "#000",
+                display: "flex",
+                width: arabic ? 165 : 234,
+                height: 25,
+                padding: "0 16px",
+                justifyContent: "center",
+                alignItems: "center",
+                flexShrink: 0,
+                borderRadius: 15,
+                border: "0.2px solid rgb(0 0 0 / 40%)",
+                background: "var(--Green, #8AF396)",
+                boxSizing: "border-box",
+                color: "#141413",
+                textAlign: "center",
                 fontFamily: pangeaFont,
-                fontSize: "48px",
+                fontSize: 14,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "19.6px",
+              }}
+            >
+              <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
+              <span className="whitespace-nowrap" style={{ marginInlineStart: 8 }}>
+                {arabic ? "تبـدأ الإبـداع هنـا" : "CREATIVITY STARTS HERE"}
+              </span>
+            </div>
+            <h1
+              className={`m-0 mt-[28px] max-w-full tracking-[0] text-black ${arabic ? "" : "uppercase"}`}
+              style={{
+                width: arabic ? 678 : 610,
+                marginTop: 28,
+                color: "#000",
+                ...(arabic ? { textAlign: "right" as const } : {}),
+                fontFamily: pangeaFont,
+                fontSize: arabic ? "64px" : "48px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "120%",
               }}
             >
-              Discover your next{" "}
-              <em
-                style={{
-                  color: "#000",
-                  fontFamily: pangeaFont,
-                  fontSize: "48px",
-                  fontStyle: "italic",
-                  fontWeight: 700,
-                  lineHeight: "120%",
-                }}
-              >
-                creative
-              </em>{" "}
-              obsession.
-              <br />
-              From beginner to pro at your own time.
+              {arabic ? (
+                <>
+                  اكتشف هوسك{" "}
+                  <span
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFont,
+                      fontSize: "64px",
+                      fontStyle: "normal",
+                      fontWeight: 600,
+                      lineHeight: "120%",
+                    }}
+                  >
+                    الإبداعي
+                  </span>{" "}
+                  التالي. من مبتدئ إلى محترف في وقتك الخاص.
+                </>
+              ) : (
+                <>
+                  Discover your next{" "}
+                  <em
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFont,
+                      fontSize: "48px",
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                      lineHeight: "120%",
+                    }}
+                  >
+                    creative
+                  </em>{" "}
+                  obsession.
+                  <br />
+                  From beginner to pro at your own time.
+                </>
+              )}
             </h1>
             <p
-              className="mt-[25px] max-w-full tracking-[0] text-black"
+              className={`${arabic ? "mt-[33px]" : "mt-[25px]"} max-w-full tracking-[0] text-black`}
               style={{
                 width: 612,
                 color: "#000",
+                ...(arabic ? { textAlign: "right" as const } : {}),
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -257,23 +358,54 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 lineHeight: "127%",
               }}
             >
-              Explore thousands of online classes in design, typography, illustration,
-              photography, and more. Taught by industry professionals.
+              {arabic
+                ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
+                : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
             </p>
             <Link
               href="/register"
-              className="mt-[30px] inline-flex h-[91px] w-[300px] items-center justify-center rounded-md border border-black bg-white px-4 text-center text-[36px] font-normal leading-[100%] tracking-[0] text-[#141413]"
-              style={{ fontFamily: pangeaFont }}
+              className={arabic ? "mt-[50px]" : "mt-[30px]"}
+              style={{
+                display: "flex",
+                width: 270,
+                height: 78,
+                padding: "0 16px",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 30,
+                border: "0.3px solid rgb(0 0 0 / 40%)",
+                background: "var(--White, #FFF)",
+                color: arabic ? "var(--Black, #000)" : "var(--Text-Primary, #141413)",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: arabic ? 40 : 36,
+                fontStyle: "normal",
+                fontWeight: arabic ? 500 : 400,
+                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                boxSizing: "border-box",
+              }}
             >
-              GET STARTED
+              {arabic ? "ابدأ الان" : "GET STARTED"}
             </Link>
             <p
-              className="mt-6 w-[300px] text-center text-[24px] font-normal leading-[120%] tracking-[0] text-black"
-              style={{ fontFamily: pangeaFont }}
+              className={`mt-6 w-[270px] text-center tracking-[0] text-black ${arabic ? "" : "text-[24px] font-normal leading-[120%]"}`}
+              style={
+                arabic
+                  ? {
+                      color: "#000",
+                      textAlign: "center",
+                      fontFamily: pangeaFont,
+                      fontSize: 20,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "120%",
+                    }
+                  : { fontFamily: pangeaFont }
+              }
             >
-              Or continue with
+              {arabic ? "أو تابع مع" : "Or continue with"}
             </p>
-            <div className="mt-[24px] w-[300px]">
+            <div className="mt-[24px] w-[270px]" dir="ltr">
               <LandingSocialSignInRow variant="hero" />
             </div>
           </div>
@@ -282,7 +414,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
             className="z-20"
             style={{
               position: "absolute",
-              right: 39,
+              ...(arabic ? { left: 39 } : { right: 39 }),
               bottom: 31,
             }}
             aria-hidden
@@ -320,12 +452,14 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
 }
 
 function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tablet" }) {
+  const arabic = useArabicLayout();
   const isTablet = variant === "tablet";
   /** Badge: 55px from SVG left, 166px from page top (header is 7px from page). */
   const tabletTop = 166 - 7;
 
   return (
     <div
+      dir={arabic ? "rtl" : undefined}
       className={`absolute z-20 ${isTablet ? "w-[601px]" : "left-[25px] top-[110px] w-[323px]"}`}
       style={{
         fontFamily: pangeaFont,
@@ -335,14 +469,15 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
       <div className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4">
         <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
         <span className="text-center text-[14px] font-normal leading-[19.6px] text-[#141413] whitespace-nowrap">
-          CREATIVITY STARTS HERE
+          {arabic ? "تبـدأ الإبـداع هنـا" : "CREATIVITY STARTS HERE"}
         </span>
       </div>
 
       <h1
-        className={`m-0 mt-[30px] uppercase text-black ${isTablet ? "" : "w-[323px]"}`}
+        className={`m-0 mt-[30px] text-black ${arabic ? "" : "uppercase"} ${isTablet ? "" : "w-[323px]"}`}
         style={{
           color: "#000",
+          ...(arabic ? { textAlign: "right" as const } : {}),
           fontFamily: pangeaFont,
           fontSize: isTablet ? "60px" : "40px",
           fontStyle: "normal",
@@ -351,28 +486,50 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
           ...(isTablet ? { width: 601, maxWidth: 601 } : {}),
         }}
       >
-        Discover your next{" "}
-        <em
-          style={{
-            color: "#000",
-            fontFamily: pangeaFont,
-            fontSize: isTablet ? "60px" : "40px",
-            fontStyle: "italic",
-            fontWeight: 700,
-            lineHeight: "120%",
-          }}
-        >
-          creative
-        </em>{" "}
-        obsession.
-        {isTablet ? " " : <br />}
-        From beginner to pro at your own time.
+        {arabic ? (
+          <>
+            اكتشف هوسك{" "}
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: isTablet ? "60px" : "40px",
+                fontStyle: "normal",
+                fontWeight: 600,
+                lineHeight: "120%",
+              }}
+            >
+              الإبداعي
+            </span>{" "}
+            التالي. من مبتدئ إلى محترف في وقتك الخاص.
+          </>
+        ) : (
+          <>
+            Discover your next{" "}
+            <em
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: isTablet ? "60px" : "40px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                lineHeight: "120%",
+              }}
+            >
+              creative
+            </em>{" "}
+            obsession.
+            {isTablet ? " " : <br />}
+            From beginner to pro at your own time.
+          </>
+        )}
       </h1>
 
       <p
-        className={`m-0 mt-[30px] text-black ${isTablet ? "w-[554px]" : "w-[284px]"}`}
+        className={`m-0 ${arabic ? "mt-[33px]" : "mt-[30px]"} text-black ${isTablet ? "w-[554px]" : "w-[284px]"}`}
         style={{
           color: "#000",
+          ...(arabic ? { textAlign: "right" as const } : {}),
           fontFamily: pangeaFont,
           fontSize: isTablet ? "24px" : "18px",
           fontStyle: "normal",
@@ -380,63 +537,83 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
           lineHeight: "127%",
         }}
       >
-        Explore thousands of online classes in design, typography, illustration,
-        photography, and more. Taught by industry professionals.
+        {arabic
+          ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
+          : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
       </p>
 
       <Link
         href="/register"
         className={
           isTablet
-            ? "mt-[61px] flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]"
-            : "mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] border-black bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
+            ? `${arabic ? "mt-[50px]" : "mt-[61px]"} flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]`
+            : "mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
         }
         style={{
           fontFamily: pangeaFont,
           ...(isTablet
             ? {
                 borderRadius: "var(--Radius-MD, 8px)",
-                border: "0.3px solid var(--Black, #000)",
+                border: "0.3px solid rgb(0 0 0 / 40%)",
                 background: "var(--White, #FFF)",
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
                 padding: "0 16px",
               }
-            : {}),
+            : {
+                borderColor: "rgb(0 0 0 / 40%)",
+              }),
         }}
       >
-        GET STARTED
+        {arabic ? "ابدأ الان" : "GET STARTED"}
       </Link>
 
       {isTablet ? (
         <>
           <p
-            className="m-0 mt-[19px] w-[300px] text-center text-[24px] font-normal leading-[120%] text-black"
-            style={{ fontFamily: pangeaFont }}
+            className={`m-0 mt-[19px] w-[300px] text-center text-black ${arabic ? "" : "text-[24px] font-normal leading-[120%]"}`}
+            style={
+              arabic
+                ? {
+                    color: "#000",
+                    textAlign: "center",
+                    fontFamily: pangeaFont,
+                    fontSize: 20,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                  }
+                : { fontFamily: pangeaFont }
+            }
           >
-            Or continue with
+            {arabic ? "أو تابع مع" : "Or continue with"}
           </p>
-          <LandingSocialSignInRow variant="tabletHero" className="mt-[23px] w-[300px]" />
+          <div className="w-[300px]" dir="ltr">
+            <LandingSocialSignInRow variant="tabletHero" className="mt-[23px] w-[300px]" />
+          </div>
         </>
       ) : (
-        <div className="mt-[17px] flex items-center">
+        <div className={`mt-[17px] flex items-center ${arabic ? "justify-end" : ""}`} dir="ltr">
           <p
-            className="m-0 text-center text-[18px] font-normal leading-[120%] text-black"
-            style={{ fontFamily: pangeaFont }}
+            className={`m-0 text-center text-black ${arabic ? "" : "text-[18px] font-normal leading-[120%]"}`}
+            style={
+              arabic
+                ? {
+                    color: "#000",
+                    textAlign: "center",
+                    fontFamily: pangeaFont,
+                    fontSize: 20,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                  }
+                : { fontFamily: pangeaFont }
+            }
           >
-            Or continue with
+            {arabic ? "أو تابع مع" : "Or continue with"}
           </p>
           <LandingSocialSignInRow variant="mobileHero" className="ml-[8px]" />
         </div>
       )}
     </div>
-  );
-}
-
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <path d="M5 12h12" strokeWidth="2" strokeLinecap="round" />
-      <path d="M13 6l6 6-6 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
