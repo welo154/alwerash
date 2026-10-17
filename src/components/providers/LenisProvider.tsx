@@ -7,7 +7,8 @@ import "lenis/dist/lenis.css";
 
 /**
  * Global Lenis smooth scrolling for the document.
- * Mount once from the root layout; cleans up on unmount.
+ * Login, register, and the admin panel use a fixed-height column that scrolls
+ * itself. Lenis captures the touchpad wheel and would stop that column from moving.
  */
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,7 +18,8 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     if (
       pathname === "/login" ||
       pathname === "/register" ||
-      pathname.startsWith("/register/")
+      pathname.startsWith("/register/") ||
+      pathname.startsWith("/admin")
     ) {
       return;
     }

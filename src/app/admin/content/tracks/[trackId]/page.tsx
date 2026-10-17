@@ -61,6 +61,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
       summary: String(formData.get("summary") ?? "") || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
+      comingSoon: formData.get("comingSoon") === "on",
     });
     redirect(`/admin/content/tracks/${id}?toast=Course+added`);
   }
@@ -275,14 +276,24 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
             </div>
-            <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-              <input
-                name="published"
-                type="checkbox"
-                className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
-              />
-              Published
-            </label>
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="published"
+                  type="checkbox"
+                  className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                />
+                Published
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                <input
+                  name="comingSoon"
+                  type="checkbox"
+                  className="rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+                />
+                Coming soon
+              </label>
+            </div>
             <button
               type="submit"
               className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
@@ -293,7 +304,7 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {track.courses.map((c: { id: string; title: string; published: boolean }) => (
+          {track.courses.map((c: { id: string; title: string; published: boolean; comingSoon: boolean }) => (
             <Link
               key={c.id}
               href={`/admin/content/courses/${c.id}`}
@@ -301,13 +312,20 @@ export default async function AdminTrackDetail({ params }: { params: Promise<{ t
             >
               <div>
                 <div className="font-semibold text-slate-900 group-hover:text-[var(--color-primary)]">{c.title}</div>
-                <span
-                  className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                    c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {c.published ? "Published" : "Draft"}
-                </span>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                      c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {c.published ? "Published" : "Draft"}
+                  </span>
+                  {c.comingSoon ? (
+                    <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      Coming soon
+                    </span>
+                  ) : null}
+                </div>
               </div>
               <span className="text-sm text-[var(--color-primary)] group-hover:underline">Manage →</span>
             </Link>

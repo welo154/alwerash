@@ -36,7 +36,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-dvh bg-white font-sans">
+    <div data-lenis-prevent className="flex h-dvh overflow-hidden bg-white font-sans">
       {/* Left sidebar: full viewport height, logout pinned to bottom */}
       <aside className="flex h-dvh w-56 shrink-0 flex-col border-r border-slate-200 bg-white">
         <Link
@@ -78,7 +78,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Right: main content with overflow scroll */}
-      <main className="min-h-0 flex-1 overflow-auto bg-slate-50/50">{children}</main>
+      <main
+        data-lenis-prevent
+        className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain bg-slate-50/50"
+      >
+        {children}
+      </main>
 
       {/* Logout confirmation modal */}
       {logoutOpen && (

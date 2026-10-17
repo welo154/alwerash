@@ -36,6 +36,7 @@ export const RATE_LIMITS = {
   /** The player refreshes roughly every 18 minutes, so this only catches scripted minting. */
   playbackPerViewer: { name: "playback_viewer", limit: 60, windowSeconds: 60 },
   uploadPerUser: { name: "upload_user", limit: 30, windowSeconds: 60 * 60 },
+  checkoutPerUser: { name: "checkout_user", limit: 10, windowSeconds: 60 * 60 },
 } as const satisfies Record<string, RateLimitRule>;
 
 export type RateLimitResult = {

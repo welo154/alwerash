@@ -220,7 +220,7 @@ function PricingCardHeader({
             lineHeight: "normal",
           }}
         >
-          /month
+          /year
         </span>
       </div>
     </>

@@ -140,7 +140,7 @@ function MobilePricingCard({
           lineHeight: "normal",
         }}
       >
-        /month
+        /year
       </span>
 
       <div

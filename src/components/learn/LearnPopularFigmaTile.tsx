@@ -153,6 +153,7 @@ export function LearnPopularFigmaTile(
     tagPrimary,
     coverImageSrc,
     progressPercent,
+    comingSoon = false,
     className = "",
     size = "default",
   } = props;
@@ -322,7 +323,7 @@ export function LearnPopularFigmaTile(
       <Link
         ref={containerRef}
         href={href}
-        aria-label={`${title}. ${authorLabel}. ${tagPrimary}. Start`}
+        aria-label={`${title}. ${authorLabel}. ${tagPrimary}.${comingSoon ? " Coming soon." : " Start"}`}
         className={
           isGrid
             ? `relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
@@ -671,32 +672,54 @@ export function LearnPopularFigmaTile(
           </p>
         </div>
         <div
-          className="inline-flex w-max max-w-full items-center justify-center self-start rounded-[8px] border border-solid border-black bg-white px-4"
-          style={{
-            height: TAG_PRIMARY_H,
-            maxWidth: isGrid ? "100%" : TAG_PILL_MAX_W,
-            marginTop: GAP_AUTHOR_TO_TAG,
-            fontFamily: pangeaFont,
-          }}
+          className="flex flex-wrap items-center gap-2 self-start"
+          style={{ marginTop: GAP_AUTHOR_TO_TAG }}
         >
-          <span className="min-w-0 truncate text-center text-[16px] font-medium not-italic leading-[19.6px] text-black uppercase">
-            {tagPrimary}
-          </span>
+          <div
+            className="inline-flex w-max max-w-full items-center justify-center rounded-[8px] border border-solid border-black bg-white px-4"
+            style={{
+              height: TAG_PRIMARY_H,
+              maxWidth: isGrid ? "100%" : TAG_PILL_MAX_W,
+              fontFamily: pangeaFont,
+            }}
+          >
+            <span className="min-w-0 truncate text-center text-[16px] font-medium not-italic leading-[19.6px] text-black uppercase">
+              {tagPrimary}
+            </span>
+          </div>
+          {comingSoon ? (
+            <div
+              className="inline-flex w-max items-center justify-center rounded-[8px] border border-solid border-amber-700 bg-amber-100 px-3"
+              style={{ height: TAG_PRIMARY_H, fontFamily: pangeaFont }}
+            >
+              <span className="text-center text-[14px] font-medium not-italic leading-[19.6px] text-amber-900 uppercase">
+                Coming soon
+              </span>
+            </div>
+          ) : null}
         </div>
         <div
           className={`flex flex-wrap items-center self-start${isGrid ? " mt-auto" : ""}`}
           style={isGrid ? { marginTop: GAP_TAG_TO_START } : { marginTop: GAP_TAG_TO_START }}
         >
           <span
-            className="inline-flex h-[42px] w-[106px] shrink-0 items-center justify-center rounded-[8px] border border-[#004B3C] bg-[#004B3C] text-white"
+            className={`inline-flex h-[42px] shrink-0 items-center justify-center rounded-[8px] border text-white ${
+              comingSoon
+                ? "w-auto border-amber-800 bg-amber-800 px-4"
+                : "w-[106px] border-[#004B3C] bg-[#004B3C]"
+            }`}
             onMouseEnter={
-              isGrid ? undefined : (e: MouseEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
+              isGrid || comingSoon
+                ? undefined
+                : (e: MouseEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
             }
             onFocus={
-              isGrid ? undefined : (e: FocusEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
+              isGrid || comingSoon
+                ? undefined
+                : (e: FocusEvent<HTMLSpanElement>) => activateHover(e.currentTarget)
             }
             onClick={
-              isGrid
+              isGrid || comingSoon
                 ? undefined
                 : (e: MouseEvent<HTMLSpanElement>) => {
                     if (!isStartHovered) {
@@ -708,14 +731,16 @@ export function LearnPopularFigmaTile(
             }
             style={{
               fontFamily: pangeaFont,
-              fontSize: "18px",
+              fontSize: comingSoon ? "14px" : "18px",
               fontStyle: "normal",
               fontWeight: 700,
               lineHeight: "var(--Line-height-Heading-sm,19.6px)",
               padding: "0 16px",
             }}
           >
-            <span className="inline-block -translate-x-[3px]">START</span>
+            <span className={`inline-block ${comingSoon ? "" : "-translate-x-[3px]"}`}>
+              {comingSoon ? "COMING SOON" : "START"}
+            </span>
           </span>
           <LearnPopularStartArrowIcon />
           {!(isGrid && progressPercent != null) ? (

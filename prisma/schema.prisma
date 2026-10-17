@@ -121,6 +121,7 @@ model User {
   learningDays          UserLearningDay[]
   courseLearningDays    UserCourseLearningDay[]
   deviceSessions        DeviceSession[]
+  checkoutAttempts      CheckoutAttempt[]
 
   @@map("users")
 }
@@ -278,6 +279,8 @@ model Course {
   introVideoMuxPlaybackId String?  @map("intro_video_mux_playback_id")
   order                  Int      @default(0)
   published              Boolean  @default(false)
+  /// Soft-launch teaser: visible when published, but the full course is not open yet.
+  comingSoon             Boolean  @default(false) @map("coming_soon")
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
@@ -589,6 +592,24 @@ model PaymentEvent {
   @@unique([provider, providerEventId])
   @@index([provider, status])
   @@map("payment_events")
+}
+
+/// A learner asked to pay before Paymob or Stripe is connected. Never a charge.
+model CheckoutAttempt {
+  id        String               @id @default(cuid())
+  userId    String               @map("user_id")
+  planId    String               @map("plan_id")
+  provider  SubscriptionProvider
+  currency  String
+  /// Price shown for this currency. Null when that price is not decided yet.
+  amount    Int?
+  status    String               @default("COMING_SOON")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("checkout_attempts")
 }
 
 // ===== Mentors =====

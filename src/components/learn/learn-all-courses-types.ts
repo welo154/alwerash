@@ -9,6 +9,7 @@ export type LearnAllCourseItem = {
   rating: number | null;
   lessonCount: number;
   totalDurationMinutes: number | null;
+  comingSoon?: boolean;
 };
 
 export type LearnCourseTrackOption = {

@@ -81,6 +81,7 @@ export const CourseCreateSchema = z.object({
   instructorImage: OptionalUrl,
   order: z.number().int().min(0).max(1_000_000).optional(),
   published: z.boolean().optional(),
+  comingSoon: z.boolean().optional(),
   featuredNewOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   featuredMostPlayedOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),
   featuredTrendingOrder: z.number().int().min(0).max(1_000_000).nullable().optional(),

@@ -22,6 +22,7 @@ function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
     authorLabel: c.instructorName?.trim() || "Instructor",
     tagPrimary: c.track?.title?.trim().toUpperCase() || "COURSE",
     coverImageSrc: c.coverImage,
+    comingSoon: c.comingSoon,
   }));
 }
 
@@ -37,6 +38,7 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
     rating: c.rating,
     lessonCount: c.lessonCount,
     totalDurationMinutes: c.totalDurationMinutes,
+    comingSoon: c.comingSoon,
   }));
 }
 

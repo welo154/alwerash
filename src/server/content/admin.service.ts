@@ -82,7 +82,7 @@ export async function adminGetTrack(id: string) {
     where: { id },
     include: {
       courses: {
-        select: { id: true, title: true, published: true },
+        select: { id: true, title: true, published: true, comingSoon: true },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -130,6 +130,7 @@ export async function adminListCourses(trackId?: string) {
         coverImage: true,
         order: true,
         published: true,
+        comingSoon: true,
         featuredMostPlayedOrder: true,
         createdAt: true,
         updatedAt: true,
@@ -172,6 +173,7 @@ async function adminListCoursesRawSafe(trackId?: string) {
     coverImage: row.cover_image,
     order: 0,
     published: row.published,
+    comingSoon: false,
     featuredMostPlayedOrder: null as number | null,
     featuredTrendingOrder: null as number | null,
     tagGuided: false,
@@ -200,6 +202,7 @@ export async function adminGetCourse(id: string) {
         introVideoMuxPlaybackId: true,
         order: true,
         published: true,
+        comingSoon: true,
         featuredNewOrder: true,
         featuredMostPlayedOrder: true,
         totalDurationMinutes: true,
@@ -292,6 +295,7 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   set("summary", data.summary);
   set("cover_image", data.coverImage);
   set("published", Boolean(data.published));
+  if (data.comingSoon !== undefined) set("coming_soon", Boolean(data.comingSoon));
   if (Array.isArray(data.requirements)) {
     await sqlSetCourseRequirements(courseId, data.requirements as string[]);
   }
@@ -391,6 +395,7 @@ async function courseFindRawSafe(courseId: string) {
     introVideoMuxPlaybackId: null as string | null,
     order: 0,
     published: row.published,
+    comingSoon: false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

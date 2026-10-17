@@ -34,7 +34,6 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   experimental: {
-    instrumentationHook: true,
     staleTimes: {
       dynamic: 30,
       static: 180,

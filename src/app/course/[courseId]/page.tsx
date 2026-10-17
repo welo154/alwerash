@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { readLiveSession } from "@/server/auth/live-session";
 import { CoursePreviewExperience } from "./CoursePreviewExperience";
+import { CourseComingSoonPanel } from "@/components/course/CourseComingSoonPanel";
 import { RelatedClassesSection } from "./RelatedClassesSection";
 import {
   courseRequirementItems,
@@ -85,8 +86,9 @@ export default async function PublicCoursePage({
     continueHref: publicCoursePath(related.id),
   }));
 
-  const freeLessonIds = getFreeLessonIds(course.modules);
-  const trialVideos = await publicGetFreePreviewVideos(course.id);
+  const isComingSoon = Boolean(course.comingSoon);
+  const freeLessonIds = isComingSoon ? [] : getFreeLessonIds(course.modules);
+  const trialVideos = isComingSoon ? [] : await publicGetFreePreviewVideos(course.id);
   const subscribeHref = getLockedLessonRedirect(course.id, viewerAccess);
   const fullCourseHref = privateCoursePath(course.id);
 
@@ -117,18 +119,33 @@ export default async function PublicCoursePage({
             {course.title}
           </h1>
 
-          <CoursePreviewExperience
-            coverImage={course.coverImage}
-            trials={trialVideos}
-            courseId={course.id}
-            fontFamily={pangeaVar.style.fontFamily}
-            modules={course.modules}
-            totalDurationMinutes={course.totalDurationMinutes}
-            freeLessonIds={freeLessonIds}
-            viewerAccess={viewerAccess}
-          />
+          {isComingSoon ? (
+            <div className="max-lg:order-2">
+              <CourseComingSoonPanel courseTitle={course.title} />
+            </div>
+          ) : (
+            <CoursePreviewExperience
+              coverImage={course.coverImage}
+              trials={trialVideos}
+              courseId={course.id}
+              fontFamily={pangeaVar.style.fontFamily}
+              modules={course.modules}
+              totalDurationMinutes={course.totalDurationMinutes}
+              freeLessonIds={freeLessonIds}
+              viewerAccess={viewerAccess}
+            />
+          )}
 
-          {hasSubscription ? (
+          {isComingSoon ? (
+            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
+              <p
+                className="m-0 inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#FFF7E8] px-8 text-[20px] font-medium text-black"
+                style={{ fontFamily: pangeaVar.style.fontFamily }}
+              >
+                Coming soon — not open yet
+              </p>
+            </div>
+          ) : hasSubscription ? (
             <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
               <Link
                 href={fullCourseHref}

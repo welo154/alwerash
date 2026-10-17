@@ -9,8 +9,6 @@ import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 const SUBSCRIPTION_LOGO = "/auth/alwerash-logo.png";
 
 const SUBSCRIPTION_ERRORS: Record<string, string> = {
-  payment_required:
-    "Checkout isn’t available yet, so this plan can’t be activated. Please contact support to complete your subscription.",
   invalid: "That plan is no longer available. Please choose another one.",
 };
 

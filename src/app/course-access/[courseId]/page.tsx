@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
-import { notFound } from "next/navigation";
-import { privateCoursePath } from "@/lib/course-access";
+import { notFound, redirect } from "next/navigation";
+import { privateCoursePath, publicCoursePath } from "@/lib/course-access";
 import { getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
 import { requireSubscription } from "@/server/subscription/require-subscription";
@@ -98,6 +98,10 @@ export default async function PrivateCoursePage({
   } catch (error) {
     if (error instanceof AppError && error.code === "NOT_FOUND") notFound();
     throw error;
+  }
+
+  if (course.comingSoon) {
+    redirect(publicCoursePath(courseId));
   }
 
   const [articleBodies, courseProgress] = await Promise.all([

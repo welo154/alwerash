@@ -634,6 +634,7 @@ export async function publicGetCourseById(courseId: string) {
       updatedAt: true,
       trackId: true,
       published: true,
+      comingSoon: true,
       track: { select: { published: true, slug: true, title: true } },
       modules: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
@@ -790,6 +791,7 @@ export type CourseForCard = {
   totalDurationMinutes: number | null;
   rating: number | null;
   studentCount: number;
+  comingSoon?: boolean;
 };
 
 function mapCourseToCard(
@@ -805,6 +807,7 @@ function mapCourseToCard(
     modules: { _count: { lessons: number } }[];
     totalDurationMinutes?: number | null;
     rating?: number | null;
+    comingSoon?: boolean | null;
   },
   studentCount: number
 ): CourseForCard {
@@ -821,6 +824,7 @@ function mapCourseToCard(
     totalDurationMinutes: c.totalDurationMinutes ?? null,
     rating: c.rating ?? null,
     studentCount,
+    comingSoon: Boolean(c.comingSoon),
   };
 }
 
@@ -963,6 +967,7 @@ const publishedCourseCardSelect = {
   instructorImage: true,
   totalDurationMinutes: true,
   rating: true,
+  comingSoon: true,
   order: true,
   createdAt: true,
   track: { select: { title: true, slug: true } },
