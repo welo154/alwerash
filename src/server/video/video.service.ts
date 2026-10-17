@@ -2,10 +2,12 @@
 import crypto from "crypto";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
-import { mux, playbackTTL, playbackUrl, uploadCorsOrigin } from "./mux";
+import { mux, playbackTTL, playbackTTLSeconds, playbackUrl, uploadCorsOrigin } from "./mux";
 import { isSignedPlaybackConfigured } from "@/server/mux/config";
 import { pickMuxPlaybackId } from "@/server/mux/playback-id";
 import { assertCanAccessLessonPlayback } from "./playback-access";
+import { viewerWatermarkMarker } from "./watermark";
+import { assertActiveDeviceSession } from "@/server/auth/device-session";
 
 function parseLessonIdFromPassthrough(passthrough?: string | null): string | null {
   if (!passthrough) return null;
@@ -60,9 +62,22 @@ export async function adminCreateMuxDirectUploadForLesson(lessonId: string) {
 
 export async function getSignedPlaybackForLesson(params: {
   lessonId: string;
-  viewer: { userId: string | null; email?: string | null; roles: string[] };
+  viewer: {
+    userId: string | null;
+    email?: string | null;
+    roles: string[];
+    deviceSessionId?: string | null;
+  };
 }) {
   const access = await assertCanAccessLessonPlayback(params.lessonId, params.viewer);
+
+  // Enforce the device limit at the point tokens are minted. Mux cannot check who
+  // is asking, so this is where "one phone and one computer" becomes real for
+  // video: a displaced device stops receiving fresh tokens and playback halts at
+  // the next refresh.
+  if (params.viewer.userId) {
+    await assertActiveDeviceSession(params.viewer.userId, params.viewer.deviceSessionId);
+  }
 
   if (!isSignedPlaybackConfigured()) {
     throw new AppError(
@@ -72,20 +87,30 @@ export async function getSignedPlaybackForLesson(params: {
     );
   }
 
+  const ttlSeconds = playbackTTLSeconds();
   const token = await mux.jwt.signPlaybackId(access.muxPlaybackId, {
     keyId: process.env.MUX_SIGNING_KEY_ID!,
     keySecret: process.env.MUX_PRIVATE_KEY!,
+    // Restrict to video delivery so the same token cannot fetch thumbnails,
+    // storyboards, or gifs for this asset.
+    type: "video",
     expiration: playbackTTL(),
   });
 
   const url = playbackUrl(access.muxPlaybackId, token);
+
+  // Opaque marker only: never send the viewer's email or user id to the browser.
   const watermarkText = params.viewer.userId
-    ? `${params.viewer.email ?? "user"} • ${params.viewer.userId}`
+    ? viewerWatermarkMarker(params.viewer.userId)
     : null;
+
   return {
     lessonId: access.lessonId,
     title: access.title,
     playbackUrl: url,
+    token,
+    /** Epoch millis. Lets the player roll the token before Mux rejects it. */
+    expiresAt: Date.now() + ttlSeconds * 1000,
     watermarkText,
     isFreePreview: access.isFreePreview,
   };
