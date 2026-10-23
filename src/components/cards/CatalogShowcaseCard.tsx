@@ -44,7 +44,44 @@ const SHOWCASE_ACCENT = "#89F496";
 export const CATALOG_SHOWCASE_CARD_W = 323;
 export const CATALOG_SHOWCASE_CARD_H = SHOWCASE_CARD_H;
 
-export function ViewMoreCircleGlyph({ className }: { className?: string }) {
+export function FeaturedViewMoreCircle() {
+  return (
+    <span className="relative block h-[50px] w-[50px]" aria-hidden>
+      <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 51 51" fill="none" className="block h-[50px] w-[50px]">
+        <path
+          d="M25.1499 50.15C38.957 50.15 50.1499 38.9571 50.1499 25.15C50.1499 11.3429 38.957 0.149994 25.1499 0.149994C11.3428 0.149994 0.149902 11.3429 0.149902 25.15C0.149902 38.9571 11.3428 50.15 25.1499 50.15Z"
+          fill="#FFF"
+        />
+        <path
+          d="M50.1499 25.15C50.1499 38.9571 38.957 50.15 25.1499 50.15C11.3428 50.15 0.149902 38.9571 0.149902 25.15C0.149902 11.3429 11.3428 0.149994 25.1499 0.149994C38.957 0.149994 50.1499 11.3429 50.1499 25.15Z"
+          stroke="var(--Black, #000)"
+          strokeWidth={0.3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 22 22"
+        fill="none"
+        className="absolute top-1/2 left-1/2 h-[20px] w-[20px] -translate-x-1/2 -translate-y-1/2"
+      >
+        <path d="M10.75 20.75L15.75 15.75L20.75 10.75L10.75 0.75" fill="#FFF" />
+        <path
+          d="M10.75 0.75L20.75 10.75L15.75 15.75L10.75 20.75M20.75 10.75L0.75 10.75"
+          stroke="var(--Black, #000)"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function ViewMoreCircleGlyph({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43 43" fill="none" className={className} aria-hidden>
       <path
@@ -115,6 +152,122 @@ function HoverLikeGlyph({ className }: { className?: string }) {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+const featuredMetaText = {
+  color: "var(--Text-Primary, #141413)",
+  textAlign: "center" as const,
+  fontFamily: pangeaFont,
+  fontSize: 18,
+  fontStyle: "normal" as const,
+  fontWeight: 400,
+  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+};
+
+function FeaturedHoverMeta({
+  levelLabel,
+  durationLabel,
+}: {
+  levelLabel: string;
+  durationLabel: string;
+}) {
+  return (
+    <>
+      <div
+        className="featured-hover-only pointer-events-none absolute flex items-center"
+        style={{ top: 25, left: 38, height: 36 }}
+      >
+        <span
+          className="inline-flex items-center justify-center"
+          style={{
+            height: 36,
+            padding: "0 16px",
+            borderRadius: 23,
+            border: "1px solid var(--Black, #000)",
+            background: "var(--Green, #8AF396)",
+            ...featuredMetaText,
+          }}
+        >
+          {levelLabel}
+        </span>
+        <span
+          className="relative flex items-center"
+          style={{
+            marginLeft: 10,
+            width: 164,
+            height: 36,
+            padding: "0 16px",
+            borderRadius: 23,
+            border: "1px solid var(--Black, #000)",
+            background: "var(--White, #FFF)",
+          }}
+        >
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 13 }}>
+            <HoverLearnersGlyph className="block h-[18px] w-[21px]" />
+          </span>
+          <span className="absolute top-1/2 flex -translate-y-1/2 items-center" style={{ left: 47, gap: 5 }}>
+            <span style={{ ...featuredMetaText, fontStyle: "italic" }}>234</span>
+            <span style={featuredMetaText}>learners</span>
+          </span>
+        </span>
+        <span
+          className="relative flex items-center"
+          style={{
+            marginLeft: 10,
+            width: 79,
+            height: 36,
+            padding: "0 16px",
+            borderRadius: 23,
+            border: "1px solid var(--Black, #000)",
+            background: "var(--White, #FFF)",
+          }}
+        >
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 10 }}>
+            <HoverLikeGlyph className="block h-[19.167px] w-[18.863px]" />
+          </span>
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 33.863, ...featuredMetaText }}>
+            98%
+          </span>
+        </span>
+        <span className="inline-flex items-center" style={{ marginLeft: 16 }} aria-hidden>
+          <HoverHeartGlyph className="block h-[28px] w-[31px]" />
+        </span>
+        <span
+          style={{
+            marginLeft: 23,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 18,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "normal",
+            opacity: 0.6,
+          }}
+        >
+          {durationLabel}
+        </span>
+      </div>
+      <p
+        className="featured-hover-only pointer-events-none absolute"
+        style={{ top: 104, left: 38, width: 501, margin: 0 }}
+      >
+        <span
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 18,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "normal",
+            opacity: 0.6,
+          }}
+        >
+          In these courses you will learn everything you need to become a professional digital artist, from basic to
+          advanced.
+        </span>
+      </p>
+    </>
   );
 }
 
@@ -274,6 +427,8 @@ export function CatalogShowcaseCard({
   viewMoreLabel = "VIEW MORE",
   viewMoreHref,
   onViewMore,
+  disableViewMoreHover = false,
+  expandCardOnHover = false,
   className = "",
   topImageSrc,
   bottomImageSrc,
@@ -337,27 +492,59 @@ export function CatalogShowcaseCard({
 
   const isTrackLink = Boolean(viewMoreHref?.startsWith("/tracks/"));
 
-  const shellClass = `relative w-[323px] overflow-visible rounded-[50px] ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
+  const shellClass = `relative overflow-visible rounded-[50px] ${expandCardOnHover ? "h-full w-full" : "w-[323px]"} ${viewMoreHovered ? "z-[99999]" : "z-[1]"} ${className}`.trim();
 
-  const ctaHoverHandlers = {
-    onMouseEnter: openHover,
-    onMouseLeave: scheduleHideHover,
-  };
+  const ctaHoverHandlers = disableViewMoreHover
+    ? {}
+    : {
+        onMouseEnter: openHover,
+        onMouseLeave: scheduleHideHover,
+      };
 
   /** Track covers historically used `topImageSrc`; photo always renders in the lower panel. */
   const photoSrc = bottomImageSrc ?? topImageSrc;
 
-  const ctaClassName =
-    "pointer-events-auto absolute bottom-[26px] left-[38px] z-10 flex h-[43px] w-[166px] items-center rounded-[8px] border border-black bg-[#89F496] pl-4 pr-10 text-black no-underline transition-colors hover:bg-black hover:text-[#89F496]";
+  const ctaClassName = expandCardOnHover
+    ? "pointer-events-auto absolute z-10 box-border flex items-center overflow-visible no-underline"
+    : "pointer-events-auto absolute bottom-[26px] left-[38px] z-10 flex h-[43px] w-[166px] items-center rounded-[8px] border border-black bg-[#89F496] pl-4 pr-10 text-black no-underline transition-colors hover:bg-black hover:text-[#89F496]";
 
-  const ctaStyle = {
-    fontFamily: pangeaFont,
-    fontSize: "18px",
-    fontWeight: 700,
-    lineHeight: "19.6px",
-  } as const;
+  const ctaStyle = expandCardOnHover
+    ? {
+        bottom: 31,
+        left: 27,
+        width: 198,
+        height: 50,
+        padding: "0 16px",
+        borderRadius: 23,
+        border: "0.3px solid var(--Black, #000)",
+        background: "var(--Green, #8AF396)",
+      }
+    : {
+        fontFamily: pangeaFont,
+        fontSize: "18px",
+        fontWeight: 700,
+        lineHeight: "19.6px",
+      };
 
-  const ctaInner = (
+  const ctaInner = expandCardOnHover ? (
+    <>
+      <span
+        style={{
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: 24,
+          fontStyle: "normal",
+          fontWeight: 500,
+          lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+        }}
+      >
+        {viewMoreLabel}
+      </span>
+      <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 154 }}>
+        <FeaturedViewMoreCircle />
+      </span>
+    </>
+  ) : (
     <>
       {viewMoreLabel}
       <span className="absolute top-[20.5px] right-[7px] inline-flex -translate-y-1/2 translate-x-1/2 items-center justify-center">
@@ -368,6 +555,17 @@ export function CatalogShowcaseCard({
 
   const titleClassName =
     "pointer-events-auto mt-[18px] block max-w-[270px] text-[32px] font-normal uppercase leading-normal text-black no-underline hover:opacity-90";
+
+  const featuredTitleStyle = {
+    color: "var(--Black, #000)",
+    fontFamily: pangeaFont,
+    fontSize: 24,
+    fontStyle: "normal",
+    fontWeight: 400,
+    lineHeight: "normal",
+    left: 36,
+    marginTop: 0,
+  } as const;
 
   const titleInner = (
     <>
@@ -395,25 +593,52 @@ export function CatalogShowcaseCard({
       >
         {/* Upper white text panel */}
         <div
-          className="absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 bg-white"
-          style={{ height: SHOWCASE_TOP_H }}
+          className={`absolute inset-x-0 top-0 z-1 overflow-hidden rounded-[50px] border border-black bg-white ${
+            expandCardOnHover ? "featured-card-panel featured-card-upper border-solid" : "max-lg:border-black/20"
+          }`}
+          style={{
+            ...(expandCardOnHover
+              ? { background: "var(--White, #FFF)", borderRadius: 50 }
+              : { height: SHOWCASE_TOP_H }),
+          }}
           aria-hidden
         />
 
         {/* Lower photo panel — Figma 323×289.744 */}
         <div
-          className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black max-lg:border-black/20 ${photoSrc ? "bg-white" : "bg-[#E9E9E9]"}`}
-          style={{ top: SHOWCASE_PHOTO_TOP, height: SHOWCASE_PHOTO_H }}
+          className={`absolute inset-x-0 z-2 overflow-hidden rounded-[50px] border border-black ${
+            expandCardOnHover ? "featured-card-panel featured-card-photo border-solid" : "max-lg:border-black/20"
+          } ${!expandCardOnHover && photoSrc ? "bg-white" : ""} ${!expandCardOnHover && !photoSrc ? "bg-[#E9E9E9]" : ""}`}
+          style={{
+            ...(expandCardOnHover
+              ? {
+                  bottom: 0,
+                  borderRadius: 50,
+                  backgroundColor: "lightgray",
+                  backgroundImage: photoSrc ? `url(${JSON.stringify(photoSrc)})` : undefined,
+                  backgroundPosition: "50%",
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                }
+              : {
+                  top: SHOWCASE_PHOTO_TOP,
+                  height: SHOWCASE_PHOTO_H,
+                }),
+          }}
           aria-hidden
         >
-          {photoSrc ? (
+          {photoSrc && !expandCardOnHover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photoSrc} alt="" className="h-full w-full object-cover object-center" />
           ) : null}
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-3">
-          <div className="absolute inset-x-0 top-0 pl-[38px] pr-[30px] pt-[28px]">
+          <div
+            className={`absolute inset-x-0 top-0 pl-[38px] pr-[30px] pt-[28px] ${
+              expandCardOnHover ? "featured-rest-meta" : ""
+            }`}
+          >
             <div className="pointer-events-auto flex items-center justify-between">
               <span
                 className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black px-4 text-[20px] leading-none text-black"
@@ -429,7 +654,7 @@ export function CatalogShowcaseCard({
               </span>
             </div>
 
-            {resolvedViewMoreHref ? (
+            {expandCardOnHover ? null : resolvedViewMoreHref ? (
               <Link
                 href={resolvedViewMoreHref}
                 className={titleClassName}
@@ -445,6 +670,27 @@ export function CatalogShowcaseCard({
             )}
           </div>
 
+          {expandCardOnHover ? (
+            resolvedViewMoreHref ? (
+              <Link
+                href={resolvedViewMoreHref}
+                className={`${titleClassName} featured-card-title absolute`}
+                style={featuredTitleStyle}
+                aria-label={`Open ${titlePrimary}${titleSecondary ? ` ${titleSecondary}` : ""}`}
+              >
+                {titleInner}
+              </Link>
+            ) : (
+              <div className={`${titleClassName} featured-card-title absolute`} style={featuredTitleStyle}>
+                {titleInner}
+              </div>
+            )
+          ) : null}
+
+          {expandCardOnHover ? (
+            <FeaturedHoverMeta levelLabel={levelLabel} durationLabel={durationLabel} />
+          ) : null}
+
           {resolvedViewMoreHref ? (
             <Link
               href={resolvedViewMoreHref}
@@ -452,6 +698,7 @@ export function CatalogShowcaseCard({
               style={ctaStyle}
               aria-label={viewMoreLabel}
               onClick={(e) => {
+                if (disableViewMoreHover) return;
                 if (!viewMoreHovered && !isTrackLink) {
                   // Course cards: first tap opens expanded preview instead of navigating
                   e.preventDefault();
@@ -477,6 +724,7 @@ export function CatalogShowcaseCard({
         </div>
       </div>
 
+      {disableViewMoreHover ? null : (
       <CatalogShowcaseHoverCard
         visible={viewMoreHovered}
         position={hoverOverlayPosition}
@@ -489,6 +737,7 @@ export function CatalogShowcaseCard({
         onHoverCardLeave={scheduleHideHover}
         onClose={scheduleHideHover}
       />
+      )}
     </>
   );
 }

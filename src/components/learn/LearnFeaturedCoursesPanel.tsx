@@ -28,6 +28,9 @@ const DESKTOP_PANEL_W = 1101;
 const DESKTOP_PANEL_H = 646;
 const DESKTOP_SVG_LEFT_PX = 57;
 const DESKTOP_CURVE_HIDE_PX = 55;
+/** Resting inset of the first card inside the desktop shell. Swiping scrolls this away. */
+const DESKTOP_CARD_FROM_SVG_LEFT = 57;
+const DESKTOP_CARD_FROM_SVG_BOTTOM = 41;
 
 /** Mobile green shell on `/course`. */
 const MOBILE_PANEL_H = 674;
@@ -105,6 +108,7 @@ export function LearnFeaturedCoursesPanel({
   useEffect(() => {
     const swiper = swiperRef.current;
     if (!swiper) return;
+    swiper.params.slidesOffsetBefore = 0;
     swiper.update();
     handleNavSync(swiper);
   }, [handleNavSync, slides.length, bleedWidth, bp]);
@@ -120,6 +124,13 @@ export function LearnFeaturedCoursesPanel({
       ? CATALOG_SHOWCASE_CARD_H * (TABLET_CARD_W / CATALOG_SHOWCASE_CARD_W)
       : CATALOG_SHOWCASE_CARD_H * (MOBILE_FEATURED_CARD_W / CATALOG_SHOWCASE_CARD_W);
   const cardGap = isTablet ? TABLET_CARD_GAP_PX : learnCarouselSwiperBehavior.spaceBetween;
+  const [hoveredSlideId, setHoveredSlideId] = useState<string | null>(null);
+  const hoveredSlideIndex = slides.findIndex((slide) => slide.id === hoveredSlideId);
+  /** Visual pixels the card grows to the right (323 → 585 in the card's own space). */
+  const hoverGrowth = (cardW * 585) / CATALOG_SHOWCASE_CARD_W - cardW;
+  /** The card pinned to the right edge has no room to grow that way. */
+  const rightEdgeIndex = arabic ? 0 : Math.max(slides.length - 1, 0);
+  const hoveringRightEdge = hoveredSlideIndex === rightEdgeIndex && slides.length > 0;
 
   const cardSwiperStyle = {
     ["--landing-showcase-card-w" as string]: `${cardW}px`,
@@ -194,11 +205,23 @@ export function LearnFeaturedCoursesPanel({
       </svg>
 
       <div
-        className={`absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-[743px]:pt-[136px] max-[743px]:pb-[50px] min-[744px]:max-lg:justify-end min-[744px]:max-lg:pb-[41px] lg:pt-[116px] lg:pb-[42px] ${
+        className={`absolute inset-y-0 left-0 z-10 box-border flex w-full flex-col max-[743px]:pt-[136px] max-[743px]:pb-[50px] min-[744px]:max-lg:justify-end min-[744px]:max-lg:pb-[41px] ${
           arabic
-            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[48px] lg:pr-[81px]"
-            : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[48px] lg:pl-[81px]"
+            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[48px]"
+            : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[48px]"
         }`}
+        style={
+          isLgUp
+            ? {
+                paddingTop: 0,
+                paddingBottom: DESKTOP_CARD_FROM_SVG_BOTTOM,
+                justifyContent: "flex-end",
+                ...(arabic
+                  ? { paddingRight: DESKTOP_SVG_LEFT_PX }
+                  : { paddingLeft: DESKTOP_SVG_LEFT_PX }),
+              }
+            : undefined
+        }
       >
         <div
           ref={scrollAreaRef}
@@ -229,23 +252,49 @@ export function LearnFeaturedCoursesPanel({
             onSlidesUpdated={handleNavSync}
             onResize={handleNavSync}
           >
-            {slides.map(({ id, cardProps }) => (
-              <SwiperSlide
-                key={id}
-                className="shrink-0 overflow-visible!"
-                style={{
-                  width: cardW,
-                  height: cardH,
-                }}
-              >
-                <ScaledCatalogShowcaseCard
-                  {...cardProps}
-                  cardW={cardW}
-                  cardH={cardH}
-                  className="shrink-0"
-                />
-              </SwiperSlide>
-            ))}
+            {slides.map(({ id, cardProps }, index) => {
+              const shiftRight =
+                !hoveringRightEdge &&
+                hoveredSlideIndex >= 0 &&
+                (arabic ? index < hoveredSlideIndex : index > hoveredSlideIndex);
+              const shiftLeft = hoveringRightEdge;
+              const shiftX = shiftLeft ? -hoverGrowth : shiftRight ? hoverGrowth : 0;
+              return (
+                <SwiperSlide
+                  key={id}
+                  className={`shrink-0 overflow-visible! ${hoveredSlideId === id ? "is-featured-expanded" : ""}`}
+                  style={{
+                    width: cardW,
+                    height: cardH,
+                    ...(index === 0 && isLgUp
+                      ? arabic
+                        ? { marginRight: DESKTOP_CARD_FROM_SVG_LEFT }
+                        : { marginLeft: DESKTOP_CARD_FROM_SVG_LEFT }
+                      : {}),
+                  }}
+                >
+                  <div
+                    className="h-full w-full"
+                    onMouseEnter={() => setHoveredSlideId(id)}
+                    onMouseLeave={() => setHoveredSlideId((current) => (current === id ? null : current))}
+                    style={{
+                      height: "100%",
+                      transform: `translate3d(${shiftX}px, 0, 0)`,
+                      transition: "transform 520ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                  >
+                    <ScaledCatalogShowcaseCard
+                      {...cardProps}
+                      cardW={cardW}
+                      cardH={cardH}
+                      className="shrink-0"
+                      disableViewMoreHover
+                      expandCardOnHover
+                    />
+                  </div>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
           <LearnCarouselEdgeNav
             atBeginning={atBeginning}
