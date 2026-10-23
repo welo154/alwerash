@@ -9,8 +9,15 @@ export const COURSE_SWIPER_MOBILE = { width: 315, gap: 20, inset: 30 } as const;
 /** Desktop tile width — keep in sync with `LEARN_POPULAR_FIGMA_TILE_W`. */
 const DESKTOP_TILE_W = 346;
 
+type CourseCarouselMetrics = {
+  width: number;
+  gap: number;
+  inset: number;
+  isLgUp: boolean;
+};
+
 export function useCourseCarouselMetrics() {
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<CourseCarouselMetrics>({
     width: COURSE_SWIPER_MOBILE.width,
     gap: COURSE_SWIPER_MOBILE.gap,
     inset: COURSE_SWIPER_MOBILE.inset,
