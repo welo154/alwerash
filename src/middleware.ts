@@ -81,8 +81,13 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // A revoked device still carries a validly signed cookie; let it reach the login
+  // page, which clears the cookie, instead of bouncing it back into the app.
+  const isDeviceRevokedLogin =
+    pathname === "/login" && req.nextUrl.searchParams.get("error") === "device_revoked";
+
   // Logged-in users must not access login/register — redirect away
-  if (isAuthPage && token?.sub) {
+  if (isAuthPage && token?.sub && !isDeviceRevokedLogin) {
     const url = req.nextUrl.clone();
     if (isAdmin) url.pathname = "/admin";
     else if (isMentor) url.pathname = "/mentor";

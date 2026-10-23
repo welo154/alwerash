@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
 import "swiper/css";
@@ -88,6 +96,61 @@ function useMobileSwiperInset() {
   }, []);
 
   return inset;
+}
+
+/** Course tile widths — keep in sync with LearnPopularFigmaTile / SwiperSlide classes. */
+const COURSE_TILE_W_MOBILE = 315;
+const COURSE_TILE_W_TABLET = 345;
+const COURSE_TILE_W_DESKTOP = 346;
+
+/**
+ * Guest landing: when a short row of cards does not fill the viewport, center
+ * the group (and drop the edge inset). When it overflows, keep a left-aligned carousel.
+ */
+function useSparseCourseCardsLayout(
+  enabled: boolean,
+  slideCount: number,
+  gapPx: number,
+  edgeInsetPx: number,
+  measureRef: RefObject<HTMLElement | null>
+) {
+  const [centered, setCentered] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) {
+      setCentered(false);
+      return;
+    }
+
+    const el = measureRef.current;
+    if (!el || slideCount <= 0) {
+      setCentered(false);
+      return;
+    }
+
+    const calc = () => {
+      const desktop = window.matchMedia("(min-width: 1036px)").matches;
+      const tablet = window.matchMedia("(min-width: 744px)").matches;
+      const slideW = desktop
+        ? COURSE_TILE_W_DESKTOP
+        : tablet
+          ? COURSE_TILE_W_TABLET
+          : COURSE_TILE_W_MOBILE;
+      const total =
+        slideCount * slideW + Math.max(0, slideCount - 1) * gapPx;
+      setCentered(total < el.clientWidth);
+    };
+
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [enabled, slideCount, gapPx, measureRef]);
+
+  return {
+    centered,
+    slidesOffsetBefore: enabled && centered ? 0 : edgeInsetPx,
+  };
 }
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
@@ -514,6 +577,9 @@ export function HomeTrackExplorerSection({
   } = useLearnCarouselSwiper();
   const swiperCardGap = useSwiperCardGap();
   const mobileSwiperInset = useMobileSwiperInset();
+  /** Guest landing: center 1–3 cards when they don’t fill the row. */
+  const centerSparseCourseCards =
+    trackPillSelectsCourses && !showWhatToLearnNextHeading;
 
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
@@ -546,6 +612,17 @@ export function HomeTrackExplorerSection({
     trackPillSelectsCourses && maxVisibleCourses != null && !showWhatToLearnNextHeading
       ? courseTiles.slice(0, maxVisibleCourses)
       : courseTiles;
+
+  const sparseCourseCardsLayout = useSparseCourseCardsLayout(
+    centerSparseCourseCards,
+    visibleCourseTiles.length,
+    swiperCardGap,
+    mobileSwiperInset,
+    scrollAreaRef
+  );
+  const courseSlidesOffsetBefore = centerSparseCourseCards
+    ? sparseCourseCardsLayout.slidesOffsetBefore
+    : mobileSwiperInset;
 
   const showViewMoreCourses =
     trackPillSelectsCourses &&
@@ -815,7 +892,7 @@ export function HomeTrackExplorerSection({
                 slidesPerView="auto"
                 spaceBetween={swiperCardGap}
                 slidesPerGroup={1}
-                slidesOffsetBefore={mobileSwiperInset || DESKTOP_SECTION_INSET_PX}
+                slidesOffsetBefore={courseSlidesOffsetBefore}
                 speed={400}
                 grabCursor
                 allowTouchMove
@@ -824,7 +901,11 @@ export function HomeTrackExplorerSection({
                 observeParents
                 watchOverflow
                 mousewheel={learnCarouselMousewheel}
-                className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
+                className={`learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!${
+                  sparseCourseCardsLayout.centered
+                    ? " learn-popular-swiper--center-sparse"
+                    : ""
+                }`}
                 onSwiper={handleSwiper}
                 onSlideChange={handleNavSync}
                 onSlidesUpdated={handleNavSync}

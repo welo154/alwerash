@@ -1,58 +1,28 @@
 /**
- * Subscribe user without payment (for now). Creates or extends an Entitlement.
- * You can replace this with real payment flow later.
+ * Subscription status reads, plus the legacy self-serve grant entry point.
+ *
+ * Activation logic lives in `entitlement.service.ts`. This module keeps the
+ * historical `createFreeEntitlement` name so existing callers keep working,
+ * but it now goes through the gated path and is refused in production unless
+ * SUBSCRIPTION_SELF_GRANT_ENABLED is set.
  */
 import { prisma } from "@/server/db/prisma";
-
-const ENTITLEMENT_PRODUCT = "ALL_ACCESS" as const;
-
-function addMonths(date: Date, months: number): Date {
-  const out = new Date(date);
-  out.setMonth(out.getMonth() + months);
-  return out;
-}
+import {
+  ENTITLEMENT_PRODUCT,
+  grantSelfServeEntitlement,
+} from "./entitlement.service";
 
 /**
- * Grant or extend subscription for a user (no payment).
- * durationMonths: 1, 6, or 12 (from bundle).
+ * Grant or extend subscription for a user without payment.
+ *
+ * @deprecated Development/staging only. Production activation must come from a
+ * verified provider event via `grantEntitlementForVerifiedPayment`.
  */
 export async function createFreeEntitlement(
   userId: string,
   durationMonths: number
 ): Promise<{ expiresAt: Date }> {
-  const now = new Date();
-  const expiresAt = addMonths(now, durationMonths);
-
-  const existing = await prisma.entitlement.findUnique({
-    where: { userId_product: { userId, product: ENTITLEMENT_PRODUCT } },
-  });
-
-  if (existing && existing.status === "ACTIVE" && existing.expiresAt && existing.expiresAt > now) {
-    // Extend if new expiry is later
-    const newExpiresAt = existing.expiresAt > expiresAt ? existing.expiresAt : expiresAt;
-    await prisma.entitlement.update({
-      where: { id: existing.id },
-      data: { expiresAt: newExpiresAt, updatedAt: now },
-    });
-    return { expiresAt: newExpiresAt };
-  }
-
-  await prisma.entitlement.upsert({
-    where: { userId_product: { userId, product: ENTITLEMENT_PRODUCT } },
-    create: {
-      userId,
-      product: ENTITLEMENT_PRODUCT,
-      status: "ACTIVE",
-      expiresAt,
-    },
-    update: {
-      status: "ACTIVE",
-      expiresAt,
-      updatedAt: now,
-    },
-  });
-
-  return { expiresAt };
+  return grantSelfServeEntitlement(userId, durationMonths);
 }
 
 /**

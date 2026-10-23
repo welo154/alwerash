@@ -10,9 +10,13 @@ export function handleRoute(
       return await fn(...args);
     } catch (err) {
       if (err instanceof AppError) {
+        const retryAfter = (err.details as { retryAfterSeconds?: number } | undefined)?.retryAfterSeconds;
         return NextResponse.json(
           { error: err.code, message: err.message, details: err.details ?? null },
-          { status: err.status }
+          {
+            status: err.status,
+            headers: retryAfter ? { "Retry-After": String(retryAfter) } : undefined,
+          }
         );
       }
       console.error(err);

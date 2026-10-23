@@ -12,6 +12,7 @@ import {
   buildLearnSidebarCategories,
 } from "@/components/learn/LearnCoursesSidebar";
 import { LearnCoursesPageFilterBar } from "@/components/learn/LearnCoursesPageFilterBar";
+import { markPage } from "@/server/observability/query-timing";
 import { LocaleMirror } from "@/components/providers/LocaleProvider";
 
 function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
@@ -25,6 +26,7 @@ function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
     tagPrimary: c.track?.title?.trim().toUpperCase() || "COURSE",
     typeLabel: c.typeLabel,
     coverImageSrc: c.coverImage,
+    comingSoon: c.comingSoon,
   }));
 }
 
@@ -43,10 +45,12 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
     rating: c.rating,
     lessonCount: c.lessonCount,
     totalDurationMinutes: c.totalDurationMinutes,
+    comingSoon: c.comingSoon,
   }));
 }
 
 export default async function LearnPage() {
+  markPage("/course");
   let catalog: Awaited<ReturnType<typeof loadCoursePageCatalog>>;
   try {
     catalog = await loadCoursePageCatalog();

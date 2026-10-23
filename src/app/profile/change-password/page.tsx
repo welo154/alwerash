@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 
 export default async function ChangePasswordPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/login?next=/profile/change-password");
+  await requirePageSession("/profile/change-password");
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">

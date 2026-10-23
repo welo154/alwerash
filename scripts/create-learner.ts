@@ -1,15 +1,24 @@
 /**
  * Create a learner (subscriber) account.
- * Run: npx tsx scripts/create-learner.ts
- * Or: npx tsx scripts/create-learner.ts ahwaleed@gmail.com "Alwerash2025$"
+ * Run: npx tsx scripts/create-learner.ts <email> <password>
  */
 import "dotenv/config";
 import { PrismaClient, Role } from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
 
 const prisma = new PrismaClient();
-const EMAIL = (process.argv[2] ?? "ahwaleed@gmail.com").toLowerCase().trim();
-const PASSWORD = process.argv[3] ?? "Alwerash2025$";
+const [rawEmail, PASSWORD] = process.argv.slice(2);
+
+if (!rawEmail || !PASSWORD) {
+  console.error("Usage: npx tsx scripts/create-learner.ts <email> <password>");
+  process.exit(1);
+}
+if (PASSWORD.length < 8) {
+  console.error("Password must be at least 8 characters.");
+  process.exit(1);
+}
+
+const EMAIL = rawEmail.toLowerCase().trim();
 
 async function main() {
   const existing = await prisma.user.findUnique({ where: { email: EMAIL } });

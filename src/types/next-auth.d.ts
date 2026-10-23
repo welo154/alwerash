@@ -11,6 +11,8 @@ declare module "next-auth" {
       country?: string | null;
       profession?: string | null;
       roles: Role[];
+      /** Opaque DeviceSession id for this cookie. Null for pre-feature cookies. */
+      deviceSessionId?: string | null;
     };
   }
 }
@@ -21,5 +23,7 @@ declare module "next-auth/jwt" {
     roles?: Role[];
     country?: string | null;
     profession?: string | null;
+    /** Opaque DeviceSession id. Absent on cookies issued before device sessions. */
+    sid?: string;
   }
 }

@@ -23,6 +23,9 @@ import {
   COURSE_CATALOG_TAGS,
   type CourseCatalogTagKey,
 } from "@/types/course-catalog-tags";
+import { revalidatePublicCatalogPaths } from "@/server/content/revalidate-public-paths";
+import { revalidatePath } from "next/cache";
+import { publicCoursePath } from "@/lib/course-access";
 
 function FeaturedInBadges({
   featuredNewOrder,
@@ -99,6 +102,7 @@ export default async function AdminCourseDetail({
       mentorId: mentorIdVal || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
+      comingSoon: formData.get("comingSoon") === "on",
       featuredNewOrder:
         featuredNew === "" || featuredNew == null
           ? null
@@ -120,6 +124,8 @@ export default async function AdminCourseDetail({
       tagNew: formData.get("tagNew") === "on",
       tagTopRated: formData.get("tagTopRated") === "on",
     });
+    revalidatePublicCatalogPaths();
+    revalidatePath(publicCoursePath(id));
     const parts = ["Course updated"];
     if (featuredNew !== "" && featuredNew != null) parts.push(`In "New" (order ${featuredNew})`);
     if (featuredMostPlayed !== "" && featuredMostPlayed != null) parts.push(`Popular class (order ${featuredMostPlayed})`);
@@ -210,6 +216,11 @@ export default async function AdminCourseDetail({
             >
               {course.published ? "Published" : "Draft"}
             </span>
+            {course.comingSoon ? (
+              <span className="mt-2 ml-2 inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                Coming soon
+              </span>
+            ) : null}
             <FeaturedInBadges
               featuredNewOrder={(course as { featuredNewOrder?: number | null }).featuredNewOrder}
               featuredMostPlayedOrder={(course as { featuredMostPlayedOrder?: number | null }).featuredMostPlayedOrder}
@@ -437,6 +448,15 @@ export default async function AdminCourseDetail({
                 className="rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
               Published
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <input
+                name="comingSoon"
+                type="checkbox"
+                defaultChecked={course.comingSoon}
+                className="rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+              />
+              Coming soon
             </label>
             <button
               type="submit"

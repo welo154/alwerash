@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileSectionTabs } from "@/components/profile/ProfileSectionTabs";
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
@@ -8,6 +7,7 @@ import { getContinueLearningCardsForUser } from "@/server/home/continue-learning
 import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { readUserProfileFromDb } from "@/server/user/readProfile";
+import { markPage } from "@/server/observability/query-timing";
 
 const FALLBACK_BIO =
   "I'm a working professional creative in the graphic design industry. I work as a concept artist and freelance illustrator. I've worked in-house at an animation studio but currently, work from home.";
@@ -23,8 +23,8 @@ export default async function ProfilePage({
 }: {
   searchParams: Promise<{ tab?: string; edit?: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user) redirect("/login?next=/profile");
+  markPage("/profile");
+  const session = await requirePageSession("/profile");
 
   const userId = session.user.id as string;
   const sessionUser = session.user as {

@@ -2,6 +2,11 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { PUBLIC_CATALOG_CACHE_TAG } from "@/server/content/revalidate-public-paths";
+
+const CATALOG_CACHE: { revalidate: number; tags: string[] } = {
+  revalidate: 60,
+  tags: [PUBLIC_CATALOG_CACHE_TAG],
+};
 import {
   catalogShowcasePropsFromTrackAggregate,
   type CatalogShowcaseCardProps,
@@ -104,25 +109,21 @@ function logCatalogError(scope: string, e: unknown) {
   console.warn(`[catalog] ${scope}:`, msg);
 }
 
-const catalogRequiresPublished = cache(async (): Promise<boolean> => {
-  try {
-    const pubTracks = await prisma.track.count({ where: { published: true } });
-    const tracks = await prisma.track.count();
-    const pubCourses = await prisma.course.count({ where: { published: true } });
-    const courses = await prisma.course.count();
-    const hasRows = tracks + courses > 0;
-    const hasPublished = pubTracks + pubCourses > 0;
-    if (hasRows && !hasPublished) {
-      console.warn(
-        "[catalog] No published tracks/courses; listing unpublished rows from the database."
-      );
-    }
-    return hasPublished || !hasRows;
-  } catch (e) {
-    logCatalogError("catalogRequiresPublished", e);
-    return true;
-  }
-});
+/**
+ * Whether catalog reads filter to published rows.
+ *
+ * This used to probe the database with four sequential `COUNT`s on every request
+ * to decide whether to fall back to listing unpublished rows when nothing was
+ * published. Measured at 1438 ms of 3210 ms — 45% of all database time on
+ * `/course` — to answer a question whose answer never changes in production.
+ *
+ * It is now an explicit opt-in for working locally against a database with no
+ * published content. See docs/performance/00-measurement.md.
+ */
+function catalogRequiresPublished(): boolean {
+  const raw = process.env.CATALOG_SHOW_UNPUBLISHED?.trim().toLowerCase();
+  return !(raw === "true" || raw === "1");
+}
 
 function publishedWhere(requirePublished: boolean): { published: true } | Record<string, never> {
   return requirePublished ? { published: true } : {};
@@ -229,43 +230,46 @@ function buildShowcaseSlides(tracks: TrackWithCourses[]): LandingShowcaseSlide[]
     }));
 }
 
-async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
-  const requirePublished = await catalogRequiresPublished();
-  const trackWhere = publishedWhere(requirePublished);
-  const courseWhere = publishedWhere(requirePublished);
+const getCachedPublishedTracksWithCourses = unstable_cache(
+  async (requirePublished: boolean): Promise<TrackWithCourses[]> => {
+    const trackWhere = publishedWhere(requirePublished);
+    const courseWhere = publishedWhere(requirePublished);
 
-  try {
-    return await prisma.track.findMany({
-      where: trackWhere,
-      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        coverImage: true,
-        order: true,
-        featuredOrder: true,
-        topRatedOrder: true,
-        activityOrder: true,
-        courses: {
-          ...trackCourseSelect,
-          where: courseWhere,
+    try {
+      return await prisma.track.findMany({
+        where: trackWhere,
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          coverImage: true,
+          order: true,
+          featuredOrder: true,
+          topRatedOrder: true,
+          activityOrder: true,
+          courses: {
+            ...trackCourseSelect,
+            where: courseWhere,
+          },
         },
-      },
-    });
+      });
+    } catch (e) {
+      if (isPrismaMissingColumnError(e)) {
+        return fetchTracksWithCoursesFallback(requirePublished);
+      }
+      throw e;
+    }
+  },
+  ["fetch-published-tracks-with-courses"],
+  CATALOG_CACHE
+);
+
+async function fetchPublishedTracksWithCourses(): Promise<TrackWithCourses[]> {
+  try {
+    return await getCachedPublishedTracksWithCourses(catalogRequiresPublished());
   } catch (e) {
     logCatalogError("fetchPublishedTracksWithCourses", e);
-    if (isPrismaPoolExhaustedError(e) || isUnreachableDatabaseError(e)) {
-      return [];
-    }
-    if (isPrismaMissingColumnError(e)) {
-      try {
-        return await fetchTracksWithCoursesFallback(requirePublished);
-      } catch (fallbackError) {
-        logCatalogError("fetchPublishedTracksWithCourses(fallback)", fallbackError);
-        return [];
-      }
-    }
     return [];
   }
 }
@@ -398,12 +402,10 @@ type PublicTrackListItem = {
   order: number;
 };
 
-export async function publicListTracks(): Promise<PublicTrackListItem[]> {
-  const requirePublished = await catalogRequiresPublished();
-  const where = publishedWhere(requirePublished);
-  try {
+const getCachedPublicTracks = unstable_cache(
+  async (requirePublished: boolean): Promise<PublicTrackListItem[]> => {
     const rows = await prisma.track.findMany({
-      where,
+      where: publishedWhere(requirePublished),
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
         id: true,
@@ -418,6 +420,14 @@ export async function publicListTracks(): Promise<PublicTrackListItem[]> {
       ...row,
       coverImage: resolveTrackCoverImage(row.coverImage, row.slug),
     }));
+  },
+  ["public-list-tracks"],
+  CATALOG_CACHE
+);
+
+export async function publicListTracks(): Promise<PublicTrackListItem[]> {
+  try {
+    return await getCachedPublicTracks(catalogRequiresPublished());
   } catch (e) {
     logCatalogError("publicListTracks", e);
     return [];
@@ -462,7 +472,7 @@ function isSoftwareIntroCourse(title: string) {
 /** Header mega-menu: only tracks/courses that exist and have a real destination. */
 export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
   try {
-    return await getCachedCoursesMenu();
+    return await getCachedCoursesMenu(catalogRequiresPublished());
   } catch (e) {
     logCatalogError("publicGetCoursesMenu", e);
     return { allCourses: [], software: [] };
@@ -470,8 +480,7 @@ export async function publicGetCoursesMenu(): Promise<CoursesMenuPayload> {
 }
 
 const getCachedCoursesMenu = unstable_cache(
-  async (): Promise<CoursesMenuPayload> => {
-    const requirePublished = await catalogRequiresPublished();
+  async (requirePublished: boolean): Promise<CoursesMenuPayload> => {
     const visibility = publishedWhere(requirePublished);
 
     const tracks = await prisma.track.findMany({
@@ -519,7 +528,7 @@ const getCachedCoursesMenu = unstable_cache(
     return { allCourses, software };
   },
   ["public-get-courses-menu"],
-  { revalidate: 60, tags: [PUBLIC_CATALOG_CACHE_TAG] }
+  CATALOG_CACHE
 );
 
 /**
@@ -532,7 +541,7 @@ export async function publicGetShowcaseTrackCardForSlug(
   try {
     const track = await prisma.track.findFirst({
       where: {
-        ...publishedWhere(await catalogRequiresPublished()),
+        ...publishedWhere(catalogRequiresPublished()),
         slug: { equals: showcaseSlug, mode: "insensitive" },
       },
       select: {
@@ -564,7 +573,7 @@ export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTr
 }
 
 export async function publicGetTrackBySlug(slug: string) {
-  const requirePublished = await catalogRequiresPublished();
+  const requirePublished = catalogRequiresPublished();
   const track = await prisma.track.findFirst({
     where: {
       ...publishedWhere(requirePublished),
@@ -644,6 +653,7 @@ export async function publicGetCourseById(courseId: string) {
       updatedAt: true,
       trackId: true,
       published: true,
+      comingSoon: true,
       track: { select: { published: true, slug: true, title: true } },
       modules: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
@@ -663,7 +673,7 @@ export async function publicGetCourseById(courseId: string) {
   });
 
   if (!course) throw new AppError("NOT_FOUND", 404, "Course not found");
-  const requirePublished = await catalogRequiresPublished();
+  const requirePublished = catalogRequiresPublished();
   if (requirePublished && !course.published) throw new AppError("NOT_FOUND", 404, "Course not found");
   if (requirePublished && course.track && !course.track.published) {
     throw new AppError("NOT_FOUND", 404, "Course not found");
@@ -804,6 +814,7 @@ export type CourseForCard = {
   totalDurationMinutes: number | null;
   rating: number | null;
   studentCount: number;
+  comingSoon?: boolean;
 };
 
 function mapCourseToCard(
@@ -828,6 +839,7 @@ function mapCourseToCard(
     modules: { _count: { lessons: number } }[];
     totalDurationMinutes?: number | null;
     rating?: number | null;
+    comingSoon?: boolean | null;
   },
   studentCount: number
 ): CourseForCard {
@@ -847,6 +859,7 @@ function mapCourseToCard(
     totalDurationMinutes: c.totalDurationMinutes ?? null,
     rating: c.rating ?? null,
     studentCount,
+    comingSoon: Boolean(c.comingSoon),
   };
 }
 
@@ -901,7 +914,7 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
   try {
     const courses = await prisma.course.findMany({
       where: {
-        ...publishedWhere(await catalogRequiresPublished()),
+        ...publishedWhere(catalogRequiresPublished()),
         featuredMostPlayedOrder: { not: null },
       },
       orderBy: { featuredMostPlayedOrder: "asc" },
@@ -949,7 +962,7 @@ export async function publicListTrendingCourses(
       return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
     }
 
-    const requirePublished = await catalogRequiresPublished();
+    const requirePublished = catalogRequiresPublished();
     const courses = await prisma.course.findMany({
       where: {
         id: { in: orderedIds },
@@ -1001,6 +1014,7 @@ const publishedCourseCardSelect = {
   ...courseTypeBadgeSelect,
   totalDurationMinutes: true,
   rating: true,
+  comingSoon: true,
   order: true,
   createdAt: true,
   track: { select: { title: true, slug: true } },
@@ -1008,9 +1022,8 @@ const publishedCourseCardSelect = {
 } as const;
 
 /** All published courses for the Learn page catalog grid. */
-export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
-  const requirePublished = await catalogRequiresPublished();
-  try {
+const getCachedAllPublishedCourses = unstable_cache(
+  async (requirePublished: boolean): Promise<CourseForCard[]> => {
     const courses = await prisma.course.findMany({
       where: publishedWhere(requirePublished),
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
@@ -1030,6 +1043,15 @@ export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> 
         studentCounts.get(c.id) ?? 0
       )
     );
+  },
+  ["public-list-all-published-courses"],
+  CATALOG_CACHE
+);
+
+export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
+  const requirePublished = catalogRequiresPublished();
+  try {
+    return await getCachedAllPublishedCourses(requirePublished);
   } catch (e) {
     logCatalogError("publicListAllPublishedCourses", e);
     return listCoursesCardFallback(requirePublished);
@@ -1069,7 +1091,7 @@ async function listCoursesCardFallback(requirePublished: boolean): Promise<Cours
 export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCard[]> {
   try {
     const courses = await prisma.course.findMany({
-      where: publishedWhere(await catalogRequiresPublished()),
+      where: publishedWhere(catalogRequiresPublished()),
       take: limit,
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       select: {
@@ -1109,7 +1131,7 @@ export async function publicGetSimilarCourses(
   limit = 4
 ): Promise<CourseForCard[]> {
   try {
-    const requirePublished = await catalogRequiresPublished();
+    const requirePublished = catalogRequiresPublished();
     const courses = await prisma.course.findMany({
       where: {
         ...publishedWhere(requirePublished),
@@ -1156,7 +1178,7 @@ export async function publicSearch(query: string, limit = 10) {
   const q = query.trim().toLowerCase();
   if (!q) return { tracks: [], courses: [] };
 
-  const requirePublished = await catalogRequiresPublished();
+  const requirePublished = catalogRequiresPublished();
   const where = publishedWhere(requirePublished);
 
   const [tracks, courses] = await Promise.all([
@@ -1228,10 +1250,8 @@ function mapMentorsToMostsDtos(
 }
 
 /** Featured mentors for the Learn / course page (max 6 — two rows of three). */
-export async function publicListFeaturedMentors(
-  limit = LEARN_FEATURED_MENTOR_LIMIT
-): Promise<LandingMostsMentorCardDto[]> {
-  try {
+const getCachedFeaturedMentors = unstable_cache(
+  async (limit: number): Promise<LandingMostsMentorCardDto[]> => {
     const orderedIds = await sqlGetFeaturedMentorIds(limit);
     if (orderedIds.length === 0) return [];
 
@@ -1245,6 +1265,16 @@ export async function publicListFeaturedMentors(
       .filter((m): m is NonNullable<typeof m> => m != null);
 
     return mapMentorsToMostsDtos(ordered);
+  },
+  ["public-list-featured-mentors"],
+  CATALOG_CACHE
+);
+
+export async function publicListFeaturedMentors(
+  limit = LEARN_FEATURED_MENTOR_LIMIT
+): Promise<LandingMostsMentorCardDto[]> {
+  try {
+    return await getCachedFeaturedMentors(limit);
   } catch {
     return [];
   }
@@ -1254,10 +1284,8 @@ export async function publicListFeaturedMentors(
  * Mentors for the landing “Current Mosts” strip on home/guest.
  * Only mentors tagged “Popular on home page” in admin appear here.
  */
-export async function publicListLandingMostsMentors(
-  limit = LANDING_MOSTS_MENTOR_LIMIT
-): Promise<LandingMostsMentorCardDto[]> {
-  try {
+const getCachedLandingMostsMentors = unstable_cache(
+  async (limit: number): Promise<LandingMostsMentorCardDto[]> => {
     const orderedIds = await sqlGetLandingPopularMentorIds(limit);
     if (orderedIds.length === 0) return [];
 
@@ -1270,21 +1298,32 @@ export async function publicListLandingMostsMentors(
       .map((id) => byId.get(id))
       .filter((m): m is NonNullable<typeof m> => m != null);
     return mapMentorsToMostsDtos(ordered);
+  },
+  ["public-list-landing-mosts-mentors"],
+  CATALOG_CACHE
+);
+
+export async function publicListLandingMostsMentors(
+  limit = LANDING_MOSTS_MENTOR_LIMIT
+): Promise<LandingMostsMentorCardDto[]> {
+  try {
+    return await getCachedLandingMostsMentors(limit);
   } catch {
     return [];
   }
 }
 
 const getCachedCoursePageCatalog = unstable_cache(
-  async () => {
-    await catalogRequiresPublished();
-
-    const popularClassCourses = await publicListPopularClassCourses(40);
-    const trendingCourses = await publicListTrendingCourses();
-    const allCourses = await publicListAllPublishedCourses();
-    const tracks = await publicListTracks();
-    const trackShowcaseSlides = await publicListTrackShowcaseSlides();
-    const featuredMentors = await publicListFeaturedMentors();
+  async (_requirePublished: boolean) => {
+    const [popularClassCourses, trendingCourses, allCourses, tracks, trackShowcaseSlides, featuredMentors] =
+      await Promise.all([
+        publicListPopularClassCourses(40),
+        publicListTrendingCourses(),
+        publicListAllPublishedCourses(),
+        publicListTracks(),
+        publicListTrackShowcaseSlides(),
+        publicListFeaturedMentors(),
+      ]);
 
     return {
       popularClassCourses,
@@ -1296,10 +1335,10 @@ const getCachedCoursePageCatalog = unstable_cache(
     };
   },
   ["load-course-page-catalog"],
-  { revalidate: 60, tags: [PUBLIC_CATALOG_CACHE_TAG] }
+  CATALOG_CACHE
 );
 
-/** Serialized catalog fetch for `/course` — avoids bursting the Supabase session pool. */
+/** Shared catalog payload for `/course`. Cached for 60s under PUBLIC_CATALOG_CACHE_TAG. */
 export const loadCoursePageCatalog = cache(async () => {
   const empty = {
     popularClassCourses: [] as CourseForCard[],
@@ -1311,7 +1350,7 @@ export const loadCoursePageCatalog = cache(async () => {
   };
 
   try {
-    return await getCachedCoursePageCatalog();
+    return await getCachedCoursePageCatalog(catalogRequiresPublished());
   } catch (e) {
     logCatalogError("loadCoursePageCatalog", e);
     return empty;

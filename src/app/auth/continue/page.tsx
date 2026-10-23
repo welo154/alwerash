@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { readLiveSession } from "@/server/auth/live-session";
 
 function withToast(path: string): string {
   return path.includes("?") ? `${path}&toast=Signed+in` : `${path}?toast=Signed+in`;
@@ -10,10 +10,10 @@ export default async function AuthContinuePage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const live = await readLiveSession();
+  if (live.state === "revoked") redirect("/login?error=device_revoked");
+  if (live.state !== "active") redirect("/login");
+  const session = live.session;
 
   const { next } = await searchParams;
   if (next?.startsWith("/")) {

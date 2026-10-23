@@ -14,4 +14,5 @@ export type LearnPopularTile = {
   coverImageSrc: string | null;
   /** Learner completion % (0–100); when set, shown instead of placeholder rating. */
   progressPercent?: number | null;
+  comingSoon?: boolean;
 };

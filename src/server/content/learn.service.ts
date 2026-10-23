@@ -227,6 +227,7 @@ export async function getCourseForLearning(courseId: string) {
       instructorName: true,
       instructorNameAr: true,
       published: true,
+      comingSoon: true,
       track: { select: { id: true, published: true, slug: true, title: true } },
       instructors: {
         orderBy: { createdAt: "asc" },
@@ -291,6 +292,7 @@ export async function getCourseForLearning(courseId: string) {
       trackSlug: course.track?.slug,
     }),
     published: course.published,
+    comingSoon: course.comingSoon,
     track: course.track,
     instructorName:
       course.instructors[0]?.instructor.name?.trim() ||

@@ -1382,6 +1382,12 @@ label:has(input[type="radio"]) {
   flex-wrap: nowrap !important;
 }
 
+/* Guest home: center a short course row that does not fill the viewport. */
+.learn-popular-swiper--center-sparse .swiper-wrapper {
+  width: 100%;
+  justify-content: center;
+}
+
 .learn-popular-swiper .swiper-slide {
   flex-shrink: 0;
 }

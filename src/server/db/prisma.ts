@@ -1,10 +1,30 @@
 import { PrismaClient } from "@prisma/client";
 import { isPoolExhaustedText, silencePoolErrors } from "@/server/db/silence-pool-errors";
+import { beginQuery, reportPoolDegraded } from "@/server/observability/query-timing";
 
 silencePoolErrors();
 
 const isDev = process.env.NODE_ENV !== "production";
-const CONNECTION_LIMIT = isDev ? 5 : 1;
+
+/**
+ * Prisma's client-side pool size.
+ *
+ * A pool of 1 makes every query wait for the one before it, which silently
+ * serializes the `Promise.all` concurrency in page code. Overridable via
+ * DB_CONNECTION_LIMIT so that effect can be measured against a real database
+ * without editing code; the historical defaults are unchanged.
+ *
+ * The Supabase session pooler (:5432) has a total pool_size of 15 shared across
+ * all clients, so check the pooler mode before raising this much.
+ */
+function resolveConnectionLimit(): number {
+  const raw = process.env.DB_CONNECTION_LIMIT?.trim();
+  if (raw && /^\d+$/.test(raw)) {
+    const parsed = Number(raw);
+    if (parsed >= 1 && parsed <= 20) return parsed;
+  }
+  return isDev ? 5 : 1;
+}
 
 function stripEnvValue(raw: string): string {
   let s = raw.trim().replace(/^\uFEFF/, "");
@@ -36,6 +56,24 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function emptyQueryResult(operation: string): unknown {
+  switch (operation) {
+    case "findMany":
+    case "$queryRaw":
+    case "$queryRawUnsafe":
+      return [];
+    case "count":
+    case "$executeRaw":
+    case "$executeRawUnsafe":
+      return 0;
+    case "aggregate":
+    case "groupBy":
+      return {};
+    default:
+      return null;
+  }
+}
+
 /** Avoid `new URL()` — passwords with `@` / `#` make that parser fail and skip pool settings. */
 function rewriteRuntimeUrl(connectionString: string): string {
   const protoEnd = connectionString.indexOf("://");
@@ -59,18 +97,24 @@ function rewriteRuntimeUrl(connectionString: string): string {
   }
 
   const isPooler = host.includes("pooler.supabase.com");
-  if (isPooler) {
-    port = "6543";
-  } else if (!port) {
-    port = "5432";
-  }
+  // Honour the configured port. This previously forced pooler hosts onto :6543,
+  // which in turn forced `pgbouncer=true` below; that disables prepared-statement
+  // reuse and measured ~280 ms of protocol overhead on *every* query — `SELECT 1`
+  // took 341 ms against a 70 ms network floor. See docs/performance/00-measurement.md.
+  //
+  // Session mode (:5432) shares a pool_size of 15 across all clients, so keep
+  // `connection_limit` low per instance. Set the port to 6543 in DATABASE_URL if
+  // you need transaction-mode headroom for many concurrent serverless instances.
+  if (!port) port = "5432";
 
   const qIndex = pathAndQuery.indexOf("?");
   const path = qIndex === -1 ? pathAndQuery || "/postgres" : pathAndQuery.slice(0, qIndex);
   const query = qIndex === -1 ? "" : pathAndQuery.slice(qIndex + 1);
   const params = new URLSearchParams(query);
-  params.set("connection_limit", String(CONNECTION_LIMIT));
+  params.set("connection_limit", String(resolveConnectionLimit()));
   params.set("pool_timeout", "20");
+  // Required in transaction mode, where prepared statements collide across pooled
+  // connections. Costly, so only applied when that port is explicitly configured.
   if (port === "6543") {
     params.set("pgbouncer", "true");
   }
@@ -135,6 +179,7 @@ const PRISMA_CLIENT_REV = 2;
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaRev?: number;
+  prismaPoolBroken?: boolean;
 };
 
 function createClient(): PrismaClient {
@@ -157,21 +202,40 @@ function createClient(): PrismaClient {
 
   const extended = base.$extends({
     query: {
-      async $allOperations({ args, query }) {
+      async $allOperations({ model, operation, args, query }) {
+        const finish = beginQuery(model, operation);
+
+        if (globalForPrisma.prismaPoolBroken) {
+          finish?.({ shortCircuited: true });
+          return emptyQueryResult(operation);
+        }
         try {
-          return await query(args);
+          const result = await query(args);
+          finish?.({ rows: Array.isArray(result) ? result.length : undefined });
+          return result;
         } catch (error) {
-          if (!isPoolError(error)) throw error;
+          if (!isPoolError(error)) {
+            finish?.({ failed: true });
+            throw error;
+          }
           for (const delayMs of POOL_RETRY_DELAYS_MS) {
             await sleep(delayMs);
             try {
-              return await query(args);
+              const result = await query(args);
+              finish?.({ rows: Array.isArray(result) ? result.length : undefined });
+              return result;
             } catch (retryError) {
-              if (!isPoolError(retryError)) throw retryError;
+              if (!isPoolError(retryError)) {
+                finish?.({ failed: true });
+                throw retryError;
+              }
               error = retryError;
             }
           }
-          throw error;
+          globalForPrisma.prismaPoolBroken = true;
+          finish?.({ failed: true });
+          reportPoolDegraded();
+          return emptyQueryResult(operation);
         }
       },
     },

@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 
 export default async function SettingsPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/login?next=/settings");
+  await requirePageSession("/settings");
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">

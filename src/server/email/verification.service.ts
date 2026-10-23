@@ -1,9 +1,13 @@
-import { randomBytes } from "crypto";
 import { prisma } from "@/server/db/prisma";
-import { sendVerificationEmail } from "./resend.client";
+import {
+  PASSWORD_RESET_IDENTIFIER_PREFIX,
+  generateOneTimeToken,
+  hashOneTimeToken,
+} from "@/server/auth/one-time-token";
+import { recordSecurityEvent } from "@/server/security/security-events";
+import { getAppBaseUrl, sendVerificationEmail } from "./resend.client";
 
 const TOKEN_EXPIRY_HOURS = 24;
-const APP_URL = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
 /**
  * Create a verification token for the user and send the email.
@@ -17,18 +21,18 @@ export async function createAndSendVerificationToken(
     where: { identifier: userId },
   });
 
-  const token = randomBytes(32).toString("hex");
+  const { raw, hash } = generateOneTimeToken();
   const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
   await prisma.verificationToken.create({
     data: {
       identifier: userId,
-      token,
+      token: hash,
       expires,
     },
   });
 
-  const verifyUrl = `${APP_URL.replace(/\/$/, "")}/verify-email?token=${encodeURIComponent(token)}`;
+  const verifyUrl = `${getAppBaseUrl()}/verify-email?token=${encodeURIComponent(raw)}`;
   const result = await sendVerificationEmail(email, verifyUrl);
 
   if (!result.success) {
@@ -48,7 +52,10 @@ export async function verifyToken(
   }
 
   const record = await prisma.verificationToken.findFirst({
-    where: { token: token.trim() },
+    where: {
+      token: hashOneTimeToken(token),
+      NOT: { identifier: { startsWith: PASSWORD_RESET_IDENTIFIER_PREFIX } },
+    },
   });
 
   if (!record) {
@@ -72,5 +79,6 @@ export async function verifyToken(
     }),
   ]);
 
+  await recordSecurityEvent({ type: "EMAIL_VERIFIED", userId });
   return { success: true, userId };
 }

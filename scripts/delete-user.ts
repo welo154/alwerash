@@ -1,12 +1,17 @@
 /**
- * Deletes user mazenhesham172@gmail.com from the database.
- * Run: npx tsx scripts/delete-user.ts
+ * Deletes a user from the database.
+ * Run: npx tsx scripts/delete-user.ts <email>
  */
 import { PrismaClient } from "@prisma/client";
 
+if (!process.argv[2]) {
+  console.error("Usage: npx tsx scripts/delete-user.ts <email>");
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 
-const EMAIL = "mazenhesham172@gmail.com";
+const EMAIL = process.argv[2].toLowerCase().trim();
 
 async function main() {
   const user = await prisma.user.findUnique({

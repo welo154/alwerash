@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AuthOAuthSection,
   AuthPasswordField,
@@ -22,6 +22,8 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   OAuthSignin: "Could not start sign-in. Please try again.",
   OAuthCallback: "Sign-in was interrupted. Please try again.",
   AccessDenied: "Access was denied. Please try again or use another sign-in method.",
+  device_revoked:
+    "You were signed out on this device, either because the account was used on another device or because the password was changed. Please sign in again.",
 };
 
 type LoginFieldErrors = {
@@ -41,6 +43,10 @@ export function AuthLoginPanel() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailDraft, setEmailDraft] = useState("");
+
+  useEffect(() => {
+    if (oauthError === "device_revoked") void signOut({ redirect: false });
+  }, [oauthError]);
 
   function clearFieldError(field: keyof LoginFieldErrors) {
     setFieldErrors((prev) => {
@@ -164,7 +170,7 @@ export function AuthLoginPanel() {
         <div className="auth-login-forgot-gap h-[18px] shrink-0" aria-hidden />
 
         <p className="auth-login-forgot m-0 w-full text-right" style={authText24}>
-          <Link href="/login" className="text-black">
+          <Link href="/forgot-password" className="text-black">
             Forgot Password?
           </Link>
         </p>

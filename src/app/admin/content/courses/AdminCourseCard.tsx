@@ -15,6 +15,7 @@ export type AdminCourseCardCourse = {
   summary: string | null;
   coverImage: string | null;
   published: boolean;
+  comingSoon: boolean;
   featuredMostPlayedOrder: number | null;
   featuredTrendingOrder: number | null;
   track: { title: string } | null;
@@ -147,15 +148,22 @@ export function AdminCourseCard({
         ) : (
           <div className="min-h-0 flex-1" />
         )}
-        <div className="mt-auto flex items-center justify-between">
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-              course.published ? "bg-gray-400 text-white" : "bg-slate-300 text-slate-600"
-            }`}
-          >
-            {course.published ? "Published" : "Draft"}
-          </span>
-          <span className="text-sm font-bold text-black group-hover:text-[var(--color-primary)]">
+        <div className="mt-auto flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                course.published ? "bg-gray-400 text-white" : "bg-slate-300 text-slate-600"
+              }`}
+            >
+              {course.published ? "Published" : "Draft"}
+            </span>
+            {course.comingSoon ? (
+              <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                Coming soon
+              </span>
+            ) : null}
+          </div>
+          <span className="shrink-0 text-sm font-bold text-black group-hover:text-[var(--color-primary)]">
             Manage →
           </span>
         </div>

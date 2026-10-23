@@ -60,6 +60,61 @@ export async function sendVerificationEmail(
   );
 }
 
+export async function sendPasswordResetEmail(
+  to: string,
+  resetUrl: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  return sendHtmlEmail(
+    to,
+    "Reset your password — Alwerash",
+    [
+      "<p>We received a request to reset the password for your Alwerash account.</p>",
+      `<p><a href="${resetUrl}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">Choose a new password</a></p>`,
+      `<p>Or copy this link: <a href="${resetUrl}">${resetUrl}</a></p>`,
+      "<p>This link expires in 1 hour and signs you out on every device. If you did not ask for this, you can ignore this email; your password has not changed.</p>",
+    ].join("\n")
+  );
+}
+
+/**
+ * Sent instead of a verification email when someone registers with an address that
+ * already has an account, so the sign-up form never reveals which emails exist.
+ */
+export async function sendAccountExistsEmail(
+  to: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  const base = getAppBaseUrl();
+  return sendHtmlEmail(
+    to,
+    "You already have an Alwerash account",
+    [
+      "<p>Someone tried to create an Alwerash account with this email address, but an account already exists.</p>",
+      `<p>If it was you, <a href="${base}/login">sign in</a> or <a href="${base}/forgot-password">reset your password</a>.</p>`,
+      "<p>If it was not you, you can ignore this email. Nothing about your account has changed.</p>",
+    ].join("\n")
+  );
+}
+
+/**
+ * Tells the account owner that a new sign-in replaced an older device. Sent only
+ * when the one-device limit is on and a slot was actually taken.
+ */
+export async function sendDeviceDisplacedEmail(
+  to: string,
+  previousDevice: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  const base = getAppBaseUrl();
+  const device = previousDevice.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return sendHtmlEmail(
+    to,
+    "Signed out on another device — Alwerash",
+    [
+      `<p>Your Alwerash account just signed in on a new device, so <strong>${device}</strong> was signed out.</p>`,
+      `<p>If this was you, you can keep watching on the new device. If it was not, <a href="${base}/forgot-password">reset your password</a>. That signs the account out everywhere.</p>`,
+    ].join("\n")
+  );
+}
+
 export async function sendMentorCapstoneSubmittedEmail(input: {
   to: string;
   learnerName: string;

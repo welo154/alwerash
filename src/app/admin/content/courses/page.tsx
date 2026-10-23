@@ -59,6 +59,7 @@ export default async function AdminCoursesPage({
               summary: c.summary,
               coverImage: c.coverImage,
               published: c.published,
+              comingSoon: c.comingSoon ?? false,
               featuredMostPlayedOrder: c.featuredMostPlayedOrder ?? null,
               featuredTrendingOrder: c.featuredTrendingOrder ?? null,
               tagGuided: c.tagGuided ?? false,

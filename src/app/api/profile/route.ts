@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { auth } from "@/auth";
+import { requireApiSession, sessionErrorResponse } from "@/server/auth/live-session";
 import { prisma } from "@/server/db/prisma";
+import { isAllowedProfileImage } from "@/server/storage/object-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -12,25 +13,20 @@ function skillsToSqlArray(skills: string[]): Prisma.Sql {
   )}]::text[]`;
 }
 
-function isMissingColumnError(e: unknown, column: string) {
-  const msg = e instanceof Error ? e.message : String(e);
-  return msg.includes(`"${column}"`) || msg.includes(`.${column}`) || msg.includes(`${column}" does not exist`) || msg.includes(`column "${column}" does not exist`) || msg.includes(`users.${column}`);
-}
-
-async function ensureBioSkillsColumns() {
-  await prisma.$executeRawUnsafe(
-    `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "bio" TEXT`
-  );
-  await prisma.$executeRawUnsafe(
-    `ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "skills" TEXT[] DEFAULT ARRAY[]::TEXT[]`
-  );
-}
+const MAX_SHORT_TEXT = 100;
+const MAX_BIO = 2000;
+const MAX_SKILLS = 30;
+const MAX_SKILL_LENGTH = 50;
 
 /** PATCH /api/profile — update name, profession, bio, skills, country, image (no email). */
 export async function PATCH(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let session;
+  try {
+    session = await requireApiSession();
+  } catch (error) {
+    const response = sessionErrorResponse(error);
+    if (response) return response;
+    throw error;
   }
 
   let body: {
@@ -88,6 +84,28 @@ export async function PATCH(request: NextRequest) {
       : undefined;
 
   if (
+    (name && name.length > MAX_SHORT_TEXT) ||
+    (profession && profession.length > MAX_SHORT_TEXT) ||
+    (country && country.length > MAX_SHORT_TEXT) ||
+    (bio && bio.length > MAX_BIO) ||
+    (skills && (skills.length > MAX_SKILLS || skills.some((s) => s.length > MAX_SKILL_LENGTH)))
+  ) {
+    return NextResponse.json({ error: "One or more fields are too long" }, { status: 400 });
+  }
+  // Only removal, or a photo this user uploaded through /api/profile/photo, or the
+  // Google avatar from sign-in. An arbitrary URL would let a profile load tracking
+  // pixels or non-http schemes into other users' pages.
+  if (image && !isAllowedProfileImage(image, session.user.id)) {
+    const current = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { image: true },
+    });
+    if (current?.image !== image) {
+      return NextResponse.json({ error: "Invalid profile image" }, { status: 400 });
+    }
+  }
+
+  if (
     name === undefined &&
     profession === undefined &&
     bio === undefined &&
@@ -127,15 +145,7 @@ export async function PATCH(request: NextRequest) {
         );
       };
 
-      try {
-        await applyBioSkills();
-      } catch (bioErr) {
-        if (!isMissingColumnError(bioErr, "bio") && !isMissingColumnError(bioErr, "skills")) {
-          throw bioErr;
-        }
-        await ensureBioSkillsColumns();
-        await applyBioSkills();
-      }
+      await applyBioSkills();
     }
   } catch (err) {
     console.error("[api/profile] update failed", err);

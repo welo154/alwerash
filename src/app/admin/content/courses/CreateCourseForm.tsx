@@ -32,6 +32,7 @@ export async function CreateCourseForm() {
       instructorImage: String(formData.get("instructorImage") ?? "").trim() || undefined,
       order: Number(formData.get("order") ?? 0),
       published: formData.get("published") === "on",
+      comingSoon: formData.get("comingSoon") === "on",
     });
     redirect("/admin/content/courses?toast=Course+added");
   }
@@ -137,6 +138,10 @@ export async function CreateCourseForm() {
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input name="published" type="checkbox" defaultChecked className="rounded border-slate-300" />
           Published
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input name="comingSoon" type="checkbox" className="rounded border-slate-300 text-amber-500 focus:ring-amber-400" />
+          Coming soon
         </label>
       </div>
       <div className="flex justify-end gap-2 pt-2">

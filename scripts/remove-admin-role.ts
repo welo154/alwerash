@@ -1,12 +1,17 @@
 /**
- * Removes ADMIN role from mazenhesham172@gmail.com
- * Run: npx tsx scripts/remove-admin-role.ts
+ * Removes the ADMIN role from a user.
+ * Run: npx tsx scripts/remove-admin-role.ts <email>
  */
 import { PrismaClient } from "@prisma/client";
 
+if (!process.argv[2]) {
+  console.error("Usage: npx tsx scripts/remove-admin-role.ts <email>");
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 
-const EMAIL = "mazenhesham172@gmail.com";
+const EMAIL = process.argv[2].toLowerCase().trim();
 
 async function main() {
   const user = await prisma.user.findUnique({

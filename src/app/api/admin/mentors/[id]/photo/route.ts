@@ -1,14 +1,14 @@
 // file: src/app/api/admin/mentors/[id]/photo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { requireRole } from "@/server/auth/require";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import { IMAGE_MIME_TYPES } from "@/server/storage/file-signature";
+import { putObject } from "@/server/storage/object-storage";
+import { readValidatedUpload, uniqueObjectName } from "@/server/storage/upload";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 4 * 1024 * 1024; // 4MB
 
 /** POST /api/admin/mentors/[id]/photo — upload mentor photo; returns { url }. */
@@ -38,34 +38,25 @@ export async function POST(
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
-  const file = formData.get("photo") ?? formData.get("file");
-  if (!file || typeof file === "string") {
-    return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  const validation = await readValidatedUpload(formData, ["photo", "file"], {
+    allowed: IMAGE_MIME_TYPES,
+    maxBytes: MAX_SIZE,
+    allowedLabel: "JPEG, PNG, and WebP images",
+  });
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.error }, { status: validation.status });
   }
+  const { bytes, type } = validation.upload;
 
-  const f = file as File;
-  if (!ALLOWED_TYPES.includes(f.type)) {
-    return NextResponse.json(
-      { error: "Only JPEG, PNG, and WebP images are allowed" },
-      { status: 400 }
-    );
-  }
-  if (f.size > MAX_SIZE) {
-    return NextResponse.json(
-      { error: "Image must be 4MB or smaller" },
-      { status: 400 }
-    );
-  }
-
-  const ext = f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
-  const filename = `${mentorId}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "mentor-photos");
-  const filepath = path.join(dir, filename);
-
+  let url: string;
   try {
-    await mkdir(dir, { recursive: true });
-    const bytes = await f.arrayBuffer();
-    await writeFile(filepath, Buffer.from(bytes));
+    const stored = await putObject(
+      "public",
+      `mentor-photos/${uniqueObjectName(mentorId, type.ext)}`,
+      bytes,
+      type.mime
+    );
+    url = stored.publicUrl!;
   } catch (err) {
     console.error("Mentor photo write failed:", err);
     return NextResponse.json(
@@ -73,8 +64,6 @@ export async function POST(
       { status: 500 }
     );
   }
-
-  const url = `/mentor-photos/${filename}`;
 
   await prisma.mentor.update({
     where: { id: mentorId },

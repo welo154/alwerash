@@ -6,7 +6,8 @@ import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
 /**
  * Do not pass a server session from the root layout — that would force the layout
  * dynamic and re-run auth (previously with DB) on every client navigation.
- * One `/api/auth/session` on mount is enough; that path now reads the JWT only.
+ * Refetch every five minutes so the cookie picks up a role change. Server pages
+ * already re-read roles on each request; middleware only sees the cookie.
  */
 export function SessionProvider({
   children,
@@ -18,7 +19,7 @@ export function SessionProvider({
   return (
     <NextAuthSessionProvider
       session={session}
-      refetchInterval={0}
+      refetchInterval={5 * 60}
       refetchOnWindowFocus={false}
     >
       {children}

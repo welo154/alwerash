@@ -82,7 +82,7 @@ export async function adminGetTrack(id: string) {
     where: { id },
     include: {
       courses: {
-        select: { id: true, title: true, published: true },
+        select: { id: true, title: true, published: true, comingSoon: true },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -130,6 +130,7 @@ export async function adminListCourses(trackId?: string) {
         coverImage: true,
         order: true,
         published: true,
+        comingSoon: true,
         featuredMostPlayedOrder: true,
         createdAt: true,
         updatedAt: true,
@@ -172,6 +173,7 @@ async function adminListCoursesRawSafe(trackId?: string) {
     coverImage: row.cover_image,
     order: 0,
     published: row.published,
+    comingSoon: false,
     featuredMostPlayedOrder: null as number | null,
     featuredTrendingOrder: null as number | null,
     tagGuided: false,
@@ -202,6 +204,7 @@ export async function adminGetCourse(id: string) {
         introVideoMuxPlaybackId: true,
         order: true,
         published: true,
+        comingSoon: true,
         featuredNewOrder: true,
         featuredMostPlayedOrder: true,
         totalDurationMinutes: true,
@@ -297,6 +300,7 @@ async function courseUpdateRawSafe(courseId: string, data: Record<string, unknow
   set("summary", data.summary);
   set("cover_image", data.coverImage);
   set("published", Boolean(data.published));
+  if (data.comingSoon !== undefined) set("coming_soon", Boolean(data.comingSoon));
   if (Array.isArray(data.requirements)) {
     await sqlSetCourseRequirements(courseId, data.requirements as string[]);
   }
@@ -398,6 +402,7 @@ async function courseFindRawSafe(courseId: string) {
     introVideoMuxPlaybackId: null as string | null,
     order: 0,
     published: row.published,
+    comingSoon: false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -616,7 +621,8 @@ export type ModuleWithLessons = Prisma.ModuleGetPayload<{
 
 /** Lesson with optional video, article, and optionally latest videoUpload for status. */
 export type LessonWithVideoUpload = ModuleWithLessons["lessons"][number] & {
-  video?: { id: string; muxPlaybackId: string } | null;
+  /** Presence only — never expose Mux playback IDs to the admin browser. */
+  video?: { id: string; hasVideo: true } | null;
   article?: { id: string; body: string } | null;
   videoUploads?: { id: string; status: string }[];
 };
@@ -644,7 +650,7 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
       lessons: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         include: {
-          video: { select: { id: true, muxPlaybackId: true } },
+          video: { select: { id: true } },
           article: { select: { id: true, body: true } },
           videoUploads: { take: 1, orderBy: { createdAt: "desc" }, select: { id: true, status: true } },
         },
@@ -652,7 +658,13 @@ export async function adminGetModule(id: string): Promise<Omit<ModuleWithLessons
     },
   });
   if (!m) throw new AppError("NOT_FOUND", 404, "Module not found");
-  return m as Omit<ModuleWithLessons, "lessons"> & { lessons: LessonWithVideoUpload[] };
+  const lessons = m.lessons.map((l) => ({
+    ...l,
+    video: l.video ? { id: l.video.id, hasVideo: true as const } : null,
+  }));
+  return { ...m, lessons } as unknown as Omit<ModuleWithLessons, "lessons"> & {
+    lessons: LessonWithVideoUpload[];
+  };
 }
 
 export async function adminCreateModule(input: unknown) {

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { requirePageSession } from "@/server/auth/live-session";
 import { LoggedInHome } from "@/components/home/LoggedInHome";
 import { getContinueLearningCardsForUser } from "@/server/home/continue-learning.service";
 import { getUserAggregateLearningProgressPercent } from "@/server/home/user-learning-progress.service";
@@ -7,6 +7,7 @@ import { getWeeklyActivitySummary } from "@/server/home/learning-activity.servic
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
+import { markPage } from "@/server/observability/query-timing";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 
 export const metadata = {
@@ -27,10 +28,8 @@ const EMPTY_TRACK_EXPLORER: HomeTrackExplorerBundle = {
 };
 
 export default async function LoggedInHomePage() {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login?next=/home");
-  }
+  markPage("/home");
+  const session = await requirePageSession("/home");
 
   const roles = (session.user.roles as string[]) ?? [];
   if (roles.includes("ADMIN")) redirect("/admin");

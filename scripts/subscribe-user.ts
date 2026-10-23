@@ -1,13 +1,17 @@
 /**
  * Grant subscription (entitlement) to a user by email so they can access course content.
- * Run: npx tsx scripts/subscribe-user.ts
- * Or:  npx tsx scripts/subscribe-user.ts ahwaleed@gmail.com
+ * Run: npx tsx scripts/subscribe-user.ts <email>
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
+if (!process.argv[2]) {
+  console.error("Usage: npx tsx scripts/subscribe-user.ts <email>");
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
-const EMAIL = (process.argv[2] ?? "ahwaleed@gmail.com").toLowerCase().trim();
+const EMAIL = process.argv[2].toLowerCase().trim();
 
 function addMonths(date: Date, months: number): Date {
   const out = new Date(date);

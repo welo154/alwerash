@@ -1,9 +1,12 @@
 // file: src/app/dashboard/page.tsx
 import Link from "next/link";
-import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { readLiveSession } from "@/server/auth/live-session";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const live = await readLiveSession();
+  if (live.state === "revoked") redirect("/login?error=device_revoked&next=/dashboard");
+  const session = live.state === "active" ? live.session : null;
   if (!session?.user) {
     return (
       <div className="p-6">

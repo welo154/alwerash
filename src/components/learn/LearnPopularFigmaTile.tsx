@@ -45,6 +45,7 @@ export function LearnPopularFigmaTile(
     tagPrimary,
     typeLabel,
     coverImageSrc,
+    comingSoon = false,
     className = "",
     size = "default",
   } = props;
@@ -53,12 +54,19 @@ export function LearnPopularFigmaTile(
   const displayTitle = arabic && titleAr?.trim() ? titleAr.trim() : title;
   const displayAuthor = arabic && authorLabelAr?.trim() ? authorLabelAr.trim() : authorLabel;
   const isGrid = size === "grid";
-  const startButtonW = arabic ? 115 : 141;
+  const startButtonW = comingSoon ? (arabic ? 150 : 170) : arabic ? 115 : 141;
+  const startLabel = comingSoon
+    ? arabic
+      ? "قريباً"
+      : t("COMING SOON")
+    : arabic
+      ? "ابــدأ"
+      : t("START");
   const grayCoverSrc = coverImageSrc?.trim() || POPULAR_CLASS_COVER_IMAGE;
   const cardLink = (
       <Link
         href={href}
-        aria-label={`${displayTitle}. ${displayAuthor}. ${t(tagPrimary)}. Start`}
+        aria-label={`${displayTitle}. ${displayAuthor}. ${t(tagPrimary)}.${comingSoon ? " Coming soon." : " Start"}`}
         className={
           isGrid
             ? `group relative flex h-full w-full flex-col overflow-hidden no-underline ${className}`.trim()
@@ -210,7 +218,11 @@ export function LearnPopularFigmaTile(
           }}
         >
           <div
-            className="relative shrink-0 bg-[var(--Green,#8AF396)] transition-colors duration-300 ease-out group-hover:bg-[var(--Dark-Green,#004B3C)]"
+            className={`relative shrink-0 transition-colors duration-300 ease-out ${
+              comingSoon
+                ? "bg-amber-100 group-hover:bg-amber-200"
+                : "bg-[var(--Green,#8AF396)] group-hover:bg-[var(--Dark-Green,#004B3C)]"
+            }`}
             style={{
               display: "flex",
               width: startButtonW,
@@ -243,16 +255,20 @@ export function LearnPopularFigmaTile(
               />
             </svg>
             <span
-              className="text-[var(--Black,#000)] transition-colors duration-300 ease-out group-hover:text-white"
+              className={`transition-colors duration-300 ease-out ${
+                comingSoon
+                  ? "text-amber-900"
+                  : "text-[var(--Black,#000)] group-hover:text-white"
+              }`}
               style={{
                 fontFamily: pangeaFont,
-                fontSize: 24,
+                fontSize: comingSoon ? 16 : 24,
                 fontStyle: "normal",
                 fontWeight: 500,
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
               }}
             >
-              {arabic ? "ابــدأ" : t("START")}
+              {startLabel}
             </span>
             <span
               className="absolute"
