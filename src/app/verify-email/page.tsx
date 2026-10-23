@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { withNext } from "@/lib/safe-internal-path";
+import { readPostAuthNext, clearPostAuthNext } from "@/server/auth/post-auth-next";
 import { verifyToken } from "@/server/email/verification.service";
 
 export default async function VerifyEmailPage({
@@ -8,6 +10,8 @@ export default async function VerifyEmailPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+  const rememberedNext = await readPostAuthNext();
+  const loginHref = withNext("/login", rememberedNext);
 
   if (!token?.trim()) {
     return (
@@ -18,7 +22,7 @@ export default async function VerifyEmailPage({
             This verification link is invalid. Request a new one from sign-in or after registering.
           </p>
           <Link
-            href="/login"
+            href={loginHref}
             className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             Go to sign in
@@ -31,7 +35,8 @@ export default async function VerifyEmailPage({
   const result = await verifyToken(token);
 
   if (result.success) {
-    redirect("/login?verified=1");
+    if (rememberedNext) await clearPostAuthNext();
+    redirect(withNext("/login?verified=1", rememberedNext));
   }
 
   const isExpired = result.reason === "expired";
@@ -48,7 +53,7 @@ export default async function VerifyEmailPage({
             : "This link is invalid or already used."}
         </p>
         <Link
-          href="/login"
+          href={loginHref}
           className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           Go to sign in

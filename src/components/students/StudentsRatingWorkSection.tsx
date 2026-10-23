@@ -1,13 +1,10 @@
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { StudentProjectThumb } from "@/components/students/StudentProjectThumb";
+import type { StudentRatingCard } from "@/components/students/student-rating-types";
+
+export type { StudentRatingCard };
 
 const pangeaFont = pangeaFontFamily;
-
-export type StudentRatingCard = {
-  quote: string;
-  initials: string;
-  name: string;
-  role: string;
-};
 
 const DEFAULT_CARDS: StudentRatingCard[] = [
   {
@@ -97,6 +94,7 @@ function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
+            textTransform: "uppercase",
           }}
         >
           {card.name}
@@ -147,6 +145,7 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
+            textTransform: "uppercase",
           }}
         >
           {card.name}
@@ -198,9 +197,10 @@ export function MobileStudentRatingCard({
         >
           {`"${card.quote}"`}
         </p>
-        <div
-          className="h-[168px] w-[112px] shrink-0 rounded-[20px] border-[0.2px] border-black bg-[#E7E7E7]"
-          aria-hidden
+        <StudentProjectThumb
+          src={card.projectImage}
+          name={card.name}
+          className="h-[168px] w-[112px] shrink-0 overflow-hidden rounded-[20px] border-[0.2px] border-black bg-[#E7E7E7]"
         />
       </div>
       <div className="pt-[18px]">
@@ -235,9 +235,10 @@ export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
             <StudentRatingProfileInfo card={card} />
           </div>
         </div>
-        <div
-          className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] border border-black bg-[#E7E7E7]"
-          aria-hidden
+        <StudentProjectThumb
+          src={card.projectImage}
+          name={card.name}
+          className="mt-[29px] h-[260px] w-[203px] shrink-0 overflow-hidden rounded-[36px] border border-black bg-[#E7E7E7]"
         />
       </div>
     </div>
@@ -253,6 +254,8 @@ export function StudentsRatingWorkSection({
   sectionClassName = "",
   variant = "desktop",
 }: StudentsRatingWorkSectionProps) {
+  const shown = cards ?? DEFAULT_CARDS;
+
   if (variant === "mobile") {
     return (
       <section
@@ -313,9 +316,9 @@ export function StudentsRatingWorkSection({
             </h2>
           </div>
 
-          {cards.length > 0 ? (
+          {shown.length > 0 ? (
             <div className="mt-[34px] flex flex-col items-center gap-[30px]">
-              {cards.slice(0, 2).map((card, idx) => (
+              {shown.slice(0, 2).map((card, idx) => (
                 <MobileStudentRatingCard key={`${card.name}-${idx}`} card={card} />
               ))}
             </div>
@@ -348,9 +351,9 @@ export function StudentsRatingWorkSection({
               <span style={{ fontStyle: "italic", fontWeight: 700 }}>WERASH</span>
             </h2>
           </div>
-          {cards.length > 0 ? (
+          {shown.length > 0 ? (
             <div className="mt-[42px] flex flex-col gap-[40px] pl-[56px]">
-              {cards.slice(0, 2).map((card, idx) => (
+              {shown.slice(0, 2).map((card, idx) => (
                 <TabletStudentRatingCard key={`${card.name}-${idx}`} card={card} />
               ))}
             </div>
@@ -407,7 +410,7 @@ export function StudentsRatingWorkSection({
             </h2>
 
             <div className="mx-auto mt-[39px] grid w-[1205px] max-w-full grid-cols-2 justify-items-stretch gap-x-[31px] gap-y-[40px]">
-              {cards.map((card, idx) => (
+              {shown.map((card, idx) => (
                 <div
                   key={`${card.name}-${idx}`}
                   className="h-[327px] w-[587px] max-w-full rounded-[36px] border border-black bg-white pb-[38px] pl-[45px] pr-[28px]"
@@ -433,7 +436,11 @@ export function StudentsRatingWorkSection({
                         <StudentRatingProfileInfo card={card} />
                       </div>
                     </div>
-                    <div className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] border border-black bg-[#E7E7E7]" />
+                    <StudentProjectThumb
+                      src={card.projectImage}
+                      name={card.name}
+                      className="mt-[29px] h-[260px] w-[203px] shrink-0 overflow-hidden rounded-[36px] border border-black bg-[#E7E7E7]"
+                    />
                   </div>
                 </div>
               ))}

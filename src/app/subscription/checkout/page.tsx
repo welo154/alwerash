@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageSession } from "@/server/auth/live-session";
+import { clearPostAuthNext } from "@/server/auth/post-auth-next";
 import { getSubscriptionPlan, isSubscriptionPlanId } from "@/lib/subscription-plans";
+import { subscriptionCheckoutPath } from "@/lib/subscription-routes";
 import { CHECKOUT_PROVIDERS, isCheckoutProviderKey } from "@/server/subscription/checkout-attempt";
 import { requestCheckout } from "./actions";
 import { isPolarConfigured } from "@/server/payments/polar";
@@ -22,12 +24,13 @@ export default async function CheckoutPlaceholderPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePageSession("/subscription/checkout");
   const params = await searchParams;
   const planId = one(params.plan);
   if (!isSubscriptionPlanId(planId)) notFound();
   const plan = getSubscriptionPlan(planId);
   if (!plan) notFound();
+  await requirePageSession(subscriptionCheckoutPath(plan.id));
+  await clearPostAuthNext();
 
   const saved = one(params.saved) === "1";
   const providerKey = one(params.provider);

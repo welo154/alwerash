@@ -59,6 +59,10 @@ export default async function AdminMentorsPage() {
         <strong>{MAX_LANDING_POPULAR_MENTORS} mentors</strong> as popular for the signed-out home page
         (“Current Mosts” section).
       </p>
+      <p className="mb-6 max-w-2xl text-sm text-slate-600">
+        Certificate signatures are uploaded on each mentor&apos;s page. Use the{" "}
+        <strong>Certificate signature</strong> button on a card to open it.
+      </p>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {mentors.map((m) => (
@@ -70,6 +74,7 @@ export default async function AdminMentorsPage() {
               photo: m.photo,
               featuredOrder: m.featuredOrder ?? null,
               landingPopularOrder: m.landingPopularOrder ?? null,
+              signatureImage: m.signatureImage ?? null,
             }}
             toggleFeatured={toggleMentorFeatured}
             togglePopular={toggleMentorPopular}

@@ -40,6 +40,14 @@ export default async function DashboardPage() {
           </Link>
         )}
         {isAdmin && (
+          <Link
+            className="inline-block rounded border border-black px-4 py-2 no-underline hover:bg-zinc-100"
+            href="/admin/content/students"
+          >
+            Student stories
+          </Link>
+        )}
+        {isAdmin && (
           <Link className="underline" href="/admin">Admin</Link>
         )}
       </div>

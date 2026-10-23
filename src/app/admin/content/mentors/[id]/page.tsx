@@ -84,7 +84,9 @@ export default async function AdminMentorEditPage({
 
       <div className="max-w-xl space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <MentorPhotoUpload mentorId={mentor.id} photo={mentor.photo} />
-        <MentorSignatureUpload mentorId={mentor.id} signatureImage={mentor.signatureImage} />
+        <div id="signature" className="scroll-mt-6">
+          <MentorSignatureUpload mentorId={mentor.id} signatureImage={mentor.signatureImage} />
+        </div>
 
         <form action={update} className="space-y-4">
           <input type="hidden" name="mentorId" value={mentor.id} />

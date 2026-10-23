@@ -2,6 +2,7 @@ import {
   publicGetHomeTrackExplorerBundle,
   publicListLandingMostsMentors,
 } from "@/server/content/public.service";
+import { publicListStudentStories } from "@/server/content/student-stories.service";
 import { HeroSection } from "./HeroSection";
 import { HomeTrackExplorerSection } from "@/components/home/HomeTrackExplorerSection";
 import { LandingCurrentMostsSection } from "./LandingCurrentMostsSection";
@@ -14,9 +15,10 @@ import { pangeaVar } from "@/lib/fonts/pangea";
 
 /** Public marketing landing — used only on `/` for signed-out visitors. */
 export async function GuestLanding() {
-  const [trackBundle, landingMostsMentors] = await Promise.all([
+  const [trackBundle, landingMostsMentors, studentStories] = await Promise.all([
     publicGetHomeTrackExplorerBundle(),
     publicListLandingMostsMentors(),
+    publicListStudentStories(),
   ]);
 
   return (
@@ -33,6 +35,7 @@ export async function GuestLanding() {
         marqueeTrackPills
         sectionClassName="mt-[50px] min-[744px]:mt-[60px] lg:mt-[63px]"
         landingMostsMentors={landingMostsMentors}
+        studentStories={studentStories}
       />
       <div className="max-lg:hidden">
         <LandingEverythingInOneSection />
@@ -44,7 +47,7 @@ export async function GuestLanding() {
           />
         ) : null}
         <div className="mb-0 w-full px-10">
-          <StudentsRatingWorkSection sectionClassName="py-0" />
+          <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
         </div>
         <LandingFaqSection />
         <LandingGetStartedCtaSection />

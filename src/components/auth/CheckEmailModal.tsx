@@ -12,10 +12,16 @@ const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
 type Props = {
   open: boolean;
   email: string;
+  signInHref?: string;
   onClose: () => void;
 };
 
-export function CheckEmailModal({ open, email: initialEmail, onClose }: Props) {
+export function CheckEmailModal({
+  open,
+  email: initialEmail,
+  signInHref = "/login",
+  onClose,
+}: Props) {
   const titleId = useId();
   const [email, setEmail] = useState(initialEmail);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -184,7 +190,7 @@ export function CheckEmailModal({ open, email: initialEmail, onClose }: Props) {
 
           <div className="mt-8 flex flex-col gap-3">
             <Link
-              href="/login"
+              href={signInHref}
               className="flex h-[64px] w-full items-center justify-center rounded-[8px] border border-black bg-white text-center text-black transition-opacity hover:opacity-80"
               style={{
                 fontSize: 24,

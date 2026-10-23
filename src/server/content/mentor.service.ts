@@ -184,13 +184,26 @@ export async function mentorReviewSubmission(
   submissionId: string,
   input: unknown
 ) {
-  const data = ReviewSubmissionSchema.parse(input);
   const existing = await prisma.submission.findFirst({
     where: { id: submissionId, ...mentorSubmissionWhere(mentorId) },
     select: { id: true },
   });
   if (!existing) throw new AppError("NOT_FOUND", 404, "Submission not found");
+  return reviewSubmissionCore(submissionId, input);
+}
 
+/** Admins can review any submission, not only those of their own courses. */
+export async function adminReviewSubmission(submissionId: string, input: unknown) {
+  const existing = await prisma.submission.findUnique({
+    where: { id: submissionId },
+    select: { id: true },
+  });
+  if (!existing) throw new AppError("NOT_FOUND", 404, "Submission not found");
+  return reviewSubmissionCore(submissionId, input);
+}
+
+async function reviewSubmissionCore(submissionId: string, input: unknown) {
+  const data = ReviewSubmissionSchema.parse(input);
   const updated = await prisma.submission.update({
     where: { id: submissionId },
     data: {

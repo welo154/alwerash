@@ -13,6 +13,7 @@ import {
   authText24,
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,7 +34,7 @@ type LoginFieldErrors = {
 
 export function AuthLoginPanel() {
   const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next");
+  const nextParam = safeInternalPath(searchParams.get("next"));
   const registered = searchParams.get("registered") === "1";
   const verified = searchParams.get("verified") === "1";
   const oauthError = searchParams.get("error");
@@ -105,7 +106,7 @@ export function AuthLoginPanel() {
     const isMentor = roles.includes("MENTOR");
     const isInstructor = roles.includes("INSTRUCTOR");
 
-    if (nextParam && nextParam.startsWith("/")) {
+    if (nextParam) {
       window.location.href = nextParam.includes("?") ? `${nextParam}&${toast}` : `${nextParam}?${toast}`;
     } else if (isAdmin) {
       window.location.href = `/admin/content/tracks?${toast}`;
@@ -179,7 +180,7 @@ export function AuthLoginPanel() {
         <div className="auth-login-centered flex flex-col">
         <p className="auth-login-join m-0 mx-auto h-[29px] w-[372px] text-center text-black" style={authText24}>
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="auth-login-join-link text-black underline">
+          <Link href={withNext("/register", nextParam)} className="auth-login-join-link text-black underline">
             Join for Free
           </Link>
         </p>

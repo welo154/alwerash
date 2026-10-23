@@ -349,19 +349,15 @@ export function TrackCoursesSection({
           </p>
         ) : (
           <div
-            className="flex min-w-0 flex-col items-center gap-y-[50px] overflow-hidden min-[744px]:max-lg:mx-auto min-[744px]:max-lg:grid min-[744px]:max-lg:w-[646px] min-[744px]:max-lg:grid-cols-[repeat(2,313px)] min-[744px]:max-lg:justify-items-start min-[744px]:max-lg:gap-x-5 min-[744px]:max-lg:gap-y-[30px] min-[744px]:max-lg:overflow-visible lg:grid lg:items-stretch lg:justify-start lg:gap-x-5 lg:gap-y-5 lg:overflow-visible lg:[grid-template-columns:repeat(auto-fill,313px)]"
+            className="flex min-w-0 flex-col items-center gap-y-[30px] min-[744px]:max-lg:mx-auto min-[744px]:max-lg:grid min-[744px]:max-lg:w-max min-[744px]:max-lg:grid-cols-[repeat(2,345px)] min-[744px]:max-lg:justify-items-start min-[744px]:max-lg:gap-x-[33px] lg:grid lg:items-start lg:justify-start lg:gap-x-[27px] lg:gap-y-[40px] lg:[grid-template-columns:repeat(auto-fill,346px)]"
             data-gsap-stagger-group
           >
             {visibleCourses.map((tile) => (
               <div
                 key={tile.id}
-                className="w-[334px] max-w-[334px] shrink-0 overflow-hidden min-[744px]:max-lg:w-[313px] min-[744px]:max-lg:max-w-[313px] lg:w-[313px] lg:max-w-none"
+                className="w-[315px] shrink-0 min-[744px]:w-[345px] lg:w-[346px]"
               >
-                <LearnPopularFigmaTile
-                  {...tile}
-                  size="grid"
-                  className="h-full w-full max-w-full overflow-hidden"
-                />
+                <LearnPopularFigmaTile {...tile} />
               </div>
             ))}
           </div>

@@ -18,7 +18,15 @@ type SubmissionDetail = {
   };
 };
 
-export function MentorReviewForm({ submission }: { submission: SubmissionDetail }) {
+export function MentorReviewForm({
+  submission,
+  endpoint = `/api/mentor/submissions/${submission.id}`,
+  doneHref = "/mentor/submissions",
+}: {
+  submission: SubmissionDetail;
+  endpoint?: string;
+  doneHref?: string;
+}) {
   const router = useRouter();
   const [feedback, setFeedback] = useState(submission.instructorFeedback ?? "");
   const [grade, setGrade] = useState(
@@ -31,7 +39,7 @@ export function MentorReviewForm({ submission }: { submission: SubmissionDetail 
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch(`/api/mentor/submissions/${submission.id}`, {
+      const res = await fetch(endpoint, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,7 +55,7 @@ export function MentorReviewForm({ submission }: { submission: SubmissionDetail 
       }
       const issued = Boolean(data.submission?.certificateCode);
       router.push(
-        `/mentor/submissions?toast=${encodeURIComponent(
+        `${doneHref}?toast=${encodeURIComponent(
           issued ? "Review saved. Certificate issued to the learner." : "Review saved"
         )}`
       );

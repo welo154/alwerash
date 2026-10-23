@@ -8,6 +8,7 @@ import { CoursesMegaMenuPanel } from "./CoursesMegaMenu";
 import { HeaderLanguageToggle } from "./HeaderLanguageToggle";
 import { MobileSiteNavBar } from "./MobileSiteNavBar";
 import { useT } from "@/components/i18n/Tr";
+import { SUBSCRIPTION_PRICING_PATH } from "@/lib/subscription-routes";
 
 export type LoggedInAppHeaderProps = {
   user?: { name?: string | null; email?: string | null; image?: string | null } | null;
@@ -207,7 +208,7 @@ export function LoggedInAppHeader({
                   {t("Log in")}
                 </Link>
                 <Link
-                  href="/register"
+                  href={SUBSCRIPTION_PRICING_PATH}
                   className="items-center justify-center whitespace-nowrap text-[18px] font-bold leading-none text-[#141413] hover:opacity-90"
                   style={{
                     display: "flex",

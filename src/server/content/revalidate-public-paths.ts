@@ -13,6 +13,15 @@ export function revalidatePublicCatalogPaths() {
   revalidatePath("/events");
 }
 
+/** Call after a student story changes so every “Why students love” section refreshes. */
+export function revalidateStudentStoryPaths() {
+  revalidateTag(PUBLIC_CATALOG_CACHE_TAG);
+  revalidatePath("/");
+  revalidatePath("/home");
+  revalidatePath("/course/[courseId]", "page");
+  revalidatePath("/library/books/[id]", "page");
+}
+
 /** Call after mentor create/update/delete so landing and directory pages refresh. */
 export function revalidatePublicMentorPaths() {
   revalidateTag(PUBLIC_CATALOG_CACHE_TAG);

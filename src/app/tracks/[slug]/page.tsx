@@ -55,10 +55,14 @@ export default async function TrackPage({
 
       <div className="mx-auto w-full min-w-0 max-w-[1400px] pl-6 sm:pl-8 lg:pl-10">
         <div className="flex min-w-0 max-w-full flex-col overflow-x-visible lg:flex-row lg:items-start lg:gap-[55px]">
-          <div className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start">
+          <div
+            className="hidden lg:sticky lg:top-8 lg:z-40 lg:block lg:self-start"
+            style={{ marginTop: -14 }}
+          >
             <LearnCoursesSidebar
               categories={sidebarCategories}
               activeCategoryKey={`track-${track.id}`}
+              headingsOnly
             />
           </div>
 

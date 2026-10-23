@@ -6,6 +6,7 @@ import { getUserAggregateLearningProgressPercent } from "@/server/home/user-lear
 import { getWeeklyActivitySummary } from "@/server/home/learning-activity.service";
 import { emptyWeeklyActivitySummary } from "@/lib/learning-activity";
 import { publicGetHomeTrackExplorerBundle, publicListLandingMostsMentors } from "@/server/content/public.service";
+import { publicListStudentStories } from "@/server/content/student-stories.service";
 import { readUserProfessionFromDb } from "@/server/user/readProfession";
 import { markPage } from "@/server/observability/query-timing";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
@@ -52,7 +53,7 @@ export default async function LoggedInHomePage() {
     console.warn("[home] continue learning unavailable", err instanceof Error ? err.message : err);
   }
 
-  const [landingMostsMentors, trackBundle, weeklyActivity, learningProgressPercent] =
+  const [landingMostsMentors, trackBundle, weeklyActivity, learningProgressPercent, studentStories] =
     await Promise.all([
       publicListLandingMostsMentors().catch((err) => {
         console.warn("[home] mosts mentors unavailable", err instanceof Error ? err.message : err);
@@ -70,6 +71,7 @@ export default async function LoggedInHomePage() {
         console.warn("[home] learning progress unavailable", err instanceof Error ? err.message : err);
         return 0;
       }),
+      publicListStudentStories(),
     ]);
 
   return (
@@ -83,6 +85,7 @@ export default async function LoggedInHomePage() {
       weeklyActivity={weeklyActivity}
       activityHighlightDayIndex={now.getUTCDay()}
       learningProgressPercent={learningProgressPercent}
+      studentStories={studentStories}
     />
   );
 }

@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { signOutToHome } from "@/lib/auth/signOutToHome";
 import { useToast } from "@/components/Toast";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { SUBSCRIPTION_PRICING_PATH } from "@/lib/subscription-routes";
 
 const pangeaFont = pangeaFontFamily;
 const MOBILE_LOGO = { width: 160, height: 47 } as const;
@@ -280,7 +281,7 @@ export function MobileNavDrawer({
             <MenuLink href="/login" onClose={onClose} style={guestAuthLink}>
               LOG IN
             </MenuLink>
-            <MenuLink href="/register" onClose={onClose} style={guestAuthLink}>
+            <MenuLink href={SUBSCRIPTION_PRICING_PATH} onClose={onClose} style={guestAuthLink}>
               SIGN UP
             </MenuLink>
           </nav>

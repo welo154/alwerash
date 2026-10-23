@@ -39,6 +39,7 @@ import { LandingEverythingInOneSection } from "@/components/landing/LandingEvery
 import { LandingCurrentMostsSection } from "@/components/landing/LandingCurrentMostsSection";
 import { LibraryPopularsSection } from "@/components/home/LibraryPopularsSection";
 import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
+import type { StudentRatingCard } from "@/components/students/student-rating-types";
 import { LandingFaqSection } from "@/components/landing/LandingFaqSection";
 import { LandingGetStartedCtaSection } from "@/components/landing/LandingGetStartedCtaSection";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
@@ -489,6 +490,8 @@ export type HomeTrackExplorerSectionProps = {
   showWhatToLearnNextHeading?: boolean;
   /** Mentors for mobile guest landing “Current Mosts” strip. */
   landingMostsMentors?: LandingMostsMentorCardDto[];
+  /** Reviews for the mobile “Why students love” panel. */
+  studentStories?: StudentRatingCard[] | null;
 };
 
 export function HomeTrackExplorerSection({
@@ -506,6 +509,7 @@ export function HomeTrackExplorerSection({
   maxPills,
   showWhatToLearnNextHeading = false,
   landingMostsMentors = [],
+  studentStories,
 }: HomeTrackExplorerSectionProps) {
   const arabic = useArabicLayout();
   const t = useT();
@@ -1226,6 +1230,7 @@ export function HomeTrackExplorerSection({
 
           <StudentsRatingWorkSection
             variant="mobile"
+            cards={studentStories ?? undefined}
             sectionClassName="mt-[75px] min-[744px]:mt-[85px]"
           />
 

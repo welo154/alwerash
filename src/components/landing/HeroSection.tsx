@@ -10,6 +10,7 @@ import { HeaderLanguageToggle } from "@/components/layout/HeaderLanguageToggle";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
+import { SUBSCRIPTION_PRICING_PATH } from "@/lib/subscription-routes";
 
 export type HeroTrack = { id: string; title: string; slug: string };
 
@@ -28,6 +29,13 @@ const HERO_SHELL_TABLET = { width: 732, height: 1049 } as const;
 /** Rest mosaic: TL 282×357, TR 197×272, BL 282×224, BR 197×308; gaps 18×16. */
 const HERO_MOSAIC_FRAME = { width: 497, height: 597 } as const;
 const mosaicAnim = (name: string) => `${name} 8000ms linear infinite`;
+/** Photos cover the largest size each frame reaches while the mosaic moves. */
+const HERO_MOSAIC_PHOTOS = [
+  { anim: "alwerash-hero-mosaic-tl", src: "/hero/mosaic-tl.jpg" },
+  { anim: "alwerash-hero-mosaic-tr", src: "/hero/mosaic-tr.jpg" },
+  { anim: "alwerash-hero-mosaic-br", src: "/hero/mosaic-br.jpg" },
+  { anim: "alwerash-hero-mosaic-bl", src: "/hero/mosaic-bl.jpg" },
+] as const;
 
 const HERO_SHELL_MOBILE_PATH =
   "M320 0C324.564 5.83965e-07 324.08 4 319.516 4H296C291.582 4 288 7.58172 288 12V34C288 38.4183 291.582 42 296 42H358.341C370.516 42 382 49.8245 382 62V739C382 773.242 354.242 801 320 801H62C27.7584 801 6.12127e-07 773.242 0 739V62C2.17657e-07 49.8245 11.4839 42 23.6594 42H102.338C113.107 42 121.838 33.2696 121.838 22.5V13.7569C121.838 7.81601 117.022 3 111.081 3H62.3134C58.8228 3 58.5094 1.32994e-07 62 0H320Z";
@@ -231,7 +239,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                     {t("Log in")}
                   </Link>
                   <Link
-                    href="/register"
+                    href={SUBSCRIPTION_PRICING_PATH}
                     className="shrink-0 items-center justify-center whitespace-nowrap text-center text-[18px] font-bold leading-none tracking-[0] text-[#141413]"
                     style={{
                       fontFamily: pangeaFont,
@@ -363,7 +371,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
             </p>
             <Link
-              href="/register"
+              href={SUBSCRIPTION_PRICING_PATH}
               className={arabic ? "mt-[50px]" : "mt-[30px]"}
               style={{
                 display: "flex",
@@ -427,22 +435,17 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
                 animation: "alwerash-hero-grid-float 5000ms ease-in-out infinite",
               }}
             >
-              <div
-                className="absolute rounded-[50px] border border-black bg-white"
-                style={{ animation: mosaicAnim("alwerash-hero-mosaic-tl") }}
-              />
-              <div
-                className="absolute rounded-[50px] border border-black bg-white"
-                style={{ animation: mosaicAnim("alwerash-hero-mosaic-tr") }}
-              />
-              <div
-                className="absolute rounded-[50px] border border-black bg-white"
-                style={{ animation: mosaicAnim("alwerash-hero-mosaic-br") }}
-              />
-              <div
-                className="absolute rounded-[50px] border border-black bg-white"
-                style={{ animation: mosaicAnim("alwerash-hero-mosaic-bl") }}
-              />
+              {HERO_MOSAIC_PHOTOS.map((frame) => (
+                <div
+                  key={frame.anim}
+                  className="absolute overflow-hidden rounded-[50px] border border-black bg-white"
+                  style={{ animation: mosaicAnim(frame.anim) }}
+                >
+                  {/* Decorative; the hero copy next to the mosaic is the accessible name. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={frame.src} alt="" className="h-full w-full object-cover" draggable={false} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -543,7 +546,7 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
       </p>
 
       <Link
-        href="/register"
+        href={SUBSCRIPTION_PRICING_PATH}
         className={
           isTablet
             ? `${arabic ? "mt-[50px]" : "mt-[61px]"} flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]`

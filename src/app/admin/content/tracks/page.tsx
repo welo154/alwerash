@@ -19,7 +19,12 @@ export default async function AdminTracksPage({
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-bold tracking-tight text-black">Tracks</h1>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="text-2xl font-bold tracking-tight text-black">Tracks</h1>
+        <Link href="/admin/content/students" className="text-sm font-medium text-black underline">
+          Student stories
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {tracks.map((t) => (

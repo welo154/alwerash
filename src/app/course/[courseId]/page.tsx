@@ -30,6 +30,7 @@ import { CourseBreadcrumb } from "./CourseBreadcrumb";
 import { LocalizedText } from "@/components/i18n/LocalizedText";
 import { LandingEverythingInOneSection } from "@/components/landing/LandingEverythingInOneSection";
 import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
+import { publicListStudentStories } from "@/server/content/student-stories.service";
 
 const pangeaVar = localFont({
   src: "../../../../public/fonts/FwTRIAL-PangeaVAR.woff2",
@@ -75,10 +76,14 @@ export default async function PublicCoursePage({
     `Learn ${course.title} with step-by-step lessons designed to build practical skills from the ground up.`;
   const requirementItems = courseRequirementItems(course.requirements);
 
-  const relatedCourses =
+  const [relatedCourses, studentStories] = await Promise.all([
     course.track?.slug != null
-      ? await publicGetSimilarCourses(course.id, course.track.slug, 8)
-      : (await publicListFeaturedCourses(9)).filter((item) => item.id !== course.id).slice(0, 8);
+      ? publicGetSimilarCourses(course.id, course.track.slug, 8)
+      : publicListFeaturedCourses(9).then((items) =>
+          items.filter((item) => item.id !== course.id).slice(0, 8)
+        ),
+    publicListStudentStories(),
+  ]);
 
   const relatedCards = relatedCourses.map((related) => ({
     titleInstructorLine: `${related.title} -\n${related.instructorName?.trim() || "Instructor"}`,
@@ -874,11 +879,11 @@ export default async function PublicCoursePage({
       </div>
 
       <div className="max-lg:order-9 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
-        <StudentsRatingWorkSection variant="mobile" />
+        <StudentsRatingWorkSection variant="mobile" cards={studentStories ?? undefined} />
       </div>
 
       <div className="mt-[66px] w-full max-w-full max-lg:hidden">
-        <StudentsRatingWorkSection sectionClassName="py-0" />
+        <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
       </div>
 
       <div className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">

@@ -10,6 +10,7 @@ export type AdminMentorCardMentor = {
   photo: string | null;
   featuredOrder: number | null;
   landingPopularOrder: number | null;
+  signatureImage: string | null;
 };
 
 export function AdminMentorCard({
@@ -139,6 +140,20 @@ export function AdminMentorCard({
         />
         Popular on home page
       </label>
+
+      <Link
+        href={`/admin/content/mentors/${mentor.id}#signature`}
+        className={`mx-3 mb-3 flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
+          mentor.signatureImage
+            ? "border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100"
+            : "border-rose-300 bg-rose-50 text-rose-900 hover:bg-rose-100"
+        }`}
+      >
+        <span>Certificate signature</span>
+        <span className="uppercase tracking-wide">
+          {mentor.signatureImage ? "Set" : "Missing · Upload"}
+        </span>
+      </Link>
     </div>
   );
 }

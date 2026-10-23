@@ -44,6 +44,18 @@ export default function AdminContentHome() {
           </Link>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-4 max-w-md shadow-sm">
+          <h2 className="font-semibold text-black mb-1">Student stories</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mb-2">
+            Name, job title, review, and the project photo in “Why students love Alwerash”.
+          </p>
+          <Link
+            href="/admin/content/students"
+            className="inline-block rounded-xl border border-black px-4 py-2 text-sm font-medium text-black no-underline hover:bg-slate-50 transition-colors"
+          >
+            Manage student stories
+          </Link>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 max-w-md shadow-sm">
           <h2 className="font-semibold text-black mb-1">Instructors</h2>
           <p className="text-sm text-[var(--color-text-muted)] mb-2">
             Create instructor accounts and assign them to courses.

@@ -9,12 +9,30 @@ const navItems = [
   { href: "/admin/content/tracks", label: "Tracks" },
   { href: "/admin/content/courses", label: "Courses" },
   { href: "/admin/content/mentors", label: "Mentors" },
+  { href: "/admin/content/students", label: "Student stories" },
   { href: "/admin/users", label: "Learners" },
+  { href: "/admin/submissions", label: "Submissions" },
+  { href: "/admin/certificates", label: "Certificates" },
+  { href: "/admin/analytics", label: "Watch time" },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [pendingSubmissions, setPendingSubmissions] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/submissions/pending-count")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { count?: number } | null) => {
+        if (!cancelled && typeof data?.count === "number") setPendingSubmissions(data.count);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -52,13 +70,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-gray-200 text-black"
                       : "text-slate-700 hover:bg-slate-100 hover:text-black"
                   }`}
                 >
                   {item.label}
+                  {item.href === "/admin/submissions" && pendingSubmissions > 0 ? (
+                    <span className="rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[11px] font-bold leading-none text-black">
+                      {pendingSubmissions}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}

@@ -8,6 +8,7 @@ import type { ContinueLearningCardDto } from "@/server/home/continue-learning.se
 import type { WeeklyActivitySummary } from "@/lib/learning-activity";
 import type { HomeTrackExplorerBundle } from "@/types/home-track-explorer";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+import type { StudentRatingCard } from "@/components/students/student-rating-types";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { Tr } from "@/components/i18n/Tr";
 
@@ -40,6 +41,7 @@ export type LoggedInHomeProps = {
   activityHighlightDayIndex: number;
   /** Aggregate completed-lesson progress across started courses (0–100). */
   learningProgressPercent: number;
+  studentStories?: StudentRatingCard[] | null;
 };
 
 export function LoggedInHome({
@@ -52,6 +54,7 @@ export function LoggedInHome({
   weeklyActivity,
   activityHighlightDayIndex,
   learningProgressPercent,
+  studentStories,
 }: LoggedInHomeProps) {
   const initials = userName
     .split(" ")
@@ -519,6 +522,7 @@ export function LoggedInHome({
           maxPills={8}
           showWhatToLearnNextHeading
           landingMostsMentors={landingMostsMentors}
+          studentStories={studentStories}
         />
       </section>
     </div>

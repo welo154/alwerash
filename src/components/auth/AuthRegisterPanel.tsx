@@ -14,6 +14,7 @@ import {
   authText24,
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 import { CheckEmailModal } from "./CheckEmailModal";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -78,7 +79,7 @@ export function AuthRegisterPanel({
 }) {
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
-  const nextParam = searchParams.get("next");
+  const nextParam = safeInternalPath(searchParams.get("next"));
   const checkEmailParam = searchParams.get("checkEmail");
   const emailQueryParam = searchParams.get("email");
   const presetCheckEmail = (checkEmailParam ?? emailQueryParam ?? "").trim();
@@ -312,7 +313,7 @@ export function AuthRegisterPanel({
 
       <p className="auth-login-join m-0 text-center text-black" style={authText24}>
         Already have an account?{" "}
-        <Link href="/login" className="auth-login-join-link text-black underline">
+        <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
           Log in
         </Link>
       </p>
@@ -322,6 +323,7 @@ export function AuthRegisterPanel({
       <CheckEmailModal
         open={checkEmailOpen}
         email={checkEmailAddress}
+        signInHref={withNext("/login", nextParam)}
         onClose={() => setCheckEmailOpen(false)}
       />
     </div>
