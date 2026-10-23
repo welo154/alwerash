@@ -15,14 +15,14 @@ export function HeaderLanguageToggle({ tone = "dark" }: { tone?: "dark" | "light
       style={{
         fontFamily: "Inter, var(--font-dm-sans), sans-serif",
         color: onGreenBar ? "#fff" : "#000",
-        borderColor: onGreenBar ? "rgb(255 255 255 / 40%)" : "rgb(0 0 0 / 40%)",
+        borderColor: onGreenBar ? "#fff" : "rgb(0 0 0 / 40%)",
       }}
     >
       {locale === "en" ? (
         <span
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            color: "var(--Black, #000)",
+            color: onGreenBar ? "#fff" : "var(--Black, #000)",
             fontFamily: "Inter",
             fontSize: 20,
             fontStyle: "normal",

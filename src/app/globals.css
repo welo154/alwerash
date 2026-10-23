@@ -1352,8 +1352,105 @@ label:has(input[type="radio"]) {
   height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
+/* Featured course cards: grow to the right. Neighbor shifting is done in the carousel. */
+.learn-featured-swiper.landing-showcase-swiper--cards .swiper-slide {
+  z-index: 1;
+}
+
+.learn-featured-swiper.landing-showcase-swiper--cards .swiper-slide.is-featured-expanded {
+  z-index: 4;
+}
+
+.learn-featured-swiper .featured-card-scaler {
+  width: 323px;
+  transition: width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-scaler {
+  width: 585px;
+}
+
+.learn-featured-swiper .featured-card-panel {
+  transition:
+    border-color 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-panel {
+  border-width: 2px !important;
+  border-color: var(--Green, #8AF396) !important;
+  border-radius: 50px;
+}
+
+/* Upper panel grows downward to 380px. Top edge stays fixed. */
+.learn-featured-swiper .featured-card-upper {
+  top: 0;
+  height: 323.077px;
+  transition:
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-upper {
+  height: 380px;
+}
+
+/* Photo shrinks from the top to 232px; the card box stays the same height. */
+.learn-featured-swiper .featured-card-photo {
+  top: auto;
+  height: 289.744px;
+  transition:
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-photo {
+  height: 232px;
+}
+
+/* Title bottom is 120px above the upper panel at rest (296px above the card bottom).
+   On hover it sits 28px above the 232px photo. */
+.learn-featured-swiper .featured-card-title {
+  bottom: 296px;
+  transition: bottom 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-title {
+  bottom: 260px;
+}
+
+.learn-featured-swiper .featured-hover-only {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-hover-only {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.learn-featured-swiper .featured-rest-meta {
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.learn-featured-swiper .swiper-slide.is-featured-expanded .featured-rest-meta {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .learn-featured-swiper.swiper {
   touch-action: pan-y pinch-zoom;
+}
+
+.learn-featured-swiper.swiper[dir="ltr"] .swiper-slide:last-child {
+  margin-right: 10px !important;
+}
+
+.learn-featured-swiper.swiper[dir="rtl"] .swiper-slide:last-child {
+  margin-left: 10px !important;
 }
 
 /* Slider tracks run from the right. Slide interiors keep their original layout. */

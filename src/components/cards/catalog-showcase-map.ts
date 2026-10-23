@@ -8,6 +8,10 @@ export type CatalogShowcaseCardProps = {
   viewMoreLabel?: string;
   viewMoreHref?: string;
   onViewMore?: () => void;
+  /** Skip the expanded preview that opens from the VIEW MORE control. */
+  disableViewMoreHover?: boolean;
+  /** Featured carousel: grow the whole card on hover instead of the VIEW MORE button. */
+  expandCardOnHover?: boolean;
   className?: string;
   /** @deprecated Prefer `bottomImageSrc` — track covers render in the lower photo panel. */
   topImageSrc?: string;
