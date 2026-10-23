@@ -5,6 +5,7 @@ import { requirePageSession } from "@/server/auth/live-session";
 import { getSubscriptionPlan, isSubscriptionPlanId } from "@/lib/subscription-plans";
 import { CHECKOUT_PROVIDERS, isCheckoutProviderKey } from "@/server/subscription/checkout-attempt";
 import { requestCheckout } from "./actions";
+import { isPolarConfigured } from "@/server/payments/polar";
 import { RATE_LIMITED_MESSAGE } from "@/server/security/rate-limit";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
 
@@ -32,6 +33,8 @@ export default async function CheckoutPlaceholderPage({
   const providerKey = one(params.provider);
   const chosen = isCheckoutProviderKey(providerKey) ? CHECKOUT_PROVIDERS[providerKey] : null;
   const rateLimited = one(params.error) === "rate_limited";
+  const unavailable = one(params.error) === "unavailable";
+  const polarReady = isPolarConfigured();
 
   return (
     <div className={`${pangeaVar.className} flex min-h-screen flex-col items-center bg-white px-4 py-10`}>
@@ -55,14 +58,20 @@ export default async function CheckoutPlaceholderPage({
           className="m-0 mt-4 text-center"
           style={{ fontFamily: pangeaFontFamily, fontSize: 16, lineHeight: "140%", opacity: 0.75 }}
         >
-          Paymob will take Egyptian pounds and Stripe will take US dollars. Neither is connected
-          yet, so this page only saves your choice. Your card is not charged and your subscription
-          does not start.
+          Pay in US dollars by card through Polar; your access starts as soon as the payment
+          clears. Paymob for Egyptian pounds is not connected yet, so that option only saves your
+          choice.
         </p>
 
         {rateLimited ? (
           <p role="alert" className="m-0 mt-6 text-center" style={{ fontFamily: pangeaFontFamily, fontSize: 16 }}>
             {RATE_LIMITED_MESSAGE}
+          </p>
+        ) : null}
+
+        {unavailable ? (
+          <p role="alert" className="m-0 mt-6 text-center" style={{ fontFamily: pangeaFontFamily, fontSize: 16 }}>
+            Card checkout is not available right now. Please try again in a few minutes.
           </p>
         ) : null}
 
@@ -73,15 +82,17 @@ export default async function CheckoutPlaceholderPage({
           </p>
         ) : (
           <div className="mt-8 flex flex-col items-center gap-4">
+            {polarReady ? (
+              <form action={requestCheckout}>
+                <input type="hidden" name="planId" value={plan.id} />
+                <input type="hidden" name="provider" value="polar" />
+                <PlaceholderButton primary>Pay by card · {plan.priceUsd} USD</PlaceholderButton>
+              </form>
+            ) : null}
             <form action={requestCheckout}>
               <input type="hidden" name="planId" value={plan.id} />
               <input type="hidden" name="provider" value="paymob" />
               <PlaceholderButton>Continue with Paymob · {plan.price} EGP</PlaceholderButton>
-            </form>
-            <form action={requestCheckout}>
-              <input type="hidden" name="planId" value={plan.id} />
-              <input type="hidden" name="provider" value="stripe" />
-              <PlaceholderButton>Continue with Stripe · {plan.priceUsd} USD</PlaceholderButton>
             </form>
           </div>
         )}
@@ -96,11 +107,11 @@ export default async function CheckoutPlaceholderPage({
   );
 }
 
-function PlaceholderButton({ children }: { children: React.ReactNode }) {
+function PlaceholderButton({ children, primary = false }: { children: React.ReactNode; primary?: boolean }) {
   return (
     <button
       type="submit"
-      className="cursor-pointer border-2 border-black bg-white px-6"
+      className={`cursor-pointer border-2 border-black px-6 ${primary ? "bg-black text-white" : "bg-white"}`}
       style={{
         minWidth: 280,
         height: 56,

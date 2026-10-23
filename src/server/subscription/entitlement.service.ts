@@ -145,6 +145,56 @@ export async function grantEntitlementForVerifiedPayment(params: {
 }
 
 /**
+ * Take back the time a refunded payment granted. Same verification and
+ * idempotency contract as {@link grantEntitlementForVerifiedPayment}; access
+ * bought by other payments stays.
+ */
+export async function reverseEntitlementForRefund(params: {
+  provider: SubscriptionProvider;
+  providerEventId: string;
+  eventType: string;
+  userId: string;
+  durationMonths: number;
+}): Promise<{ applied: boolean }> {
+  const { provider, providerEventId, eventType, userId, durationMonths } = params;
+
+  const alreadyProcessed = await prisma.paymentEvent.findUnique({
+    where: { provider_providerEventId: { provider, providerEventId } },
+    select: { status: true },
+  });
+  if (alreadyProcessed?.status === "PROCESSED") return { applied: false };
+
+  const now = new Date();
+  return prisma.$transaction(async (tx) => {
+    await tx.paymentEvent.upsert({
+      where: { provider_providerEventId: { provider, providerEventId } },
+      create: { provider, providerEventId, type: eventType, status: "RECEIVED" },
+      update: {},
+    });
+
+    const existing = await tx.entitlement.findUnique({
+      where: { userId_product: { userId, product: ENTITLEMENT_PRODUCT } },
+    });
+    if (existing?.expiresAt) {
+      const reduced = addMonths(existing.expiresAt, -durationMonths);
+      await tx.entitlement.update({
+        where: { id: existing.id },
+        data:
+          reduced > now
+            ? { expiresAt: reduced, updatedAt: now }
+            : { status: "REVOKED", expiresAt: now, updatedAt: now },
+      });
+    }
+
+    await tx.paymentEvent.update({
+      where: { provider_providerEventId: { provider, providerEventId } },
+      data: { status: "PROCESSED", processedAt: now },
+    });
+    return { applied: true };
+  });
+}
+
+/**
  * Development-only self grant. Throws in production unless explicitly enabled.
  */
 export async function grantSelfServeEntitlement(

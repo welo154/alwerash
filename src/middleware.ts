@@ -188,5 +188,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   // Run on all paths except static assets and NextAuth API
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:ico|png|jpg|jpeg|gif|svg|woff2?)$).*)"],
+  matcher: [
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:ico|png|jpg|jpeg|gif|svg|webp|avif|mp4|webm|woff2?|ttf|otf|txt|xml)$).*)",
+  ],
 };

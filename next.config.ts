@@ -17,7 +17,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self' https://accounts.google.com",
+  "form-action 'self' https://accounts.google.com https://*.polar.sh",
 ].join("; ");
 
 const securityHeaders = [

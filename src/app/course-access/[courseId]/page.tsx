@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import { notFound, redirect } from "next/navigation";
 import { privateCoursePath, publicCoursePath } from "@/lib/course-access";
@@ -102,8 +103,12 @@ export default async function PrivateCoursePage({
   const userId = session.user!.id!;
 
   let course;
+  let courseProgress;
   try {
-    course = await getCourseForLearning(courseId);
+    [course, courseProgress] = await Promise.all([
+      getCourseForLearning(courseId),
+      getCourseProgress(userId, courseId),
+    ]);
   } catch (error) {
     if (error instanceof AppError && error.code === "NOT_FOUND") notFound();
     throw error;
@@ -113,15 +118,9 @@ export default async function PrivateCoursePage({
     redirect(publicCoursePath(courseId));
   }
 
-  const [articleBodies, courseProgress, assignment, submission, certificate] = await Promise.all([
-    loadArticleBodiesByLessonId(
-      course.modules.flatMap((module) => module.lessons.map((lesson) => lesson.id))
-    ),
-    getCourseProgress(userId, courseId),
-    getPublishedAssignmentForCourse(courseId),
-    getLearnerSubmissionForCourse(courseId, userId),
-    getCertificateForLearnerCourse(userId, courseId),
-  ]);
+  const articleBodies = await loadArticleBodiesByLessonId(
+    course.modules.flatMap((module) => module.lessons.map((lesson) => lesson.id))
+  );
 
   const modulesBase: FullAccessModule[] = course.modules.map((module) => ({
     id: module.id,
@@ -159,36 +158,49 @@ export default async function PrivateCoursePage({
         instructorProfession={course.instructorProfession}
         completedLessonIds={courseProgress?.completedLessonIds ?? []}
       />
-      {assignment ? (
-        <div className="mx-auto max-w-3xl px-6 pb-16">
-          <AssignmentSubmissionPanel
-            assignment={{
-              id: assignment.id,
-              title: assignment.title,
-              instructions: assignment.instructions,
-            }}
-            initialSubmission={
-              submission
-                ? {
-                    id: submission.id,
-                    status: submission.status,
-                    textAnswer: submission.textAnswer,
-                    externalLink: submission.externalLink,
-                    instructorFeedback: submission.instructorFeedback,
-                    grade: submission.grade,
-                    files: submission.files.map((file) => ({
-                      id: file.id,
-                      fileKey: file.fileKey,
-                      mime: file.mime,
-                      size: file.size,
-                    })),
-                  }
-                : null
-            }
-            certificateHref={certificate ? certificatePath(certificate.code) : null}
-          />
-        </div>
-      ) : null}
+      <Suspense fallback={null}>
+        <CourseAssignmentSection courseId={course.id} userId={userId} />
+      </Suspense>
     </main>
+  );
+}
+
+async function CourseAssignmentSection({ courseId, userId }: { courseId: string; userId: string }) {
+  const [assignment, submission, certificate] = await Promise.all([
+    getPublishedAssignmentForCourse(courseId),
+    getLearnerSubmissionForCourse(courseId, userId),
+    getCertificateForLearnerCourse(userId, courseId),
+  ]);
+  if (!assignment) return null;
+
+  return (
+    <div className="mx-auto max-w-3xl px-6 pb-16">
+      <AssignmentSubmissionPanel
+        assignment={{
+          id: assignment.id,
+          title: assignment.title,
+          instructions: assignment.instructions,
+        }}
+        initialSubmission={
+          submission
+            ? {
+                id: submission.id,
+                status: submission.status,
+                textAnswer: submission.textAnswer,
+                externalLink: submission.externalLink,
+                instructorFeedback: submission.instructorFeedback,
+                grade: submission.grade,
+                files: submission.files.map((file) => ({
+                  id: file.id,
+                  fileKey: file.fileKey,
+                  mime: file.mime,
+                  size: file.size,
+                })),
+              }
+            : null
+        }
+        certificateHref={certificate ? certificatePath(certificate.code) : null}
+      />
+    </div>
   );
 }

@@ -33,6 +33,7 @@ enum ThreadType {
 enum SubscriptionProvider {
   STRIPE
   PAYMOB
+  POLAR
 }
 
 /// Device class for session limits. Tablets count as MOBILE.
