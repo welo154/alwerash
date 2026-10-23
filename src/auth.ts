@@ -129,11 +129,21 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
+/** Next throws this while prerendering a route that reads cookies or headers. It must propagate so the route is marked dynamic instead of failing the build. */
+function isDynamicServerError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const digest = "digest" in error ? String((error as { digest?: unknown }).digest) : "";
+  if (digest.includes("DYNAMIC_SERVER_USAGE")) return true;
+  const message = error instanceof Error ? error.message : "";
+  return message.includes("Dynamic server usage");
+}
+
 /** Get current session (use in API routes and server components). */
 export async function auth() {
   try {
     return await getServerSession(authOptions);
   } catch (error) {
+    if (isDynamicServerError(error)) throw error;
     console.error("[auth] getServerSession failed", error);
     return null;
   }
