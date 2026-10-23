@@ -4,6 +4,13 @@ import { privateCoursePath, publicCoursePath } from "@/lib/course-access";
 import { getCourseForLearning } from "@/server/content/learn.service";
 import { AppError } from "@/server/lib/errors";
 import { requireSubscription } from "@/server/subscription/require-subscription";
+import { AssignmentSubmissionPanel } from "@/components/learning/AssignmentSubmissionPanel";
+import { getPublishedAssignmentForCourse } from "@/server/content/assignment.service";
+import { getLearnerSubmissionForCourse } from "@/server/learning/submission.service";
+import {
+  certificatePath,
+  getCertificateForLearnerCourse,
+} from "@/server/certificates/certificate.service";
 import { getCourseProgress } from "@/server/learning/progress.service";
 import { markPage } from "@/server/observability/query-timing";
 import { prisma } from "@/server/db/prisma";
@@ -106,11 +113,14 @@ export default async function PrivateCoursePage({
     redirect(publicCoursePath(courseId));
   }
 
-  const [articleBodies, courseProgress] = await Promise.all([
+  const [articleBodies, courseProgress, assignment, submission, certificate] = await Promise.all([
     loadArticleBodiesByLessonId(
       course.modules.flatMap((module) => module.lessons.map((lesson) => lesson.id))
     ),
     getCourseProgress(userId, courseId),
+    getPublishedAssignmentForCourse(courseId),
+    getLearnerSubmissionForCourse(courseId, userId),
+    getCertificateForLearnerCourse(userId, courseId),
   ]);
 
   const modulesBase: FullAccessModule[] = course.modules.map((module) => ({
@@ -149,6 +159,36 @@ export default async function PrivateCoursePage({
         instructorProfession={course.instructorProfession}
         completedLessonIds={courseProgress?.completedLessonIds ?? []}
       />
+      {assignment ? (
+        <div className="mx-auto max-w-3xl px-6 pb-16">
+          <AssignmentSubmissionPanel
+            assignment={{
+              id: assignment.id,
+              title: assignment.title,
+              instructions: assignment.instructions,
+            }}
+            initialSubmission={
+              submission
+                ? {
+                    id: submission.id,
+                    status: submission.status,
+                    textAnswer: submission.textAnswer,
+                    externalLink: submission.externalLink,
+                    instructorFeedback: submission.instructorFeedback,
+                    grade: submission.grade,
+                    files: submission.files.map((file) => ({
+                      id: file.id,
+                      fileKey: file.fileKey,
+                      mime: file.mime,
+                      size: file.size,
+                    })),
+                  }
+                : null
+            }
+            certificateHref={certificate ? certificatePath(certificate.code) : null}
+          />
+        </div>
+      ) : null}
     </main>
   );
 }

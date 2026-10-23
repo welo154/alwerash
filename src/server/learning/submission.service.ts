@@ -150,7 +150,7 @@ export async function submitSubmission(assignmentId: string, userId: string) {
               title: true,
               mentor: {
                 select: {
-                  user: { select: { email: true } },
+                  user: { select: { id: true, email: true } },
                 },
               },
             },
@@ -160,26 +160,97 @@ export async function submitSubmission(assignmentId: string, userId: string) {
     },
   });
 
-  const mentorEmail = updated.assignment.course?.mentor?.user?.email;
-  if (mentorEmail) {
-    const { getAppBaseUrl, sendMentorCapstoneSubmittedEmail } = await import(
-      "@/server/email/resend.client"
-    );
-    const reviewUrl = `${getAppBaseUrl()}/mentor/submissions/${updated.id}`;
-    void sendMentorCapstoneSubmittedEmail({
-      to: mentorEmail,
+  const course = updated.assignment.course;
+  const mentorUser = course?.mentor?.user ?? null;
+  if (course && mentorUser?.id) {
+    void notifyCourseMentorOfSubmission({
+      submissionId: updated.id,
+      learnerId: userId,
       learnerName: updated.user.name?.trim() || updated.user.email,
-      courseTitle: updated.assignment.course?.title ?? "your course",
+      mentorUserId: mentorUser.id,
+      mentorEmail: mentorUser.email,
+      courseId: course.id,
+      courseTitle: course.title,
       assignmentTitle: updated.assignment.title,
-      reviewUrl,
-    }).catch((err) => console.error("[email] mentor notify failed:", err));
+    }).catch((err) => console.error("[submission] mentor notify failed:", err));
   } else {
     console.warn(
-      "[email] Capstone submitted but mentor has no linked login email; skipping notify"
+      "[submission] Submitted, but this course has no mentor account to notify"
     );
   }
 
   return updated;
+}
+
+/** Puts a review request on the course mentor's account and emails them. */
+async function notifyCourseMentorOfSubmission(input: {
+  submissionId: string;
+  learnerId: string;
+  learnerName: string;
+  mentorUserId: string;
+  mentorEmail: string | null;
+  courseId: string;
+  courseTitle: string;
+  assignmentTitle: string;
+}) {
+  const reviewPath = `/mentor/submissions/${input.submissionId}`;
+  const body = [
+    `${input.learnerName} submitted “${input.assignmentTitle}” for ${input.courseTitle}.`,
+    "Please open it to review the work and leave your remarks or corrections.",
+    reviewPath,
+  ].join("\n");
+
+  if (input.mentorUserId !== input.learnerId) {
+    const existing = await prisma.thread.findFirst({
+      where: {
+        type: "COURSE",
+        courseId: input.courseId,
+        AND: [
+          { participants: { some: { userId: input.learnerId } } },
+          { participants: { some: { userId: input.mentorUserId } } },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await prisma.message.create({
+        data: { threadId: existing.id, senderId: input.learnerId, body },
+      });
+    } else {
+      await prisma.thread.create({
+        data: {
+          type: "COURSE",
+          courseId: input.courseId,
+          participants: {
+            create: [{ userId: input.learnerId }, { userId: input.mentorUserId }],
+          },
+          messages: {
+            create: { senderId: input.learnerId, body },
+          },
+        },
+      });
+    }
+  }
+
+  if (!input.mentorEmail) {
+    console.warn("[email] Mentor account has no email; in-app message only");
+    return;
+  }
+
+  const { getAppBaseUrl, sendMentorCapstoneSubmittedEmail } = await import(
+    "@/server/email/resend.client"
+  );
+  const result = await sendMentorCapstoneSubmittedEmail({
+    to: input.mentorEmail,
+    learnerName: input.learnerName,
+    courseTitle: input.courseTitle,
+    assignmentTitle: input.assignmentTitle,
+    reviewUrl: `${getAppBaseUrl()}${reviewPath}`,
+  });
+  if (!result.success) {
+    console.error("[email] mentor notify failed:", result.error);
+  }
 }
 
 export async function canAccessSubmissionFile(

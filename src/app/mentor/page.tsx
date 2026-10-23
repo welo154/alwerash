@@ -4,6 +4,7 @@ import { requireRole } from "@/server/auth/require";
 import {
   mentorGetDashboardStats,
   mentorListCourses,
+  mentorListSubmissionMessages,
 } from "@/server/content/mentor.service";
 
 export default async function MentorPage() {
@@ -21,9 +22,10 @@ export default async function MentorPage() {
     );
   }
 
-  const [stats, courses] = await Promise.all([
+  const [stats, courses, messages] = await Promise.all([
     mentorGetDashboardStats(mentorId),
     mentorListCourses(mentorId),
+    mentorListSubmissionMessages(session.user.id, 5),
   ]);
 
   return (
@@ -37,6 +39,45 @@ export default async function MentorPage() {
         <StatCard label="Pending reviews" value={stats.pendingSubmissions} />
         <StatCard label="Reviewed this week" value={stats.reviewedThisWeek} />
       </div>
+
+      <section className="mt-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-slate-900">Submission messages</h2>
+          <Link href="/mentor/messages" className="text-sm font-medium text-indigo-700 hover:underline">
+            All messages
+          </Link>
+        </div>
+        <div className="mt-4 space-y-3">
+          {messages.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
+              When a learner submits an assignment, it shows up here and in your email.
+            </div>
+          ) : (
+            messages.map((message) => {
+              const href =
+                message.body
+                  .split("\n")
+                  .map((line) => line.trim())
+                  .find((line) => line.startsWith("/mentor/submissions/")) ?? "/mentor/messages";
+              return (
+                <Link
+                  key={message.id}
+                  href={href}
+                  className="block rounded-lg border border-slate-200 bg-white p-4 hover:bg-slate-50"
+                >
+                  <p className="text-sm font-medium text-slate-900">
+                    {message.sender.name?.trim() || message.sender.email} ·{" "}
+                    {message.thread.course?.title ?? "Course"}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-600">
+                    {message.body.split("\n")[0]}
+                  </p>
+                </Link>
+              );
+            })
+          )}
+        </div>
+      </section>
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold text-slate-900">Your courses</h2>

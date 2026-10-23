@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
   type ReactNode,
-  type RefObject,
 } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
@@ -50,7 +49,6 @@ const TABLET_SWIPER_CARD_GAP_PX = 33;
 const DESKTOP_SWIPER_CARD_GAP_PX = 27;
 const MOBILE_SECTION_INSET_PX = 30;
 const TABLET_SECTION_INSET_PX = 61;
-const DESKTOP_SECTION_INSET_PX = 120;
 
 function useSwiperCardGap() {
   const [gap, setGap] = useState(MOBILE_SWIPER_CARD_GAP_PX);
@@ -96,61 +94,6 @@ function useMobileSwiperInset() {
   }, []);
 
   return inset;
-}
-
-/** Course tile widths — keep in sync with LearnPopularFigmaTile / SwiperSlide classes. */
-const COURSE_TILE_W_MOBILE = 315;
-const COURSE_TILE_W_TABLET = 345;
-const COURSE_TILE_W_DESKTOP = 346;
-
-/**
- * Guest landing: when a short row of cards does not fill the viewport, center
- * the group (and drop the edge inset). When it overflows, keep a left-aligned carousel.
- */
-function useSparseCourseCardsLayout(
-  enabled: boolean,
-  slideCount: number,
-  gapPx: number,
-  edgeInsetPx: number,
-  measureRef: RefObject<HTMLElement | null>
-) {
-  const [centered, setCentered] = useState(false);
-
-  useEffect(() => {
-    if (!enabled) {
-      setCentered(false);
-      return;
-    }
-
-    const el = measureRef.current;
-    if (!el || slideCount <= 0) {
-      setCentered(false);
-      return;
-    }
-
-    const calc = () => {
-      const desktop = window.matchMedia("(min-width: 1036px)").matches;
-      const tablet = window.matchMedia("(min-width: 744px)").matches;
-      const slideW = desktop
-        ? COURSE_TILE_W_DESKTOP
-        : tablet
-          ? COURSE_TILE_W_TABLET
-          : COURSE_TILE_W_MOBILE;
-      const total =
-        slideCount * slideW + Math.max(0, slideCount - 1) * gapPx;
-      setCentered(total < el.clientWidth);
-    };
-
-    calc();
-    const ro = new ResizeObserver(calc);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [enabled, slideCount, gapPx, measureRef]);
-
-  return {
-    centered,
-    slidesOffsetBefore: enabled && centered ? 0 : edgeInsetPx,
-  };
 }
 
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
@@ -577,9 +520,6 @@ export function HomeTrackExplorerSection({
   } = useLearnCarouselSwiper();
   const swiperCardGap = useSwiperCardGap();
   const mobileSwiperInset = useMobileSwiperInset();
-  /** Guest landing: center 1–3 cards when they don’t fill the row. */
-  const centerSparseCourseCards =
-    trackPillSelectsCourses && !showWhatToLearnNextHeading;
 
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
@@ -612,17 +552,6 @@ export function HomeTrackExplorerSection({
     trackPillSelectsCourses && maxVisibleCourses != null && !showWhatToLearnNextHeading
       ? courseTiles.slice(0, maxVisibleCourses)
       : courseTiles;
-
-  const sparseCourseCardsLayout = useSparseCourseCardsLayout(
-    centerSparseCourseCards,
-    visibleCourseTiles.length,
-    swiperCardGap,
-    mobileSwiperInset,
-    scrollAreaRef
-  );
-  const courseSlidesOffsetBefore = centerSparseCourseCards
-    ? sparseCourseCardsLayout.slidesOffsetBefore
-    : mobileSwiperInset;
 
   const showViewMoreCourses =
     trackPillSelectsCourses &&
@@ -883,16 +812,32 @@ export function HomeTrackExplorerSection({
                 ? t("No published courses in this track yet.")
                 : t("No tracks to show.")}
             </p>
+          ) : trackPillSelectsCourses ? (
+            <div className="w-full overflow-x-auto">
+              <div
+                className="flex w-max min-w-full items-start justify-center"
+                style={{ columnGap: swiperCardGap, paddingInline: mobileSwiperInset }}
+              >
+                {visibleCourseTiles.map((tile) => (
+                  <div
+                    key={`${cardGridKey}-${tile.id}`}
+                    className="w-[315px] shrink-0 min-[744px]:w-[345px] lg:w-[346px]"
+                  >
+                    <LearnPopularFigmaTile {...tile} />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <>
               <Swiper
-                key={`${cardGridKey}-${arabic ? "ar" : "en"}-${mobileSwiperInset || DESKTOP_SECTION_INSET_PX}`}
+                key={`${cardGridKey}-${arabic ? "ar" : "en"}-${mobileSwiperInset}`}
                 dir={arabic ? "rtl" : "ltr"}
                 modules={[Mousewheel]}
                 slidesPerView="auto"
                 spaceBetween={swiperCardGap}
                 slidesPerGroup={1}
-                slidesOffsetBefore={courseSlidesOffsetBefore}
+                slidesOffsetBefore={mobileSwiperInset}
                 speed={400}
                 grabCursor
                 allowTouchMove
@@ -901,37 +846,24 @@ export function HomeTrackExplorerSection({
                 observeParents
                 watchOverflow
                 mousewheel={learnCarouselMousewheel}
-                className={`learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!${
-                  sparseCourseCardsLayout.centered
-                    ? " learn-popular-swiper--center-sparse"
-                    : ""
-                }`}
+                className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
                 onSwiper={handleSwiper}
                 onSlideChange={handleNavSync}
                 onSlidesUpdated={handleNavSync}
                 onResize={handleNavSync}
               >
-                {trackPillSelectsCourses
-                  ? visibleCourseTiles.map((tile) => (
-                      <SwiperSlide
-                        key={`${cardGridKey}-${tile.id}`}
-                        className="h-auto! w-[315px]! shrink-0 overflow-visible! min-[744px]:w-[345px]! lg:w-[346px]!"
-                      >
-                        <LearnPopularFigmaTile {...tile} />
-                      </SwiperSlide>
-                    ))
-                  : trackSlides.map(({ slug, cardProps }) => (
-                      <SwiperSlide
-                        key={`${cardGridKey}-${slug}`}
-                        className="h-auto! shrink-0 overflow-visible!"
-                        style={{ width: CATALOG_SHOWCASE_CARD_W }}
-                      >
-                        <CatalogShowcaseCard
-                          {...cardProps}
-                          showcaseSlug={slug}
-                        />
-                      </SwiperSlide>
-                    ))}
+                {trackSlides.map(({ slug, cardProps }) => (
+                  <SwiperSlide
+                    key={`${cardGridKey}-${slug}`}
+                    className="h-auto! shrink-0 overflow-visible!"
+                    style={{ width: CATALOG_SHOWCASE_CARD_W }}
+                  >
+                    <CatalogShowcaseCard
+                      {...cardProps}
+                      showcaseSlug={slug}
+                    />
+                  </SwiperSlide>
+                ))}
               </Swiper>
 
               <div className="hidden lg:contents">

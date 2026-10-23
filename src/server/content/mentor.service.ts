@@ -2,6 +2,10 @@ import { SubmissionStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
+import {
+  certificatePath,
+  issueCertificateForSubmission,
+} from "@/server/certificates/certificate.service";
 
 const ReviewSubmissionSchema = z.object({
   feedback: z.string().min(1).max(10_000),
@@ -207,11 +211,17 @@ export async function mentorReviewSubmission(
   });
 
   const courseId = updated.assignment.course?.id;
+  const certificate =
+    data.status === "REVIEWED" && courseId
+      ? await issueCertificateForSubmission(updated.id)
+      : null;
+
   if (updated.user.email && courseId) {
     const { getAppBaseUrl, sendLearnerCapstoneReviewedEmail } = await import(
       "@/server/email/resend.client"
     );
-    const feedbackUrl = `${getAppBaseUrl()}/learn/${courseId}#final-assignment`;
+    const baseUrl = getAppBaseUrl();
+    const feedbackUrl = `${baseUrl}/course-access/${courseId}#final-assignment`;
     void sendLearnerCapstoneReviewedEmail({
       to: updated.user.email,
       courseTitle: updated.assignment.course?.title ?? "your course",
@@ -219,10 +229,33 @@ export async function mentorReviewSubmission(
       feedback: data.feedback,
       grade: data.grade ?? null,
       feedbackUrl,
+      certificateUrl: certificate ? `${baseUrl}${certificatePath(certificate.code)}` : null,
     }).catch((err) => console.error("[email] learner notify failed:", err));
   }
 
-  return updated;
+  return { ...updated, certificateCode: certificate?.code ?? null };
+}
+
+/** Messages left on the mentor's account when a learner submits. */
+export async function mentorListSubmissionMessages(mentorUserId: string, limit = 30) {
+  return prisma.message.findMany({
+    where: {
+      senderId: { not: mentorUserId },
+      thread: {
+        type: "COURSE",
+        participants: { some: { userId: mentorUserId } },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: {
+      id: true,
+      body: true,
+      createdAt: true,
+      sender: { select: { name: true, email: true } },
+      thread: { select: { course: { select: { title: true } } } },
+    },
+  });
 }
 
 export async function mentorOwnsSubmissionCourse(mentorId: string, submissionId: string) {

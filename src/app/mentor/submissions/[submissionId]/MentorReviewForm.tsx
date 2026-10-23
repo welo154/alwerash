@@ -45,7 +45,12 @@ export function MentorReviewForm({ submission }: { submission: SubmissionDetail 
         setError(typeof data.message === "string" ? data.message : "Could not save review.");
         return;
       }
-      router.push("/mentor/submissions?toast=Review+saved");
+      const issued = Boolean(data.submission?.certificateCode);
+      router.push(
+        `/mentor/submissions?toast=${encodeURIComponent(
+          issued ? "Review saved. Certificate issued to the learner." : "Review saved"
+        )}`
+      );
       router.refresh();
     } catch {
       setError("Network error.");
@@ -86,7 +91,7 @@ export function MentorReviewForm({ submission }: { submission: SubmissionDetail 
           onClick={() => review("REVIEWED")}
           className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
         >
-          Mark reviewed
+          Approve and issue certificate
         </button>
         <button
           type="button"

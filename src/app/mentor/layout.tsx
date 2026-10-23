@@ -22,6 +22,9 @@ export default async function MentorLayout({ children }: { children: React.React
             <Link href="/mentor" className="hover:text-slate-900">
               Dashboard
             </Link>
+            <Link href="/mentor/messages" className="hover:text-slate-900">
+              Messages
+            </Link>
             <Link href="/mentor/submissions" className="hover:text-slate-900">
               Submissions
             </Link>

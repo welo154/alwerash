@@ -17,6 +17,13 @@ export function getAppBaseUrl(): string {
   return raw.replace(/\/$/, "");
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 async function sendHtmlEmail(
   to: string,
   subject: string,
@@ -122,13 +129,15 @@ export async function sendMentorCapstoneSubmittedEmail(input: {
   assignmentTitle: string;
   reviewUrl: string;
 }): Promise<{ success: true } | { success: false; error: string }> {
-  const learner = input.learnerName.trim() || "A learner";
+  const learner = escapeHtml(input.learnerName.trim() || "A learner");
+  const courseTitle = escapeHtml(input.courseTitle);
+  const assignmentTitle = escapeHtml(input.assignmentTitle);
   return sendHtmlEmail(
     input.to,
-    `Capstone submitted — ${input.courseTitle}`,
+    `Assignment submitted — ${input.courseTitle}`,
     [
-      `<p><strong>${learner}</strong> submitted the final assignment for <strong>${input.courseTitle}</strong>.</p>`,
-      `<p>Assignment: ${input.assignmentTitle}</p>`,
+      `<p><strong>${learner}</strong> submitted the final assignment for <strong>${courseTitle}</strong>.</p>`,
+      `<p>Assignment: ${assignmentTitle}</p>`,
       `<p><a href="${input.reviewUrl}" style="display:inline-block;background:#111;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">Open submission to rate &amp; comment</a></p>`,
       `<p>Or copy this link: <a href="${input.reviewUrl}">${input.reviewUrl}</a></p>`,
     ].join("\n")
@@ -142,26 +151,32 @@ export async function sendLearnerCapstoneReviewedEmail(input: {
   feedback: string;
   grade: number | null;
   feedbackUrl: string;
+  certificateUrl?: string | null;
 }): Promise<{ success: true } | { success: false; error: string }> {
   const gradeLine =
     input.grade != null
       ? `<p><strong>Grade:</strong> ${input.grade}/100</p>`
       : "<p><strong>Grade:</strong> Not scored</p>";
-  const safeFeedback = input.feedback
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\n/g, "<br/>");
+  const safeFeedback = escapeHtml(input.feedback).replace(/\n/g, "<br/>");
+  const certificateLines = input.certificateUrl
+    ? [
+        `<p>Congratulations, your certificate is ready.</p>`,
+        `<p><a href="${escapeHtml(input.certificateUrl)}" style="display:inline-block;background:#059669;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">View your certificate</a></p>`,
+      ]
+    : [];
 
   return sendHtmlEmail(
     input.to,
-    `Your capstone was reviewed — ${input.courseTitle}`,
+    input.certificateUrl
+      ? `Your certificate is ready — ${input.courseTitle}`
+      : `Your capstone was reviewed — ${input.courseTitle}`,
     [
-      `<p>Your mentor reviewed <strong>${input.assignmentTitle}</strong> for <strong>${input.courseTitle}</strong>.</p>`,
+      `<p>Your mentor reviewed <strong>${escapeHtml(input.assignmentTitle)}</strong> for <strong>${escapeHtml(input.courseTitle)}</strong>.</p>`,
       gradeLine,
       `<p><strong>Comment:</strong></p><p>${safeFeedback}</p>`,
-      `<p><a href="${input.feedbackUrl}" style="display:inline-block;background:#4f46e5;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">View grade &amp; comment</a></p>`,
-      `<p>Or copy this link: <a href="${input.feedbackUrl}">${input.feedbackUrl}</a></p>`,
+      ...certificateLines,
+      `<p><a href="${escapeHtml(input.feedbackUrl)}" style="display:inline-block;background:#4f46e5;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">View grade &amp; comment</a></p>`,
+      `<p>Or copy this link: <a href="${escapeHtml(input.feedbackUrl)}">${escapeHtml(input.feedbackUrl)}</a></p>`,
     ].join("\n")
   );
 }

@@ -29,6 +29,7 @@ type AssignmentData = {
 type Props = {
   assignment: AssignmentData;
   initialSubmission: SubmissionData | null;
+  certificateHref?: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -38,7 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
   NEEDS_CHANGES: "Changes requested",
 };
 
-export function AssignmentSubmissionPanel({ assignment, initialSubmission }: Props) {
+export function AssignmentSubmissionPanel({ assignment, initialSubmission, certificateHref }: Props) {
   const router = useRouter();
   const [submission, setSubmission] = useState(initialSubmission);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export function AssignmentSubmissionPanel({ assignment, initialSubmission }: Pro
         <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{assignment.instructions}</p>
       ) : (
         <p className="mt-2 text-sm text-slate-600">
-          Upload a photo or PDF of your work for mentor review.
+          Upload a photo or PDF. Submitting sends it to your course mentor’s account and email so they can review and correct it.
         </p>
       )}
 
@@ -149,6 +150,20 @@ export function AssignmentSubmissionPanel({ assignment, initialSubmission }: Pro
           {submission.grade != null ? (
             <p className="mt-2 text-indigo-800">Grade: {submission.grade}/100</p>
           ) : null}
+        </div>
+      ) : null}
+
+      {certificateHref ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm font-medium text-emerald-900">
+            Congratulations! Your certificate is ready.
+          </p>
+          <a
+            href={certificateHref}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            View certificate
+          </a>
         </div>
       ) : null}
 

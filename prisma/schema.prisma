@@ -123,6 +123,7 @@ model User {
   courseLearningDays    UserCourseLearningDay[]
   deviceSessions        DeviceSession[]
   checkoutAttempts      CheckoutAttempt[]
+  certificates          Certificate[]
 
   @@map("users")
 }
@@ -312,6 +313,7 @@ model Course {
   instructors            CourseInstructor[]
   userCourseLearningDays UserCourseLearningDay[]
   assignments            Assignment[]
+  certificates           Certificate[]
 
   @@index([trackId, order])
   @@index([mentorId])
@@ -478,13 +480,40 @@ model Submission {
   createdAt         DateTime         @default(now()) @map("created_at")
   updatedAt         DateTime         @updatedAt @map("updated_at")
 
-  assignment Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  files      SubmissionFile[]
+  assignment  Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files       SubmissionFile[]
+  certificate Certificate?
 
   @@index([assignmentId])
   @@index([userId])
   @@map("submissions")
+}
+
+/// Issued when a mentor marks the final assignment reviewed. Names are copied at
+/// issue time so later edits to the user, course, or mentor never change a
+/// certificate that has already been shared.
+model Certificate {
+  id               String   @id @default(cuid())
+  /// Public verification code shown on the certificate and in its URL.
+  code             String   @unique
+  userId           String   @map("user_id")
+  courseId         String   @map("course_id")
+  submissionId     String?  @unique @map("submission_id")
+  recipientName    String   @map("recipient_name")
+  courseTitle      String   @map("course_title")
+  mentorName       String?  @map("mentor_name")
+  mentorTitle      String?  @map("mentor_title")
+  signatureImage   String?  @map("signature_image")
+  issuedAt         DateTime @default(now()) @map("issued_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submission Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@map("certificates")
 }
 
 model SubmissionFile {
@@ -628,6 +657,8 @@ model Mentor {
   nameAr          String?  @map("name_ar")
   photo           String?  // URL path e.g. /mentor-photos/xxx.jpg
   certificateName String?  @map("certificate_name")
+  /// Signature image printed on learner certificates.
+  signatureImage  String?  @map("signature_image")
   aboutMe         String?  @map("about_me") @db.Text
   /// Learn page mentor strip (null = hidden); lower order = first
   featuredOrder   Int?     @map("featured_order")

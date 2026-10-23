@@ -11,16 +11,13 @@ import "./globals.css";
 
 export const metadata = {
   title: {
-    default: "Alwerash — Subscription education for design & creative",
-    template: "%s | Alwerash",
+    default: "ALWERASH",
+    template: "ALWERASH",
   },
   description:
     "Learn from industry experts. Subscribe once, access all courses in design, motion, and creative skills.",
-  icons: {
-    icon: "/brand/alwerash-logo.png",
-  },
   openGraph: {
-    title: "Alwerash — Subscription education for design & creative",
+    title: "Alwerash",
     description: "Learn from industry experts. Subscribe once, access all courses.",
     type: "website",
   },

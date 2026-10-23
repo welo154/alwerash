@@ -7,6 +7,7 @@ import { adminDeleteMentor, adminGetMentor, adminUpdateMentor, MAX_LANDING_POPUL
 import { adminGetMentorAccountStatus } from "@/server/auth/adminUsers.service";
 import { revalidatePublicMentorPaths } from "@/server/content/revalidate-public-paths";
 import { MentorPhotoUpload } from "../../components/MentorPhotoUpload";
+import { MentorSignatureUpload } from "../../components/MentorSignatureUpload";
 import { MentorAccountClient } from "../MentorAccountClient";
 
 export default async function AdminMentorEditPage({
@@ -83,6 +84,7 @@ export default async function AdminMentorEditPage({
 
       <div className="max-w-xl space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <MentorPhotoUpload mentorId={mentor.id} photo={mentor.photo} />
+        <MentorSignatureUpload mentorId={mentor.id} signatureImage={mentor.signatureImage} />
 
         <form action={update} className="space-y-4">
           <input type="hidden" name="mentorId" value={mentor.id} />
