@@ -40,23 +40,32 @@ export function LandingGetStartedCtaSection({
         <div className="mx-auto flex w-full max-w-[393px] flex-col items-center overflow-x-hidden px-0 min-[744px]:max-w-none">
           <h2
             id="landing-get-started-heading-mobile"
-            className="m-0 w-[358px] max-w-full uppercase min-[744px]:hidden"
+            className={`m-0 w-[358px] max-w-full min-[744px]:hidden ${arabic ? "" : "uppercase"}`}
             style={{
+              width: 358,
               color: "#000",
               textAlign: "center",
               fontFamily: pangeaFont,
-              fontSize: "32px",
+              fontSize: 32,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
               lineHeight: "120%",
             }}
           >
-            MASTER NEW SKILLS, BUILD A PROFESSIONAL PORTFOLIO, AND LEARN FROM THE
-            BEST IN THE INDUSTRY. ONLY AT
+            {arabic ? (
+              <>
+                اكتسب مهارات جديدة،
+                <br />
+                قم ببناء محفظة مهنية، وتعلم من الأفضل في الصناعة. فقط في
+              </>
+            ) : (
+              "MASTER NEW SKILLS, BUILD A PROFESSIONAL PORTFOLIO, AND LEARN FROM THE BEST IN THE INDUSTRY. ONLY AT"
+            )}
           </h2>
 
           <div
-            className="mt-[6px] shrink-0 min-[744px]:hidden"
+            className={`shrink-0 min-[744px]:hidden ${arabic ? "mt-0" : "mt-[6px]"}`}
             style={{
               width: CTA_MOBILE_LOGO_W,
               height: CTA_MOBILE_LOGO_H,
@@ -118,28 +127,57 @@ export function LandingGetStartedCtaSection({
 
           <Link
             href={SUBSCRIPTION_PRICING_PATH}
-            className="mt-[53px] inline-flex h-[44px] items-center justify-center rounded-[8px] border-[0.2px] border-black px-4 text-center text-[24px] font-normal no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[58px] min-[744px]:h-[91px] min-[744px]:w-[300px] min-[744px]:border-[0.3px] min-[744px]:px-4 min-[744px]:text-[36px] min-[744px]:font-bold"
+            className={`text-center text-[24px] font-normal no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[58px] min-[744px]:!h-[91px] min-[744px]:!w-[300px] min-[744px]:!rounded-[8px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black min-[744px]:text-[36px] min-[744px]:!font-bold ${
+              arabic ? "mt-[46px] min-[744px]:mt-[58px]" : "mt-[53px]"
+            }`}
             style={{
+              display: "inline-flex",
+              height: 50,
+              padding: "0 16px",
+              alignItems: "center",
+              borderRadius: 23,
+              border: "0.2px solid rgb(0 0 0 / 40%)",
               background: "var(--Green, #8AF396)",
               color: "var(--Text-Primary, #141413)",
               fontFamily: pangeaFont,
               fontStyle: "normal",
-              lineHeight: "19.6px",
+              fontWeight: 400,
+              lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+              boxSizing: "border-box",
             }}
           >
-            GET STARTED
+            {arabic ? (
+              <>
+                <span className="min-[744px]:hidden">ابدأ الآن</span>
+                <span className="hidden min-[744px]:inline">GET STARTED</span>
+              </>
+            ) : (
+              "GET STARTED"
+            )}
           </Link>
 
           <p
-            className="m-0 mt-[20px] text-center text-[18px] font-normal leading-[120%] min-[744px]:mt-[36px] min-[744px]:text-[24px]"
+            className={`m-0 text-center text-[18px] font-normal leading-[120%] min-[744px]:mt-[36px] min-[744px]:text-[24px] ${
+              arabic ? "mt-[21px]" : "mt-[20px]"
+            }`}
             style={{
               color: "#000",
+              textAlign: "center",
               fontFamily: pangeaFont,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "120%",
             }}
           >
-            Or continue with
+            {arabic ? (
+              <>
+                <span className="min-[744px]:hidden">أو تابع مع</span>
+                <span className="hidden min-[744px]:inline">Or continue with</span>
+              </>
+            ) : (
+              "Or continue with"
+            )}
           </p>
 
           <LandingSocialSignInRow variant="mobileCta" className="mt-[18px] min-[744px]:hidden" />

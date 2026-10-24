@@ -168,7 +168,7 @@ function FaqMobileRule({ includeTablet = true }: { includeTablet?: boolean }) {
   return (
     <>
       <div className={`${FULL_BLEED} mt-[21px] min-[744px]:hidden`} aria-hidden>
-        <div className="bg-black" style={{ height: "0.3px" }} />
+        <div style={{ height: "0.3px", background: "rgb(0 0 0 / 40%)" }} />
       </div>
       {includeTablet ? (
         <div
@@ -212,18 +212,49 @@ export function LandingFaqSection({
           style={{ fontFamily: pangeaFont }}
         >
           {arabic ? (
-            <span
-              className="text-[36px] font-bold not-italic leading-[120%] min-[744px]:text-[40px]"
-              style={{
-                color: "#000",
-                fontFamily: pangeaFont,
-                fontStyle: "normal",
-                fontWeight: 700,
-                lineHeight: "120%",
-              }}
-            >
-              الأسئلة المتكررة
-            </span>
+            <>
+              <span className="min-[744px]:hidden">
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: 36,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأسئلة{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 36,
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    fontVariationSettings: '"wght" 700',
+                    lineHeight: "120%",
+                  }}
+                >
+                  المتكررة
+                </span>
+              </span>
+              <span
+                className="hidden text-[40px] font-bold not-italic leading-[120%] min-[744px]:inline"
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  lineHeight: "120%",
+                }}
+              >
+                الأسئلة المتكررة
+              </span>
+            </>
           ) : (
             <>
               <span

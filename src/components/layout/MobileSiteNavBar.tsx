@@ -44,7 +44,7 @@ export function MobileSiteNavLogo({
       className={
         isTablet
           ? "absolute left-[7px] top-[3px] z-40 block"
-          : "absolute left-[-16px] top-[-2px] z-40 block"
+          : "absolute top-[-2px] left-[-16px] z-40 block max-[385px]:left-[-22px]"
       }
       style={{
         width: size.width,
@@ -80,9 +80,20 @@ export function MobileSiteNavActions({
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shellWidth, setShellWidth] = useState<number | null>(null);
   /** Keep the field clipped until the width tween finishes so open matches close. */
   const [searchClipDone, setSearchClipDone] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const shell = actionsRef.current?.parentElement;
+    if (!shell || variant === "tablet") return;
+    const measure = () => setShellWidth(shell.offsetWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, [variant]);
 
   useEffect(() => {
     if (!searchOpen) {
@@ -132,11 +143,18 @@ export function MobileSiteNavActions({
         ? "calc(22px - (100vw - 382px) / 2 + 41px)"
         : 17 + searchIconSize + 4
     : searchIconClosedRight + searchIconSize + 4;
-  const searchBarWidth = isTablet
-    ? tabletBar.width
-    : outlinedSearch
-      ? 192
-      : 206;
+  const baseSearchBarWidth = isTablet ? tabletBar.width : outlinedSearch ? 192 : 206;
+  const headerIsCompressed = !isTablet && shellWidth != null && shellWidth < MOBILE_SHELL_WIDTH - 0.5;
+  const searchBarRightInset = 17 + SEARCH_ICON_SIZE + 4;
+  const logoRight =
+    headerIsCompressed && typeof window !== "undefined"
+      ? (shellWidth - window.innerWidth) / 2 + MOBILE_LOGO.width
+      : null;
+  const clearOfLogo =
+    logoRight == null ? baseSearchBarWidth : shellWidth - logoRight - searchBarRightInset - 8;
+  const searchBarWidth = headerIsCompressed
+    ? Math.min(baseSearchBarWidth, shellWidth * 0.5, Math.max(0, clearOfLogo))
+    : baseSearchBarWidth;
   const searchBarHeight = isTablet ? tabletBar.height : SEARCH_BAR_HEIGHT;
   const searchBarTop = isTablet
     ? TABLET_SEARCH_TOP + (TABLET_SEARCH_ICON - tabletBar.height) / 2 - 1
@@ -175,6 +193,7 @@ export function MobileSiteNavActions({
             autoFocus={searchOpen}
             expanded={searchOpen}
             outlined={outlinedSearch}
+            barWidth={searchBarWidth}
           />
         </div>
       </div>

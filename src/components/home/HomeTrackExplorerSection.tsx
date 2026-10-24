@@ -136,24 +136,8 @@ const bodyTextFont = {
   fontFamily: pangeaFontFamily,
 } as const;
 
-const sectionLabelFont = {
-  color: "var(--White, #FFF)",
-  fontFamily: pangeaFontFamily,
-  fontSize: "18px",
-  fontStyle: "normal",
-  fontWeight: 400,
-  lineHeight: "normal",
-} as const;
-
-function SectionLabelUnderline({ width }: { width: number }) {
-  return (
-    <div
-      className="shrink-0 bg-[#FFF]"
-      style={{ width, height: "1.2px", minHeight: "1.2px", maxHeight: "1.2px" }}
-      aria-hidden
-    />
-  );
-}
+const MOBILE_ARABIC_DISCOVER_COPY =
+  "استكشف الآلاف من الدورات التدريبية عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير الفوتوغرافي، والمزيد. تُدرس على يد محترفين في الصناعة.";
 
 function MobileDiscoverCta({
   className,
@@ -163,32 +147,57 @@ function MobileDiscoverCta({
   onDark?: boolean;
 }) {
   const t = useT();
+  const arabic = useArabicLayout();
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
       <p
         className={`m-0 w-[315px] text-[20px] font-normal leading-[127%] min-[744px]:text-[24px] ${
           onDark ? "min-[744px]:w-[514px]" : "min-[744px]:w-[620px]"
-        }`}
+        } ${arabic ? "max-[743px]:text-right" : ""}`}
         style={{
           ...bodyTextFont,
           color: onDark ? "var(--White, #FFF)" : "#000",
+          fontStyle: "normal",
           fontWeight: 400,
+          fontVariationSettings: '"wght" 400',
           lineHeight: "127%",
+          ...(arabic ? { textAlign: "right" as const } : {}),
         }}
       >
-        {t(
-          "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+        {arabic ? (
+          <>
+            <span className="min-[744px]:hidden">{MOBILE_ARABIC_DISCOVER_COPY}</span>
+            <span className="hidden min-[744px]:inline">
+              {t(
+                "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+              )}
+            </span>
+          </>
+        ) : (
+          t(
+            "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+          )
         )}
       </p>
       <Link
         href="/course"
-        className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[8px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
+        className={`mt-[20px] w-fit self-start text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:!h-[91px] min-[744px]:!w-[247px] min-[744px]:!rounded-[8px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black min-[744px]:text-center min-[744px]:text-[36px] ${
+          arabic ? "max-[743px]:mt-[19px] max-[743px]:self-end" : ""
+        }`}
         style={{
           ...pillFont,
-          backgroundColor: "var(--Blue, #64E1FF)",
-          borderRadius: "var(--Radius-MD, 8px)",
+          display: "flex",
+          width: "fit-content",
+          height: 50,
+          padding: "0 16px",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 23,
+          border: "0.2px solid rgb(0 0 0 / 40%)",
+          background: "var(--Blue, #64E1FF)",
           color: "var(--Text-Primary, #141413)",
           lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          boxSizing: "border-box",
         }}
       >
         {t("Discover")}
@@ -855,7 +864,7 @@ export function HomeTrackExplorerSection({
                 : t("No tracks to show.")}
             </p>
           ) : trackPillSelectsCourses ? (
-            <div ref={courseRowRef} className="w-full overflow-x-auto">
+            <div ref={courseRowRef} className="no-scrollbar w-full overflow-x-auto">
               <div
                 className={`flex w-max min-w-full items-start ${arabic ? "flex-row-reverse" : ""}`}
                 style={{
@@ -964,16 +973,23 @@ export function HomeTrackExplorerSection({
       {showDiscoverCta ? (
         <>
           <div className="lg:hidden">
-          <MobileDiscoverCta className="mt-[45px] pl-[31px] min-[744px]:mt-[60px] min-[744px]:pl-[61px]" />
+          <MobileDiscoverCta
+            className={
+              arabic
+                ? "mt-[45px] max-[743px]:ml-auto max-[743px]:mr-[30px] max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:mt-[60px] min-[744px]:pl-[61px]"
+                : "mt-[45px] pl-[31px] min-[744px]:mt-[60px] min-[744px]:pl-[61px]"
+            }
+          />
 
           <div
-            className="relative mx-auto mt-[45px] box-border h-[1386.999px] w-[393px] overflow-hidden min-[744px]:mt-[82px] min-[744px]:h-[1329.001px] min-[744px]:w-[732px]"
+            className="relative mx-auto mt-[45px] box-border w-[393px] max-w-[99%] overflow-hidden [container-type:inline-size] min-[744px]:mt-[82px] min-[744px]:!aspect-auto min-[744px]:h-[1329.001px] min-[744px]:w-[732px] min-[744px]:max-w-none"
             style={{
               borderRadius: 55,
               background: "var(--Dark-Green, #004B3C)",
+              aspectRatio: "393 / 1074",
             }}
           >
-            <div className="relative mx-auto h-full w-[393px] min-[744px]:w-full">
+            <div className="relative h-[1074px] w-[393px] max-[743px]:absolute max-[743px]:top-0 max-[743px]:left-1/2 max-[743px]:origin-top max-[743px]:[transform:translateX(-50%)_scale(calc(100cqw/393px))] min-[744px]:mx-auto min-[744px]:h-full min-[744px]:w-full min-[744px]:transform-none">
             {/* Figma 1181:6349 — WORK book */}
             <div
               className="absolute left-[32px] top-[40px] z-[10] flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[68px] min-[744px]:top-[82px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]"
@@ -1026,68 +1042,14 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            {/* Books label — phone only */}
-            <div className="absolute left-[265px] top-[142px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  BOOKS
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={77} />
-            </div>
-
-            <div className="absolute right-[26px] top-[295px] z-20 origin-center rotate-[5deg] min-[744px]:right-[103px] min-[744px]:top-[138px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute right-[26px] top-[195px] z-20 origin-center rotate-[5deg] min-[744px]:right-[103px] min-[744px]:top-[138px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="origin-top-left min-[744px]:scale-x-[1.47843] min-[744px]:scale-y-[1.48077]">
                 <LibraryArticleCardVisual clipId="mobile-landing-article" />
               </div>
             </div>
 
-            {/* Articles label — phone only */}
-            <div className="absolute left-[49px] top-[421px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  ARTICLES
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={95} />
-            </div>
-
             {/* Blue day film book — same size as WORK book */}
-            <div className="absolute left-[31px] top-[558px] z-10 flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[76px] min-[744px]:top-[445px] min-[744px]:z-[30] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute left-[31px] top-[358px] z-[30] flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[76px] min-[744px]:top-[445px] min-[744px]:z-[30] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="flex-none" style={{ transform: "rotate(-4.96deg)" }}>
                 <div className="relative h-[283.146px] w-[186.543px] overflow-hidden rounded-br-[20px] rounded-tr-[20px] shadow-[16px_16px_11px_0_rgba(0,0,0,0.1)] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1103,42 +1065,8 @@ export function HomeTrackExplorerSection({
                 </div>
               </div>
             </div>
-            {/* References & Materials label — phone only */}
-            <div className="absolute left-[241px] top-[667px] inline-flex flex-col min-[744px]:hidden">
-              <div className="inline-flex flex-col">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  REFERENCES &
-                </p>
-                <SectionLabelUnderline width={125} />
-              </div>
-              <div className="inline-flex flex-col">
-                <div className="flex items-center gap-[4px]">
-                  <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                    MATERIALS
-                  </p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    className="shrink-0"
-                    aria-hidden
-                  >
-                    <path
-                      d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                      stroke="white"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <SectionLabelUnderline width={108} />
-              </div>
-            </div>
             <div
-              className="pointer-events-none absolute left-[53px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[109.826px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
+              className="pointer-events-none absolute left-[53px] top-[371px] z-[30] flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[109.826px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
               aria-hidden
             >
               <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
@@ -1153,7 +1081,7 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
             <div
-              className="pointer-events-none absolute left-[52px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[108.288px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
+              className="pointer-events-none absolute left-[52px] top-[371px] z-[30] flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[108.288px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
               aria-hidden
             >
               <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
@@ -1168,7 +1096,7 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            <div className="absolute left-[170px] top-[813px] z-[9] origin-center h-[278.075px] w-[173.605px] overflow-visible min-[744px]:left-auto min-[744px]:right-[98px] min-[744px]:top-[524px] min-[744px]:z-[8] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute left-[190px] top-[513px] z-[9] origin-center h-[278.075px] w-[173.605px] overflow-visible min-[744px]:left-auto min-[744px]:right-[98px] min-[744px]:top-[524px] min-[744px]:z-[8] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="relative h-[278.075px] w-[173.605px] origin-top-left rotate-[5deg] min-[744px]:scale-x-[1.65212] min-[744px]:scale-y-[1.56557]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1198,36 +1126,13 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            {/* Podcasts label — phone only */}
-            <div className="absolute left-[44px] top-[946px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  PODCASTS
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={108} />
-            </div>
-
             <MobileDiscoverCta
               onDark
-              className="absolute left-[31px] top-[1170px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+              className={
+                arabic
+                  ? "absolute top-[857px] max-[743px]:right-[30px] max-[743px]:left-auto max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:left-[62px] min-[744px]:right-auto min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+                  : "absolute left-[31px] top-[857px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+              }
             />
             </div>
           </div>

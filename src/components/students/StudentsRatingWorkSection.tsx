@@ -106,8 +106,9 @@ function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
           {t(card.name)}
         </p>
         <span
-          className="mt-[4px] inline-flex h-[21px] w-auto items-center justify-center rounded-[8px] border-[0.2px] border-black px-4"
+          className="mt-[4px] inline-flex h-[21px] w-auto items-center justify-center rounded-[8px] px-4"
           style={{
+            border: "0.2px solid rgb(0 0 0 / 40%)",
             background: "var(--Blue, #64E1FF)",
             color: "var(--Text-Primary, #141413)",
             fontFamily: pangeaFont,
@@ -193,12 +194,14 @@ export function MobileStudentRatingCard({
   const t = useT();
   return (
     <div
-      className="mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pt-[25px] pr-[25px]"
+      className={`mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pr-[25px] ${
+        arabic ? "pt-[41px]" : "pt-[25px]"
+      }`}
       style={{ width, height }}
     >
       <div className={`flex items-start gap-[9px] ${arabic ? "flex-row-reverse" : ""}`}>
         <p
-          className="m-0 min-w-0 flex-1"
+          className={`m-0 min-w-0 flex-1 ${arabic ? "mt-[30px]" : ""}`}
           dir={arabic ? "rtl" : undefined}
           style={{
             color: "var(--Black, #000)",
@@ -284,19 +287,52 @@ export function StudentsRatingWorkSection({
         aria-label="Why students love Alwerash"
       >
         <div
-          className={`relative mx-auto box-border overflow-hidden min-[744px]:hidden ${className}`.trim()}
+          className={`relative mx-auto box-border aspect-[393/859] w-[393px] max-w-[99%] overflow-hidden [container-type:inline-size] min-[744px]:hidden ${className}`.trim()}
           style={{
-            width: 393,
-            height: 859,
             borderRadius: 55,
             background: "var(--Dark-Green, #004B3C)",
           }}
         >
-          <div className={arabic ? "pt-[55px] pr-[35px]" : "pt-[55px] pl-[35px]"}>
+          <div className="absolute top-0 left-1/2 h-[859px] w-[393px] origin-top [transform:translateX(-50%)_scale(calc(100cqw/393px))]">
+          <div className={arabic ? "pt-[55px]" : "pt-[55px] pl-[35px]"}>
             <h2
-              className={`m-0 w-[336px] text-white ${arabic ? "mr-auto text-right" : "uppercase"}`}
-              style={{ fontFamily: pangeaFont }}
+              className={`m-0 text-white ${arabic ? "text-right" : "w-[336px] uppercase"}`}
+              style={
+                arabic
+                  ? {
+                      marginRight: 29,
+                      color: "var(--White, #FFF)",
+                      textAlign: "right",
+                      fontFamily: pangeaFont,
+                      fontSize: 36,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
+                      lineHeight: "120%",
+                    }
+                  : { fontFamily: pangeaFont }
+              }
             >
+              {arabic ? (
+                <>
+                  لماذا{" "}
+                  <span
+                    style={{
+                      color: "var(--White, #FFF)",
+                      fontFamily: pangeaFont,
+                      fontSize: 36,
+                      fontStyle: "normal",
+                      fontWeight: 600,
+                      fontVariationSettings: '"wght" 600',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    يحبنا
+                  </span>{" "}
+                  الطلاب
+                </>
+              ) : (
+                <>
               <span
                 style={{
                   color: "var(--White, #FFF)",
@@ -307,7 +343,7 @@ export function StudentsRatingWorkSection({
                   lineHeight: "120%",
                 }}
               >
-                {arabic ? "لماذا يحب الطلاب " : "WHY STUDENTS "}
+                WHY STUDENTS{" "}
               </span>
               <span
                 style={{
@@ -319,9 +355,8 @@ export function StudentsRatingWorkSection({
                   lineHeight: "120%",
                 }}
               >
-                {arabic ? "الورش" : "LOVE"}
+                LOVE
               </span>
-              {arabic ? null : (
               <span
                 style={{
                   color: "var(--White, #FFF)",
@@ -335,6 +370,7 @@ export function StudentsRatingWorkSection({
                 {" "}
                 US
               </span>
+                </>
               )}
             </h2>
           </div>
@@ -346,6 +382,7 @@ export function StudentsRatingWorkSection({
               ))}
             </div>
           ) : null}
+          </div>
         </div>
 
         <div

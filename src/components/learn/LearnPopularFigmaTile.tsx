@@ -54,6 +54,8 @@ export function LearnPopularFigmaTile(
   const displayTitle = arabic && titleAr?.trim() ? titleAr.trim() : title;
   const displayAuthor = arabic && authorLabelAr?.trim() ? authorLabelAr.trim() : authorLabel;
   const isGrid = size === "grid";
+  /** English phone course cards. Tablet and desktop keep the 50px control. */
+  const mobileStart = !isGrid && !arabic && !comingSoon;
   const startButtonW = comingSoon ? (arabic ? 150 : 170) : arabic ? 115 : 141;
   const startLabel = comingSoon
     ? arabic
@@ -209,12 +211,16 @@ export function LearnPopularFigmaTile(
           </p>
         </div>
         <div
-          className="absolute flex items-center"
+          className={`absolute flex items-center ${
+            mobileStart
+              ? "max-[743px]:!bottom-[26px] max-[743px]:!left-[20px] max-[743px]:!h-[45.667px] min-[744px]:!bottom-[27px] min-[744px]:!left-[33px] min-[744px]:!h-[50px]"
+              : ""
+          }`}
           style={{
-            left: arabic ? undefined : 33,
+            left: arabic ? undefined : mobileStart ? 20 : 33,
             right: arabic ? 25 : undefined,
-            bottom: START_BUTTON_BOTTOM,
-            height: START_BUTTON_H,
+            bottom: mobileStart ? 26 : START_BUTTON_BOTTOM,
+            height: mobileStart ? 45.667 : START_BUTTON_H,
           }}
         >
           <div
@@ -222,17 +228,22 @@ export function LearnPopularFigmaTile(
               comingSoon
                 ? "bg-amber-100 group-hover:bg-amber-200"
                 : "bg-[var(--Green,#8AF396)] group-hover:bg-[var(--Dark-Green,#004B3C)]"
+            } ${
+              mobileStart
+                ? "min-[744px]:!h-[50px] min-[744px]:!w-[141px] min-[744px]:!border-0"
+                : ""
             }`}
             style={{
               display: "flex",
-              width: startButtonW,
-              height: START_BUTTON_H,
+              width: mobileStart ? 128.78 : startButtonW,
+              height: mobileStart ? 45.667 : START_BUTTON_H,
               padding: "0 16px",
               justifyContent: arabic ? "flex-end" : undefined,
               alignItems: "center",
               borderRadius: 23,
               boxSizing: "border-box",
               overflow: "visible",
+              ...(mobileStart ? { border: "0.3px solid rgb(0 0 0 / 40%)" } : {}),
             }}
           >
             <svg
@@ -242,7 +253,7 @@ export function LearnPopularFigmaTile(
               viewBox={`0 0 ${startButtonW} 50`}
               fill="none"
               aria-hidden
-              className="pointer-events-none absolute inset-0"
+              className={`pointer-events-none absolute inset-0 ${mobileStart ? "max-[743px]:hidden" : ""}`}
             >
               <rect
                 x="0.15"
@@ -265,24 +276,29 @@ export function LearnPopularFigmaTile(
                 fontSize: comingSoon ? 16 : 24,
                 fontStyle: "normal",
                 fontWeight: 500,
+                fontVariationSettings: '"wght" 500',
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
               }}
             >
               {startLabel}
             </span>
             <span
-              className="absolute"
+              className={`absolute ${
+                mobileStart
+                  ? "max-[743px]:!left-[91.33px] max-[743px]:!h-[45.667px] max-[743px]:!w-[45.667px] min-[744px]:!left-[100px] min-[744px]:!h-[50px] min-[744px]:!w-[50px]"
+                  : ""
+              }`}
               aria-hidden
               style={{
-                left: arabic ? undefined : 100,
+                left: arabic ? undefined : mobileStart ? 91.33 : 100,
                 right: arabic ? 71 : undefined,
                 top: "50%",
-                width: 50,
-                height: 50,
+                width: mobileStart ? 45.667 : 50,
+                height: mobileStart ? 45.667 : 50,
                 transform: "translateY(-50%)",
               }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 51 51" fill="none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 51 51" fill="none" className="h-full w-full">
                 <path
                   d="M25.1499 50.1499C38.957 50.1499 50.1499 38.957 50.1499 25.1499C50.1499 11.3428 38.957 0.149902 25.1499 0.149902C11.3428 0.149902 0.149902 11.3428 0.149902 25.1499C0.149902 38.957 11.3428 50.1499 25.1499 50.1499Z"
                   fill="#FFF"
@@ -316,11 +332,15 @@ export function LearnPopularFigmaTile(
           </div>
         </div>
         <div
-          className="absolute"
+          className={
+            arabic
+              ? "absolute"
+              : "absolute max-[743px]:right-[130px] max-[743px]:bottom-[34.5px] min-[744px]:right-[126.7px] min-[744px]:bottom-[37.5px]"
+          }
           style={
             arabic
               ? { left: 33, bottom: 30, width: 16.3, height: 13.583 }
-              : { right: 126.7, bottom: 37.5, width: 16.3, height: 13.583 }
+              : { width: 16.3, height: 13.583 }
           }
         >
           <svg
@@ -341,8 +361,14 @@ export function LearnPopularFigmaTile(
             />
           </svg>
           <div
-            className="absolute flex items-center"
-            style={{ left: 16.3 + 6.5, top: "50%", transform: "translateY(-50%)" }}
+            className={`absolute flex items-center ${
+              arabic ? "" : "max-[743px]:left-[22.6px] min-[744px]:left-[22.8px]"
+            }`}
+            style={{
+              left: arabic ? 16.3 + 6.5 : undefined,
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
           >
             <span
               style={{
@@ -351,6 +377,7 @@ export function LearnPopularFigmaTile(
                 fontSize: 15,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
                 opacity: 0.6,
               }}
@@ -382,6 +409,7 @@ export function LearnPopularFigmaTile(
                 fontSize: 15,
                 fontStyle: "italic",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
                 opacity: 0.6,
               }}

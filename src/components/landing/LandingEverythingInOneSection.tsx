@@ -128,6 +128,47 @@ function FeatureGlyphOneOnOne({ className }: GlyphProps) {
   );
 }
 
+const PHONE_DECO_BOX_STYLE = {
+  width: 82,
+  height: 82,
+  borderRadius: 25,
+  border: "0.3px solid rgb(0 0 0 / 40%)",
+  background: "#E9E9E9",
+} as const;
+
+/** Phone Arabic trio. Side boxes sit 44px from the center box; 126px is center-to-center. */
+function PhoneArabicDecoCluster({ edge }: { edge: "above" | "below" }) {
+  const sidesLower = edge === "above";
+  return (
+    <div
+      className={`relative max-[743px]:-ml-[30px] max-[743px]:-mr-4 max-[743px]:h-[115px] max-[743px]:w-[calc(100%+46px)] min-[744px]:hidden ${
+        sidesLower ? "max-[743px]:mb-[50px]" : "max-[743px]:mt-[57px]"
+      }`}
+      aria-hidden
+    >
+      {(["left", "right"] as const).map((side) => (
+        <div
+          key={side}
+          className="absolute left-1/2"
+          style={{
+            ...PHONE_DECO_BOX_STYLE,
+            top: sidesLower ? 33 : 0,
+            transform: `translateX(calc(-50% ${side === "left" ? "-" : "+"} 126px)) scaleY(-1)`,
+          }}
+        />
+      ))}
+      <div
+        className="absolute left-1/2 z-[1]"
+        style={{
+          ...PHONE_DECO_BOX_STYLE,
+          top: sidesLower ? 0 : 33,
+          transform: "translateX(-50%) scaleY(-1)",
+        }}
+      />
+    </div>
+  );
+}
+
 /** Light grey placeholders — left insets from design; vertical gap 68px between each pair. */
 function DecoBox({ className }: { className?: string }) {
   return (
@@ -263,7 +304,9 @@ export function LandingEverythingInOneSection({
         className={`w-full ${
           isCourseRows
             ? "pl-[30px] pr-4 min-[744px]:max-lg:pl-[61px]"
-            : "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
+            : arabic
+              ? "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
+              : "px-0 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
         } ${className ?? ""}`}
         aria-labelledby="everything-in-one-place-heading-mobile"
       >
@@ -284,10 +327,56 @@ export function LandingEverythingInOneSection({
           >
             {mobileHeading}
           </h2>
+        ) : arabic ? (
+          <>
+          <PhoneArabicDecoCluster edge="above" />
+          <div className="max-[743px]:-ml-[30px] max-[743px]:-mr-4 max-[743px]:flex max-[743px]:w-[calc(100%+46px)] max-[743px]:justify-center">
+            <h2
+              id="everything-in-one-place-heading-mobile"
+              className="m-0 w-[269px] text-center text-black min-[744px]:hidden"
+              style={{
+                width: 269,
+                color: "#000",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 36,
+                lineHeight: "120%",
+              }}
+            >
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
+                  lineHeight: "120%",
+                }}
+              >
+                كل شيء
+              </span>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }}
+              >
+                {" "}
+                في مكان واحد
+              </span>
+            </h2>
+          </div>
+          </>
         ) : (
         <h2
           id="everything-in-one-place-heading-mobile"
-          className="m-0 w-[269px] text-left text-black min-[744px]:hidden"
+          className="m-0 ml-[30px] w-[269px] text-left text-black min-[744px]:hidden"
           style={{ fontFamily: pangeaFont }}
         >
           <span
@@ -316,7 +405,11 @@ export function LandingEverythingInOneSection({
           {FEATURES.map(({ title, body, Icon }) => (
             <li
               key={title}
-              className={`flex items-center ${arabic ? "flex-row-reverse" : ""} ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}
+              className={`flex items-center ${arabic ? "flex-row-reverse" : ""} ${
+                !arabic && !isCourseRows
+                  ? "max-[743px]:mx-auto max-[743px]:w-[95%] max-[743px]:max-w-[95%]"
+                  : ""
+              } ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}
             >
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
@@ -331,7 +424,9 @@ export function LandingEverythingInOneSection({
                 className={
                   isCourseRows
                     ? `${arabic ? "mr-[14px] text-right min-[744px]:max-lg:mr-[27px]" : "ml-[14px] min-[744px]:max-lg:ml-[27px]"} min-w-0`
-                    : `${arabic ? "mr-[21px] text-right min-[744px]:mr-[27px]" : "ml-[21px] min-[744px]:ml-[27px]"} w-[221px] shrink-0 min-[744px]:w-[480px]`
+                    : arabic
+                      ? "mr-[21px] w-[221px] shrink-0 text-right min-[744px]:mr-[27px] min-[744px]:w-[480px]"
+                      : "ml-[21px] w-[221px] min-w-0 shrink min-[744px]:ml-[27px] min-[744px]:w-[480px] min-[744px]:shrink-0"
                 }
               >
                 <h3
@@ -352,13 +447,22 @@ export function LandingEverythingInOneSection({
                 </p>
               </div>
               {hideChecks ? null : (
-              <span className={`shrink-0 ${arabic ? "mr-[33px] min-[744px]:mr-auto" : "ml-[33px] min-[744px]:ml-auto"}`}>
+              <span
+                className={`shrink-0 ${
+                  arabic
+                    ? "mr-[33px] min-[744px]:mr-auto"
+                    : isCourseRows
+                      ? "ml-[33px] min-[744px]:ml-auto"
+                      : "ml-auto"
+                }`}
+              >
                 <FeatureCheckGlyph className="h-[33.171px] w-[33.171px] min-[744px]:h-[44.893px] min-[744px]:w-[44.893px]" />
               </span>
               )}
             </li>
           ))}
         </ul>
+        {arabic && !mobileHeading && !isCourseRows ? <PhoneArabicDecoCluster edge="below" /> : null}
       </section>
     );
   }

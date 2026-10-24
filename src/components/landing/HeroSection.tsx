@@ -53,14 +53,17 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
       <div className="relative w-full min-[744px]:hidden">
         <div
           className="relative mx-auto overflow-visible"
-          style={{ width: HERO_SHELL_MOBILE.width, height: HERO_SHELL_MOBILE.height }}
+          style={{
+            width: HERO_SHELL_MOBILE.width,
+            maxWidth: "99%",
+            height: HERO_SHELL_MOBILE.height,
+          }}
         >
           <svg
-            className="pointer-events-none absolute inset-0 z-0"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full"
             xmlns="http://www.w3.org/2000/svg"
-            width={HERO_SHELL_MOBILE.width}
-            height={HERO_SHELL_MOBILE.height}
             viewBox="0 0 382 801"
+            preserveAspectRatio="none"
             fill="none"
             aria-hidden
           >
@@ -463,33 +466,87 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
   return (
     <div
       dir={arabic ? "rtl" : undefined}
-      className={`absolute z-20 ${isTablet ? "w-[601px]" : "left-[25px] top-[110px] w-[323px]"}`}
+      className={`absolute z-20 ${
+        isTablet ? "w-[601px]" : arabic ? "top-[110px] w-[324px]" : "left-[25px] top-[110px] w-[323px]"
+      }`}
       style={{
         fontFamily: pangeaFont,
         ...(isTablet ? { left: 55, top: tabletTop } : {}),
+        ...(arabic && !isTablet ? { right: 24, left: "auto" } : {}),
       }}
     >
-      <div className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4">
+      <div
+        className="inline-flex items-center justify-center gap-[8px] overflow-hidden rounded-[6px] border-[0.2px] border-black bg-[#8AF396] px-4"
+        style={isTablet ? undefined : { border: "0.2px solid rgb(0 0 0 / 40%)" }}
+      >
         <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-black" aria-hidden />
-        <span className="text-center text-[14px] font-normal leading-[19.6px] text-[#141413] whitespace-nowrap">
-          {arabic ? "تبـدأ الإبـداع هنـا" : "CREATIVITY STARTS HERE"}
+        <span
+          className="whitespace-nowrap text-center text-[14px] font-normal leading-[19.6px] text-[#141413]"
+          style={
+            arabic && !isTablet
+              ? {
+                  color: "var(--Text-Primary, #141413)",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                }
+              : undefined
+          }
+        >
+          {arabic ? (isTablet ? "تبـدأ الإبـداع هنـا" : "ابدأ إبداعك هنا") : "CREATIVITY STARTS HERE"}
         </span>
       </div>
 
       <h1
-        className={`m-0 mt-[30px] text-black ${arabic ? "" : "uppercase"} ${isTablet ? "" : "w-[323px]"}`}
-        style={{
-          color: "#000",
-          ...(arabic ? { textAlign: "right" as const } : {}),
-          fontFamily: pangeaFont,
-          fontSize: isTablet ? "60px" : "40px",
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "120%",
-          ...(isTablet ? { width: 601, maxWidth: 601 } : {}),
-        }}
+        className={`m-0 mt-[30px] text-black ${arabic ? "" : "uppercase"} ${!isTablet && !arabic ? "w-[323px]" : ""}`}
+        style={
+          arabic && !isTablet
+            ? {
+                width: 324,
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: 48,
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "120%",
+              }
+            : {
+                color: "#000",
+                ...(arabic ? { textAlign: "right" as const } : {}),
+                fontFamily: pangeaFont,
+                fontSize: isTablet ? "60px" : "40px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+                ...(isTablet ? { width: 601, maxWidth: 601 } : {}),
+              }
+        }
       >
-        {arabic ? (
+        {arabic && !isTablet ? (
+          <>
+            اكتشف{" "}
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: 48,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }}
+            >
+              هوسك
+            </span>{" "}
+            الإبداعي التالي. من مبتدئ إلى محترف في وقتك الخاص.
+          </>
+        ) : arabic ? (
           <>
             اكتشف هوسك{" "}
             <span
@@ -529,20 +586,38 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
       </h1>
 
       <p
-        className={`m-0 ${arabic ? "mt-[33px]" : "mt-[30px]"} text-black ${isTablet ? "w-[554px]" : "w-[284px]"}`}
-        style={{
-          color: "#000",
-          ...(arabic ? { textAlign: "right" as const } : {}),
-          fontFamily: pangeaFont,
-          fontSize: isTablet ? "24px" : "18px",
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "127%",
-        }}
+        className={`m-0 text-black ${
+          arabic && !isTablet ? "mt-[64px] w-[284px]" : arabic ? "mt-[33px]" : "mt-[30px]"
+        } ${isTablet ? "w-[554px]" : arabic ? "" : "w-[284px]"}`}
+        style={
+          arabic && !isTablet
+            ? {
+                width: 284,
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: 18,
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "127%",
+              }
+            : {
+                color: "#000",
+                ...(arabic ? { textAlign: "right" as const } : {}),
+                fontFamily: pangeaFont,
+                fontSize: isTablet ? "24px" : "18px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "127%",
+              }
+        }
       >
-        {arabic
-          ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
-          : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
+        {arabic && !isTablet
+          ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس على يد محترفين في الصناعة."
+          : arabic
+            ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
+            : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
       </p>
 
       <Link
@@ -550,7 +625,9 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
         className={
           isTablet
             ? `${arabic ? "mt-[50px]" : "mt-[61px]"} flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]`
-            : "mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
+            : arabic
+              ? "mt-[64px]"
+              : "mt-[50px]"
         }
         style={{
           fontFamily: pangeaFont,
@@ -562,12 +639,44 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
                 padding: "0 16px",
               }
-            : {
-                borderColor: "rgb(0 0 0 / 40%)",
-              }),
+            : arabic
+              ? {
+                  display: "flex",
+                  width: 122,
+                  height: 50,
+                  padding: "0 16px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 23,
+                  border: "0.2px solid rgb(0 0 0 / 40%)",
+                  background: "var(--White, #FFF)",
+                  color: "var(--Text-Primary, #141413)",
+                  textAlign: "center",
+                  fontSize: 24,
+                  fontStyle: "normal",
+                  fontWeight: 500,
+                  fontVariationSettings: '"wght" 500',
+                  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                  boxSizing: "border-box",
+                }
+              : {
+                  display: "inline-flex",
+                  height: 50,
+                  padding: "0 16px",
+                  alignItems: "center",
+                  borderRadius: 23,
+                  border: "0.2px solid rgb(0 0 0 / 40%)",
+                  background: "var(--White, #FFF)",
+                  color: "var(--Text-Primary, #141413)",
+                  fontSize: 24,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                  boxSizing: "border-box",
+                }),
         }}
       >
-        {arabic ? "ابدأ الان" : "GET STARTED"}
+        {arabic ? (isTablet ? "ابدأ الان" : "ابدأ الآن") : "GET STARTED"}
       </Link>
 
       {isTablet ? (
@@ -595,27 +704,35 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
           </div>
         </>
       ) : (
-        <div className={`mt-[17px] flex items-center ${arabic ? "justify-end" : ""}`} dir="ltr">
+        arabic ? (
+          <div className="mt-[26px] flex items-center justify-end" dir="ltr">
+            <LandingSocialSignInRow variant="mobileHero" />
+            <p
+              className="m-0 ml-[8px] text-black"
+              style={{
+                color: "#000",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 20,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }}
+            >
+              أو تابع مع
+            </p>
+          </div>
+        ) : (
+        <div className="mt-[17px] flex items-center" dir="ltr">
           <p
-            className={`m-0 text-center text-black ${arabic ? "" : "text-[18px] font-normal leading-[120%]"}`}
-            style={
-              arabic
-                ? {
-                    color: "#000",
-                    textAlign: "center",
-                    fontFamily: pangeaFont,
-                    fontSize: 20,
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "120%",
-                  }
-                : { fontFamily: pangeaFont }
-            }
+            className="m-0 text-center text-[18px] font-normal leading-[120%] text-black"
+            style={{ fontFamily: pangeaFont }}
           >
-            {arabic ? "أو تابع مع" : "Or continue with"}
+            Or continue with
           </p>
           <LandingSocialSignInRow variant="mobileHero" className="ml-[8px]" />
         </div>
+        )
       )}
     </div>
   );

@@ -76,7 +76,7 @@ function CurrentMostsHeading({
 
 /**
  * “THE CURRENT MOSTS” strip — below Everything-in-one-place.
- * Phone: stacked 329×341 cards.
+ * Phone: horizontal swiper of 317×341 cards.
  * iPad (744–lg): 40px heading, 2×301×311.979 cards, 18×50 gaps.
  * lg+: same heading type; 383×357 cards in the page’s column count.
  */
@@ -221,12 +221,48 @@ export function LandingCurrentMostsSection({
       >
         <h2
           id="landing-current-mosts-heading-mobile"
-          className="m-0 w-[269px] text-left uppercase text-black"
-          style={{
-            fontFamily: pangeaFont,
-            marginLeft: mobileHeadingInsetPx ?? 30,
-          }}
+          className={`m-0 w-[269px] text-black ${arabic ? "text-right" : "text-left uppercase"}`}
+          style={
+            arabic
+              ? {
+                  width: 269,
+                  marginRight: 29,
+                  marginLeft: "auto",
+                  color: "#000",
+                  textAlign: "right",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }
+              : {
+                  fontFamily: pangeaFont,
+                  marginLeft: mobileHeadingInsetPx ?? 30,
+                }
+          }
         >
+          {arabic ? (
+            <>
+              الأكثر{" "}
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  fontVariationSettings: '"wght" 600',
+                  lineHeight: "120%",
+                }}
+              >
+                شيوعًا
+              </span>{" "}
+              حاليًا
+            </>
+          ) : (
+            <>
           <span
             style={{
               color: "#000",
@@ -251,20 +287,42 @@ export function LandingCurrentMostsSection({
           >
             MOSTS
           </span>
+            </>
+          )}
         </h2>
 
-        {visibleMentors.length > 0 ? (
-          <div className="relative left-1/2 mt-[40px] flex w-screen max-w-[100vw] -translate-x-1/2 flex-col items-center gap-y-[40px] px-4">
-            {visibleMentors.map((m) => (
-              <LandingMentorCard
-                key={m.id}
-                layout="mobile"
-                variant={m.variant}
-                name={m.name}
-                profession={m.profession}
-                onOpen={() => setSelectedMentor(m)}
-              />
-            ))}
+        {mentors.length > 0 ? (
+          <div className="relative mt-[40px] w-full overflow-x-clip">
+            <Swiper
+              key={arabic ? "mosts-phone-ar" : "mosts-phone-en"}
+              dir={arabic ? "rtl" : "ltr"}
+              modules={[Mousewheel]}
+              slidesPerView="auto"
+              spaceBetween={20}
+              slidesPerGroup={1}
+              slidesOffsetBefore={mobileHeadingInsetPx ?? 30}
+              speed={400}
+              grabCursor
+              allowTouchMove
+              simulateTouch
+              observer
+              observeParents
+              watchOverflow
+              mousewheel={learnCarouselMousewheel}
+              className="learn-popular-swiper learn-popular-swiper--cards no-scrollbar ml-0! mr-0! w-full min-w-0 max-w-full"
+            >
+              {mentors.map((m) => (
+                <SwiperSlide key={m.id} className="h-auto! w-[317px]! shrink-0">
+                  <LandingMentorCard
+                    layout="mobile"
+                    variant={m.variant}
+                    name={m.name}
+                    profession={m.profession}
+                    onOpen={() => setSelectedMentor(m)}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         ) : null}
       </section>

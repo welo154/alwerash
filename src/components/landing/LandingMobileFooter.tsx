@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { Tr } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -102,9 +103,10 @@ function MobileFooterColumn({
   viewMoreLabel?: string;
 }) {
   const showViewMore = links.length > MAX_FOOTER_COLUMN_LINKS;
+  const arabic = useArabicLayout();
 
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 ${arabic ? "max-[743px]:text-right" : ""}`}>
       <h3
         className="m-0 text-[14px] font-bold uppercase leading-[120%] min-[744px]:text-[18px]"
         style={{
@@ -154,10 +156,11 @@ function MobileFooterColumn({
 
 export function LandingMobileFooter() {
   const year = new Date().getFullYear();
+  const arabic = useArabicLayout();
 
   return (
     <footer
-      className="site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex w-[382px] translate-y-[35px] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px]"
+      className="site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex w-[382px] max-w-[99%] translate-y-[35px] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:max-w-none min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px]"
       style={{
         background: "var(--Bright-Green, #89F496)",
       }}
@@ -173,7 +176,11 @@ export function LandingMobileFooter() {
         aria-hidden
       />
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-between gap-3">
+      <div
+        className={`flex items-center justify-between gap-3 ${
+          arabic ? "max-[743px]:flex-row-reverse" : ""
+        }`}
+      >
         <div className="flex min-w-0 items-center">
           <p
             className="m-0 shrink-0 text-[16px] font-bold leading-[120%] min-[744px]:text-[20px]"
@@ -272,7 +279,7 @@ export function LandingMobileFooter() {
       </div>
 
       <hr
-        className="relative left-1/2 mt-[15px] w-[356px] -translate-x-1/2 border-0 bg-black min-[744px]:w-[622px]"
+        className="relative left-1/2 mt-[15px] w-[calc(100%+24px)] max-w-none -translate-x-1/2 border-0 bg-black min-[744px]:w-[622px]"
         style={{ height: "0.3px" }}
       />
 
@@ -284,14 +291,17 @@ export function LandingMobileFooter() {
       </div>
 
       <div className="mt-[16px] -translate-y-[40px] pt-0 min-[744px]:translate-y-0">
-        <Link href="/" className="-ml-[24px] inline-block max-w-[calc(100%+24px)] min-[744px]:ml-0">
+        <Link
+          href="/"
+          className="mx-auto block w-full max-w-full min-[744px]:ml-0 min-[744px]:mr-0 min-[744px]:inline-block min-[744px]:w-auto min-[744px]:max-w-[calc(100%+24px)]"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/alwerash-logo-hero.png"
             alt="Alwerash"
             width={677}
             height={240}
-            className="block h-auto w-[382px] max-w-none object-contain object-left min-[744px]:w-[622px]"
+            className="mx-auto block h-auto w-full max-w-full -translate-x-[0.812%] object-contain object-center min-[744px]:w-[622px] min-[744px]:max-w-none min-[744px]:translate-x-0 min-[744px]:object-left"
           />
         </Link>
 
