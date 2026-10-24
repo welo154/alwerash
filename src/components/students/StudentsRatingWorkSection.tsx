@@ -394,23 +394,51 @@ export function StudentsRatingWorkSection({
             background: "var(--Dark-Green, #004B3C)",
           }}
         >
-          <div className={arabic ? "pr-[56px] pt-[64px]" : "pl-[56px] pt-[64px]"}>
+          <div className={arabic ? "pt-[64px]" : "pl-[56px] pt-[64px]"}>
             <h2
-              className={`m-0 w-[583px] max-w-full text-white ${arabic ? "mr-auto text-right" : "uppercase"}`}
-              style={{
-                color: "#FFF",
-                fontFamily: pangeaFont,
-                fontSize: 40,
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "120%",
-              }}
+              className={`m-0 max-w-full text-white ${arabic ? "text-right" : "w-[583px] uppercase"}`}
+              style={
+                arabic
+                  ? {
+                      width: 583,
+                      marginRight: 93,
+                      marginLeft: "auto",
+                      color: "#FFF",
+                      textAlign: "right",
+                      fontFamily: pangeaFont,
+                      fontSize: 40,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
+                      lineHeight: "120%",
+                    }
+                  : {
+                      color: "#FFF",
+                      fontFamily: pangeaFont,
+                      fontSize: 40,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "120%",
+                    }
+              }
             >
               {arabic ? (
                 <>
                   لماذا يحب الطلاب
                   <br />
-                  <span style={{ fontStyle: "italic", fontWeight: 700 }}>الورش</span>
+                  <span
+                    style={{
+                      color: "#FFF",
+                      fontFamily: pangeaFont,
+                      fontSize: 40,
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      fontVariationSettings: '"wght" 700',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    الورش
+                  </span>
                 </>
               ) : (
                 <>
@@ -422,7 +450,7 @@ export function StudentsRatingWorkSection({
             </h2>
           </div>
           {shown.length > 0 ? (
-            <div className={`mt-[42px] flex flex-col gap-[40px] ${arabic ? "pr-[56px]" : "pl-[56px]"}`}>
+            <div className={`mt-[42px] flex flex-col gap-[40px] ${arabic ? "items-center" : "pl-[56px]"}`}>
               {shown.slice(0, 2).map((card, idx) => (
                 <TabletStudentRatingCard key={`${card.name}-${idx}`} card={card} />
               ))}

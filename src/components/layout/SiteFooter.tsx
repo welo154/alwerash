@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { Tr } from "@/components/i18n/Tr";
-import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useArabicLayout, useLocale } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const FOOTER_BG = "#89F496";
@@ -133,7 +133,8 @@ function FooterColumn({
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
-  const arabic = useArabicLayout();
+  const { locale, toggleLocale } = useLocale();
+  const arabic = locale === "ar";
 
   return (
     <footer className="bg-white px-4 pb-10 pt-4 sm:px-6 lg:px-8">
@@ -219,10 +220,12 @@ export function SiteFooter() {
             </div>
             <button
               type="button"
-              className="inline-flex h-[40px] w-[131px] shrink-0 items-center justify-center gap-[10px] rounded-[8px] border border-black bg-transparent px-[12px] text-sm font-normal text-black opacity-100"
+              onClick={toggleLocale}
+              className="inline-flex h-[40px] w-[131px] shrink-0 cursor-pointer items-center justify-center gap-[10px] rounded-[8px] border border-black bg-transparent px-[12px] text-sm font-normal text-black opacity-100"
+              aria-label={locale === "en" ? "Switch to Arabic" : "Switch to English"}
               suppressHydrationWarning
             >
-              <Tr>English</Tr>
+              {locale === "en" ? "العربية" : "English"}
               <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
             </button>
           </div>

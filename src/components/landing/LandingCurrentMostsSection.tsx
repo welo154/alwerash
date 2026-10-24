@@ -19,8 +19,6 @@ const TABLET_HEADING_LEFT_PX = 63;
 const TABLET_CARD_W = 301;
 const TABLET_CARD_H = 311.979;
 const TABLET_GAP_X = 18;
-const TABLET_GAP_Y = 50;
-const TABLET_GRID_W = TABLET_CARD_W * 2 + TABLET_GAP_X;
 /** Same horizontal gap as the desktop mentor card grid. */
 const DESKTOP_CARD_GAP_PX = 26;
 const DESKTOP_PAGE_INSET_PX = 120;
@@ -331,46 +329,112 @@ export function LandingCurrentMostsSection({
         className={`relative left-1/2 hidden w-screen max-w-[100vw] -translate-x-1/2 min-[744px]:max-lg:block ${className ?? ""}`}
         aria-labelledby="landing-current-mosts-heading-tablet"
       >
-        <CurrentMostsHeading
-          id="landing-current-mosts-heading-tablet"
-          sizePx={tabletHeadingSizePx ?? 40}
-          paddingLeftPx={TABLET_HEADING_LEFT_PX}
-        />
+        {arabic ? (
+          <h2
+            id="landing-current-mosts-heading-tablet"
+            className="m-0 text-black"
+            style={{
+              width: "fit-content",
+              marginRight: TABLET_HEADING_LEFT_PX,
+              marginLeft: "auto",
+              color: "#000",
+              textAlign: "right",
+              fontFamily: pangeaFont,
+              fontSize: tabletHeadingSizePx ?? 40,
+              fontStyle: "normal",
+              fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "120%",
+            }}
+          >
+            الأكثر{" "}
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: tabletHeadingSizePx ?? 40,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }}
+            >
+              شيوعًا
+            </span>{" "}
+            حاليًا
+          </h2>
+        ) : (
+          <CurrentMostsHeading
+            id="landing-current-mosts-heading-tablet"
+            sizePx={tabletHeadingSizePx ?? 40}
+            paddingLeftPx={TABLET_HEADING_LEFT_PX}
+          />
+        )}
         {showExploreCopy ? (
           <p
             className="m-0 mt-[17px] h-[60px] w-[404px] text-[24px] font-normal leading-[127%] text-black"
-            style={{
-              fontFamily: pangeaFont,
-              marginLeft: TABLET_HEADING_LEFT_PX,
-            }}
+            style={
+              arabic
+                ? {
+                    width: 404,
+                    height: 60,
+                    marginRight: TABLET_HEADING_LEFT_PX,
+                    marginLeft: "auto",
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: 24,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "127%",
+                  }
+                : {
+                    fontFamily: pangeaFont,
+                    marginLeft: TABLET_HEADING_LEFT_PX,
+                  }
+            }
           >
-            Explore our most popular and most watched mentors and instructors.
+            {arabic
+              ? "استكشف معلمينا ومدربينا الأكثر شعبية والأكثر مشاهدة."
+              : "Explore our most popular and most watched mentors and instructors."}
           </p>
         ) : null}
-        {visibleMentors.length > 0 ? (
-          <div
-            className="mx-auto grid justify-items-center"
-            style={{
-              marginTop: 70,
-              width: TABLET_GRID_W,
-              maxWidth: "100%",
-              gridTemplateColumns: `repeat(2, ${TABLET_CARD_W}px)`,
-              columnGap: TABLET_GAP_X,
-              rowGap: TABLET_GAP_Y,
-            }}
-          >
-            {visibleMentors.map((m) => (
-              <LandingMentorCard
-                key={m.id}
-                layout="tablet"
-                variant={m.variant}
-                name={m.name}
-                profession={m.profession}
-                onOpen={() => setSelectedMentor(m)}
-                widthPx={TABLET_CARD_W}
-                heightPx={TABLET_CARD_H}
-              />
-            ))}
+        {mentors.length > 0 ? (
+          <div className="relative mt-[70px] w-full overflow-x-clip">
+            <Swiper
+              key={arabic ? "mosts-tablet-ar" : "mosts-tablet"}
+              dir={arabic ? "rtl" : "ltr"}
+              modules={[Mousewheel]}
+              slidesPerView="auto"
+              spaceBetween={TABLET_GAP_X}
+              slidesPerGroup={1}
+              slidesOffsetBefore={TABLET_HEADING_LEFT_PX}
+              slidesOffsetAfter={TABLET_HEADING_LEFT_PX}
+              speed={400}
+              grabCursor
+              allowTouchMove
+              simulateTouch
+              observer
+              observeParents
+              watchOverflow
+              mousewheel={learnCarouselMousewheel}
+              className="learn-popular-swiper learn-popular-swiper--cards no-scrollbar ml-0! mr-0! w-full min-w-0 max-w-full"
+            >
+              {mentors.map((m) => (
+                <SwiperSlide key={m.id} className="h-auto! w-[301px]! shrink-0">
+                  <LandingMentorCard
+                    layout="tablet"
+                    variant={m.variant}
+                    name={m.name}
+                    profession={m.profession}
+                    onOpen={() => setSelectedMentor(m)}
+                    widthPx={TABLET_CARD_W}
+                    heightPx={TABLET_CARD_H}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         ) : null}
       </section>

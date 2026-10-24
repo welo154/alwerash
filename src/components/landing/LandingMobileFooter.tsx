@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { Tr } from "@/components/i18n/Tr";
-import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { useArabicLayout, useLocale } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -106,7 +106,7 @@ function MobileFooterColumn({
   const arabic = useArabicLayout();
 
   return (
-    <div className={`min-w-0 ${arabic ? "max-[743px]:text-right" : ""}`}>
+    <div className={`min-w-0 ${arabic ? "text-right" : ""}`}>
       <h3
         className="m-0 text-[14px] font-bold uppercase leading-[120%] min-[744px]:text-[18px]"
         style={{
@@ -156,11 +156,14 @@ function MobileFooterColumn({
 
 export function LandingMobileFooter() {
   const year = new Date().getFullYear();
-  const arabic = useArabicLayout();
+  const { locale, toggleLocale } = useLocale();
+  const arabic = locale === "ar";
 
   return (
     <footer
-      className="site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex w-[382px] max-w-[99%] translate-y-[35px] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:max-w-none min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px]"
+      className={`site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex w-[382px] max-w-[99%] translate-y-[35px] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:max-w-none min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px] ${
+        arabic ? "min-[744px]:[direction:rtl]" : ""
+      }`}
       style={{
         background: "var(--Bright-Green, #89F496)",
       }}
@@ -196,7 +199,7 @@ export function LandingMobileFooter() {
           </p>
           <Link
             href="/subscription"
-            className="ml-[16px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
+            className="ms-[16px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
             style={{
               color: "#000",
               textAlign: "center",
@@ -209,7 +212,7 @@ export function LandingMobileFooter() {
           </Link>
           <Link
             href="/subscription"
-            className="ml-[20px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
+            className="ms-[20px] hidden shrink-0 text-[16px] font-normal leading-[120%] text-black transition-opacity hover:opacity-70 min-[744px]:inline"
             style={{
               color: "#000",
               textAlign: "center",
@@ -222,7 +225,7 @@ export function LandingMobileFooter() {
           </Link>
         </div>
 
-        <div className="flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center" dir="ltr">
           <div className="flex items-center gap-[3px] min-[744px]:gap-[4px]">
             {MOBILE_FOOTER_SOCIALS.map((item) => (
               <a
@@ -247,8 +250,9 @@ export function LandingMobileFooter() {
 
           <button
             type="button"
-            className="relative ml-[10px] inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center bg-transparent p-0 min-[744px]:h-[32px] min-[744px]:w-[32px]"
-            aria-label="Language"
+            onClick={toggleLocale}
+            className="relative ms-[10px] inline-flex h-[28px] w-[28px] shrink-0 cursor-pointer items-center justify-center bg-transparent p-0 min-[744px]:h-[32px] min-[744px]:w-[32px]"
+            aria-label={locale === "en" ? "Switch to Arabic" : "Switch to English"}
             suppressHydrationWarning
           >
             <svg
@@ -272,7 +276,7 @@ export function LandingMobileFooter() {
               className="relative z-10 text-center text-[14px] font-normal leading-[120%] text-black"
               style={{ fontFamily: pangeaFont }}
             >
-              EN
+              {locale === "en" ? "ع" : "EN"}
             </span>
           </button>
         </div>
@@ -293,7 +297,9 @@ export function LandingMobileFooter() {
       <div className="mt-[16px] -translate-y-[40px] pt-0 min-[744px]:translate-y-0">
         <Link
           href="/"
-          className="mx-auto block w-full max-w-full min-[744px]:ml-0 min-[744px]:mr-0 min-[744px]:inline-block min-[744px]:w-auto min-[744px]:max-w-[calc(100%+24px)]"
+          className={`mx-auto block w-full max-w-full min-[744px]:inline-block min-[744px]:w-auto min-[744px]:max-w-[calc(100%+24px)] ${
+            arabic ? "min-[744px]:ml-auto min-[744px]:mr-0" : "min-[744px]:ml-0 min-[744px]:mr-0"
+          }`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -301,7 +307,9 @@ export function LandingMobileFooter() {
             alt="Alwerash"
             width={677}
             height={240}
-            className="mx-auto block h-auto w-full max-w-full -translate-x-[0.812%] object-contain object-center min-[744px]:w-[622px] min-[744px]:max-w-none min-[744px]:translate-x-0 min-[744px]:object-left"
+            className={`mx-auto block h-auto w-full max-w-full -translate-x-[0.812%] object-contain object-center min-[744px]:w-[622px] min-[744px]:max-w-none min-[744px]:translate-x-0 ${
+              arabic ? "min-[744px]:object-right" : "min-[744px]:object-left"
+            }`}
           />
         </Link>
 

@@ -63,7 +63,7 @@ export function LandingMentorCard({
   const isTablet = layout === "tablet";
   const arabic = useArabicLayout();
   const arabicDesktop = arabic && !isMobile && !isTablet;
-  const arabicCardText = arabic && !isTablet;
+  const arabicCardText = arabic;
   const cardWidth = isMobile ? MOBILE_CARD_WIDTH : (widthPx ?? 383);
   const cardHeight = isMobile ? MOBILE_CARD_HEIGHT : (heightPx ?? 357);
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
@@ -271,8 +271,8 @@ export function LandingMentorCard({
       <div
         className="pointer-events-none absolute z-[2] flex flex-col items-start overflow-visible text-left text-black transition-colors duration-200 group-hover:text-[#004B3C]"
         style={{
-          left: 24 * scaleX + (arabicDesktop ? 15 : arabicCardText && isMobile ? 30 : 0),
-          top: 10 * scaleY - (arabicDesktop ? 5 : arabicCardText && isMobile ? 10 : 0),
+          left: 24 * scaleX + (arabicDesktop ? 15 : arabicCardText && isMobile ? 30 : arabic && isTablet ? 25 : 0),
+          top: 10 * scaleY - (arabicDesktop ? 5 : arabicCardText && isMobile ? 10 : arabic && isTablet ? 10 : 0),
         }}
       >
         <span style={badgeFirstWordStyle}>{arabicCardText ? "الأكثــر" : "MOST"}</span>
@@ -281,11 +281,12 @@ export function LandingMentorCard({
 
       {isTablet ? (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start"
+          className={`pointer-events-none absolute inset-x-0 bottom-0 flex flex-col ${arabic ? "items-end" : "items-start"}`}
           style={{
-            paddingLeft: 27 * scaleX,
-            paddingRight: 16,
+            paddingLeft: arabic ? 16 : 27 * scaleX,
+            paddingRight: arabic ? 27 * scaleX : 16,
             paddingBottom: 38 * scaleY,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
           <div
@@ -295,12 +296,14 @@ export function LandingMentorCard({
               fontSize: 20,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
               opacity: 0.6,
               marginBottom: 4,
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            MEET
+            {arabic ? "التقِ" : "MEET"}
           </div>
           <div
             className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
@@ -309,13 +312,15 @@ export function LandingMentorCard({
               fontSize: 24,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
               width: 120,
               marginBottom: 6,
               overflowWrap: "break-word",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {name}
+            {displayName}
           </div>
           <div
             className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
@@ -324,10 +329,12 @@ export function LandingMentorCard({
               fontSize: 20,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {profession}
+            {displayProfession}
           </div>
         </div>
       ) : null}

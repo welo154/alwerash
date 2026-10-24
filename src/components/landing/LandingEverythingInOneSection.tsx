@@ -251,6 +251,7 @@ const mobileFeatureTitleStyle = {
   fontSize: "20px",
   fontStyle: "normal",
   fontWeight: 600,
+  fontVariationSettings: '"wght" 600',
   lineHeight: "127%",
 } as const;
 
@@ -259,6 +260,7 @@ const mobileFeatureBodyStyle = {
   fontFamily: pangeaFont,
   fontStyle: "normal",
   fontWeight: 400,
+  fontVariationSettings: '"wght" 400',
   lineHeight: "127%",
 } as const;
 
@@ -425,12 +427,18 @@ export function LandingEverythingInOneSection({
                   isCourseRows
                     ? `${arabic ? "mr-[14px] text-right min-[744px]:max-lg:mr-[27px]" : "ml-[14px] min-[744px]:max-lg:ml-[27px]"} min-w-0`
                     : arabic
-                      ? "mr-[21px] w-[221px] shrink-0 text-right min-[744px]:mr-[27px] min-[744px]:w-[480px]"
+                      ? "mr-[21px] w-[221px] shrink-0 text-right min-[744px]:mr-[27px] min-[744px]:h-[60px] min-[744px]:w-[379px]"
                       : "ml-[21px] w-[221px] min-w-0 shrink min-[744px]:ml-[27px] min-[744px]:w-[480px] min-[744px]:shrink-0"
                 }
               >
                 <h3
-                  className={isCourseRows ? "m-0 text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0"}
+                  className={
+                    isCourseRows
+                      ? "m-0 text-[16px] min-[744px]:max-lg:text-[20px]"
+                      : arabic
+                        ? "m-0 min-[744px]:!text-[24px] min-[744px]:!leading-[150%]"
+                        : "m-0"
+                  }
                   style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}
                 >
                   {t(title)}
@@ -439,7 +447,9 @@ export function LandingEverythingInOneSection({
                   className={
                     isCourseRows
                       ? "m-0 text-[14px] min-[744px]:max-lg:text-[20px]"
-                      : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
+                      : arabic
+                        ? "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:!text-[20px] min-[744px]:!leading-[150%]"
+                        : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
                   }
                   style={isCourseRows ? courseFeatureBodyStyle : mobileFeatureBodyStyle}
                 >

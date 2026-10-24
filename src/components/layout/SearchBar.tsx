@@ -154,7 +154,7 @@ export function SearchBar({
   if (variant === "mobileHeader") {
     const isTablet = layout === "tablet";
     const barWidth = barWidthProp ?? (isTablet ? 491 : outlined ? 192 : 206);
-    const barHeight = isTablet ? 54 : 38;
+    const barHeight = isTablet ? 66 : 38;
     return (
       <div
         ref={containerRef}
@@ -180,7 +180,7 @@ export function SearchBar({
             gap: 10,
             borderRadius: isTablet ? "14px 8px 8px 28px" : "8px 8px 8px 18px",
             border: isTablet
-              ? "1px solid var(--Black, #000)"
+              ? "0 solid var(--Black, #000)"
               : outlined
                 ? "0.3px solid var(--Black, #000)"
                 : "0 solid transparent",

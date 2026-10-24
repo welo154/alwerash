@@ -82,6 +82,46 @@ export function LandingGetStartedCtaSection({
             />
           </div>
 
+          {arabic ? (
+            <>
+              <h2
+                id="landing-get-started-heading-tablet"
+                className="m-0 hidden min-[744px]:block lg:hidden"
+                style={{
+                  width: 436,
+                  color: "#000",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 40,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }}
+              >
+                أتقن مهارات جديدة،
+                <br />
+                ابنِ محفظة مهنية، وتعلم من الأفضل في الصناعة. فقط في إل
+              </h2>
+              <div
+                className="hidden shrink-0 min-[744px]:block lg:hidden"
+                style={{
+                  width: CTA_TABLET_LOGO_W,
+                  height: CTA_TABLET_LOGO_H,
+                  aspectRatio: "104 / 31",
+                }}
+              >
+                <Image
+                  src="/brand/alwerash-logo.png"
+                  alt="Alwerash"
+                  width={CTA_TABLET_LOGO_W}
+                  height={CTA_TABLET_LOGO_H}
+                  className="block size-full object-contain object-center"
+                  unoptimized
+                />
+              </div>
+            </>
+          ) : (
           <h2
             id="landing-get-started-heading-tablet"
             className="m-0 hidden w-[594px] max-w-full uppercase min-[744px]:block lg:hidden"
@@ -124,11 +164,12 @@ export function LandingGetStartedCtaSection({
               </span>
             </span>
           </h2>
+          )}
 
           <Link
             href={SUBSCRIPTION_PRICING_PATH}
-            className={`text-center text-[24px] font-normal no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[58px] min-[744px]:!h-[91px] min-[744px]:!w-[300px] min-[744px]:!rounded-[8px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black min-[744px]:text-[36px] min-[744px]:!font-bold ${
-              arabic ? "mt-[46px] min-[744px]:mt-[58px]" : "mt-[53px]"
+            className={`text-center text-[24px] font-normal no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[58px] min-[744px]:!flex min-[744px]:!h-[83.778px] min-[744px]:!w-[290px] min-[744px]:!items-center min-[744px]:!justify-center min-[744px]:!rounded-[30px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black/40 min-[744px]:text-[36px] ${
+              arabic ? "mt-[46px] min-[744px]:mt-[58px] min-[744px]:!text-right min-[744px]:!font-normal" : "mt-[53px] min-[744px]:!font-bold"
             }`}
             style={{
               display: "inline-flex",
@@ -142,23 +183,17 @@ export function LandingGetStartedCtaSection({
               fontFamily: pangeaFont,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
               boxSizing: "border-box",
             }}
           >
-            {arabic ? (
-              <>
-                <span className="min-[744px]:hidden">ابدأ الآن</span>
-                <span className="hidden min-[744px]:inline">GET STARTED</span>
-              </>
-            ) : (
-              "GET STARTED"
-            )}
+            {arabic ? "ابدأ الآن" : "GET STARTED"}
           </Link>
 
           <p
             className={`m-0 text-center text-[18px] font-normal leading-[120%] min-[744px]:mt-[36px] min-[744px]:text-[24px] ${
-              arabic ? "mt-[21px]" : "mt-[20px]"
+              arabic ? "mt-[21px] min-[744px]:w-[290px]" : "mt-[20px]"
             }`}
             style={{
               color: "#000",
@@ -172,8 +207,7 @@ export function LandingGetStartedCtaSection({
           >
             {arabic ? (
               <>
-                <span className="min-[744px]:hidden">أو تابع مع</span>
-                <span className="hidden min-[744px]:inline">Or continue with</span>
+                أو تابع مع
               </>
             ) : (
               "Or continue with"

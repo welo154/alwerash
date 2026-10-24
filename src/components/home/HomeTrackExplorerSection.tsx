@@ -153,7 +153,9 @@ function MobileDiscoverCta({
       <p
         className={`m-0 w-[315px] text-[20px] font-normal leading-[127%] min-[744px]:text-[24px] ${
           onDark ? "min-[744px]:w-[514px]" : "min-[744px]:w-[620px]"
-        } ${arabic ? "max-[743px]:text-right" : ""}`}
+        } ${arabic ? "max-[743px]:text-right" : ""} ${
+          onDark && arabic ? "min-[744px]:!mt-[20px]" : ""
+        }`}
         style={{
           ...bodyTextFont,
           color: onDark ? "var(--White, #FFF)" : "#000",
@@ -181,8 +183,8 @@ function MobileDiscoverCta({
       </p>
       <Link
         href="/course"
-        className={`mt-[20px] w-fit self-start text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:!h-[91px] min-[744px]:!w-[247px] min-[744px]:!rounded-[8px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black min-[744px]:text-center min-[744px]:text-[36px] ${
-          arabic ? "max-[743px]:mt-[19px] max-[743px]:self-end" : ""
+        className={`mt-[20px] w-fit self-start text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:!h-[78px] min-[744px]:!w-[270px] min-[744px]:!rounded-[30px] min-[744px]:!border-[0.3px] min-[744px]:!border-solid min-[744px]:!border-black/40 min-[744px]:text-center min-[744px]:text-[36px] ${
+          arabic ? "max-[743px]:mt-[19px] max-[743px]:self-end min-[744px]:self-end" : ""
         }`}
         style={{
           ...pillFont,
@@ -976,7 +978,7 @@ export function HomeTrackExplorerSection({
           <MobileDiscoverCta
             className={
               arabic
-                ? "mt-[45px] max-[743px]:ml-auto max-[743px]:mr-[30px] max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:mt-[60px] min-[744px]:pl-[61px]"
+                ? "mt-[45px] max-[743px]:ml-auto max-[743px]:mr-[30px] max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:mt-[60px] min-[744px]:ml-auto min-[744px]:mr-[61px] min-[744px]:w-[620px] min-[744px]:items-end"
                 : "mt-[45px] pl-[31px] min-[744px]:mt-[60px] min-[744px]:pl-[61px]"
             }
           />
@@ -1130,7 +1132,7 @@ export function HomeTrackExplorerSection({
               onDark
               className={
                 arabic
-                  ? "absolute top-[857px] max-[743px]:right-[30px] max-[743px]:left-auto max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:left-[62px] min-[744px]:right-auto min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+                  ? "absolute top-[857px] max-[743px]:right-[30px] max-[743px]:left-auto max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:right-[60px] min-[744px]:left-auto min-[744px]:bottom-[82px] min-[744px]:top-auto min-[744px]:[&>a]:!mt-[37px]"
                   : "absolute left-[31px] top-[857px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
               }
             />
@@ -1144,13 +1146,57 @@ export function HomeTrackExplorerSection({
             </div>
             <h2
               className="m-0 w-full text-center text-black"
-              style={{ fontFamily: pangeaFontFamily }}
+              style={
+                arabic
+                  ? {
+                      color: "#000",
+                      textAlign: "center",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      lineHeight: "120%",
+                    }
+                  : { fontFamily: pangeaFontFamily }
+              }
             >
-              <span className="text-[40px] font-bold italic leading-[120%]">EVERYTHING</span>
-              <span className="text-[40px] font-normal not-italic leading-[120%]">
-                {" "}
-                IN ONE PLACE
-              </span>
+              {arabic ? (
+                <>
+                  <span
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                      fontVariationSettings: '"wght" 700',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    كل شيء
+                  </span>
+                  <span
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    {" "}
+                    في مكان واحد
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[40px] font-bold italic leading-[120%]">EVERYTHING</span>
+                  <span className="text-[40px] font-normal not-italic leading-[120%]">
+                    {" "}
+                    IN ONE PLACE
+                  </span>
+                </>
+              )}
             </h2>
           </div>
           <LandingEverythingInOneSection

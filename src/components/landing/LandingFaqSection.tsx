@@ -206,7 +206,7 @@ export function LandingFaqSection({
           dir={arabic ? "rtl" : "ltr"}
           className={
             arabic
-              ? "m-0 ml-auto mr-[30px] w-[334px] max-w-[334px] text-right text-black min-[744px]:mx-auto min-[744px]:w-full min-[744px]:max-w-none min-[744px]:text-center"
+              ? "m-0 ml-auto mr-[30px] w-[334px] max-w-[334px] text-right text-black min-[744px]:mx-0 min-[744px]:w-full min-[744px]:max-w-none min-[744px]:pr-[62px] min-[744px]:pl-[62px] min-[744px]:text-right"
               : "m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black min-[744px]:mx-auto min-[744px]:w-full min-[744px]:max-w-none min-[744px]:text-center"
           }
           style={{ fontFamily: pangeaFont }}
@@ -242,17 +242,33 @@ export function LandingFaqSection({
                   المتكررة
                 </span>
               </span>
-              <span
-                className="hidden text-[40px] font-bold not-italic leading-[120%] min-[744px]:inline"
-                style={{
-                  color: "#000",
-                  fontFamily: pangeaFont,
-                  fontStyle: "normal",
-                  fontWeight: 700,
-                  lineHeight: "120%",
-                }}
-              >
-                الأسئلة المتكررة
+              <span className="hidden min-[744px]:inline">
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 40,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأسئلة{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 40,
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    fontVariationSettings: '"wght" 700',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الشائعة
+                </span>
               </span>
             </>
           ) : (
