@@ -14,8 +14,10 @@ import {
   authText24,
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 import { CheckEmailModal } from "./CheckEmailModal";
+import { pangeaFont } from "./auth-theme";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REQUIREMENTS = {
@@ -77,6 +79,7 @@ export function AuthRegisterPanel({
     formData: FormData
   ) => Promise<{ success: true; email: string } | { success: false; error: string }>;
 }) {
+  const arabic = useArabicLayout();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
   const nextParam = safeInternalPath(searchParams.get("next"));
@@ -147,12 +150,36 @@ export function AuthRegisterPanel({
   }
 
   return (
-    <div className="auth-mobile-panel auth-register-panel flex w-full flex-col">
-      <h1 className="auth-login-title m-0 text-black" style={authHeadingStyle}>
-        SIGN IN
+    <div
+      className="auth-mobile-panel auth-register-panel flex w-full flex-col"
+      data-arabic={arabic ? "true" : undefined}
+    >
+      <h1
+        className="auth-login-title m-0 text-black"
+        style={
+          arabic
+            ? {
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: 36,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }
+            : authHeadingStyle
+        }
+      >
+        {arabic ? "تسجيل الدخول" : "SIGN IN"}
       </h1>
       <div className="auth-register-title-gap h-[12px] shrink-0" aria-hidden />
-      <p className="auth-register-subtitle m-0 h-[29px] w-[598px] max-w-full text-black" style={authText24}>
+      <p
+        className={`auth-register-subtitle m-0 h-[29px] w-[598px] max-w-full text-black${
+          arabic ? " hidden" : ""
+        }`}
+        style={authText24}
+      >
         Learn from the best and showcase your creative work.
       </p>
       <div className="auth-register-fields-gap h-[33px] shrink-0" aria-hidden />
@@ -162,7 +189,8 @@ export function AuthRegisterPanel({
           id="name"
           name="name"
           type="text"
-          placeholder="Name"
+          placeholder={arabic ? "الاسم" : "Name"}
+          className="auth-field-name"
           autoComplete="name"
           required
           error={fieldErrors.name}
@@ -175,7 +203,7 @@ export function AuthRegisterPanel({
           id="email"
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={arabic ? "البريد الإلكتروني" : "Email"}
           autoComplete="email"
           required
           error={fieldErrors.email}
@@ -189,13 +217,16 @@ export function AuthRegisterPanel({
           onShowPassword={() => setShowPassword(true)}
           onHidePassword={() => setShowPassword(false)}
           autoComplete="new-password"
+          placeholder={arabic ? "كلمة المرور" : "Password"}
           error={fieldErrors.password}
           errorId="register-password-error"
           onValueChange={() => clearFieldError("password")}
         />
         <div className="auth-register-payment">
           <div className="auth-register-payment-label-gap shrink-0" aria-hidden />
-          <p className="auth-register-payment-label m-0 text-black">Payment Method</p>
+          <p className="auth-register-payment-label m-0 text-black">
+            {arabic ? "طريقة الدفع" : "Payment Method"}
+          </p>
           <div className="auth-register-payment-tabs-gap shrink-0" aria-hidden />
           <div className="auth-register-payment-tabs" role="tablist" aria-label="Payment method">
             <button
@@ -224,7 +255,7 @@ export function AuthRegisterPanel({
                   strokeLinejoin="round"
                 />
               </svg>
-              Credit card
+              {arabic ? "بطاقة ائتمان" : "Credit card"}
             </button>
             <button
               type="button"
@@ -242,7 +273,7 @@ export function AuthRegisterPanel({
                 height={30}
                 className="auth-register-pay-icon shrink-0"
               />
-              Apple pay
+              {arabic ? "أبل باي" : "Apple pay"}
             </button>
           </div>
           <input type="hidden" name="paymentMethod" value={paymentMethod} />
@@ -250,14 +281,15 @@ export function AuthRegisterPanel({
           <AuthTextField
             id="card-name"
             name="cardName"
-            placeholder="Name"
+            placeholder={arabic ? "الاسم على البطاقة" : "Name"}
+            className="auth-field-name"
             autoComplete="cc-name"
           />
           <div className="auth-login-password-gap h-[18px] shrink-0" aria-hidden />
           <AuthTextField
             id="card-number"
             name="cardNumber"
-            placeholder="Cards number"
+            placeholder={arabic ? "رقم البطاقة" : "Cards number"}
             autoComplete="cc-number"
             inputMode="numeric"
           />
@@ -266,7 +298,7 @@ export function AuthRegisterPanel({
             <AuthTextField
               id="card-expiry"
               name="cardExpiry"
-              placeholder="Expiry date"
+              placeholder={arabic ? "تاريخ انتهاء الصلاحية" : "Expiry date"}
               autoComplete="cc-exp"
               className="auth-field-half"
             />
@@ -283,16 +315,38 @@ export function AuthRegisterPanel({
         <div className="auth-login-forgot-gap h-[35px] shrink-0" aria-hidden />
 
         <div className="auth-login-centered flex flex-col">
-        <p className="auth-register-terms m-0 h-[65px] w-[549px] max-w-full text-black" style={authText24}>
-          By signing up, you agree to our{" "}
-          <Link href="/" className="auth-login-join-link text-black underline">
-            Terms of Use
-          </Link>{" "}
-          and{" "}
-          <Link href="/" className="auth-login-join-link text-black underline">
-            Privacy Policy
-          </Link>
-          .
+        <p
+          dir={arabic ? "rtl" : undefined}
+          className={`auth-register-terms m-0 h-[65px] w-[549px] max-w-full text-black${
+            arabic ? " ml-auto text-right" : ""
+          }`}
+          style={{ ...authText24, ...(arabic ? { textAlign: "right" } : {}) }}
+        >
+          {arabic ? (
+            <>
+              بالتسجيل، فإنك توافق على{" "}
+              <Link href="/" className="auth-login-join-link text-black underline">
+                شروط الاستخدام
+              </Link>{" "}
+              و{" "}
+              <Link href="/" className="auth-login-join-link text-black underline">
+                سياسة الخصوصية
+              </Link>
+              .
+            </>
+          ) : (
+            <>
+              By signing up, you agree to our{" "}
+              <Link href="/" className="auth-login-join-link text-black underline">
+                Terms of Use
+              </Link>{" "}
+              and{" "}
+              <Link href="/" className="auth-login-join-link text-black underline">
+                Privacy Policy
+              </Link>
+              .
+            </>
+          )}
         </p>
         <div className="auth-login-submit-gap h-[32px] shrink-0" aria-hidden />
 
@@ -302,7 +356,7 @@ export function AuthRegisterPanel({
           className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white disabled:cursor-not-allowed disabled:opacity-50"
           style={authSubmitButtonStyle}
         >
-          {loading ? "Creating account..." : "GET STARTED"}
+          {loading ? "Creating account..." : arabic ? "ابدأ الآن" : "GET STARTED"}
         </button>
 
       <AuthOAuthSection
@@ -311,11 +365,26 @@ export function AuthRegisterPanel({
 
       <div className="auth-login-resend-gap h-[40px] shrink-0" aria-hidden />
 
-      <p className="auth-login-join m-0 text-center text-black" style={authText24}>
-        Already have an account?{" "}
-        <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
-          Log in
-        </Link>
+      <p
+        dir={arabic ? "rtl" : undefined}
+        className="auth-login-join m-0 text-center text-black"
+        style={authText24}
+      >
+        {arabic ? (
+          <>
+            لديك حساب بالفعل؟{" "}
+            <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
+              تسجيل الدخول
+            </Link>
+          </>
+        ) : (
+          <>
+            Already have an account?{" "}
+            <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
+              Log in
+            </Link>
+          </>
+        )}
       </p>
         </div>
       </form>

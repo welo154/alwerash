@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { AuthBrandingAside } from "./AuthBrandingAside";
 import { AuthGreenPanel } from "./AuthGreenPanel";
 import {
@@ -32,7 +35,12 @@ function AuthHeadlineWerash({ fontSize }: { fontSize: number }) {
   );
 }
 
+const AUTH_MOBILE_ARABIC_HEADLINE =
+  "اكتسب مهارات جديدة، وابنِ محفظة مهنية، وتعلم من الأفضل في الصناعة. فقط في AlWerash";
+
 function AuthLoginMobileBrand() {
+  const arabic = useLocale().locale === "ar";
+
   return (
     <div className="flex w-full shrink-0 flex-col items-center lg:hidden">
       <Link
@@ -52,17 +60,37 @@ function AuthLoginMobileBrand() {
       </Link>
       <p
         className="m-0 mt-[20px] w-[334px] max-w-full text-center text-black min-[744px]:hidden"
-        style={{
-          fontFamily: pangeaFont,
-          fontSize: 20,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "120%",
-        }}
+        style={
+          arabic
+            ? {
+                width: 334,
+                color: "#000",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 20,
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "120%",
+              }
+            : {
+                fontFamily: pangeaFont,
+                fontSize: 20,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }
+        }
       >
-        Master new skills, build a professional portfolio, and learn from the best in the
-        industry. Only at Al
-        <AuthHeadlineWerash fontSize={20} />
+        {arabic ? (
+          AUTH_MOBILE_ARABIC_HEADLINE
+        ) : (
+          <>
+            Master new skills, build a professional portfolio, and learn from the best in the
+            industry. Only at Al
+            <AuthHeadlineWerash fontSize={20} />
+          </>
+        )}
       </p>
       <p
         className="m-0 mt-[20px] hidden w-[622px] max-w-full text-center text-black min-[744px]:block"
@@ -72,18 +100,43 @@ function AuthLoginMobileBrand() {
           fontSize: 32,
           fontStyle: "normal",
           fontWeight: 400,
+          fontVariationSettings: arabic ? '"wght" 400' : undefined,
           lineHeight: "120%",
         }}
       >
-        Master new skills, build a professional portfolio, and learn from the best in the
-        industry. Only at Al
-        <AuthHeadlineWerash fontSize={32} />
+        {arabic ? (
+          <>
+            اكتسب مهارات جديدة، وابنِ محفظة مهنية، وتعلم من الأفضل في الصناعة. فقط في{" "}
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: 32,
+                fontStyle: "normal",
+                fontWeight: 700,
+                fontVariationSettings: '"wght" 700',
+                lineHeight: "120%",
+              }}
+            >
+              الـورش
+            </span>
+          </>
+        ) : (
+          <>
+            Master new skills, build a professional portfolio, and learn from the best in the
+            industry. Only at Al
+            <AuthHeadlineWerash fontSize={32} />
+          </>
+        )}
       </p>
     </div>
   );
 }
 
 function AuthLoginMobileSocialRow() {
+  const { locale, toggleLocale } = useLocale();
+  const arabic = locale === "ar";
+
   return (
     <div className="auth-login-social-row mt-[22px] mb-[18px] flex shrink-0 items-center justify-center lg:hidden">
       <div className="auth-login-social-icons flex items-center" style={{ gap: 8 }}>
@@ -105,6 +158,8 @@ function AuthLoginMobileSocialRow() {
       </div>
       <button
         type="button"
+        onClick={toggleLocale}
+        aria-label={arabic ? "Switch to English" : "Switch to Arabic"}
         className="auth-login-lang flex shrink-0 items-center justify-center bg-white text-black"
         style={{
           marginLeft: 37,
@@ -122,7 +177,7 @@ function AuthLoginMobileSocialRow() {
         }}
         suppressHydrationWarning
       >
-        English
+        {arabic ? "English" : "العربيه"}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={15}
@@ -152,6 +207,7 @@ export function AuthPageShell({
   panel?: React.ReactNode;
   mobileLayout?: "login" | "register";
 }) {
+  const arabic = useLocale().locale === "ar";
   const mobileChrome = Boolean(mobileLayout);
   const mobileGreenHeightClass =
     mobileLayout === "register"
@@ -218,20 +274,61 @@ export function AuthPageShell({
         </div>
 
         {mobileChrome ? (
-          <p
-            className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
-            style={{
-              fontFamily: pangeaFont,
-              fontSize: 14,
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "127%",
-              opacity: 0.6,
-            }}
-          >
-            Thousands of creative classes. Beginner to pro, watch at your pace and even
-            offline.
-          </p>
+          arabic ? (
+            <>
+              <p
+                className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black min-[744px]:hidden"
+                style={{
+                  width: 293,
+                  color: "#000",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "127%",
+                  opacity: 0.6,
+                }}
+              >
+                آلاف الدروس الإبداعية. من المبتدئين إلى المحترفين، شاهد بالوتيرة التي تناسبك وحتى
+                بدون اتصال بالإنترنت.
+              </p>
+              <p
+                className="auth-login-support-copy m-0 mt-[21px] hidden w-[622px] shrink-0 text-center text-black min-[744px]:block lg:hidden"
+                style={{
+                  width: 622,
+                  color: "#000",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 24,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "127%",
+                  opacity: 0.6,
+                }}
+              >
+                آلاف الدروس الإبداعية. من المبتدئين إلى المحترفين، شاهد بالوتيرة التي تناسبك وحتى
+                بدون اتصال.
+              </p>
+            </>
+          ) : (
+            <p
+              className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
+              style={{
+                fontFamily: pangeaFont,
+                fontSize: 14,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "127%",
+                opacity: 0.6,
+              }}
+            >
+              Thousands of creative classes. Beginner to pro, watch at your pace and even
+              offline.
+            </p>
+          )
         ) : null}
         {mobileChrome ? <AuthLoginMobileSocialRow /> : null}
       </div>

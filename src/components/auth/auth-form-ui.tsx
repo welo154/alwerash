@@ -1,3 +1,4 @@
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { AUTH_OAUTH_ICONS } from "./auth-oauth-icons";
 import { pangeaFont } from "./auth-theme";
 
@@ -168,6 +169,7 @@ export function AuthPasswordField({
   onShowPassword,
   onHidePassword,
   autoComplete = "current-password",
+  placeholder = "Password",
   error,
   errorId = "password-error",
   onValueChange,
@@ -176,6 +178,7 @@ export function AuthPasswordField({
   onShowPassword: () => void;
   onHidePassword: () => void;
   autoComplete?: string;
+  placeholder?: string;
   error?: string | null;
   errorId?: string;
   onValueChange?: () => void;
@@ -190,7 +193,7 @@ export function AuthPasswordField({
           name="password"
           type={showPassword ? "text" : "password"}
           autoComplete={autoComplete}
-          placeholder="Password"
+          placeholder={placeholder}
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
@@ -224,11 +227,13 @@ export function AuthOAuthSection({
 }: {
   onOAuthSignIn?: (providerId: string) => void;
 }) {
+  const arabic = useArabicLayout();
+
   return (
     <>
       <div className="auth-oauth-label-gap h-[17px] shrink-0" aria-hidden />
       <p className="auth-oauth-label m-0 text-center text-black" style={authText24}>
-        Or continue with
+        {arabic ? "أو تابع مع" : "Or continue with"}
       </p>
       <div className="auth-oauth-icons-gap h-[18px] shrink-0" aria-hidden />
       <div className="auth-oauth-icons flex items-center justify-center gap-[12px]">
