@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import { learnCarouselMousewheel } from "@/components/learn/learn-carousel-swiper-config";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { LandingMentorCard } from "./LandingMentorCard";
 import { LandingMentorModal } from "./LandingMentorModal";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
@@ -14,6 +21,9 @@ const TABLET_CARD_H = 311.979;
 const TABLET_GAP_X = 18;
 const TABLET_GAP_Y = 50;
 const TABLET_GRID_W = TABLET_CARD_W * 2 + TABLET_GAP_X;
+/** Same horizontal gap as the desktop mentor card grid. */
+const DESKTOP_CARD_GAP_PX = 26;
+const DESKTOP_PAGE_INSET_PX = 120;
 
 function CurrentMostsHeading({
   id,
@@ -117,6 +127,15 @@ export function LandingCurrentMostsSection({
 }) {
   const [selectedMentor, setSelectedMentor] =
     useState<LandingMostsMentorCardDto | null>(null);
+  const arabic = useArabicLayout();
+  const {
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
 
   const visibleMentors = mentors.slice(0, (mentorsPerRow ?? (forceTwoPerRow ? 2 : 3)) * 2);
 
@@ -298,6 +317,177 @@ export function LandingCurrentMostsSection({
         ) : null}
       </section>
 
+      {!contained ? (
+      <section
+        className={`relative mb-[90px] w-full max-lg:hidden ${className ?? ""}`}
+        style={{ marginTop: 123 }}
+        data-gsap-reveal
+        aria-labelledby="landing-current-mosts-heading"
+      >
+        <div
+          dir={arabic ? "rtl" : "ltr"}
+          className="flex items-center"
+          style={{
+            paddingInlineStart: DESKTOP_PAGE_INSET_PX,
+            columnGap: arabic ? 560 : 48,
+          }}
+        >
+          <h2
+            id="landing-current-mosts-heading"
+            className="m-0 text-black"
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "48px",
+              lineHeight: "120%",
+              textAlign: arabic ? "right" : undefined,
+            }}
+          >
+            {arabic ? (
+              <>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأكثـر{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
+                    lineHeight: "120%",
+                  }}
+                >
+                  شيوعًــا
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  {" "}
+                  حاليًـا
+                </span>
+              </>
+            ) : (
+              <>
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "120%",
+              }}
+            >
+              THE CURRENT{" "}
+            </span>
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                fontVariationSettings: '"wght" 700',
+                lineHeight: "120%",
+              }}
+            >
+              MOSTS
+            </span>
+              </>
+            )}
+          </h2>
+          <p
+            className="m-0 text-black"
+            style={{
+              width: arabic ? "295px" : "361px",
+              height: "60px",
+              color: "#000",
+              textAlign: arabic ? "right" : undefined,
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "127%",
+            }}
+          >
+            {arabic
+              ? "استكشف معلمينا ومدربينا الأكثر شعبية والأكثر مشاهدة."
+              : "Explore our most popular and most watched mentors and instructors."}
+          </p>
+        </div>
+
+        <div className="relative mt-[82px] w-full">
+          <Swiper
+            key={arabic ? "ar" : "en"}
+            dir={arabic ? "rtl" : "ltr"}
+            modules={[Mousewheel]}
+            slidesPerView="auto"
+            spaceBetween={DESKTOP_CARD_GAP_PX}
+            slidesPerGroup={1}
+            slidesOffsetBefore={DESKTOP_PAGE_INSET_PX}
+            speed={400}
+            grabCursor
+            allowTouchMove
+            simulateTouch
+            observer
+            observeParents
+            watchOverflow
+            mousewheel={learnCarouselMousewheel}
+            className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
+            onSwiper={handleSwiper}
+            onSlideChange={handleNavSync}
+            onSlidesUpdated={handleNavSync}
+            onResize={handleNavSync}
+          >
+            {mentors.map((m) => (
+              <SwiperSlide key={m.id} className="h-auto! w-[383px]! shrink-0">
+                <LandingMentorCard
+                  variant={m.variant}
+                  name={m.name}
+                  profession={m.profession}
+                  onOpen={() => setSelectedMentor(m)}
+                  widthPx={mentorCardWidthPx ?? 383}
+                  heightPx={mentorCardHeightPx ?? 357}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <LearnCarouselEdgeNav
+            atBeginning={atBeginning}
+            atEnd={atEnd}
+            onPrev={slidePrev}
+            onNext={slideNext}
+            prevLabel="Previous mentor"
+            nextLabel="Next mentor"
+          />
+        </div>
+      </section>
+      ) : (
       <section
         className={`max-lg:hidden ${sectionSpacingClass} ${className ?? ""}`}
         style={sectionInlineStyle}
@@ -362,6 +552,7 @@ export function LandingCurrentMostsSection({
           </div>
         </div>
       </section>
+      )}
 
       <LandingMentorModal
         mentor={selectedMentor}

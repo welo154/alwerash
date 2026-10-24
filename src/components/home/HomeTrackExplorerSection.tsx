@@ -97,6 +97,30 @@ function useMobileSwiperInset() {
   return inset;
 }
 
+/** Distance from the page edge to the first course card. Desktop keeps 120px on either side. */
+function useCourseRowStartInset() {
+  const [inset, setInset] = useState(MOBILE_SECTION_INSET_PX);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const tablet = window.matchMedia("(min-width: 744px)");
+    const update = () => {
+      if (desktop.matches) setInset(120);
+      else if (tablet.matches) setInset(TABLET_SECTION_INSET_PX);
+      else setInset(MOBILE_SECTION_INSET_PX);
+    };
+    update();
+    desktop.addEventListener("change", update);
+    tablet.addEventListener("change", update);
+    return () => {
+      desktop.removeEventListener("change", update);
+      tablet.removeEventListener("change", update);
+    };
+  }, []);
+
+  return inset;
+}
+
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
@@ -524,6 +548,8 @@ export function HomeTrackExplorerSection({
   } = useLearnCarouselSwiper();
   const swiperCardGap = useSwiperCardGap();
   const mobileSwiperInset = useMobileSwiperInset();
+  const courseRowStartInset = useCourseRowStartInset();
+  const courseRowRef = useRef<HTMLDivElement>(null);
 
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
@@ -569,6 +595,18 @@ export function HomeTrackExplorerSection({
     : "featured";
 
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
+
+  useEffect(() => {
+    const node = courseRowRef.current;
+    if (!node) return;
+    const pinStart = () => {
+      node.scrollLeft = arabic ? node.scrollWidth : 0;
+    };
+    pinStart();
+    const observer = new ResizeObserver(pinStart);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [arabic, cardGridKey, courseRowStartInset, visibleCourseTiles.length]);
 
   const contentInsetClass =
     contentLeftPx != null
@@ -817,10 +855,14 @@ export function HomeTrackExplorerSection({
                 : t("No tracks to show.")}
             </p>
           ) : trackPillSelectsCourses ? (
-            <div className="w-full overflow-x-auto">
+            <div ref={courseRowRef} className="w-full overflow-x-auto">
               <div
-                className="flex w-max min-w-full items-start justify-center"
-                style={{ columnGap: swiperCardGap, paddingInline: mobileSwiperInset }}
+                className={`flex w-max min-w-full items-start ${arabic ? "flex-row-reverse" : ""}`}
+                style={{
+                  columnGap: swiperCardGap,
+                  paddingLeft: arabic ? 0 : courseRowStartInset,
+                  paddingRight: arabic ? courseRowStartInset : 0,
+                }}
               >
                 {visibleCourseTiles.map((tile) => (
                   <div
@@ -1259,9 +1301,12 @@ export function HomeTrackExplorerSection({
 
           <div className="max-lg:hidden">
           <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
-            <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
+            <div
+              className={`flex min-h-[216px] flex-wrap items-center justify-between gap-6 ${arabic ? "flex-row-reverse" : ""}`}
+            >
               <p
-                className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
+                className={`w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black ${arabic ? "text-right" : ""}`}
+                dir={arabic ? "rtl" : undefined}
                 style={bodyTextFont}
               >
                 {t(
@@ -1270,8 +1315,8 @@ export function HomeTrackExplorerSection({
               </p>
               <Link
                 href="/course"
-                className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
-                style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
+                className="box-border flex h-[78px] w-[270px] shrink-0 items-center justify-center rounded-[30px] border-[0.3px] border-solid border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                style={{ ...pillFont, background: "var(--Blue, #64E1FF)", padding: "0 16px" }}
               >
                 {t("Discover")}
               </Link>
@@ -1296,12 +1341,15 @@ export function HomeTrackExplorerSection({
               <LibraryFeaturedBook embedded />
 
               <div
-                className="mx-auto flex max-w-full flex-wrap items-center justify-between lg:pl-[92px] lg:pr-[72px]"
+                className={`mx-auto flex max-w-full flex-wrap items-center justify-between ${
+                  arabic ? "flex-row-reverse lg:pr-[92px] lg:pl-[72px]" : "lg:pl-[92px] lg:pr-[72px]"
+                }`}
                 style={{ marginTop: 25 }}
               >
                 <p
-                  className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white"
-                  style={{ ...bodyTextFont, marginLeft: 90 }}
+                  className={`w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white ${arabic ? "text-right" : ""}`}
+                  dir={arabic ? "rtl" : undefined}
+                  style={{ ...bodyTextFont, ...(arabic ? { marginRight: 90 } : { marginLeft: 90 }) }}
                 >
                   {t(
                     "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
@@ -1309,11 +1357,12 @@ export function HomeTrackExplorerSection({
                 </p>
                 <Link
                   href="/course"
-                  className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                  className="box-border flex h-[78px] w-[270px] shrink-0 items-center justify-center rounded-[30px] border-[0.3px] border-solid border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
                   style={{
                     ...pillFont,
-                    backgroundColor: "var(--Blue, #64E1FF)",
-                    marginRight: 65,
+                    background: "var(--Blue, #64E1FF)",
+                    padding: "0 16px",
+                    ...(arabic ? { marginLeft: 65 } : { marginRight: 65 }),
                   }}
                 >
                   {t("Discover")}

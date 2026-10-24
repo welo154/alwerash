@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { Tr } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const FOOTER_BG = "#89F496";
 
@@ -22,6 +25,7 @@ const categoriesLinks: { label: string; href: string }[] = [
   { label: "Architecture & Spaces courses", href: "/course" },
   { label: "Writing courses", href: "/course" },
   { label: "Fashion courses", href: "/course" },
+  { label: "Web & App design courses", href: "/course" },
 ];
 
 const softwareLinks: { label: string; href: string }[] = [
@@ -57,17 +61,48 @@ function FooterColumn({
   links,
   viewMoreHref,
   viewMoreLabel = "View more",
+  arabicLinksAt120 = false,
 }: {
   title: string;
   links: { label: string; href: string }[];
   viewMoreHref?: string;
   viewMoreLabel?: string;
+  /** Arabic categories column: links are 18px / 400 / 120%. */
+  arabicLinksAt120?: boolean;
 }) {
+  const arabic = useArabicLayout();
+  const arabicLinkStyle =
+    arabic && arabicLinksAt120
+      ? {
+          color: "#000",
+          fontFamily: pangeaFont,
+          fontSize: "18px",
+          fontStyle: "normal" as const,
+          fontWeight: 400,
+          fontVariationSettings: '"wght" 400',
+          lineHeight: "120%",
+          textAlign: "right" as const,
+        }
+      : { fontFamily: pangeaFont };
+
   return (
-    <div className="w-full min-w-0 max-w-full sm:w-max sm:min-w-max sm:max-w-none">
+    <div className={`w-full min-w-0 max-w-full sm:w-max sm:min-w-max sm:max-w-none ${arabic ? "text-right" : ""}`}>
       <h3
-        className="text-[18px] font-bold uppercase leading-[120%] tracking-[0] text-black sm:whitespace-nowrap"
-        style={{ fontFamily: pangeaFont }}
+        className={`text-[18px] font-bold leading-[120%] tracking-[0] text-black sm:whitespace-nowrap ${arabic ? "text-right" : "uppercase"}`}
+        style={
+          arabic
+            ? {
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: "18px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                fontVariationSettings: '"wght" 700',
+                lineHeight: "120%",
+              }
+            : { fontFamily: pangeaFont }
+        }
       >
         <Tr>{title}</Tr>
       </h3>
@@ -75,7 +110,7 @@ function FooterColumn({
       <ul className="mt-4 space-y-1">
         {links.map((item) => (
           <li key={item.label}>
-            <Link href={item.href} className={footerColumnLinkClassName} style={{ fontFamily: pangeaFont }}>
+            <Link href={item.href} className={footerColumnLinkClassName} style={arabicLinkStyle}>
               <Tr>{item.label}</Tr>
             </Link>
           </li>
@@ -84,8 +119,8 @@ function FooterColumn({
           <li>
             <Link
               href={viewMoreHref}
-              className={`${footerColumnLinkClassName} underline transition-opacity hover:opacity-70`}
-              style={{ fontFamily: pangeaFont }}
+              className={`${footerColumnLinkClassName}${arabic && arabicLinksAt120 ? "" : " underline"} transition-opacity hover:opacity-70`}
+              style={arabicLinkStyle}
             >
               <Tr>{viewMoreLabel}</Tr>
             </Link>
@@ -98,10 +133,12 @@ function FooterColumn({
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const arabic = useArabicLayout();
 
   return (
     <footer className="bg-white px-4 pb-10 pt-4 sm:px-6 lg:px-8">
       <div
+        dir={arabic ? "rtl" : "ltr"}
         className="mx-auto max-w-[1600px] overflow-hidden rounded-[32px] px-[76px] pb-[20px] pt-[45px] sm:rounded-[36px] lg:rounded-[40px]"
         style={{ backgroundColor: FOOTER_BG }}
       >
@@ -129,7 +166,10 @@ export function SiteFooter() {
               <Tr>Help Center</Tr>
             </Link>
           </div>
-          <div className="flex shrink-0 flex-row flex-nowrap items-center gap-[40px]">
+          <div
+            dir="ltr"
+            className={`flex shrink-0 flex-row flex-nowrap items-center gap-[40px] ${arabic ? "flex-row-reverse" : ""}`}
+          >
             <div className="flex items-center gap-[3px] text-black">
               <a
                 href="https://instagram.com"
@@ -190,14 +230,17 @@ export function SiteFooter() {
 
         <hr className="mt-[15px] mb-[38px] border-t border-black" />
 
-        {/* Four columns — max-content widths + 100px gaps so labels stay one line (scroll on narrow viewports) */}
+        {/* Four columns — max-content widths so labels stay one line (scroll on narrow viewports) */}
         <div className="overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch]">
-          <div className="grid w-max min-w-full max-w-full grid-cols-1 gap-y-10 sm:grid-cols-[repeat(2,max-content)] sm:gap-x-[100px] sm:gap-y-10 lg:grid-cols-[repeat(4,max-content)] lg:gap-x-[100px]">
+          <div
+            className={`grid w-max min-w-full grid-cols-[repeat(4,max-content)] ${arabic ? "gap-x-[115px]" : "gap-x-[100px]"}`}
+          >
             <FooterColumn
               title="Categories"
               links={categoriesLinks}
               viewMoreHref="/course"
-              viewMoreLabel="View more"
+              viewMoreLabel={arabic ? "View all" : "View more"}
+              arabicLinksAt120
             />
             <FooterColumn title="Software" links={softwareLinks} />
             <FooterColumn title="Discover" links={discoverLinks} />
@@ -205,8 +248,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Large wordmark — same slot; hero logo asset */}
-        <div className="bg-transparent -mb-9 -mt-5">
+        {/* Wordmark stays on the left in both languages. */}
+        <div dir="ltr" className="bg-transparent -mb-9 -mt-5">
           <Link
             href="/"
             className="-ml-[31px] inline-block max-w-[calc(100%+31px)] bg-transparent max-sm:max-w-full"
@@ -224,10 +267,29 @@ export function SiteFooter() {
 
         {/* Legal — Pangea 18 / 400 / 120% / center; no border-top */}
         <div
+          dir="ltr"
           className="mt-4 flex flex-col gap-4 pt-6 text-center text-[18px] font-normal leading-[120%] tracking-[0] text-black sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6"
           style={{ fontFamily: pangeaFont }}
         >
-          <span suppressHydrationWarning>© {year} AlWerash</span>
+          <span
+            suppressHydrationWarning
+            style={
+              arabic
+                ? {
+                    color: "#000",
+                    textAlign: "center",
+                    fontFamily: pangeaFont,
+                    fontSize: "18px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }
+                : undefined
+            }
+          >
+            {arabic ? `© ${year} الورشة` : `© ${year} AlWerash`}
+          </span>
           <Link href="/" className="text-center hover:opacity-70">
             <Tr>Terms of use</Tr>
           </Link>

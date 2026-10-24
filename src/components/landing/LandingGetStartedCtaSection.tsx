@@ -1,12 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { SUBSCRIPTION_PRICING_PATH } from "@/lib/subscription-routes";
 
 const pangeaFont = pangeaFontFamily;
 
-const CTA_BUTTON_TEXT = "#141413";
 /** Inline headline logo — 104:31, larger than previous 208×62 */
 const CTA_INLINE_LOGO_W = 260;
 const CTA_INLINE_LOGO_H = 78;
@@ -27,6 +29,8 @@ export function LandingGetStartedCtaSection({
   variant?: "desktop" | "mobile";
   className?: string;
 } = {}) {
+  const arabic = useArabicLayout();
+
   if (variant === "mobile") {
     return (
       <section
@@ -156,7 +160,8 @@ export function LandingGetStartedCtaSection({
       <div className="mx-auto flex max-w-[1400px] flex-col items-center px-4 sm:px-8">
         <h2
           id="landing-get-started-heading"
-          className="w-full max-w-[894px] text-center font-normal uppercase tracking-[0]"
+          dir={arabic ? "rtl" : undefined}
+          className={`text-center font-normal tracking-[0] ${arabic ? "w-[712px] max-w-full" : "w-full max-w-[894px] uppercase"}`}
           style={{
             color: "#000",
             fontFamily: pangeaFont,
@@ -168,51 +173,82 @@ export function LandingGetStartedCtaSection({
             textAlign: "center",
           }}
         >
-          <span className="block">Master new skills,</span>
-          <span className="block">build a professional portfolio,</span>
-          <span className="block">and learn from the best in the</span>
-          <span className="block">
-            industry. Only at{" "}
-            <span
-              className="-translate-x-[34px] -translate-y-[10px] inline-block max-w-full align-middle sm:-translate-x-[50px]"
-              style={{
-                width: `${CTA_INLINE_LOGO_W}px`,
-                height: `${CTA_INLINE_LOGO_H}px`,
-                aspectRatio: "104 / 31",
-              }}
-            >
-              <Image
-                src="/brand/alwerash-logo.png"
-                alt=""
-                width={CTA_INLINE_LOGO_W}
-                height={CTA_INLINE_LOGO_H}
-                className="block size-full object-contain object-bottom"
-                unoptimized
-                aria-hidden
-              />
-              <span className="sr-only">Alwerash</span>
-            </span>
-          </span>
+          {arabic ? (
+            <>
+              اكتسب مهارات جديدة،
+              <br />
+              قم ببناء محفظة مهنية، وتعلم من أفضل الخبراء في الصناعة. فقط في{" "}
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "48px",
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
+                  lineHeight: "120%",
+                }}
+              >
+                الـــورش
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="block">Master new skills,</span>
+              <span className="block">build a professional portfolio,</span>
+              <span className="block">and learn from the best in the</span>
+              <span className="block">
+                industry. Only at{" "}
+                <span
+                  className="-translate-x-[34px] -translate-y-[10px] inline-block max-w-full align-middle sm:-translate-x-[50px]"
+                  style={{
+                    width: `${CTA_INLINE_LOGO_W}px`,
+                    height: `${CTA_INLINE_LOGO_H}px`,
+                    aspectRatio: "104 / 31",
+                  }}
+                >
+                  <Image
+                    src="/brand/alwerash-logo.png"
+                    alt=""
+                    width={CTA_INLINE_LOGO_W}
+                    height={CTA_INLINE_LOGO_H}
+                    className="block size-full object-contain object-bottom"
+                    unoptimized
+                    aria-hidden
+                  />
+                  <span className="sr-only">Alwerash</span>
+                </span>
+              </span>
+            </>
+          )}
         </h2>
 
         <Link
           href={SUBSCRIPTION_PRICING_PATH}
-          className="mt-[50px] flex h-[123px] w-[390px] max-w-full shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black bg-[#8AF396] px-4 py-0 text-center font-bold uppercase tracking-[0] transition-colors hover:bg-[#64E1FF]"
+          dir={arabic ? "rtl" : undefined}
+          className={`mt-[50px] box-border flex max-w-full shrink-0 items-center justify-center text-center tracking-[0] no-underline transition-opacity hover:opacity-90 ${arabic ? "" : "uppercase"}`}
           style={{
+            width: 390,
+            height: 123,
+            padding: "0 16px",
+            borderRadius: 55,
+            border: "0.3px solid var(--Black, #000)",
+            background: "var(--Green, #8AF396)",
+            color: "var(--Text-Primary, #141413)",
             fontFamily: pangeaFont,
-            color: CTA_BUTTON_TEXT,
-            fontSize: "48px",
+            fontSize: arabic ? 64 : 48,
             fontStyle: "normal",
-            fontWeight: 700,
-            lineHeight: "19.6px",
-            fontVariationSettings: '"wght" 700',
+            fontWeight: 600,
+            lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+            fontVariationSettings: '"wght" 600',
             textAlign: "center",
           }}
         >
-          Get started
+          {arabic ? "ابدأ الآن" : "Get started"}
         </Link>
 
         <p
+          dir={arabic ? "rtl" : undefined}
           className="mt-[40px] text-center font-normal"
           style={{
             color: "#000",
@@ -225,7 +261,7 @@ export function LandingGetStartedCtaSection({
             textAlign: "center",
           }}
         >
-          Or continue with
+          {arabic ? "أو تابع مع" : "Or continue with"}
         </p>
 
         <LandingSocialSignInRow variant="cta" className="mt-[40px]" />

@@ -1,3 +1,7 @@
+"use client";
+
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { StudentProjectThumb } from "@/components/students/StudentProjectThumb";
 import type { StudentRatingCard } from "@/components/students/student-rating-types";
@@ -81,10 +85,12 @@ function MobileStudentRatingAvatar({ initials }: { initials: string }) {
 }
 
 function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
-    <div className="flex items-start gap-[9px]">
+    <div className={`flex items-start gap-[9px] ${arabic ? "flex-row-reverse" : ""}`}>
       <MobileStudentRatingAvatar initials={card.initials} />
-      <div>
+      <div className={arabic ? "text-right" : undefined}>
         <p
           className="m-0"
           style={{
@@ -94,10 +100,10 @@ function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
-            textTransform: "uppercase",
+            textTransform: arabic ? "none" : "uppercase",
           }}
         >
-          {card.name}
+          {t(card.name)}
         </p>
         <span
           className="mt-[4px] inline-flex h-[21px] w-auto items-center justify-center rounded-[8px] border-[0.2px] border-black px-4"
@@ -111,7 +117,7 @@ function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             lineHeight: "19.6px",
           }}
         >
-          {card.role}
+          {t(card.role)}
         </span>
       </div>
     </div>
@@ -119,8 +125,10 @@ function MobileStudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
 }
 
 function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
-    <div className="flex items-center gap-[10px]">
+    <div className={`flex items-center gap-[10px] ${arabic ? "flex-row-reverse" : ""}`}>
       <div className="flex h-[63px] w-[63px] items-center justify-center rounded-full border border-black bg-white">
         <span
           style={{
@@ -135,7 +143,7 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
           {card.initials}
         </span>
       </div>
-      <div>
+      <div className={arabic ? "text-right" : undefined}>
         <p
           className="m-0"
           style={{
@@ -145,14 +153,17 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
-            textTransform: "uppercase",
+            textTransform: arabic ? "none" : "uppercase",
           }}
         >
-          {card.name}
+          {t(card.name)}
         </p>
         <span
-          className="mt-[6px] inline-flex h-[31px] items-center rounded-[8px] border border-black px-4"
+          className="mt-[6px] box-border inline-flex h-[31px] items-center"
           style={{
+            padding: "0 16px",
+            borderRadius: 25,
+            border: "0.3px solid var(--Black, #000)",
             background: "var(--Blue, #64E1FF)",
             color: "var(--Text-Primary, #141413)",
             fontFamily: pangeaFont,
@@ -162,7 +173,7 @@ function StudentRatingProfileInfo({ card }: { card: StudentRatingCard }) {
             lineHeight: "19.6px",
           }}
         >
-          {card.role}
+          {t(card.role)}
         </span>
       </div>
     </div>
@@ -178,14 +189,17 @@ export function MobileStudentRatingCard({
   width?: number;
   height?: number;
 }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
     <div
       className="mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pt-[25px] pr-[25px]"
       style={{ width, height }}
     >
-      <div className="flex items-start gap-[9px]">
+      <div className={`flex items-start gap-[9px] ${arabic ? "flex-row-reverse" : ""}`}>
         <p
           className="m-0 min-w-0 flex-1"
+          dir={arabic ? "rtl" : undefined}
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -193,9 +207,10 @@ export function MobileStudentRatingCard({
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "normal",
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {`"${card.quote}"`}
+          {`"${t(card.quote)}"`}
         </p>
         <StudentProjectThumb
           src={card.projectImage}
@@ -211,15 +226,18 @@ export function MobileStudentRatingCard({
 }
 
 export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
+  const arabic = useArabicLayout();
+  const t = useT();
   return (
     <div
-      className="box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[45px] pr-[28px]"
+      className={`box-border rounded-[36px] border border-black bg-white pb-[38px] ${arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"}`}
       style={{ width: 621, height: 339 }}
     >
-      <div className="flex h-full items-start justify-between gap-[16px]">
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pt-[64px]">
+      <div className={`flex h-full items-start justify-between gap-[16px] ${arabic ? "flex-row-reverse" : ""}`}>
+        <div className={`flex h-full min-h-0 min-w-0 flex-1 flex-col pt-[64px] ${arabic ? "items-end" : ""}`}>
           <p
             className="m-0 max-w-full"
+            dir={arabic ? "rtl" : undefined}
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
@@ -227,9 +245,10 @@ export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "normal",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {`"${card.quote}"`}
+            {`"${t(card.quote)}"`}
           </p>
           <div className="mt-auto mb-[20px] pt-[18px]">
             <StudentRatingProfileInfo card={card} />
@@ -254,6 +273,8 @@ export function StudentsRatingWorkSection({
   sectionClassName = "",
   variant = "desktop",
 }: StudentsRatingWorkSectionProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const shown = cards ?? DEFAULT_CARDS;
 
   if (variant === "mobile") {
@@ -271,9 +292,9 @@ export function StudentsRatingWorkSection({
             background: "var(--Dark-Green, #004B3C)",
           }}
         >
-          <div className="pt-[55px] pl-[35px]">
+          <div className={arabic ? "pt-[55px] pr-[35px]" : "pt-[55px] pl-[35px]"}>
             <h2
-              className="m-0 w-[336px] uppercase text-white"
+              className={`m-0 w-[336px] text-white ${arabic ? "mr-auto text-right" : "uppercase"}`}
               style={{ fontFamily: pangeaFont }}
             >
               <span
@@ -286,7 +307,7 @@ export function StudentsRatingWorkSection({
                   lineHeight: "120%",
                 }}
               >
-                WHY STUDENTS{" "}
+                {arabic ? "لماذا يحب الطلاب " : "WHY STUDENTS "}
               </span>
               <span
                 style={{
@@ -298,8 +319,9 @@ export function StudentsRatingWorkSection({
                   lineHeight: "120%",
                 }}
               >
-                LOVE
+                {arabic ? "الورش" : "LOVE"}
               </span>
+              {arabic ? null : (
               <span
                 style={{
                   color: "var(--White, #FFF)",
@@ -313,6 +335,7 @@ export function StudentsRatingWorkSection({
                 {" "}
                 US
               </span>
+              )}
             </h2>
           </div>
 
@@ -334,9 +357,9 @@ export function StudentsRatingWorkSection({
             background: "var(--Dark-Green, #004B3C)",
           }}
         >
-          <div className="pl-[56px] pt-[64px]">
+          <div className={arabic ? "pr-[56px] pt-[64px]" : "pl-[56px] pt-[64px]"}>
             <h2
-              className="m-0 w-[583px] max-w-full uppercase text-white"
+              className={`m-0 w-[583px] max-w-full text-white ${arabic ? "mr-auto text-right" : "uppercase"}`}
               style={{
                 color: "#FFF",
                 fontFamily: pangeaFont,
@@ -346,13 +369,23 @@ export function StudentsRatingWorkSection({
                 lineHeight: "120%",
               }}
             >
-              WHY STUDENTS LOVE{" "}
-              <span style={{ fontStyle: "italic", fontWeight: 300 }}>AL</span>
-              <span style={{ fontStyle: "italic", fontWeight: 700 }}>WERASH</span>
+              {arabic ? (
+                <>
+                  لماذا يحب الطلاب
+                  <br />
+                  <span style={{ fontStyle: "italic", fontWeight: 700 }}>الورش</span>
+                </>
+              ) : (
+                <>
+                  WHY STUDENTS LOVE{" "}
+                  <span style={{ fontStyle: "italic", fontWeight: 300 }}>AL</span>
+                  <span style={{ fontStyle: "italic", fontWeight: 700 }}>WERASH</span>
+                </>
+              )}
             </h2>
           </div>
           {shown.length > 0 ? (
-            <div className="mt-[42px] flex flex-col gap-[40px] pl-[56px]">
+            <div className={`mt-[42px] flex flex-col gap-[40px] ${arabic ? "pr-[56px]" : "pl-[56px]"}`}>
               {shown.slice(0, 2).map((card, idx) => (
                 <TabletStudentRatingCard key={`${card.name}-${idx}`} card={card} />
               ))}
@@ -389,48 +422,78 @@ export function StudentsRatingWorkSection({
 
           <div className="relative z-10 px-[48px] pt-[59px]">
             <h2
-              className="m-0 uppercase text-white"
+              className={`m-0 text-white ${arabic ? "text-right" : "uppercase"}`}
+              dir={arabic ? "rtl" : undefined}
               style={{
                 width: "612px",
                 maxWidth: "100%",
+                marginLeft: arabic ? "auto" : undefined,
+                marginRight: arabic ? "calc(86px - 48px)" : undefined,
                 color: "#FFF",
+                textAlign: arabic ? "right" : undefined,
                 fontFamily: pangeaFont,
-                fontSize: "48px",
+                fontSize: arabic ? "55px" : "48px",
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: arabic ? '"wght" 400' : undefined,
                 lineHeight: "120%",
               }}
             >
-              WHY STUDENTS LOVE
-              <br />
-              <span style={{ fontStyle: "italic", fontWeight: 300 }}>AL</span>
-              <span style={{ fontStyle: "italic", fontWeight: 700 }}>
-                WERASH
-              </span>
+              {arabic ? (
+                <>
+                  لماذا يحب الطلاب
+                  <br />
+                  <span
+                    style={{
+                      color: "#FFF",
+                      fontFamily: pangeaFont,
+                      fontSize: "55px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      fontVariationSettings: '"wght" 700',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    الــورش
+                  </span>
+                </>
+              ) : (
+                <>
+                  WHY STUDENTS LOVE
+                  <br />
+                  <span style={{ fontStyle: "italic", fontWeight: 300 }}>AL</span>
+                  <span style={{ fontStyle: "italic", fontWeight: 700 }}>
+                    WERASH
+                  </span>
+                </>
+              )}
             </h2>
 
             <div className="mx-auto mt-[39px] grid w-[1205px] max-w-full grid-cols-2 justify-items-stretch gap-x-[31px] gap-y-[40px]">
               {shown.map((card, idx) => (
                 <div
                   key={`${card.name}-${idx}`}
-                  className="h-[327px] w-[587px] max-w-full rounded-[36px] border border-black bg-white pb-[38px] pl-[45px] pr-[28px]"
+                  className={`h-[327px] w-[587px] max-w-full rounded-[36px] border border-black bg-white pb-[38px] ${arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"}`}
                 >
-                  <div className="flex h-full items-start justify-between gap-[16px]">
-                    <div className="flex h-full min-h-0 flex-1 flex-col pt-[80px]">
+                  <div className={`flex h-full items-start justify-between gap-[16px] ${arabic ? "flex-row-reverse" : ""}`}>
+                    <div className={`flex h-full min-h-0 flex-1 flex-col pt-[80px] ${arabic ? "items-end" : ""}`}>
                       <p
                         className="m-0"
+                        dir={arabic ? "rtl" : undefined}
                         style={{
-                          width: "286px",
+                          width: arabic ? "287.949px" : "286px",
                           maxWidth: "100%",
                           color: "var(--Black, #000)",
+                          textAlign: arabic ? "right" : undefined,
                           fontFamily: pangeaFont,
                           fontSize: "16px",
                           fontStyle: "normal",
                           fontWeight: 400,
+                          fontVariationSettings: arabic ? '"wght" 400' : undefined,
                           lineHeight: "normal",
                         }}
                       >
-                        {`"${card.quote}"`}
+                        {`"${t(card.quote)}"`}
                       </p>
                       <div className="mt-auto pt-[18px]">
                         <StudentRatingProfileInfo card={card} />

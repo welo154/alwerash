@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, type ReactNode } from "react";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -8,6 +9,20 @@ const MENTOR_PHOTO = "/landing/mentor-modal-photo.png";
 
 const PLACEHOLDER_BIO =
   "I'm a working professional creative in the game industry. I work as a concept artist and freelance illustrator. I've worked in-house at an animation studio but currently, work from home. As an instructor, I strive to provide the best learning experience possible for my students by creating clear content and maintaining a personable demeanor.";
+
+const PLACEHOLDER_BIO_AR =
+  "أنا مبدع محترف أعمل في صناعة الألعاب. أعمل فنانًا مفاهيميًا ورسامًا مستقلًا. عملت داخل استوديو للرسوم المتحركة، وأعمل حاليًا من المنزل. بصفتي مدربًا، أحرص على تقديم أفضل تجربة تعلم ممكنة لطلابي من خلال محتوى واضح وأسلوب قريب.";
+
+const ARABIC_MENTOR_COPY: Record<string, string> = {
+  "LAYLA HASSAN": "ليلى حسن",
+  "OMAR FARID": "عمر فريد",
+  "SARA NOUR": "سارة نور",
+  "KARIM ADEL": "كريم عادل",
+  "Concept Artist": "فنانة مفاهيم",
+  "Motion Designer": "مصمم حركة",
+  Photographer: "مصورة",
+  Architect: "مهندس معماري",
+};
 
 const MODAL_PATH =
   "M859 0C889.376 3.2213e-06 914 24.6243 914 55V598C914 628.376 889.376 653 859 653H55C24.6243 653 0 628.376 0 598V128.48C0 100.866 22.3858 78.4805 50 78.4805H163.197C177.557 78.4805 189.197 66.8397 189.197 52.4805V50C189.197 22.3858 211.583 0 239.197 0H859Z";
@@ -49,7 +64,7 @@ function StatRow({
       </span>
       <span
         style={{
-          marginLeft: 18,
+          marginInlineStart: 18,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
           fontSize: 16,
@@ -65,6 +80,7 @@ function StatRow({
 }
 
 export function LandingMentorModal({ mentor, open, onClose }: Props) {
+  const arabic = useArabicLayout();
   const rawId = useId().replace(/:/g, "");
   const shellMaskId = `mentor-modal-shell-mask-${rawId}`;
   const photoMaskId = `mentor-modal-photo-mask-${rawId}`;
@@ -191,17 +207,20 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
 
           {/* Content — 51px right of photo, 85px from top */}
           <div
+            dir={arabic ? "rtl" : "ltr"}
             className="absolute z-10 flex flex-col items-start"
             style={{
-              left: "calc(420 / 914 * 100%)",
+              ...(arabic ? { right: 51 } : { left: "calc(420 / 914 * 100%)" }),
               top: "calc(85 / 653 * 100%)",
+              width: "calc(363 / 914 * 100%)",
               maxWidth: "calc(363 / 914 * 100%)",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
             <div
               className="box-border flex items-center justify-center"
               style={{
-                width: 164,
+                width: arabic ? "max-content" : 164,
                 height: 39,
                 padding: "0 16px",
                 borderRadius: "var(--Radius-SM, 6px)",
@@ -212,11 +231,21 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                 fontFamily: pangeaFont,
                 fontSize: 18,
                 fontWeight: 500,
+                fontStyle: "normal",
                 lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                whiteSpace: "nowrap",
               }}
             >
-              <span style={{ fontStyle: "normal" }}>MOST </span>
-              <span style={{ fontStyle: "italic" }}>WATCHED</span>
+              {arabic ? (
+                mentor.variant === "popular" ? "الأكثر شيوعًا" : "الأكثر مشاهدة"
+              ) : (
+                <>
+                  <span style={{ fontStyle: "normal" }}>MOST </span>
+                  <span style={{ fontStyle: "italic" }}>
+                    {mentor.variant === "popular" ? "POPULAR" : "WATCHED"}
+                  </span>
+                </>
+              )}
             </div>
 
             <div
@@ -229,9 +258,10 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                 fontWeight: 400,
                 lineHeight: "normal",
                 opacity: 0.6,
+                textAlign: arabic ? "right" : undefined,
               }}
             >
-              MEET
+              {arabic ? "التقِ" : "MEET"}
             </div>
 
             <div
@@ -243,9 +273,10 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                textAlign: arabic ? "right" : undefined,
               }}
             >
-              {mentor.name}
+              {arabic ? (ARABIC_MENTOR_COPY[mentor.name] ?? mentor.name) : mentor.name}
             </div>
 
             <div
@@ -256,9 +287,10 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                textAlign: arabic ? "right" : undefined,
               }}
             >
-              {mentor.profession}
+              {arabic ? (ARABIC_MENTOR_COPY[mentor.profession] ?? mentor.profession) : mentor.profession}
             </div>
 
             <div className="flex flex-col" style={{ marginTop: 22, gap: 11 }}>
@@ -281,7 +313,7 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                     />
                   </svg>
                 }
-                label="4.8 Instructor Rating"
+                label={arabic ? "تقييم المدرب 4.8" : "4.8 Instructor Rating"}
               />
               <StatRow
                 icon={
@@ -302,7 +334,7 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                     />
                   </svg>
                 }
-                label="231 students"
+                label={arabic ? "231 طالبًا" : "231 students"}
               />
               <StatRow
                 icon={
@@ -323,7 +355,7 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                     />
                   </svg>
                 }
-                label="4 courses"
+                label={arabic ? "4 دورات" : "4 courses"}
               />
             </div>
 
@@ -339,9 +371,10 @@ export function LandingMentorModal({ mentor, open, onClose }: Props) {
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                textAlign: arabic ? "right" : undefined,
               }}
             >
-              “{PLACEHOLDER_BIO}”
+              {arabic ? `«${PLACEHOLDER_BIO_AR}»` : `“${PLACEHOLDER_BIO}”`}
             </p>
           </div>
         </div>

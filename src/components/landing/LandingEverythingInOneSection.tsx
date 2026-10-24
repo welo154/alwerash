@@ -1,6 +1,8 @@
 "use client";
 
 import type { ComponentType, CSSProperties } from "react";
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -251,6 +253,9 @@ export function LandingEverythingInOneSection({
   /** Course page uses its own row metrics; home keeps the original mobile sizes. */
   mobileRowLayout?: "home" | "course";
 } = {}) {
+  const arabic = useArabicLayout();
+  const t = useT();
+
   if (variant === "mobile") {
     const isCourseRows = mobileRowLayout === "course";
     return (
@@ -309,7 +314,10 @@ export function LandingEverythingInOneSection({
           }`}
         >
           {FEATURES.map(({ title, body, Icon }) => (
-            <li key={title} className={`flex items-center ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}>
+            <li
+              key={title}
+              className={`flex items-center ${arabic ? "flex-row-reverse" : ""} ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}
+            >
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
                   className={`shrink-0 ${
@@ -322,15 +330,15 @@ export function LandingEverythingInOneSection({
               <div
                 className={
                   isCourseRows
-                    ? "ml-[14px] min-w-0 min-[744px]:max-lg:ml-[27px]"
-                    : "ml-[21px] w-[221px] shrink-0 min-[744px]:ml-[27px] min-[744px]:w-[480px]"
+                    ? `${arabic ? "mr-[14px] text-right min-[744px]:max-lg:mr-[27px]" : "ml-[14px] min-[744px]:max-lg:ml-[27px]"} min-w-0`
+                    : `${arabic ? "mr-[21px] text-right min-[744px]:mr-[27px]" : "ml-[21px] min-[744px]:ml-[27px]"} w-[221px] shrink-0 min-[744px]:w-[480px]`
                 }
               >
                 <h3
                   className={isCourseRows ? "m-0 text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0"}
                   style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}
                 >
-                  {title}
+                  {t(title)}
                 </h3>
                 <p
                   className={
@@ -340,11 +348,11 @@ export function LandingEverythingInOneSection({
                   }
                   style={isCourseRows ? courseFeatureBodyStyle : mobileFeatureBodyStyle}
                 >
-                  {body}
+                  {t(body)}
                 </p>
               </div>
               {hideChecks ? null : (
-              <span className="ml-[33px] shrink-0 min-[744px]:ml-auto">
+              <span className={`shrink-0 ${arabic ? "mr-[33px] min-[744px]:mr-auto" : "ml-[33px] min-[744px]:ml-auto"}`}>
                 <FeatureCheckGlyph className="h-[33.171px] w-[33.171px] min-[744px]:h-[44.893px] min-[744px]:w-[44.893px]" />
               </span>
               )}
@@ -373,31 +381,85 @@ export function LandingEverythingInOneSection({
         <div className="min-w-0 w-full max-w-[640px] flex-1 xl:max-w-none xl:px-4">
           <h2
             id="everything-in-one-place-heading"
-            className="mb-[64px] text-center text-[48px] leading-[120%] text-black"
-            style={{ fontFamily: pangeaFont }}
+            className={`${arabic ? "mb-[38px]" : "mb-[64px]"} text-center text-[48px] leading-[120%] text-black`}
+            style={{
+              color: "#000",
+              textAlign: "center",
+              fontFamily: pangeaFont,
+              fontSize: 48,
+              lineHeight: "120%",
+            }}
           >
-            <span className="font-bold italic">EVERYTHING</span>
-            <span className="font-normal not-italic"> IN ONE PLACE</span>
+            {arabic ? (
+              <>
+                <span style={{ color: "#000", fontFamily: pangeaFont, fontSize: 48, fontStyle: "italic", fontWeight: 700, lineHeight: "120%" }}>
+                  كــل شــيء
+                </span>
+                <span style={{ color: "#000", fontFamily: pangeaFont, fontSize: 48, fontStyle: "normal", fontWeight: 400, lineHeight: "120%" }}>
+                  {" "}
+                  في مكان واحد
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="font-bold italic">EVERYTHING</span>
+                <span className="font-normal not-italic"> IN ONE PLACE</span>
+              </>
+            )}
           </h2>
 
-          <ul className="mb-[35px] flex list-none flex-col gap-[35px] p-0">
+          <ul className={`mb-[35px] flex list-none flex-col p-0 ${arabic ? "gap-[20px]" : "gap-[35px]"}`}>
             {FEATURES.map(({ title, body, Icon }) => (
-              <li key={title} className="flex items-start">
-                <span className="mt-1 mr-4 flex shrink-0 items-center justify-center text-[#1E1E1E] sm:mr-6">
+              <li key={title} className={`flex ${arabic ? "flex-row-reverse items-center" : "items-start"}`}>
+                <span
+                  className={`flex shrink-0 items-center justify-center text-[#1E1E1E] ${arabic ? "ml-4 sm:ml-6" : "mt-1 mr-4 sm:mr-6"}`}
+                >
                   <Icon className="h-[36px] w-[44px] shrink-0" />
                 </span>
                 <div
-                  className="mr-[115px] w-[480px] max-w-full shrink-0"
+                  className={`w-[480px] max-w-full shrink-0 ${arabic ? "ml-[115px] text-right" : "mr-[115px]"}`}
                   style={{ fontFamily: pangeaFont }}
                 >
-                  <h3 className="text-[24px] font-semibold not-italic leading-[127%] text-black">
-                    {title}
+                  <h3
+                    className={arabic ? "m-0" : "text-[24px] font-semibold not-italic leading-[127%] text-black"}
+                    style={
+                      arabic
+                        ? {
+                            color: "#000",
+                            textAlign: "right",
+                            fontFamily: pangeaFont,
+                            fontSize: "32px",
+                            fontStyle: "normal",
+                            fontWeight: 600,
+                            fontVariationSettings: '"wght" 600',
+                            lineHeight: "150%",
+                          }
+                        : undefined
+                    }
+                  >
+                    {t(title)}
                   </h3>
-                  <p className="mt-2 text-[24px] font-normal not-italic leading-[127%] text-black">
-                    {body}
+                  <p
+                    className={arabic ? "m-0" : "mt-2 text-[24px] font-normal not-italic leading-[127%] text-black"}
+                    style={
+                      arabic
+                        ? {
+                            color: "#000",
+                            textAlign: "right",
+                            fontFamily: pangeaFont,
+                            fontSize: "24px",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            fontVariationSettings: '"wght" 400',
+                            lineHeight: "150%",
+                          }
+                        : undefined
+                    }
+                  >
+                    {t(body)}
                   </p>
                 </div>
-                <span className="-translate-x-[40px] shrink-0">
+                <span className={`shrink-0 ${arabic ? "translate-x-[40px]" : "-translate-x-[40px]"}`}>
                   <FeatureCheck />
                 </span>
               </li>
