@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { COURSE_FILTER_ACTIONS } from "@/components/learn/course-filter-actions";
+import { courseNavLabel } from "@/components/learn/CoursesPageExpandableNav";
 import {
   LEARN_SIDEBAR_COURSE_FILTERS,
   LEARN_SIDEBAR_EXTRA_CATEGORIES,
   type LearnCoursesSidebarCategory,
 } from "@/components/learn/LearnCoursesSidebar";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -68,6 +70,7 @@ export function LearnCoursesPageFilterBar({
 }: {
   categories: LearnCoursesSidebarCategory[];
 }) {
+  const arabic = useArabicLayout();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
@@ -137,7 +140,7 @@ export function LearnCoursesPageFilterBar({
     <div ref={rootRef} className="flex justify-center gap-[10px] min-[744px]:max-lg:gap-[11px]">
       <div className="relative">
         <FilterPill
-          label="Courses"
+          label={courseNavLabel("Courses", arabic)}
           open={openMenu === "courses"}
           onToggle={() => setOpenMenu((prev) => (prev === "courses" ? null : "courses"))}
           menuId="learn-courses-page-courses-menu"
@@ -154,10 +157,12 @@ export function LearnCoursesPageFilterBar({
                 <button
                   type="button"
                   role="menuitem"
-                  className="flex w-full px-4 py-2 text-left text-[14px] font-normal leading-[19.6px] text-black transition-colors hover:bg-[#8AF396]"
+                  className={`flex w-full px-4 py-2 text-[14px] font-normal leading-[19.6px] text-black transition-colors hover:bg-[#8AF396] ${
+                    arabic ? "text-right" : "text-left"
+                  }`}
                   onClick={() => applyCourseFilter(item)}
                 >
-                  {item}
+                  {courseNavLabel(item, arabic)}
                 </button>
               </li>
             ))}
@@ -167,7 +172,7 @@ export function LearnCoursesPageFilterBar({
 
       <div className="relative">
         <FilterPill
-          label="Categories"
+          label={courseNavLabel("Categories", arabic)}
           open={openMenu === "categories"}
           onToggle={() => setOpenMenu((prev) => (prev === "categories" ? null : "categories"))}
           menuId="learn-courses-page-categories-menu"
@@ -185,19 +190,23 @@ export function LearnCoursesPageFilterBar({
                   <Link
                     href={item.href}
                     role="menuitem"
-                    className="flex w-full px-4 py-2 text-left text-[14px] font-normal leading-[19.6px] text-black no-underline transition-colors hover:bg-[#8AF396]"
+                    className={`flex w-full px-4 py-2 text-[14px] font-normal leading-[19.6px] text-black no-underline transition-colors hover:bg-[#8AF396] ${
+                      arabic ? "text-right" : "text-left"
+                    }`}
                     onClick={() => setOpenMenu(null)}
                   >
-                    {item.label}
+                    {courseNavLabel(item.label, arabic)}
                   </Link>
                 ) : (
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full px-4 py-2 text-left text-[14px] font-normal leading-[19.6px] text-black transition-colors hover:bg-[#8AF396]"
+                    className={`flex w-full px-4 py-2 text-[14px] font-normal leading-[19.6px] text-black transition-colors hover:bg-[#8AF396] ${
+                      arabic ? "text-right" : "text-left"
+                    }`}
                     onClick={() => onCategorySelect(item)}
                   >
-                    {item.label}
+                    {courseNavLabel(item.label, arabic)}
                   </button>
                 )}
               </li>

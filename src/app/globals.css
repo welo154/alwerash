@@ -1737,7 +1737,7 @@ label:has(input[type="radio"]) {
   height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
-/* Featured course cards: grow to the right. Neighbor shifting is done in the carousel. */
+/* Featured course cards grow to the right in English and to the left in Arabic. Neighbor shifting is done in the carousel. */
 .learn-featured-swiper.landing-showcase-swiper--cards .swiper-slide {
   z-index: 1;
 }
@@ -1824,6 +1824,40 @@ label:has(input[type="radio"]) {
 .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-rest-meta {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Phone and iPad keep the resting card. Expansion is desktop only. */
+@media (max-width: 1035px) {
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-scaler {
+    width: 323px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-panel {
+    border-width: 1px !important;
+    border-color: #000 !important;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-upper {
+    height: 323.077px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-photo {
+    height: 289.744px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-title {
+    bottom: 296px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-hover-only {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-rest-meta {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .learn-featured-swiper.swiper {

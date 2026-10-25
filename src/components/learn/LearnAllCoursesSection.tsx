@@ -220,15 +220,19 @@ export default function LearnAllCoursesSection({
 
   const trackFilterOptions = useMemo<FilterOption[]>(
     () => [
-      { value: "all", label: "All tracks" },
+      { value: "all", label: arabic ? "كل المسارات" : "All tracks" },
       ...trackOptions.map((track) => ({ value: track.slug, label: track.title })),
     ],
-    [trackOptions]
+    [arabic, trackOptions]
   );
 
   const typeFilterOptions = useMemo<FilterOption[]>(
-    () => TYPE_OPTIONS.map((option) => ({ value: option.id, label: option.label })),
-    []
+    () =>
+      TYPE_OPTIONS.map((option) => ({
+        value: option.id,
+        label: arabic && option.id === "all" ? "كل الدورات" : option.label,
+      })),
+    [arabic]
   );
 
   const filteredCourses = useMemo(() => {

@@ -1,5 +1,9 @@
 import { Suspense } from "react";
-import { loadCoursePageCatalog, type CourseForCard } from "@/server/content/public.service";
+import {
+  loadCoursePageCatalog,
+  publicListLandingMostsMentors,
+  type CourseForCard,
+} from "@/server/content/public.service";
 import { LandingCurrentMostsSection } from "@/components/landing";
 import { LearnFeaturedCoursesPanel } from "@/components/learn/LearnFeaturedCoursesPanel";
 import { LearnPopularClassesSection } from "@/components/learn/LearnPopularClassesSection";
@@ -71,8 +75,14 @@ export default async function LearnPage() {
     allCourses,
     tracks,
     trackShowcaseSlides,
-    featuredMentors,
   } = catalog;
+
+  let landingMostsMentors: Awaited<ReturnType<typeof publicListLandingMostsMentors>> = [];
+  try {
+    landingMostsMentors = await publicListLandingMostsMentors();
+  } catch {
+    landingMostsMentors = [];
+  }
 
   const popularTiles = toPopularTiles(popularClassCourses);
   const trendingTiles = toPopularTiles(trendingCourses);
@@ -142,29 +152,18 @@ export default async function LearnPage() {
             </div>
           </div>
 
-          {featuredMentors.length > 0 ? (
-            <div
-              className={`max-lg:pe-0 lg:pe-10 ${
-                hasCarouselSections || allCourseItems.length > 0
-                  ? "mt-[45px] lg:mt-[90px]"
-                  : ""
-              } max-lg:-ms-6 max-lg:w-[calc(100%+1.5rem)] sm:max-lg:-ms-8 sm:max-lg:w-[calc(100%+2rem)]`}
-            >
-              <LandingCurrentMostsSection
-                mentors={featuredMentors}
-                mentorsPerRow={3}
-                mentorCardWidthPx={383}
-                mentorCardHeightPx={357}
-                compactVerticalSpacing
-                contained
-                mobileHeadingInsetPx={38}
-                tabletHeadingSizePx={32}
-                className="mt-0 lg:mt-0"
-              />
-            </div>
-          ) : null}
         </main>
       </div>
+
+      {landingMostsMentors.length > 0 ? (
+        <LandingCurrentMostsSection
+          mentors={landingMostsMentors}
+          mentorCardWidthPx={383}
+          mentorCardHeightPx={357}
+          showDesktopSupportingCopy={false}
+          className="mt-[55px] min-[744px]:max-lg:mt-[84px]"
+        />
+      ) : null}
     </LocaleMirror>
   );
 }

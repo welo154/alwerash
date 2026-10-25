@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
 import { appendShowcaseToHref } from "./catalog-showcase-map";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 export type { CatalogShowcaseCardProps } from "./catalog-showcase-map";
@@ -39,6 +40,46 @@ const SHOWCASE_PANEL_OVERLAP = SHOWCASE_PHOTO_H - 176;
 const SHOWCASE_PHOTO_TOP = SHOWCASE_TOP_H - SHOWCASE_PANEL_OVERLAP;
 const SHOWCASE_CARD_H = SHOWCASE_PHOTO_TOP + SHOWCASE_PHOTO_H;
 const SHOWCASE_ACCENT = "#89F496";
+
+const SHOWCASE_TITLE_AR: Record<string, string> = {
+  "creative coding": "البرمجة الإبداعية",
+  branding: "الهوية البصرية",
+  "3d design": "التصميم ثلاثي الأبعاد",
+  "ui / ux": "واجهة وتجربة المستخدم",
+  "ui/ux": "واجهة وتجربة المستخدم",
+  calligraphy: "الخط",
+  ornamentation: "الزخرفة",
+  illustration: "الرسم",
+  "cv & portfolio": "السيرة والأعمال",
+  "business & design": "الأعمال والتصميم",
+};
+
+function arabicShowcaseTitle(primary: string, secondary?: string) {
+  const joined = [primary, secondary].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().toLowerCase();
+  return SHOWCASE_TITLE_AR[joined] ?? [primary, secondary].filter(Boolean).join(" ");
+}
+
+function arabicLevelLabel(label: string) {
+  const key = label.trim().toLowerCase();
+  if (key === "beginner") return "مبتــدئ";
+  if (key === "intermediate") return "متوسط";
+  if (key === "advanced") return "متقدم";
+  return label;
+}
+
+function arabicDurationLabel(label: string) {
+  const hoursAndMinutes = label.match(/(\d+)\s*h(?:rs?)?(?:\s*(\d+)\s*m)?/i);
+  if (hoursAndMinutes) {
+    const hours = Number(hoursAndMinutes[1]);
+    const minutes = hoursAndMinutes[2] ? Number(hoursAndMinutes[2]) : 0;
+    if (hours > 0 && minutes > 0) return `${hours} ساعة و ${minutes} دقيقة`;
+    if (hours > 0) return `${hours} ساعة`;
+    return `${minutes} دقيقة`;
+  }
+  const minutesOnly = label.match(/(\d+)\s*m/i);
+  if (minutesOnly) return `${minutesOnly[1]} دقيقة`;
+  return label;
+}
 
 /** Fixed catalog tile size — keep carousels in sync with CatalogShowcaseCard layout. */
 export const CATALOG_SHOWCASE_CARD_W = 323;
@@ -172,11 +213,16 @@ function FeaturedHoverMeta({
   levelLabel: string;
   durationLabel: string;
 }) {
+  const arabic = useArabicLayout();
+  const level = arabic ? arabicLevelLabel(levelLabel) : levelLabel;
+  const duration = arabic ? arabicDurationLabel(durationLabel) : durationLabel;
+
   return (
     <>
       <div
+        dir={arabic ? "rtl" : undefined}
         className="featured-hover-only pointer-events-none absolute flex items-center"
-        style={{ top: 25, left: 38, height: 36 }}
+        style={{ top: 25, height: 36, ...(arabic ? { right: 38 } : { left: 38 }) }}
       >
         <span
           className="inline-flex items-center justify-center"
@@ -189,12 +235,12 @@ function FeaturedHoverMeta({
             ...featuredMetaText,
           }}
         >
-          {levelLabel}
+          {level}
         </span>
         <span
           className="relative flex items-center"
           style={{
-            marginLeft: 10,
+            marginInlineStart: 10,
             width: 164,
             height: 36,
             padding: "0 16px",
@@ -203,18 +249,18 @@ function FeaturedHoverMeta({
             background: "var(--White, #FFF)",
           }}
         >
-          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 13 }}>
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ insetInlineStart: 13 }}>
             <HoverLearnersGlyph className="block h-[18px] w-[21px]" />
           </span>
-          <span className="absolute top-1/2 flex -translate-y-1/2 items-center" style={{ left: 47, gap: 5 }}>
+          <span className="absolute top-1/2 flex -translate-y-1/2 items-center" style={{ insetInlineStart: 47, gap: 5 }}>
             <span style={{ ...featuredMetaText, fontStyle: "italic" }}>234</span>
-            <span style={featuredMetaText}>learners</span>
+            <span style={featuredMetaText}>{arabic ? "متعلم" : "learners"}</span>
           </span>
         </span>
         <span
           className="relative flex items-center"
           style={{
-            marginLeft: 10,
+            marginInlineStart: 10,
             width: 79,
             height: 36,
             padding: "0 16px",
@@ -223,19 +269,19 @@ function FeaturedHoverMeta({
             background: "var(--White, #FFF)",
           }}
         >
-          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 10 }}>
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ insetInlineStart: 10 }}>
             <HoverLikeGlyph className="block h-[19.167px] w-[18.863px]" />
           </span>
-          <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 33.863, ...featuredMetaText }}>
+          <span className="absolute top-1/2 -translate-y-1/2" style={{ insetInlineStart: 33.863, ...featuredMetaText }}>
             98%
           </span>
         </span>
-        <span className="inline-flex items-center" style={{ marginLeft: 16 }} aria-hidden>
+        <span className="inline-flex items-center" style={{ marginInlineStart: 16 }} aria-hidden>
           <HoverHeartGlyph className="block h-[28px] w-[31px]" />
         </span>
         <span
           style={{
-            marginLeft: 23,
+            marginInlineStart: 23,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: 18,
@@ -243,14 +289,22 @@ function FeaturedHoverMeta({
             fontWeight: 400,
             lineHeight: "normal",
             opacity: 0.6,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {durationLabel}
+          {duration}
         </span>
       </div>
       <p
+        dir={arabic ? "rtl" : undefined}
         className="featured-hover-only pointer-events-none absolute"
-        style={{ top: 104, left: 38, width: 501, margin: 0 }}
+        style={{
+          top: 104,
+          width: 501,
+          margin: 0,
+          textAlign: arabic ? "right" : undefined,
+          ...(arabic ? { right: 38 } : { left: 38 }),
+        }}
       >
         <span
           style={{
@@ -263,8 +317,9 @@ function FeaturedHoverMeta({
             opacity: 0.6,
           }}
         >
-          In these courses you will learn everything you need to become a professional digital artist, from basic to
-          advanced.
+          {arabic
+            ? "في هذه الدورات ستتعلم كل ما تحتاجه لتصبح فنانًا رقميًا محترفًا، من الأساسيات إلى المستوى المتقدم."
+            : "In these courses you will learn everything you need to become a professional digital artist, from basic to advanced."}
         </span>
       </p>
     </>
@@ -434,6 +489,8 @@ export function CatalogShowcaseCard({
   bottomImageSrc,
 }: CatalogShowcaseCardProps) {
   const [viewMoreHovered, setViewMoreHovered] = useState(false);
+  const arabic = useArabicLayout();
+  const arabicFeatured = arabic && expandCardOnHover;
   const [hoverOverlayPosition, setHoverOverlayPosition] = useState<{ left: number; top: number } | null>(null);
   const cardShellRef = useRef<HTMLDivElement | null>(null);
   const hideHoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -509,16 +566,30 @@ export function CatalogShowcaseCard({
     : "pointer-events-auto absolute bottom-[26px] left-[38px] z-10 flex h-[43px] w-[166px] items-center rounded-[8px] border border-black bg-[#89F496] pl-4 pr-10 text-black no-underline transition-colors hover:bg-black hover:text-[#89F496]";
 
   const ctaStyle = expandCardOnHover
-    ? {
-        bottom: 31,
-        left: 27,
-        width: 198,
-        height: 50,
-        padding: "0 16px",
-        borderRadius: 23,
-        border: "0.3px solid var(--Black, #000)",
-        background: "var(--Green, #8AF396)",
-      }
+    ? arabicFeatured
+      ? {
+          bottom: 32,
+          right: 29,
+          display: "flex",
+          width: 180,
+          height: 50,
+          padding: "0 15px",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          borderRadius: 23,
+          border: "0.3px solid rgb(0 0 0 / 40%)",
+          background: "var(--Green, #8AF396)",
+        }
+      : {
+          bottom: 31,
+          left: 27,
+          width: 198,
+          height: 50,
+          padding: "0 16px",
+          borderRadius: 23,
+          border: "0.3px solid var(--Black, #000)",
+          background: "var(--Green, #8AF396)",
+        }
     : {
         fontFamily: pangeaFont,
         fontSize: "18px",
@@ -527,23 +598,49 @@ export function CatalogShowcaseCard({
       };
 
   const ctaInner = expandCardOnHover ? (
-    <>
-      <span
-        style={{
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: 24,
-          fontStyle: "normal",
-          fontWeight: 500,
-          lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-        }}
-      >
-        {viewMoreLabel}
-      </span>
-      <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 154 }}>
-        <FeaturedViewMoreCircle />
-      </span>
-    </>
+    arabicFeatured ? (
+      <>
+        <span
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 24,
+            fontStyle: "normal",
+            fontWeight: 500,
+            fontVariationSettings: '"wght" 500',
+            lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          }}
+        >
+          عرض المزيد
+        </span>
+        <span
+          className="pointer-events-none absolute top-1/2"
+          style={{ right: 137, width: 50, height: 50, transform: "translateY(-50%)" }}
+        >
+          <span className="block h-full w-full" style={{ transform: "rotate(180deg)" }}>
+            <FeaturedViewMoreCircle />
+          </span>
+        </span>
+      </>
+    ) : (
+      <>
+        <span
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 24,
+            fontStyle: "normal",
+            fontWeight: 500,
+            lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          }}
+        >
+          {viewMoreLabel}
+        </span>
+        <span className="absolute top-1/2 -translate-y-1/2" style={{ left: 154 }}>
+          <FeaturedViewMoreCircle />
+        </span>
+      </>
+    )
   ) : (
     <>
       {viewMoreLabel}
@@ -556,27 +653,51 @@ export function CatalogShowcaseCard({
   const titleClassName =
     "pointer-events-auto mt-[18px] block max-w-[270px] text-[32px] font-normal uppercase leading-normal text-black no-underline hover:opacity-90";
 
-  const featuredTitleStyle = {
-    color: "var(--Black, #000)",
-    fontFamily: pangeaFont,
-    fontSize: 24,
-    fontStyle: "normal",
-    fontWeight: 400,
-    lineHeight: "normal",
-    left: 36,
-    marginTop: 0,
-  } as const;
+  const featuredTitleStyle = arabicFeatured
+    ? {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: 30,
+        fontStyle: "normal",
+        fontWeight: 400,
+        fontVariationSettings: '"wght" 400',
+        lineHeight: "normal",
+        textAlign: "right" as const,
+        right: 36,
+        left: "auto",
+        marginTop: 0,
+        maxWidth: "calc(100% - 56px)",
+      }
+    : {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: 24,
+        fontStyle: "normal",
+        fontWeight: 400,
+        lineHeight: "normal",
+        left: 36,
+        marginTop: 0,
+      };
 
   const titleInner = (
     <>
-      {titlePrimary}
-      {titleSecondary ? (
+      {arabicFeatured ? (
+        arabicShowcaseTitle(titlePrimary, titleSecondary)
+      ) : (
         <>
-          <br />
-          {titleSecondary}
+          {titlePrimary}
+          {titleSecondary ? (
+            <>
+              <br />
+              {titleSecondary}
+            </>
+          ) : null}
         </>
-      ) : null}
-      <span className="ml-2 inline-flex h-[20px] w-[20px] align-middle">
+      )}
+      <span
+        className="inline-flex h-[20px] w-[20px] align-middle"
+        style={{ marginInlineStart: 8, ...(arabicFeatured ? { transform: "scaleX(-1)" } : {}) }}
+      >
         <ExternalLinkGlyph className="h-[20px] w-[20px]" />
       </span>
     </>
@@ -635,22 +756,56 @@ export function CatalogShowcaseCard({
 
         <div className="pointer-events-none absolute inset-0 z-3">
           <div
-            className={`absolute inset-x-0 top-0 pl-[38px] pr-[30px] pt-[28px] ${
-              expandCardOnHover ? "featured-rest-meta" : ""
-            }`}
+            className={`absolute inset-x-0 top-0 pt-[28px] ${
+              arabicFeatured ? "pr-[38px] pl-[30px]" : "pl-[38px] pr-[30px]"
+            } ${expandCardOnHover ? "featured-rest-meta" : ""}`}
           >
-            <div className="pointer-events-auto flex items-center justify-between">
+            <div
+              className={`pointer-events-auto flex items-center justify-between ${
+                arabicFeatured ? "flex-row-reverse" : ""
+              }`}
+            >
               <span
-                className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black px-4 text-[20px] leading-none text-black"
-                style={{ backgroundColor: SHOWCASE_ACCENT }}
+                className={`inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black px-4 ${
+                  arabicFeatured ? "" : "text-[20px] leading-none text-black"
+                }`}
+                style={
+                  arabicFeatured
+                    ? {
+                        backgroundColor: SHOWCASE_ACCENT,
+                        color: "var(--Text-Primary, #141413)",
+                        textAlign: "center",
+                        fontFamily: pangeaFont,
+                        fontSize: 16,
+                        fontStyle: "normal",
+                        fontWeight: 400,
+                        fontVariationSettings: '"wght" 400',
+                        lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                      }
+                    : { backgroundColor: SHOWCASE_ACCENT }
+                }
               >
-                {levelLabel}
+                {arabicFeatured ? arabicLevelLabel(levelLabel) : levelLabel}
               </span>
               <span
-                className="text-[18px] font-normal leading-normal text-black opacity-60"
-                style={{ fontFamily: pangeaFont }}
+                className={arabicFeatured ? undefined : "text-[18px] font-normal leading-normal text-black opacity-60"}
+                style={
+                  arabicFeatured
+                    ? {
+                        color: "var(--Black, #000)",
+                        textAlign: "right",
+                        fontFamily: pangeaFont,
+                        fontSize: 16,
+                        fontStyle: "normal",
+                        fontWeight: 400,
+                        fontVariationSettings: '"wght" 400',
+                        lineHeight: "normal",
+                        opacity: 0.6,
+                      }
+                    : { fontFamily: pangeaFont }
+                }
               >
-                {durationLabel}
+                {arabicFeatured ? arabicDurationLabel(durationLabel) : durationLabel}
               </span>
             </div>
 
@@ -674,14 +829,19 @@ export function CatalogShowcaseCard({
             resolvedViewMoreHref ? (
               <Link
                 href={resolvedViewMoreHref}
-                className={`${titleClassName} featured-card-title absolute`}
+                dir={arabicFeatured ? "rtl" : undefined}
+                className={`${titleClassName} featured-card-title absolute ${arabicFeatured ? "normal-case" : ""}`}
                 style={featuredTitleStyle}
                 aria-label={`Open ${titlePrimary}${titleSecondary ? ` ${titleSecondary}` : ""}`}
               >
                 {titleInner}
               </Link>
             ) : (
-              <div className={`${titleClassName} featured-card-title absolute`} style={featuredTitleStyle}>
+              <div
+                dir={arabicFeatured ? "rtl" : undefined}
+                className={`${titleClassName} featured-card-title absolute ${arabicFeatured ? "normal-case" : ""}`}
+                style={featuredTitleStyle}
+              >
                 {titleInner}
               </div>
             )
