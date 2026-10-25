@@ -290,7 +290,17 @@ export function SearchBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => query.trim() && setOpen(true)}
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-black outline-none placeholder:text-gray-500"
+            className="header-search-field min-w-0 bg-transparent text-black outline-none placeholder:text-[var(--Black,#000)] placeholder:opacity-60"
+            style={{
+              flex: "1 0 0",
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFontFamily,
+              fontSize: 18,
+              fontStyle: "normal",
+              fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "19.6px",
+            }}
             aria-label={t("Search for courses")}
             role="combobox"
             aria-expanded={showDropdown}

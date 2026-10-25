@@ -305,7 +305,7 @@ export function LandingEverythingInOneSection({
       <section
         className={`w-full ${
           isCourseRows
-            ? "pl-[30px] pr-4 min-[744px]:max-lg:pl-[61px]"
+            ? "pl-[30px] pr-4 max-[743px]:ar:pl-4 max-[743px]:ar:pr-[30px] min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:ar:pl-4 min-[744px]:max-lg:ar:pr-[61px]"
             : arabic
               ? "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
               : "px-0 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
@@ -323,11 +323,13 @@ export function LandingEverythingInOneSection({
               fontFamily: pangeaFont,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
               lineHeight: "normal",
               opacity: 0.6,
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {mobileHeading}
+            {t(mobileHeading)}
           </h2>
         ) : arabic ? (
           <>

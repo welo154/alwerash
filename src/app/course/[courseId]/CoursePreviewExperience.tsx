@@ -3,6 +3,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { AuthorizedHlsPlayer } from "@/components/video/AuthorizedHlsPlayer";
+import { localizedText } from "@/components/i18n/LocalizedText";
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import {
   CourseContentAccordion,
   type CourseAccordionModule,
@@ -12,6 +15,7 @@ import type { CourseViewerAccess } from "@/lib/course-access";
 export type CourseTrialLesson = {
   lessonId: string;
   title: string;
+  titleAr?: string | null;
   type: string;
   hasVideo: boolean;
   posterUrl: string | null;
@@ -89,6 +93,8 @@ export function CoursePreviewExperience({
   freeLessonIds,
   viewerAccess,
 }: CoursePreviewExperienceProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const videoTrials = useMemo(() => trials.filter(isVideoLesson), [trials]);
   const firstVideo = videoTrials[0] ?? null;
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
@@ -130,9 +136,9 @@ export function CoursePreviewExperience({
 
   return (
     <>
-      <div className="max-lg:order-2 max-[743px]:-ml-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:ml-[31px]">
+      <div className="max-lg:order-2 max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:ms-[31px]">
       <div
-        className="relative mt-[15px] h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:mt-[39px] lg:h-[557px] lg:w-[843px] lg:rounded-[50px] lg:border-2"
+        className="relative mt-[15px] h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] max-[743px]:en:border-black/35 min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:mt-[39px] lg:h-[460px] lg:w-[758px] lg:rounded-[50px] lg:border-[0.3px] lg:border-black/35"
         aria-label="Course preview"
       >
         {showingArticle ? (
@@ -141,7 +147,7 @@ export function CoursePreviewExperience({
               className="m-0 mb-4 text-[28px] font-medium text-black"
               style={{ fontFamily }}
             >
-              {activeLesson?.title}
+              {activeLesson ? localizedText(arabic, activeLesson.title, activeLesson.titleAr) : null}
             </h2>
             {activeLesson?.articleBody ? (
               <div
@@ -152,7 +158,7 @@ export function CoursePreviewExperience({
               </div>
             ) : (
               <p className="m-0 text-[18px] text-black/60" style={{ fontFamily }}>
-                This reading has no content yet.
+                {t("This reading has no content yet.")}
               </p>
             )}
           </div>
@@ -190,7 +196,7 @@ export function CoursePreviewExperience({
               {showingVideo ? (
                 <PlayOverlayButton
                   onClick={handlePlayClick}
-                  label={`Play free preview: ${activeLesson?.title ?? "lesson"}`}
+                  label={`${t("Play free preview")}: ${activeLesson ? localizedText(arabic, activeLesson.title, activeLesson.titleAr) : t("lesson")}`}
                 />
               ) : (
                 <PlayGlyph />
@@ -201,7 +207,7 @@ export function CoursePreviewExperience({
       </div>
       </div>
 
-      <div className="max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
+      <div className="max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
       <CourseContentAccordion
         courseId={courseId}
         fontFamily={fontFamily}

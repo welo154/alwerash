@@ -1,250 +1,172 @@
 "use client";
 // @refresh reset
 
-import Link from "next/link";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
+import { LearnPopularFigmaTile } from "@/components/learn/LearnPopularFigmaTile";
+import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { useCourseCarouselMetrics } from "@/components/learn/useCourseCarouselMetrics";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
-
-export type RelatedCourseCard = {
-  titleInstructorLine: string;
-  lectureLine: string;
-  topicTitle: string;
-  continueHref: string;
-};
 
 type RelatedClassesSectionProps = {
   fontFamily: string;
-  cards?: RelatedCourseCard[];
+  cards?: LearnPopularTile[];
 };
 
-const COURSE_CARD_STACK_OVERLAP_PX = 281 - 69;
+/** First card sits this far from the visible page edge on desktop. */
+const DESKTOP_EDGE_INSET_PX = 117;
 
-function ContinueCourseChevronIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43 43" fill="none" width={41} height={41} className="shrink-0" aria-hidden>
-      <path
-        d="M21.25 41.75C32.5718 41.75 41.75 32.5718 41.75 21.25C41.75 9.92816 32.5718 0.75 21.25 0.75C9.92816 0.75 0.75 9.92816 0.75 21.25C0.75 32.5718 9.92816 41.75 21.25 41.75Z"
-        fill="var(--White, #FFF)"
-      />
-      <path d="M21.25 29.45L29.45 21.25L21.25 13.05" fill="var(--White, #FFF)" />
-      <path
-        d="M21.25 29.45L29.45 21.25M29.45 21.25L21.25 13.05M29.45 21.25L13.05 21.25M41.75 21.25C41.75 32.5718 32.5718 41.75 21.25 41.75C9.92816 41.75 0.75 32.5718 0.75 21.25C0.75 9.92816 9.92816 0.75 21.25 0.75C32.5718 0.75 41.75 9.92816 41.75 21.25Z"
-        stroke="var(--Black, #000)"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+/**
+ * Full-bleed `100vw` is wider than the layout viewport when a scrollbar is present,
+ * so a fixed padding lands a few pixels off the page edge. Measure the first card
+ * and correct the start padding until it is exactly `DESKTOP_EDGE_INSET_PX`.
+ */
+function useDesktopPageEdgeInset(arabic: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const remeasure = useRef<() => void>(() => {});
 
-function CourseStackCard({ titleInstructorLine, lectureLine, topicTitle, continueHref, fontFamily }: RelatedCourseCard & { fontFamily: string }) {
-  const cardBase = "box-border w-full rounded-[50px] border border-[var(--Black,#000)]";
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const padProp = arabic ? "paddingRight" : "paddingLeft";
 
-  return (
-    <div className="relative w-[315px] max-w-full shrink-0 min-[744px]:max-lg:w-[346px] lg:w-[347px]">
-      <div
-        className={`relative z-1 ${cardBase}`}
-        style={{
-          height: "378px",
-          background: "var(--Grey, #E9E9E9)",
-        }}
-      >
-        <div className="absolute left-1/2 -translate-x-1/2" style={{ top: "48px", width: "78px", height: "78px" }} aria-hidden>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none" className="h-full w-full" style={{ color: "var(--Black, #000)" }}>
-            <path
-              d="M40 79C61.5391 79 79 61.5391 79 40C79 18.4609 61.5391 1 40 1C18.4609 1 1 18.4609 1 40C1 61.5391 18.4609 79 40 79Z"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d="M32.2 24.4L55.6 40L32.2 55.6V24.4Z" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      </div>
-      <div
-        className={`relative z-2 flex min-h-[281px] flex-col overflow-hidden ${cardBase}`}
-        style={{
-          marginTop: `-${COURSE_CARD_STACK_OVERLAP_PX}px`,
-          background: "var(--White, #FFF)",
-        }}
-      >
-        <div className="flex min-h-0 flex-1 flex-col py-[23px] pl-[37px]">
-          <p className="m-0 whitespace-pre-line" style={{ color: "#000", fontFamily, fontSize: "18px", fontWeight: 400, opacity: 0.6 }}>
-            {titleInstructorLine}
-          </p>
-          <p className="m-0 mt-[70px]" style={{ color: "#000", fontFamily, fontSize: "18px", fontWeight: 400, opacity: 0.6 }}>
-            {lectureLine}
-          </p>
-          <p className="m-0 mt-[6px]" style={{ color: "#000", fontFamily, fontSize: "24px", fontWeight: 400 }}>
-            {topicTitle}
-          </p>
-          <Link href={continueHref} className="relative mt-[17px] inline-flex shrink-0 pr-[calc(41px/2)] transition-opacity hover:opacity-90">
-            <span
-              className="flex h-[43px] w-[106px] shrink-0 items-center border border-white px-[16px]"
-              style={{
-                borderRadius: "var(--Radius-MD, 8px)",
-                background: "var(--Dark-Green, #004B3C)",
-              }}
-            >
-              <span style={{ color: "#FFF", fontFamily, fontSize: "18px", fontWeight: 700, lineHeight: "19.6px" }}>START</span>
-            </span>
-            <span className="absolute left-[106px] top-1/2 z-1 -translate-x-1/2 -translate-y-1/2" aria-hidden>
-              <ContinueCourseChevronIcon />
-            </span>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+    const apply = () => {
+      if (!desktop.matches) {
+        el.style.paddingLeft = "";
+        el.style.paddingRight = "";
+        return;
+      }
+      el.style[arabic ? "paddingLeft" : "paddingRight"] = "";
+      const slide = el.querySelector<HTMLElement>(".swiper-slide");
+      if (!slide) return;
+      const box = slide.getBoundingClientRect();
+      const viewport = document.documentElement.clientWidth;
+      const current = arabic ? viewport - box.right : box.left;
+      if (Math.abs(current - DESKTOP_EDGE_INSET_PX) <= 1) return;
+      const currentPad = parseFloat(getComputedStyle(el)[padProp]) || 0;
+      el.style[padProp] = `${Math.round(currentPad + (DESKTOP_EDGE_INSET_PX - current))}px`;
+    };
+
+    remeasure.current = apply;
+    apply();
+    const frame = requestAnimationFrame(apply);
+    window.addEventListener("resize", apply);
+    desktop.addEventListener("change", apply);
+    return () => {
+      el.style.paddingLeft = "";
+      el.style.paddingRight = "";
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", apply);
+      desktop.removeEventListener("change", apply);
+    };
+  }, [arabic]);
+
+  return { ref, remeasure: () => remeasure.current() };
 }
 
 export function RelatedClassesSection({ fontFamily, cards = [] }: RelatedClassesSectionProps) {
   const arabic = useArabicLayout();
-  const swiperRef = useRef<SwiperType | null>(null);
-  const [atBeginning, setAtBeginning] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
+  const { ref: edgeRef, remeasure } = useDesktopPageEdgeInset(arabic);
+  const { width: slideW, gap: slideGap } = useCourseCarouselMetrics();
 
   if (cards.length === 0) return null;
 
   return (
     <section className="mt-[70px] w-full max-lg:mt-[65px]">
       <div
-        dir="ltr"
-        className={
+        ref={edgeRef}
+        className={`lg:relative lg:left-1/2 lg:w-screen lg:max-w-[100vw] lg:-translate-x-1/2 lg:overflow-x-clip ${
           arabic
-            ? "flex w-full flex-row-reverse items-center justify-start max-[743px]:pr-[30px] min-[744px]:max-lg:mr-[31px]"
-            : "flex items-center max-[743px]:pl-[30px] min-[744px]:max-lg:ml-[31px]"
-        }
+            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:mr-[31px] lg:pr-[117px] lg:pl-[60px]"
+            : "max-[743px]:pl-[30px] min-[744px]:max-lg:ml-[31px] lg:pr-[60px] lg:pl-[117px]"
+        }`}
       >
-        <h2
-          className="m-0 text-[24px] font-semibold italic leading-[120%] text-[var(--Black,#000)] min-[744px]:max-lg:text-[32px] min-[744px]:max-lg:font-bold lg:text-[48px]"
-          style={{ fontFamily }}
+        <div
+          dir="ltr"
+          className={arabic ? "flex w-full flex-row-reverse items-center justify-start" : "flex items-center"}
         >
-          RELATED <span className="font-normal not-italic">CLASSES</span>
-        </h2>
-        <svg
-          className={`${arabic ? "mr-[16px] scale-x-[-1]" : "ml-[16px]"} hidden h-[41px] w-[41px] min-[744px]:max-lg:block`}
-          xmlns="http://www.w3.org/2000/svg"
-          width="41"
-          height="41"
-          viewBox="0 0 62 62"
-          fill="none"
-          aria-hidden
-        >
-          <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
-          <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
-          <path
-            d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
-            stroke="var(--Black, #000)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <svg className={`${arabic ? "mr-[27px] scale-x-[-1]" : "ml-[27px]"} hidden lg:block`} xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
-          <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="var(--White, #FFF)" />
-          <path d="M31 43L43 31L31 19" fill="var(--White, #FFF)" />
-          <path
-            d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
-            stroke="var(--Black, #000)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
+          <h2
+            dir={arabic ? "rtl" : "ltr"}
+            className="m-0 text-[24px] leading-[120%] text-[var(--Black,#000)] min-[744px]:max-lg:text-[32px] lg:text-[48px]"
+            style={{ fontFamily, lineHeight: "120%" }}
+          >
+            {arabic ? (
+              <>
+                <span
+                  style={{
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  الفصول ذات
+                </span>
+                <span
+                  style={{
+                    fontStyle: "italic",
+                    fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
+                  }}
+                >
+                  {"\u00A0"}
+                  الصلــة
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  style={{
+                    fontStyle: "italic",
+                    fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
+                  }}
+                >
+                  RELATED
+                </span>
+                <span
+                  style={{
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                  }}
+                >
+                  {" "}
+                  CLASSES
+                </span>
+              </>
+            )}
+          </h2>
+        </div>
 
-      <div className={`relative mt-[35px] min-[744px]:max-lg:mt-[40px] lg:left-1/2 lg:mt-[50px] lg:w-screen lg:max-w-[100vw] lg:-translate-x-1/2 lg:overflow-hidden ${
-        arabic
-          ? "max-[743px]:pr-[30px] min-[744px]:max-lg:mr-[31px] lg:pl-[60px] lg:pr-[55px]"
-          : "max-[743px]:pl-[30px] min-[744px]:max-lg:ml-[31px] lg:pl-[55px] lg:pr-[60px]"
-      }`}>
-        <Swiper
-          key={arabic ? "rtl" : "ltr"}
-          dir={arabic ? "rtl" : "ltr"}
-          slidesPerView="auto"
-          spaceBetween={20}
-          breakpoints={{
-            744: {
-              spaceBetween: 30,
-            },
-            1036: {
-              spaceBetween: 20,
-            },
-          }}
-          slidesPerGroup={1}
-          speed={450}
-          grabCursor
-          allowTouchMove
-          simulateTouch
-          className="overflow-visible!"
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-            setAtBeginning(swiper.isBeginning);
-            setAtEnd(swiper.isEnd);
-          }}
-          onSlideChange={(swiper) => {
-            setAtBeginning(swiper.isBeginning);
-            setAtEnd(swiper.isEnd);
-          }}
-          onResize={(swiper) => {
-            setAtBeginning(swiper.isBeginning);
-            setAtEnd(swiper.isEnd);
-          }}
-        >
-          {cards.map((card) => (
-            <SwiperSlide key={card.continueHref} className="w-[315px]! min-[744px]:max-lg:mr-[30px]! min-[744px]:max-lg:w-[346px]! lg:w-[347px]!">
-              <CourseStackCard {...card} fontFamily={fontFamily} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        <button
-          type="button"
-          aria-label={arabic ? "Next related classes" : "Previous related classes"}
-          disabled={arabic ? atEnd : atBeginning}
-          onClick={() => (arabic ? swiperRef.current?.slideNext(450) : swiperRef.current?.slidePrev(450))}
-          className="absolute left-[8px] top-1/2 z-20 hidden -translate-y-1/2 disabled:opacity-40 lg:block"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden className="scale-x-[-1]">
-            <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="white" />
-            <path d="M31 43L43 31L31 19" fill="white" />
-            <path
-              d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
-              stroke="black"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          aria-label={arabic ? "Previous related classes" : "Next related classes"}
-          disabled={arabic ? atBeginning : atEnd}
-          onClick={() => (arabic ? swiperRef.current?.slidePrev(450) : swiperRef.current?.slideNext(450))}
-          className="absolute right-[8px] top-1/2 z-20 hidden -translate-y-1/2 disabled:opacity-40 lg:block"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 62 62" fill="none" aria-hidden>
-            <path d="M31 61C47.5685 61 61 47.5685 61 31C61 14.4315 47.5685 1 31 1C14.4315 1 1 14.4315 1 31C1 47.5685 14.4315 61 31 61Z" fill="white" />
-            <path d="M31 43L43 31L31 19" fill="white" />
-            <path
-              d="M31 43L43 31M43 31L31 19M43 31L19 31M61 31C61 47.5685 47.5685 61 31 61C14.4315 61 1 47.5685 1 31C1 14.4315 14.4315 1 31 1C47.5685 1 61 14.4315 61 31Z"
-              stroke="black"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        <div className="relative mt-[35px] min-[744px]:max-lg:mt-[40px] lg:mt-[50px]">
+          <Swiper
+            key={arabic ? "rtl" : "ltr"}
+            dir={arabic ? "rtl" : "ltr"}
+            slidesPerView="auto"
+            spaceBetween={slideGap}
+            slidesPerGroup={1}
+            speed={450}
+            grabCursor
+            allowTouchMove
+            simulateTouch
+            className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full"
+            onSwiper={() => remeasure()}
+            onResize={() => remeasure()}
+          >
+            {cards.map((card) => (
+              <SwiperSlide
+                key={card.id}
+                className="h-auto! shrink-0 overflow-visible!"
+                style={{ width: slideW }}
+              >
+                <LearnPopularFigmaTile {...card} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
     </section>
   );
 }
-

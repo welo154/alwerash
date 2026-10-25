@@ -180,10 +180,11 @@ export function LoggedInAppHeader({
               >
                 <path
                   d="M20.25 12.25L28.25 20.25L20.25 28.25M28.25 20.25H12.25M40.25 20.25C40.25 31.2957 31.2957 40.25 20.25 40.25C9.2043 40.25 0.25 31.2957 0.25 20.25C0.25 9.2043 9.2043 0.25 20.25 0.25C31.2957 0.25 40.25 9.2043 40.25 20.25Z"
-                  stroke="#fff"
-                  strokeWidth="0.5"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={{ stroke: "#FFFFFF", strokeOpacity: 1, opacity: 1 }}
                 />
               </svg>
             </button>
