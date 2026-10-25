@@ -180,7 +180,7 @@ export function SearchBar({
             gap: 10,
             borderRadius: isTablet ? "14px 8px 8px 28px" : "8px 8px 8px 18px",
             border: isTablet
-              ? "0 solid var(--Black, #000)"
+              ? "1px solid var(--Black, #000)"
               : outlined
                 ? "0.3px solid var(--Black, #000)"
                 : "0 solid transparent",

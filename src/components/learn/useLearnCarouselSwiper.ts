@@ -81,8 +81,9 @@ export function useLearnCarouselSwiper(slideMs = LEARN_CAROUSEL_SLIDE_MS) {
       if (absX <= absY) return;
 
       e.preventDefault();
-      if (e.deltaX > 0) stepOnce(1);
-      else stepOnce(-1);
+      // In RTL, slideNext moves the row to the right, opposite the trackpad gesture.
+      const forward = swiper.rtlTranslate ? e.deltaX < 0 : e.deltaX > 0;
+      stepOnce(forward ? 1 : -1);
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });

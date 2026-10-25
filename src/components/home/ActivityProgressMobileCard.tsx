@@ -3,6 +3,8 @@
 
 import { useId } from "react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { toArabicIndicDigits } from "@/lib/learning-activity";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -142,7 +144,7 @@ function ActivityProgressArc({
 type Props = {
   progressPercent: number;
   showTrackTicks?: boolean;
-  variant?: "mobile" | "tablet" | "tabletWide";
+  variant?: "mobile" | "tablet" | "tabletWide" | "desktop";
 };
 
 export function ActivityProgressMobileCard({
@@ -150,65 +152,94 @@ export function ActivityProgressMobileCard({
   showTrackTicks = false,
   variant = "mobile",
 }: Props) {
+  const arabic = useArabicLayout();
   const displayPercent = Math.min(100, Math.max(0, Math.round(progressPercent)));
-  const isTablet = variant === "tablet" || variant === "tabletWide";
+  const isDesktop = variant === "desktop";
+  const isTablet = variant === "tablet" || variant === "tabletWide" || isDesktop;
   const isWide = variant === "tabletWide";
+  const arcTop = isDesktop ? 36 : isTablet ? 28 : 21;
+  const arcHeight = isTablet ? 302.077 : 238;
+  const largeType = isTablet;
 
   return (
     <div
       className={`relative box-border max-w-full shrink-0 overflow-hidden rounded-[50px] ${
-        isWide
-          ? "h-[401px] w-[622px] border-[0.3px] border-[var(--Black,#000)]"
-          : isTablet
-            ? "h-[401px] w-[445px] border-[0.3px] border-black/20"
-            : "h-[305px] w-[315px] border-[0.3px] border-black/20"
+        isDesktop
+          ? "h-[401px] w-[445px]"
+          : isWide
+            ? "h-[401px] w-[622px] border-[0.3px] border-[var(--Black,#000)]"
+            : isTablet
+              ? "h-[401px] w-[445px] border-[0.3px] border-black/20"
+              : "h-[305px] w-[315px] border-[0.3px] border-black/20"
       }`}
-      style={{ background: "var(--White, #FFF)" }}
+      style={{
+        background: "var(--White, #FFF)",
+        ...(isDesktop ? { border: "0.3px solid var(--Black, #000)" } : null),
+      }}
       aria-label={`Learning progress ${displayPercent} percent`}
     >
       <div
         className="absolute left-1/2 -translate-x-1/2"
-        style={{ top: isTablet ? 28 : 21 }}
+        style={{ top: arcTop }}
       >
         <ActivityProgressArc
           progressPercent={displayPercent}
           showTrackTicks={showTrackTicks}
           width={isTablet ? 363 : 286}
-          height={isTablet ? 302.077 : 238}
+          height={arcHeight}
         />
       </div>
 
       <p
         className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center"
         style={{
-          top: isTablet ? 148 : 116,
+          top: isDesktop ? arcTop + arcHeight / 2 - 28.8 : isTablet ? 148 : 116,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
-          fontSize: isTablet ? 48 : 40,
+          fontSize: largeType ? 48 : 40,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
           fontVariationSettings: '"wght" 400',
         }}
       >
-        {displayPercent}%
+        {arabic ? `${toArabicIndicDigits(displayPercent)}٪` : `${displayPercent}%`}
       </p>
 
       <p
-        className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center uppercase"
+        className={`absolute left-1/2 m-0 w-full -translate-x-1/2 text-center ${arabic ? "" : "uppercase"}`}
         style={{
-          top: isTablet ? 210 : 164,
+          top: isDesktop ? arcTop + arcHeight / 2 + 33.2 : isTablet ? 210 : 164,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
-          fontSize: isTablet ? 32 : 24,
+          fontSize: arabic && isDesktop ? 48 : largeType ? 32 : 24,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
           fontVariationSettings: '"wght" 400',
         }}
       >
-        PROGRESS
+        {arabic ? "التقدم" : "PROGRESS"}
       </p>
+
+      {isDesktop ? (
+        <p
+          className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center"
+          style={{
+            top: arcTop + arcHeight + 6,
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 16,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "127%",
+            opacity: 0.6,
+            fontVariationSettings: '"wght" 400',
+          }}
+        >
+          {arabic ? "استمر - أنت على المسار الصحيح!" : "Keep going - You're on track!"}
+        </p>
+      ) : null}
     </div>
   );
 }

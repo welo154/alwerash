@@ -20,6 +20,7 @@ import {
   PODCAST_CARD_FRAME_WIDTH,
   PODCAST_CARDS,
 } from "@/components/library/LibraryPodcastsSection";
+import { libraryCardPrice, libraryCardTitle } from "@/components/library/library-card-copy";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
@@ -109,19 +110,34 @@ function ArticleCardFavoriteIcon() {
 
 function LibraryPopularArticleCard({ slide }: { slide: PopularArticleSlide }) {
   const t = useT();
+  const arabic = useArabicLayout();
+  const title = libraryCardTitle(arabic, slide.title);
   return (
     <article className="w-fit shrink-0">
       <LibraryArticleCardVisual clipId={slide.id} />
-      <div className="mt-5 flex items-start gap-[30px]">
+      <div dir={arabic ? "rtl" : undefined} className="mt-5 flex items-start gap-[30px]">
         <div className="min-w-0">
-          <p className="m-0 text-black" style={META_TEXT_STYLE}>
-            {slide.title}
+          <p
+            className="m-0 text-black"
+            style={{
+              ...META_TEXT_STYLE,
+              color: "#000",
+              textAlign: arabic ? "right" : undefined,
+              fontVariationSettings: '"wght" 400',
+            }}
+          >
+            {title}
           </p>
           <p
             className="m-0 mt-0.5"
-            style={{ ...META_TEXT_STYLE, color: "rgba(0, 0, 0, 0.60)" }}
+            style={{
+              ...META_TEXT_STYLE,
+              color: arabic ? "#707070" : "rgba(0, 0, 0, 0.60)",
+              textAlign: arabic ? "right" : undefined,
+              fontVariationSettings: '"wght" 400',
+            }}
           >
-            {t(slide.priceLabel)}
+            {arabic ? libraryCardPrice(true, slide.priceLabel) : t(slide.priceLabel)}
           </p>
         </div>
         <button
@@ -192,17 +208,23 @@ export function LibraryPopularsSection({ contentLeftPx }: LibraryPopularsSection
         }`}
       >
         <h2
-          className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
-          style={{ fontFamily: pangeaFont }}
+          className={`m-0 font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] ${arabic ? "text-right text-[24px] lg:text-[40px]" : "text-[24px] lg:text-[36px]"}`}
+          style={{
+            fontFamily: pangeaFont,
+            color: "#000",
+            fontVariationSettings: '"wght" 400',
+            textAlign: arabic ? "right" : undefined,
+          }}
         >
-          {t("LIBRARY POPULARS")}
+          {arabic ? "المكتبة الشعبية" : t("LIBRARY POPULARS")}
         </h2>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 45 45"
           fill="none"
           aria-hidden
-          className={`size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px] ${arabic ? "scale-x-[-1]" : ""}`}
+          className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
+          style={arabic ? { transform: "scaleX(-1)" } : undefined}
         >
           <path
             d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"

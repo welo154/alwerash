@@ -285,7 +285,7 @@ export function MobileSiteNavBar({
     <div className={`relative w-full ${className ?? ""}`}>
       <div
         className="relative mx-auto min-[744px]:hidden"
-        style={{ width: MOBILE_SHELL_WIDTH, height: MOBILE_LOGO.height }}
+        style={{ width: MOBILE_SHELL_WIDTH, maxWidth: "99%", height: MOBILE_LOGO.height }}
       >
         <MobileSiteNavLogo homeHref={homeHref} />
         <MobileSiteNavActions outlinedSearch />

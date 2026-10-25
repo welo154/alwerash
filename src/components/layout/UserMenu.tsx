@@ -5,6 +5,7 @@ import Image from "next/image";
 import { signOutToHome } from "@/lib/auth/signOutToHome";
 import { useRef, useEffect, useState, type ReactNode } from "react";
 import { useToast } from "@/components/Toast";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
@@ -84,6 +85,8 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
   const isGreen = theme === "green";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { locale, toggleLocale } = useLocale();
+  const languageLabel = locale === "ar" ? "English" : "Arabic";
 
   const displayName = (user.name ?? "User").trim() || "User";
   const displayEmail = user.email?.trim() ?? "";
@@ -203,7 +206,16 @@ export function UserMenu({ user, theme = "black" }: UserMenuProps) {
               Subscription
             </MenuRow>
             <ComingSoonRow label="Payment Methods" onClose={close} />
-            <ComingSoonRow label="Language" onClose={close} />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={toggleLocale}
+              aria-label={locale === "ar" ? "Switch to English" : "Switch to Arabic"}
+              className="flex w-full items-center px-[30px] py-0 text-left text-[18px] font-normal leading-normal text-black hover:bg-transparent"
+              style={{ fontFamily: pangeaFont }}
+            >
+              {languageLabel}
+            </button>
           </nav>
 
           <MenuDivider className="mt-[20px]" />

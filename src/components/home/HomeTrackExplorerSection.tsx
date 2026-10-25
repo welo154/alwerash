@@ -253,7 +253,7 @@ function TrackSelectPill({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`flex h-[27px] w-auto items-center justify-center text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] ${
+      className={`flex h-[27px] w-auto items-center justify-center text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] lg:!h-[45px] lg:!w-fit lg:!rounded-[25px] lg:!border-[0.3px] lg:!border-solid lg:!border-black/40 lg:!px-4 lg:!text-center lg:!text-[24px] lg:!font-bold lg:!leading-[19.6px] ${
         fillRow ? "min-w-0 flex-1 overflow-hidden" : "shrink-0"
       } ${pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"}`}
       style={{
@@ -263,6 +263,11 @@ function TrackSelectPill({
         borderRadius: 23,
         border: "0.3px solid rgb(0 0 0 / 40%)",
         boxSizing: "border-box",
+        fontStyle: "normal",
+        fontWeight: 700,
+        fontVariationSettings: '"wght" 700',
+        textAlign: "center",
+        ...(fillRow ? {} : { width: "fit-content" }),
       }}
     >
       <span className={fillRow ? "min-w-0 truncate" : undefined}>{t(pill.label)}</span>
@@ -349,10 +354,12 @@ function TabletEqualWidthPills({
     return () => ro.disconnect();
   }, [pills]);
 
+  const arabic = useArabicLayout();
   if (pills.length === 0) return null;
 
   return (
     <div
+      dir={arabic ? "rtl" : undefined}
       className="hidden min-[744px]:block lg:hidden"
       style={{ paddingLeft: TABLET_TOPIC_INSET_PX, paddingRight: TABLET_TOPIC_INSET_PX }}
     >
@@ -627,7 +634,9 @@ export function HomeTrackExplorerSection({
     contentLeftPx != null ? "max-lg:gap-[9px] lg:gap-[15px]" : "gap-[25px]";
   const pillRowClass =
     contentLeftPx != null
-      ? `flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass} hidden max-[743px]:flex lg:flex`
+      ? arabic
+        ? `flex-wrap ${pillRowGapClass} hidden max-[743px]:flex max-[743px]:flex-row-reverse lg:flex max-[743px]:pr-[30px] max-[743px]:pl-0 max-lg:pl-0 min-[744px]:max-lg:pr-[61px] lg:flex-row-reverse lg:pr-[120px] lg:pl-[160px]`
+        : `flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass} hidden max-[743px]:flex lg:flex`
       : `${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`;
   const pillRowStyle =
     pillGapPx != null && contentLeftPx == null
@@ -706,17 +715,22 @@ export function HomeTrackExplorerSection({
           }`}
         >
           <h2
-            className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
-            style={{ fontFamily: pangeaFontFamily }}
+            className={`m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] ${arabic ? "text-right lg:text-[40px]" : "lg:text-[36px]"}`}
+            style={{
+              fontFamily: pangeaFontFamily,
+              fontVariationSettings: '"wght" 400',
+              textAlign: arabic ? "right" : undefined,
+            }}
           >
-            {t("WHAT TO LEARN NEXT")}
+            {arabic ? "ماذا تتعلم بعد ذلك" : t("WHAT TO LEARN NEXT")}
           </h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 45 45"
             fill="none"
             aria-hidden
-            className={`size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px] ${arabic ? "scale-x-[-1]" : ""}`}
+            className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
+            style={arabic ? { transform: "scaleX(-1)" } : undefined}
           >
             <path
               d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -746,17 +760,23 @@ export function HomeTrackExplorerSection({
               : contentInsetClass
           }`}
           style={{
+            color: "var(--Black, #000)",
             fontFamily: pangeaFontFamily,
+            fontStyle: "normal",
+            fontWeight: 400,
+            fontVariationSettings: '"wght" 400',
+            lineHeight: "127%",
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          Recommended for you
+          {arabic ? "موصى به لك" : "Recommended for you"}
         </p>
       ) : null}
 
       {showWhatToLearnNextHeading ? (
         <div
           key={cardGridKey}
-          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
+          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[35px] lg:ml-0 lg:w-full lg:max-w-none ${
             contentLeftPx != null
               ? arabic
                 ? "lg:pr-[120px] lg:pl-6"
@@ -944,20 +964,13 @@ export function HomeTrackExplorerSection({
       ) : null}
 
       {showWhatToLearnNextHeading && landingMostsMentors.length > 0 ? (
-        <div
-          className={`mt-[55px] min-[744px]:max-lg:mt-[84px] lg:mb-[120px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
-        >
-          <LandingCurrentMostsSection
-            mentors={landingMostsMentors}
-            mentorCardWidthPx={383}
-            mentorCardHeightPx={357}
-            contained
-            alignCardsLeft
-            compactVerticalSpacing
-            cardsTopGapPx={58}
-            tabletHeadingSizePx={32}
-          />
-        </div>
+        <LandingCurrentMostsSection
+          mentors={landingMostsMentors}
+          mentorCardWidthPx={383}
+          mentorCardHeightPx={357}
+          showDesktopSupportingCopy={false}
+          className="mt-[55px] min-[744px]:max-lg:mt-[84px]"
+        />
       ) : null}
 
       {showViewMoreCourses && trackPillSelectsCourses ? (

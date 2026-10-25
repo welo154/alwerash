@@ -1,6 +1,7 @@
 "use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
 import "swiper/css";
 import {
   ActivityScheduleCard,
@@ -19,6 +20,8 @@ const MOBILE_SWIPER_GAP_PX = 20;
 const MOBILE_SECTION_INSET_PX = 30;
 const TABLET_SWIPER_GAP_PX = 33;
 const TABLET_SECTION_INSET_PX = 61;
+const DESKTOP_SWIPER_GAP_PX = 30;
+const DESKTOP_SECTION_INSET_PX = 120;
 
 export function TrackActivitySection({
   weeklyActivity,
@@ -51,7 +54,7 @@ export function TrackActivitySection({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          {t("TRACK YOUR ACTIVITY")}
+          {arabic ? "تتبع نشاطك" : t("TRACK YOUR ACTIVITY")}
         </h2>
 
         <h2
@@ -63,9 +66,10 @@ export function TrackActivitySection({
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {t("TRACK YOUR ACTIVITY")}
+          {arabic ? "تتبع نشاطك" : t("TRACK YOUR ACTIVITY")}
         </h2>
 
         <h2
@@ -73,14 +77,15 @@ export function TrackActivitySection({
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "36px",
+            fontSize: arabic ? 40 : "36px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
             fontVariationSettings: '"wght" 400',
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {t("TRACK YOUR ACTIVITY")}
+          {arabic ? "تتبع نشاطك" : t("TRACK YOUR ACTIVITY")}
         </h2>
       </div>
 
@@ -151,14 +156,56 @@ export function TrackActivitySection({
         </Swiper>
       </div>
 
-      <div className="max-lg:pl-[30px] max-lg:pr-0">
-        <div className="mt-[43px] hidden w-full flex-wrap gap-[30px] lg:flex">
-          <WeeklyActivityBarCard
-            summary={weeklyActivity}
-            highlightDayIndex={activityHighlightDayIndex}
-          />
-          <ActivityScheduleCard />
-        </div>
+      <div
+        className="relative mt-[43px] hidden overflow-x-clip lg:block"
+        data-lenis-prevent-horizontal
+        style={{
+          marginLeft: arabic ? -24 : -DESKTOP_SECTION_INSET_PX,
+          width: `calc(100% + ${DESKTOP_SECTION_INSET_PX + 24}px)`,
+        }}
+      >
+        <Swiper
+          key={arabic ? "rtl-desktop" : "ltr-desktop"}
+          dir={arabic ? "rtl" : "ltr"}
+          modules={[Mousewheel]}
+          mousewheel={{
+            forceToAxis: true,
+            releaseOnEdges: true,
+            sensitivity: 1,
+            thresholdDelta: 4,
+            thresholdTime: 400,
+          }}
+          slidesPerView="auto"
+          spaceBetween={DESKTOP_SWIPER_GAP_PX}
+          slidesPerGroup={1}
+          slidesOffsetBefore={DESKTOP_SECTION_INSET_PX}
+          slidesOffsetAfter={DESKTOP_SECTION_INSET_PX}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          threshold={10}
+          touchReleaseOnEdges
+          touchStartPreventDefault={false}
+          className="learn-popular-swiper overflow-hidden!"
+        >
+          <SwiperSlide className="w-[445px]!">
+            <ActivityProgressMobileCard
+              progressPercent={learningProgressPercent}
+              showTrackTicks
+              variant="desktop"
+            />
+          </SwiperSlide>
+          <SwiperSlide className="w-[445px]!">
+            <WeeklyActivityBarCard
+              summary={weeklyActivity}
+              highlightDayIndex={activityHighlightDayIndex}
+            />
+          </SwiperSlide>
+          <SwiperSlide className="w-[727px]!">
+            <ActivityScheduleCard />
+          </SwiperSlide>
+        </Swiper>
       </div>
     </section>
   );

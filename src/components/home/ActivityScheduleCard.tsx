@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { toArabicIndicDigits } from "@/lib/learning-activity";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
 
@@ -949,12 +952,30 @@ const TABLET_SCHEDULE_LAYOUT = {
   eventPadX: roundPx(MOBILE_SCHEDULE_LAYOUT.eventPadX * TABLET_SCHEDULE_SX),
 } as const;
 
-function formatMobileScheduleDay(date: Date): string {
+const ARABIC_WEEKDAYS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const ARABIC_MONTHS = [
+  "يناير",
+  "فبراير",
+  "مارس",
+  "أبريل",
+  "مايو",
+  "يونيو",
+  "يوليو",
+  "أغسطس",
+  "سبتمبر",
+  "أكتوبر",
+  "نوفمبر",
+  "ديسمبر",
+];
+
+function formatMobileScheduleDay(date: Date, arabic = false): string {
+  if (arabic) return `${ARABIC_WEEKDAYS[date.getDay()]} ${toArabicIndicDigits(date.getDate())}`;
   const day = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date).toUpperCase();
   return `${day} ${date.getDate()}`;
 }
 
-function formatMobileScheduleMonthYear(date: Date): string {
+function formatMobileScheduleMonthYear(date: Date, arabic = false): string {
+  if (arabic) return `${ARABIC_MONTHS[date.getMonth()]} ${toArabicIndicDigits(date.getFullYear())}`;
   const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date).toUpperCase();
   return `${month} ${date.getFullYear()}`;
 }
@@ -968,13 +989,15 @@ function pickScheduleSlotForDate(date: Date): ScheduleSlot {
   );
 }
 
-function mobileEventTitle(slot: ScheduleSlot): string {
+function mobileEventTitle(slot: ScheduleSlot, arabic = false): string {
+  if (arabic && slot.hourIndex === 0) return "ما هو فيغما؟";
   const primary = slot.title.split("\n")[0]?.trim() ?? slot.title;
   if (slot.hourIndex === 0) return "WHAT'S FIGMA?";
-  return primary.replace(/\.\.$/, "").toUpperCase();
+  return arabic ? primary.replace(/\.\.$/, "") : primary.replace(/\.\.$/, "").toUpperCase();
 }
 
-function mobileEventDuration(slot: ScheduleSlot): string {
+function mobileEventDuration(slot: ScheduleSlot, arabic = false): string {
+  if (arabic) return slot.hourIndex === 0 ? "٤٠ دقيقة" : "٤٥ دقيقة";
   return slot.hourIndex === 0 ? "40mins" : "45mins";
 }
 
@@ -991,6 +1014,7 @@ export function ActivityScheduleMobileCard({
 }: {
   variant?: "mobile" | "tablet";
 }) {
+  const arabic = useArabicLayout();
   const [open, setOpen] = useState(false);
   const [today, setToday] = useState<Date | null>(null);
   const isTablet = variant === "tablet";
@@ -1003,8 +1027,8 @@ export function ActivityScheduleMobileCard({
   }, []);
 
   const scheduleDate = today ?? new Date();
-  const dayHeading = formatMobileScheduleDay(scheduleDate);
-  const monthHeading = formatMobileScheduleMonthYear(scheduleDate);
+  const dayHeading = formatMobileScheduleDay(scheduleDate, arabic);
+  const monthHeading = formatMobileScheduleMonthYear(scheduleDate, arabic);
   const activeSlot = pickScheduleSlotForDate(scheduleDate);
   const eventTop = Math.min(
     mobileEventTopPx(activeSlot.hourIndex, layout),
@@ -1027,7 +1051,9 @@ export function ActivityScheduleMobileCard({
           className="absolute m-0"
           style={{
             top: layout.dayTop,
-            left: layout.dayLeft,
+            left: arabic ? undefined : layout.dayLeft,
+            right: arabic ? layout.dayLeft : undefined,
+            textAlign: arabic ? "right" : undefined,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: layout.dayFont,
@@ -1044,7 +1070,8 @@ export function ActivityScheduleMobileCard({
           className="absolute m-0 text-center"
           style={{
             top: layout.monthTop,
-            right: layout.monthRight,
+            right: arabic ? undefined : layout.monthRight,
+            left: arabic ? layout.monthRight : undefined,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: layout.monthFont,
@@ -1059,11 +1086,12 @@ export function ActivityScheduleMobileCard({
         </p>
 
         <hr
-          className="absolute left-0 m-0 border-0 bg-black"
+          className="absolute left-0 m-0 border-0"
           style={{
             top: layout.hrTop,
             width: cardWidth,
             height: "0.2px",
+            background: "rgb(0 0 0 / 40%)",
           }}
           aria-hidden
         />
@@ -1072,10 +1100,15 @@ export function ActivityScheduleMobileCard({
           className="absolute"
           style={{
             top: layout.timesTop,
-            left: layout.timesLeft,
+            left: arabic ? undefined : layout.timesLeft,
+            right: arabic ? layout.timesLeft : undefined,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {MOBILE_SCHEDULE_TIMES.map((time, index) => (
+          {(arabic
+            ? (["٨:٠٠ ص", "٩:٠٠ ص", "١٠:٠٠ ص", "١١:٠٠ ص"] as const)
+            : MOBILE_SCHEDULE_TIMES
+          ).map((time, index) => (
             <p
               key={time}
               className="m-0"
@@ -1096,9 +1129,11 @@ export function ActivityScheduleMobileCard({
 
         <div
           className="absolute box-border flex flex-col items-center justify-center border-[0.3px] border-black/20"
+          dir={arabic ? "rtl" : undefined}
           style={{
             top: eventTop,
-            right: layout.eventRight,
+            right: arabic ? undefined : layout.eventRight,
+            left: arabic ? layout.eventRight : undefined,
             width: layout.eventWidth,
             height: layout.eventHeight,
             padding: `0 ${layout.eventPadX}px`,
@@ -1118,12 +1153,13 @@ export function ActivityScheduleMobileCard({
               lineHeight: `${layout.eventLineHeight}px`,
             }}
           >
-            {mobileEventTitle(activeSlot)}
+            {mobileEventTitle(activeSlot, arabic)}
           </p>
           <p
             className="m-0"
             style={{
               color: "var(--Black, #000)",
+              textAlign: arabic ? "right" : undefined,
               fontFamily: pangeaFont,
               fontSize: layout.eventMetaFont,
               fontStyle: "normal",
@@ -1131,7 +1167,7 @@ export function ActivityScheduleMobileCard({
               lineHeight: `${layout.eventLineHeight}px`,
             }}
           >
-            {mobileEventDuration(activeSlot)}
+            {mobileEventDuration(activeSlot, arabic)}
           </p>
         </div>
       </button>
@@ -1141,8 +1177,26 @@ export function ActivityScheduleMobileCard({
   );
 }
 
+const SCHEDULE_DAYS = [
+  { day: "SUN", dayAr: "الأحد", date: "15", left: 124, muted: true },
+  { day: "MON", dayAr: "الإثنين", date: "16", left: 203, muted: true },
+  { day: "TUE", dayAr: "الثلاثاء", date: "17", left: 287, muted: true },
+  { day: "WED", dayAr: "الأربعاء", date: "18", left: 363, muted: false },
+  { day: "THU", dayAr: "الخميس", date: "19", left: 447, muted: true },
+  { day: "FRI", dayAr: "الجمعة", date: "20", left: 525, muted: true },
+] as const;
+
+const SCHEDULE_TIMES = ["8:00 am", "9:00 am", "10:00 am", "11:00 am"] as const;
+const SCHEDULE_TIMES_AR = ["٨:٠٠ ص", "٩:٠٠ ص", "١٠:٠٠ ص", "١١:٠٠ ص"] as const;
+
 export function ActivityScheduleCard() {
+  const arabic = useArabicLayout();
   const [open, setOpen] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   return (
     <>
@@ -1152,7 +1206,10 @@ export function ActivityScheduleCard() {
         className="relative box-border h-[401px] w-[727px] max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[50px] border border-[var(--Black,#000)] bg-[var(--White,#FFF)] p-0 text-left transition-[border-color,box-shadow] duration-200 hover:border-[var(--Green,#8AF396)] hover:shadow-[0_0_0_1px_var(--Green,#8AF396)]"
         aria-label="Activity details card"
       >
-        <div className="absolute left-[34px] top-[33px] flex h-[36px] w-[68px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]">
+        <div
+          className="absolute top-[33px] flex h-[36px] w-[68px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]"
+          style={{ left: arabic ? undefined : 34, right: arabic ? 34 : undefined }}
+        >
           <span
             style={{
               color: "#000",
@@ -1164,14 +1221,17 @@ export function ActivityScheduleCard() {
               fontVariationSettings: '"wght" 400',
             }}
           >
-            MAY
+            {arabic ? "مايو" : "MAY"}
           </span>
         </div>
 
         <h3
-          className="absolute left-[277px] top-[26px] m-0"
+          className="absolute top-[26px] m-0"
           style={{
+            left: arabic ? "50%" : 277,
+            transform: arabic ? "translateX(-50%)" : undefined,
             color: "#000",
+            textAlign: arabic ? "center" : undefined,
             fontFamily: pangeaFont,
             fontSize: "36px",
             fontStyle: "normal",
@@ -1180,10 +1240,13 @@ export function ActivityScheduleCard() {
             fontVariationSettings: '"wght" 400',
           }}
         >
-          JUNE 2026
+          {arabic ? "يونيو ٢٠٢٦" : "JUNE 2026"}
         </h3>
 
-        <div className="absolute left-[626px] top-[33px] flex h-[36px] w-[73px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]">
+        <div
+          className="absolute top-[33px] flex h-[36px] w-[73px] items-center justify-center rounded-[8px] border border-[var(--Black,#000)] bg-white px-[16px]"
+          style={{ left: arabic ? 28 : 626 }}
+        >
           <span
             style={{
               color: "#000",
@@ -1195,125 +1258,85 @@ export function ActivityScheduleCard() {
               fontVariationSettings: '"wght" 400',
             }}
           >
-            JULY
+            {arabic ? "يوليو" : "JULY"}
           </span>
         </div>
 
-        <div className="absolute left-[124px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            SUN
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            15
-          </p>
-        </div>
-        <div className="absolute left-[203px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            MON
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            16
-          </p>
-        </div>
-        <div className="absolute left-[287px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            TUE
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            17
-          </p>
-        </div>
-        <div className="absolute left-[363px] top-[93px] text-center text-[18px] leading-normal text-black">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            WED
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            18
-          </p>
-        </div>
-        <div className="absolute left-[447px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            THU
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            19
-          </p>
-        </div>
-        <div className="absolute left-[525px] top-[93px] text-center text-[18px] leading-normal text-black opacity-40">
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            FRI
-          </p>
-          <p className="m-0" style={{ fontFamily: pangeaFont }}>
-            20
-          </p>
-        </div>
+        {arabic ? (
+          <div
+            dir="rtl"
+            className="absolute top-[93px] flex items-start justify-between"
+            style={{ left: 110, right: 110 }}
+          >
+            {SCHEDULE_DAYS.map((item) => (
+              <div
+                key={item.day}
+                className="text-center text-[18px] leading-normal text-black"
+                style={{ opacity: item.muted ? 0.4 : 1 }}
+              >
+                <p className="m-0 whitespace-nowrap" style={{ fontFamily: pangeaFont }}>
+                  {item.dayAr}
+                </p>
+                <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                  {toArabicIndicDigits(item.date)}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          SCHEDULE_DAYS.map((item) => (
+            <div
+              key={item.day}
+              className="absolute top-[93px] text-center text-[18px] leading-normal text-black"
+              style={{ left: item.left, opacity: item.muted ? 0.4 : 1 }}
+            >
+              <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                {item.day}
+              </p>
+              <p className="m-0" style={{ fontFamily: pangeaFont }}>
+                {item.date}
+              </p>
+            </div>
+          ))
+        )}
 
-        <p
-          className="absolute left-[28px] top-[185px] m-0"
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: "18px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "normal",
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          8:00 am
-        </p>
-        <p
-          className="absolute left-[28px] top-[235px] m-0"
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: "18px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "normal",
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          9:00 am
-        </p>
-        <p
-          className="absolute left-[29px] top-[285px] m-0"
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: "18px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "normal",
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          10:00 am
-        </p>
-        <p
-          className="absolute left-[28px] top-[335px] m-0"
-          style={{
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: "18px",
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "normal",
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          11:00 am
-        </p>
+        {(arabic ? SCHEDULE_TIMES_AR : SCHEDULE_TIMES).map((time, index) => (
+          <p
+            key={time}
+            className="absolute m-0"
+            style={{
+              left: arabic ? undefined : index === 2 ? 29 : 28,
+              right: arabic ? 28 : undefined,
+              top: 185 + index * 50,
+              color: "var(--Black, #000)",
+              textAlign: arabic ? "right" : undefined,
+              fontFamily: pangeaFont,
+              fontSize: "18px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              fontVariationSettings: '"wght" 400',
+            }}
+          >
+            {time}
+          </p>
+        ))}
 
         <div
-          className="absolute left-[132px] top-[237px] inline-flex h-[74px] w-fit flex-col items-start justify-center rounded-[24px] border border-[var(--Black,#000)] px-[16px]"
-          style={{ background: "var(--Purple, #FF8CFF)" }}
+          dir={arabic ? "rtl" : undefined}
+          className="absolute top-[237px] inline-flex h-[74px] w-fit flex-col items-start justify-center rounded-[24px] border border-[var(--Black,#000)] px-[16px]"
+          style={{
+            left: arabic ? undefined : 132,
+            right: arabic ? 132 : undefined,
+            background: "var(--Purple, #FF8CFF)",
+          }}
         >
           <div className="flex items-center justify-start gap-[8px]">
             <p
               className="m-0"
               style={{
                 color: "#000",
+                textAlign: arabic ? "right" : undefined,
                 fontFamily: pangeaFont,
                 fontSize: "24px",
                 fontStyle: "normal",
@@ -1322,7 +1345,7 @@ export function ActivityScheduleCard() {
                 fontVariationSettings: '"wght" 500',
               }}
             >
-              {"WHAT'S FIGMA?"}
+              {arabic ? "ما هو فيغما؟" : "WHAT'S FIGMA?"}
             </p>
             <p
               className="m-0"
@@ -1337,13 +1360,14 @@ export function ActivityScheduleCard() {
                 fontVariationSettings: '"wght" 400',
               }}
             >
-              40mins
+              {arabic ? "٤٠ دقيقة" : "40mins"}
             </p>
           </div>
           <p
-            className="m-0 text-left"
+            className={`m-0 ${arabic ? "text-right" : "text-left"}`}
             style={{
               color: "#000",
+              textAlign: arabic ? "right" : "left",
               fontFamily: pangeaFont,
               fontSize: "18px",
               fontStyle: "normal",
@@ -1353,12 +1377,19 @@ export function ActivityScheduleCard() {
               fontVariationSettings: '"wght" 400',
             }}
           >
-            UI/UX Design Class with Mohamed Tarek Mostafa
+            {arabic
+              ? "فصل تصميم واجهة المستخدم وتجربة المستخدم مع محمد طارق مصطفى"
+              : "UI/UX Design Class with Mohamed Tarek Mostafa"}
           </p>
         </div>
       </button>
 
-      <ActivityScheduleModal open={open} onClose={() => setOpen(false)} />
+      {portalReady
+        ? createPortal(
+            <ActivityScheduleModal open={open} onClose={() => setOpen(false)} />,
+            document.body,
+          )
+        : null}
     </>
   );
 }

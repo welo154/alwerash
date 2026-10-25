@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { LibraryBookGridBox } from "./LibraryBookGridBox";
+import { libraryCardPrice, libraryCardTitle } from "./library-card-copy";
 import type { LibraryBook } from "./library-books";
 
 const pangeaFont =
@@ -38,25 +42,37 @@ function LibraryMaterialFavoriteIcon() {
 }
 
 export function LibraryMaterialCard({ book }: { book: LibraryBook }) {
+  const arabic = useArabicLayout();
+  const title = libraryCardTitle(arabic, book.title);
   return (
     <article className="w-[194px] shrink-0">
       <Link href={`/library/books/${book.id}`} className="block hover:opacity-90">
         <LibraryBookGridBox imageSrc={book.imageSrc} imageAlt={book.imageAlt} />
       </Link>
-      <div className="mt-4 flex items-start gap-[30px]">
+      <div dir={arabic ? "rtl" : undefined} className="mt-4 flex items-start gap-[30px]">
         <div className="min-w-0">
           <Link
             href={`/library/books/${book.id}`}
             className="m-0 block text-black hover:opacity-80"
-            style={META_TEXT_STYLE}
+            style={{
+              ...META_TEXT_STYLE,
+              color: "#000",
+              textAlign: arabic ? "right" : undefined,
+              fontVariationSettings: '"wght" 400',
+            }}
           >
-            {book.title}
+            {title}
           </Link>
           <p
             className="m-0 mt-0.5"
-            style={{ ...META_TEXT_STYLE, color: "rgba(0, 0, 0, 0.60)" }}
+            style={{
+              ...META_TEXT_STYLE,
+              color: arabic ? "#707070" : "rgba(0, 0, 0, 0.60)",
+              textAlign: arabic ? "right" : undefined,
+              fontVariationSettings: '"wght" 400',
+            }}
           >
-            {book.priceLabel}
+            {libraryCardPrice(arabic, book.priceLabel)}
           </p>
         </div>
         <button

@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 import { HomeTrackExplorerSection } from "@/components/home/HomeTrackExplorerSection";
 import { ContinueLearningSection } from "@/components/home/ContinueLearningSection";
@@ -56,6 +59,7 @@ export function LoggedInHome({
   learningProgressPercent,
   studentStories,
 }: LoggedInHomeProps) {
+  const arabic = useArabicLayout();
   const initials = userName
     .split(" ")
     .slice(0, 2)
@@ -63,12 +67,19 @@ export function LoggedInHome({
     .join("");
 
   const firstName = userName.split(" ")[0];
+  const arabicFirstName =
+    firstName.trim().toLowerCase() === "mazen" ? "مازن" : firstName;
+  const arabicProfession =
+    subtitleLeftOfEdit?.trim().toLowerCase() === ".net developer"
+      ? "مطور دوت نت"
+      : subtitleLeftOfEdit;
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <section className="relative bg-white lg:pt-[60px]" style={{ fontFamily: pangeaFont }}>
         <div
-          className="flex items-center gap-[10px] pl-[30px] min-[744px]:hidden"
+          dir={arabic ? "rtl" : "ltr"}
+          className={`flex items-center gap-[10px] min-[744px]:hidden ${arabic ? "pr-[30px]" : "pl-[30px]"}`}
           style={{ paddingTop: MOBILE_USER_INFO_TOP_PX - MOBILE_HEADER_HEIGHT_PX }}
         >
           <div className="relative h-[45px] w-[45px] shrink-0 overflow-hidden rounded-full border-2 border-black">
@@ -90,8 +101,8 @@ export function LoggedInHome({
             )}
           </div>
 
-          <div className="min-w-0">
-            <h1 className="m-0 uppercase">
+          <div className={`min-w-0 ${arabic ? "text-right" : ""}`}>
+            <h1 className={`m-0 ${arabic ? "" : "uppercase"}`} style={arabic ? { textAlign: "right" } : undefined}>
               <span
                 style={{
                   color: "var(--Black, #000)",
@@ -102,7 +113,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                <Tr>WELCOME BACK,</Tr>{" "}
+                {arabic ? "مرحبًا بعودتك،" : <Tr>WELCOME BACK,</Tr>}{" "}
               </span>
               <span
                 style={{
@@ -114,24 +125,24 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                {firstName.toUpperCase()}!
+                {arabic ? arabicFirstName : firstName.toUpperCase()}!
               </span>
             </h1>
 
-            <p className="m-0 flex flex-wrap items-baseline gap-x-[8px]">
+            <p className="m-0 flex flex-wrap items-baseline gap-x-[8px]" style={arabic ? { textAlign: "right" } : undefined}>
               {subtitleLeftOfEdit ? (
                 <span
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaFont,
-                    fontSize: "16px",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "120%",
-                    opacity: 0.6,
-                  }}
-                >
-                  {subtitleLeftOfEdit}
+                  fontSize: "16px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                  opacity: 0.6,
+                }}
+              >
+                  {arabic ? arabicProfession : subtitleLeftOfEdit}
                 </span>
               ) : null}
               <Link
@@ -169,10 +180,12 @@ export function LoggedInHome({
         />
 
         <div
+          dir={arabic ? "rtl" : "ltr"}
           className="hidden items-center min-[744px]:flex lg:hidden"
           style={{
             paddingTop: TABLET_USER_INFO_TOP_PX - TABLET_HEADER_HEIGHT_PX,
-            paddingLeft: TABLET_USER_INFO_LEFT_PX,
+            paddingLeft: arabic ? undefined : TABLET_USER_INFO_LEFT_PX,
+            paddingRight: arabic ? TABLET_USER_INFO_LEFT_PX : undefined,
             gap: 16,
           }}
         >
@@ -203,8 +216,8 @@ export function LoggedInHome({
             )}
           </div>
 
-          <div className="min-w-0">
-            <h1 className="m-0 uppercase">
+          <div className={`min-w-0 ${arabic ? "text-right" : ""}`}>
+            <h1 className={`m-0 ${arabic ? "" : "uppercase"}`} style={arabic ? { textAlign: "right" } : undefined}>
               <span
                 style={{
                   color: "var(--Black, #000)",
@@ -215,7 +228,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                <Tr>WELCOME BACK,</Tr>{" "}
+                {arabic ? "مرحبًا بعودتك،" : <Tr>WELCOME BACK,</Tr>}{" "}
               </span>
               <span
                 style={{
@@ -227,7 +240,7 @@ export function LoggedInHome({
                   lineHeight: "120%",
                 }}
               >
-                {firstName.toUpperCase()}!
+                {arabic ? arabicFirstName : firstName.toUpperCase()}!
               </span>
             </h1>
 
@@ -247,7 +260,7 @@ export function LoggedInHome({
                     opacity: 0.6,
                   }}
                 >
-                  {subtitleLeftOfEdit}
+                  {arabic ? arabicProfession : subtitleLeftOfEdit}
                 </span>
               ) : null}
               <Link
@@ -278,7 +291,10 @@ export function LoggedInHome({
           aria-hidden
         />
 
-        <div className="hidden items-center gap-[17px] pl-[71px] pr-6 lg:flex">
+        <div
+          dir={arabic ? "rtl" : "ltr"}
+          className={`hidden w-full items-center gap-[17px] lg:flex ${arabic ? "pr-[71px] pl-6" : "pl-[71px] pr-6"}`}
+        >
           <div className="relative h-[82px] w-[82px] shrink-0 overflow-hidden rounded-full border-2 border-black">
             {userImage ? (
               <Image
@@ -298,24 +314,25 @@ export function LoggedInHome({
             )}
           </div>
 
-          <div className="flex flex-col">
-            <h1 className="uppercase">
+          <div className={`flex flex-col ${arabic ? "items-start text-right" : ""}`}>
+            <h1 className={arabic ? "m-0" : "uppercase"} style={arabic ? { textAlign: "right" } : undefined}>
               <span
                 style={{
-                  color: "#000",
+                  color: "var(--Black, #000)",
                   fontFamily: pangeaFont,
                   fontSize: "36px",
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "120%",
                   fontVariationSettings: '"wght" 400',
+                  textAlign: arabic ? "right" : undefined,
                 }}
               >
-                <Tr>WELCOME BACK,</Tr>{" "}
+                {arabic ? "مرحبًا بعودتك،" : <Tr>WELCOME BACK,</Tr>}{" "}
               </span>
               <span
                 style={{
-                  color: "#000",
+                  color: "var(--Black, #000)",
                   fontFamily: pangeaFont,
                   fontSize: "36px",
                   fontStyle: "normal",
@@ -324,18 +341,22 @@ export function LoggedInHome({
                   fontVariationSettings: '"wght" 600',
                 }}
               >
-                {firstName.toUpperCase()}!
+                {arabic ? firstName : firstName.toUpperCase()}!
               </span>
             </h1>
 
             <p
-              className="mt-[3px] flex flex-wrap items-baseline"
-              style={{ gap: subtitleLeftOfEdit ? "11px" : 0 }}
+              className="m-0 mt-[3px] flex flex-wrap items-baseline"
+              style={{
+                gap: subtitleLeftOfEdit ? "11px" : 0,
+                textAlign: arabic ? "right" : undefined,
+              }}
             >
               {subtitleLeftOfEdit ? (
                 <span
                   style={{
-                    color: "#000",
+                    color: "var(--Black, #000)",
+                    textAlign: arabic ? "right" : undefined,
                     fontFamily: pangeaFont,
                     fontSize: "24px",
                     fontStyle: "normal",
@@ -379,33 +400,49 @@ export function LoggedInHome({
             aria-hidden
           />
           <h2
-            className="m-0 mt-[40px] uppercase"
-            style={{ paddingLeft: 120 }}
+            className={`m-0 mt-[40px] uppercase ${arabic ? "text-right" : ""}`}
+            style={{
+              paddingLeft: arabic ? undefined : 120,
+              paddingRight: arabic ? 120 : undefined,
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: arabic ? 40 : undefined,
+              fontWeight: arabic ? 400 : undefined,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
+              lineHeight: arabic ? "120%" : undefined,
+              textAlign: arabic ? "right" : undefined,
+            }}
           >
-            <span
-              style={{
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: "36px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "120%",
-              }}
-            >
-              <Tr>CONTINUE</Tr>{" "}
-            </span>
-            <span
-              style={{
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: "36px",
-                fontStyle: "italic",
-                fontWeight: 700,
-                lineHeight: "120%",
-              }}
-            >
-              <Tr>LEARNING</Tr>
-            </span>
+            {arabic ? (
+              "استمر في التعلم"
+            ) : (
+              <>
+                <span
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: "36px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                  }}
+                >
+                  <Tr>CONTINUE</Tr>{" "}
+                </span>
+                <span
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: "36px",
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    lineHeight: "120%",
+                  }}
+                >
+                  <Tr>LEARNING</Tr>
+                </span>
+              </>
+            )}
           </h2>
         </div>
 
@@ -426,37 +463,59 @@ export function LoggedInHome({
           }
         />
 
-        <h2 className="m-0 mt-[60px] pl-[30px] uppercase max-[743px]:block hidden">
-          <span
-            className="block"
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily: pangeaFont,
-              fontSize: "24px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "120%",
-            }}
-          >
-            TOPICS RECOMMENDED
-          </span>
-          <span
-            className="block"
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily: pangeaFont,
-              fontSize: "24px",
-              fontStyle: "italic",
-              fontWeight: 700,
-              lineHeight: "120%",
-            }}
-          >
-            FOR YOU
-          </span>
+        <h2
+          className={`m-0 mt-[60px] uppercase max-[743px]:block hidden ${arabic ? "pr-[30px] text-right" : "pl-[30px]"}`}
+          style={arabic ? { textAlign: "right" } : undefined}
+        >
+          {arabic ? (
+            <span
+              className="block"
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily: pangeaFont,
+                fontSize: "24px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+                fontVariationSettings: '"wght" 400',
+              }}
+            >
+              الموضوعات الموصى بها لك
+            </span>
+          ) : (
+            <>
+              <span
+                className="block"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "24px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                TOPICS RECOMMENDED
+              </span>
+              <span
+                className="block"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "24px",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: "120%",
+                }}
+              >
+                FOR YOU
+              </span>
+            </>
+          )}
         </h2>
 
         <h2
-          className="mt-[84px] hidden pl-[61px] uppercase min-[744px]:block lg:hidden"
+          className={`mt-[84px] hidden uppercase min-[744px]:block lg:hidden ${arabic ? "pr-[61px] text-right" : "pl-[61px]"}`}
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -464,49 +523,64 @@ export function LoggedInHome({
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
+            textAlign: arabic ? "right" : undefined,
+            fontVariationSettings: arabic ? '"wght" 400' : undefined,
           }}
         >
-          TOPICS RECOMMENDED FOR{" "}
-          <span
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily: pangeaFont,
-              fontSize: 32,
-              fontStyle: "normal",
-              fontWeight: 600,
-              lineHeight: "120%",
-            }}
-          >
-            YOU
-          </span>
+          {arabic ? (
+            "الموضوعات الموصى بها لك"
+          ) : (
+            <>
+              TOPICS RECOMMENDED FOR{" "}
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: 32,
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  lineHeight: "120%",
+                }}
+              >
+                YOU
+              </span>
+            </>
+          )}
         </h2>
 
         <h2
-          className="mt-[67px] hidden pl-[120px] pr-6 uppercase lg:block"
+          className={`mt-[67px] hidden uppercase lg:block ${arabic ? "pr-[120px] pl-6 text-right" : "pl-[120px] pr-6"}`}
           style={{
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
-            fontSize: "36px",
+            fontSize: arabic ? 40 : "36px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
             fontVariationSettings: '"wght" 400',
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          TOPICS RECOMMENDED FOR{" "}
-          <span
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily: pangeaFont,
-              fontSize: "36px",
-              fontStyle: "normal",
-              fontWeight: 600,
-              lineHeight: "120%",
-              fontVariationSettings: '"wght" 600',
-            }}
-          >
-            YOU
-          </span>
+          {arabic ? (
+            "الموضوعات الموصى بها لك"
+          ) : (
+            <>
+              TOPICS RECOMMENDED FOR{" "}
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: "36px",
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  lineHeight: "120%",
+                  fontVariationSettings: '"wght" 600',
+                }}
+              >
+                YOU
+              </span>
+            </>
+          )}
         </h2>
 
         <HomeTrackExplorerSection

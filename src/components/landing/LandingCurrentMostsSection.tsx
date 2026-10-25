@@ -96,6 +96,8 @@ export function LandingCurrentMostsSection({
   mentorCardHeightPx,
   /** Guest home only: line under the heading on iPad. */
   showExploreCopy = false,
+  /** Sentence beside the desktop heading. Logged-in home hides it. */
+  showDesktopSupportingCopy = true,
   className,
 }: {
   mentors: LandingMostsMentorCardDto[];
@@ -121,6 +123,7 @@ export function LandingCurrentMostsSection({
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
   showExploreCopy?: boolean;
+  showDesktopSupportingCopy?: boolean;
   className?: string;
 }) {
   const [selectedMentor, setSelectedMentor] =
@@ -542,6 +545,7 @@ export function LandingCurrentMostsSection({
               </>
             )}
           </h2>
+          {showDesktopSupportingCopy ? (
           <p
             className="m-0 text-black"
             style={{
@@ -561,6 +565,7 @@ export function LandingCurrentMostsSection({
               ? "استكشف معلمينا ومدربينا الأكثر شعبية والأكثر مشاهدة."
               : "Explore our most popular and most watched mentors and instructors."}
           </p>
+          ) : null}
         </div>
 
         <div className="relative mt-[82px] w-full">

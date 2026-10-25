@@ -280,9 +280,6 @@ export function LoggedInAppHeader({
               </svg>
             </button>
             <UserMenu user={user!} theme="green" />
-            <span className="ml-[15px] inline-flex">
-              <HeaderLanguageToggle tone="light" />
-            </span>
               </>
             )}
           </div>
