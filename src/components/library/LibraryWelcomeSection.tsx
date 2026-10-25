@@ -17,8 +17,8 @@ export function LibraryWelcomeSection() {
       </h2>
 
       <p className="w-[403px] shrink-0 text-[24px] font-normal not-italic leading-[127%] text-black">
-        Explore thousands of online material in design, typography, illustration,
-        photography, and more.
+        Explore online articles, books, references and podcasts and more. Taught by
+        industry professionals.
       </p>
     </section>
   );

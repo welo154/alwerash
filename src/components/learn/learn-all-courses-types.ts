@@ -12,6 +12,8 @@ export type LearnAllCourseItem = {
   rating: number | null;
   lessonCount: number;
   totalDurationMinutes: number | null;
+  durationLabel?: string | null;
+  levelLabel?: string | null;
   comingSoon?: boolean;
 };
 

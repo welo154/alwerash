@@ -12,44 +12,17 @@ const pangeaFont = pangeaFontFamily;
 const footerColumnLinkClassName =
   "text-[18px] font-normal leading-[161%] tracking-[0] text-black underline-offset-2 transition-opacity hover:opacity-70 whitespace-normal sm:whitespace-nowrap";
 
-const categoriesLinks: { label: string; href: string }[] = [
-  { label: "Illustration courses", href: "/course" },
-  { label: "Craft courses", href: "/course" },
-  { label: "Marketing & Business courses", href: "/course" },
-  { label: "Photography & Video courses", href: "/course" },
-  { label: "Design courses", href: "/course" },
-  { label: "3D & Animation courses", href: "/course" },
-  { label: "Architecture & Spaces courses", href: "/course" },
-  { label: "Writing courses", href: "/course" },
-  { label: "Fashion courses", href: "/course" },
-];
-
-const softwareLinks: { label: string; href: string }[] = [
-  { label: "Adobe Photoshop courses", href: "/course" },
-  { label: "Adobe Illustrator courses", href: "/course" },
-  { label: "Procreate courses", href: "/course" },
-  { label: "Adobe After Effects courses", href: "/course" },
-  { label: "Adobe Lightroom courses", href: "/course" },
-  { label: "Cinema 4D courses", href: "/course" },
-  { label: "Adobe InDesign courses", href: "/course" },
-  { label: "ChatGPT courses", href: "/course" },
-  { label: "Adobe Premiere courses", href: "/course" },
-];
-
 const discoverLinks: { label: string; href: string }[] = [
-  { label: "Teach on ElWerash", href: "/register" },
+  { label: "Teach on Alwerash", href: "/register" },
   { label: "Plans and Pricing", href: "/subscription" },
   { label: "Help and Support", href: "/subscription" },
 ];
 
 const sectionLinks: { label: string; href: string }[] = [
-  { label: "About Us", href: "/" },
   { label: "Courses", href: "/course" },
   { label: "Library", href: "/library" },
   { label: "Events", href: "/events" },
-  { label: "Creatives", href: "/mentors" },
   { label: "Tracks", href: "/course" },
-  { label: "Blog", href: "/" },
 ];
 
 function FooterColumn({
@@ -96,7 +69,13 @@ function FooterColumn({
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({
+  courseLinks,
+  softwareLinks,
+}: {
+  courseLinks: { label: string; href: string }[];
+  softwareLinks: { label: string; href: string }[];
+}) {
   const year = new Date().getFullYear();
 
   return (
@@ -162,14 +141,29 @@ export function SiteFooter() {
                 />
               </a>
               <a
-                href="https://x.com"
+                href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-[39px] shrink-0 items-center justify-center transition-opacity hover:opacity-70"
-                aria-label="X"
+                aria-label="Facebook"
               >
                 <Image
-                  src="/social/footer-x.png"
+                  src="/social/facebook.png"
+                  alt=""
+                  width={39}
+                  height={39}
+                  className="size-[39px] object-contain"
+                />
+              </a>
+              <a
+                href="https://www.tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex size-[39px] shrink-0 items-center justify-center transition-opacity hover:opacity-70"
+                aria-label="TikTok"
+              >
+                <Image
+                  src="/social/footer-tiktok.png"
                   alt=""
                   width={39}
                   height={39}
@@ -194,12 +188,12 @@ export function SiteFooter() {
         <div className="overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch]">
           <div className="grid w-max min-w-full max-w-full grid-cols-1 gap-y-10 sm:grid-cols-[repeat(2,max-content)] sm:gap-x-[100px] sm:gap-y-10 lg:grid-cols-[repeat(4,max-content)] lg:gap-x-[100px]">
             <FooterColumn
-              title="Categories"
-              links={categoriesLinks}
+              title="ALL COURSES"
+              links={courseLinks}
               viewMoreHref="/course"
               viewMoreLabel="View more"
             />
-            <FooterColumn title="Software" links={softwareLinks} />
+            <FooterColumn title="SOFTWARE" links={softwareLinks} />
             <FooterColumn title="Discover" links={discoverLinks} />
             <FooterColumn title="Sections" links={sectionLinks} />
           </div>

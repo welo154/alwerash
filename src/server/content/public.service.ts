@@ -23,6 +23,7 @@ import { sqlGetLandingPopularMentorIds } from "./landing-popular-mentor-sql";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
 import { getFreeLessonIds, isFreeLesson } from "@/lib/course-access";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
+import { courseCardStats } from "@/lib/content/course-card-stats";
 import { courseTypeBadgeLabel, courseTypeBadgeSelect } from "@/lib/content/course-type-badge";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
 import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
@@ -138,6 +139,7 @@ type TrackCourseRow = {
   coverImage: string | null;
   introVideoMuxPlaybackId: string | null;
   totalDurationMinutes: number | null;
+  level: string | null;
   featuredMostPlayedOrder: number | null;
   modules: { _count: { lessons: number } }[];
 };
@@ -166,6 +168,7 @@ const trackCourseSelect = {
     coverImage: true,
     introVideoMuxPlaybackId: true,
     totalDurationMinutes: true,
+    level: true,
     ...courseTypeBadgeSelect,
     modules: { select: { _count: { select: { lessons: true } } } },
   },
@@ -193,6 +196,7 @@ function buildCourseTilesForTrack(
     authorLabelAr: course.instructorNameAr,
     tagPrimary,
     typeLabel: courseTypeBadgeLabel(course),
+    ...courseCardStats(course),
     coverImageSrc: effectiveCoverImage(
       course.coverImage,
       course.introVideoMuxPlaybackId,
@@ -314,6 +318,7 @@ async function fetchTracksWithCoursesFallback(
       coverImage: course.cover_image,
       introVideoMuxPlaybackId: null,
       totalDurationMinutes: null,
+      level: "BEGINNER",
       featuredMostPlayedOrder: null,
       modules: [],
     });
@@ -449,16 +454,21 @@ const EXCLUDED_MENU_TRACK_SLUGS = new Set([
   "motion-design",
 ]);
 
-const SOFTWARE_MENU_LABEL_BY_TITLE: Record<string, string> = {
-  "Photoshop Fundamentals": "Adobe Photoshop courses",
-  "Illustrator Fundamentals": "Adobe Illustrator courses",
-  "InDesign Fundamentals": "Adobe InDesign courses",
-  "After Effects Fundamentals": "Adobe After Effects courses",
-  "Figma Fundamentals": "Figma courses",
-  "Procreate & Digital Drawing": "Procreate courses",
-  TouchDesigner: "TouchDesigner courses",
-  Affinity: "Affinity courses",
-};
+/** Tools shown in the header SOFTWARE column, in this order. */
+const SOFTWARE_MENU_LABELS = [
+  "Figma",
+  "Blender",
+  "Substance Painter",
+  "P5.js",
+  "Adobe Firefly",
+  "Canva",
+] as const;
+
+function courseTitleMatchesSoftware(title: string, label: string) {
+  const normalized = title.toLowerCase().replace(/\./g, "");
+  const needle = label.toLowerCase().replace(/\./g, "");
+  return normalized.includes(needle);
+}
 
 function trackMenuLabel(title: string) {
   const trimmed = title.trim();
@@ -501,33 +511,27 @@ const getCachedCoursesMenu = unstable_cache(
         href: `/tracks/${track.slug}`,
       }));
 
-    const softwareTrack = await prisma.track.findFirst({
-      where: {
-        ...visibility,
-        slug: { equals: SOFTWARE_TRACK_SLUG, mode: "insensitive" },
-      },
-      select: {
-        courses: {
-          where: visibility,
-          orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-          select: { id: true, title: true },
-        },
-      },
+    const publishedCourses = await prisma.course.findMany({
+      where: visibility,
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: { id: true, title: true },
     });
 
-    const software = (softwareTrack?.courses ?? [])
-      .filter((course) => !isSoftwareIntroCourse(course.title))
-      .slice(0, COURSES_MENU_MAX_ITEMS)
-      .map((course) => ({
-        label:
-          SOFTWARE_MENU_LABEL_BY_TITLE[course.title] ??
-          trackMenuLabel(course.title),
-        href: `/course/${course.id}`,
-      }));
+    const software = SOFTWARE_MENU_LABELS.map((label) => {
+      const course = publishedCourses.find(
+        (item) =>
+          !isSoftwareIntroCourse(item.title) &&
+          courseTitleMatchesSoftware(item.title, label)
+      );
+      return {
+        label,
+        href: course ? `/course/${course.id}` : `/tracks/${SOFTWARE_TRACK_SLUG}`,
+      };
+    });
 
     return { allCourses, software };
   },
-  ["public-get-courses-menu"],
+  ["public-get-courses-menu-software"],
   CATALOG_CACHE
 );
 
@@ -600,6 +604,8 @@ export async function publicGetTrackBySlug(slug: string) {
         titleAr: true,
           ...courseTypeBadgeSelect,
           rating: true,
+          totalDurationMinutes: true,
+          level: true,
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       },
@@ -631,6 +637,7 @@ export async function publicListTrackCoursesForTile(trackSlug: string): Promise<
     authorLabelAr: c.instructorNameAr,
     tagPrimary: track.title.toUpperCase(),
     typeLabel: courseTypeBadgeLabel(c),
+    ...courseCardStats(c),
     coverImageSrc: c.coverImage,
   }));
 }
@@ -649,6 +656,7 @@ export async function publicGetCourseById(courseId: string) {
       instructorImage: true,
       introVideoMuxPlaybackId: true,
       totalDurationMinutes: true,
+      level: true,
       rating: true,
       updatedAt: true,
       trackId: true,
@@ -812,6 +820,7 @@ export type CourseForCard = {
   track: { title: string; slug: string } | null;
   lessonCount: number;
   totalDurationMinutes: number | null;
+  level: string | null;
   rating: number | null;
   studentCount: number;
   comingSoon?: boolean;
@@ -838,6 +847,7 @@ function mapCourseToCard(
     track: { title: string; slug: string } | null;
     modules: { _count: { lessons: number } }[];
     totalDurationMinutes?: number | null;
+    level?: string | null;
     rating?: number | null;
     comingSoon?: boolean | null;
   },
@@ -857,6 +867,7 @@ function mapCourseToCard(
     track: c.track,
     lessonCount,
     totalDurationMinutes: c.totalDurationMinutes ?? null,
+    level: c.level ?? null,
     rating: c.rating ?? null,
     studentCount,
     comingSoon: Boolean(c.comingSoon),
@@ -1013,6 +1024,7 @@ const publishedCourseCardSelect = {
   instructorImage: true,
   ...courseTypeBadgeSelect,
   totalDurationMinutes: true,
+  level: true,
   rating: true,
   comingSoon: true,
   order: true,
@@ -1107,6 +1119,7 @@ export async function publicListFeaturedCourses(limit = 8): Promise<CourseForCar
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         totalDurationMinutes: true,
+        level: true,
         rating: true,
         modules: { select: { _count: { select: { lessons: true } } } },
       },
@@ -1156,6 +1169,7 @@ export async function publicGetSimilarCourses(
         instructorImage: true,
         track: { select: { title: true, slug: true } },
         totalDurationMinutes: true,
+        level: true,
         rating: true,
         modules: { select: { _count: { select: { lessons: true } } } },
       },
@@ -1315,10 +1329,9 @@ export async function publicListLandingMostsMentors(
 
 const getCachedCoursePageCatalog = unstable_cache(
   async (_requirePublished: boolean) => {
-    const [popularClassCourses, trendingCourses, allCourses, tracks, trackShowcaseSlides, featuredMentors] =
+    const [popularClassCourses, allCourses, tracks, trackShowcaseSlides, featuredMentors] =
       await Promise.all([
         publicListPopularClassCourses(40),
-        publicListTrendingCourses(),
         publicListAllPublishedCourses(),
         publicListTracks(),
         publicListTrackShowcaseSlides(),
@@ -1327,7 +1340,6 @@ const getCachedCoursePageCatalog = unstable_cache(
 
     return {
       popularClassCourses,
-      trendingCourses,
       allCourses,
       tracks,
       trackShowcaseSlides,
@@ -1342,7 +1354,6 @@ const getCachedCoursePageCatalog = unstable_cache(
 export const loadCoursePageCatalog = cache(async () => {
   const empty = {
     popularClassCourses: [] as CourseForCard[],
-    trendingCourses: [] as CourseForCard[],
     allCourses: [] as CourseForCard[],
     tracks: [] as Awaited<ReturnType<typeof publicListTracks>>,
     trackShowcaseSlides: [] as LandingShowcaseSlide[],

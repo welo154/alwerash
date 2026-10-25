@@ -17,50 +17,28 @@ const MOBILE_FOOTER_SOCIALS = [
     src: "/social/footer-linkedin.png",
   },
   {
-    label: "X",
-    href: "https://x.com",
-    src: "/social/footer-x.png",
+    label: "Facebook",
+    href: "https://facebook.com",
+    src: "/social/facebook.png",
+  },
+  {
+    label: "TikTok",
+    href: "https://www.tiktok.com",
+    src: "/social/footer-tiktok.png",
   },
 ] as const;
 
-const categoriesLinks: { label: string; href: string }[] = [
-  { label: "Illustration courses", href: "/course" },
-  { label: "Craft courses", href: "/course" },
-  { label: "Marketing & Business courses", href: "/course" },
-  { label: "Photography & Video courses", href: "/course" },
-  { label: "Design courses", href: "/course" },
-  { label: "3D & Animation courses", href: "/course" },
-  { label: "Architecture & Spaces courses", href: "/course" },
-  { label: "Writing courses", href: "/course" },
-  { label: "Fashion courses", href: "/course" },
-];
-
-const softwareLinks: { label: string; href: string }[] = [
-  { label: "Adobe Photoshop courses", href: "/course" },
-  { label: "Adobe Illustrator courses", href: "/course" },
-  { label: "Procreate courses", href: "/course" },
-  { label: "Adobe After Effects courses", href: "/course" },
-  { label: "Adobe Lightroom courses", href: "/course" },
-  { label: "Cinema 4D courses", href: "/course" },
-  { label: "Adobe InDesign courses", href: "/course" },
-  { label: "ChatGPT courses", href: "/course" },
-  { label: "Adobe Premiere courses", href: "/course" },
-];
-
 const discoverLinks: { label: string; href: string }[] = [
-  { label: "Teach on ElWerash", href: "/register" },
+  { label: "Teach on Alwerash", href: "/register" },
   { label: "Plans and Pricing", href: "/subscription" },
   { label: "Help and Support", href: "/subscription" },
 ];
 
 const sectionLinks: { label: string; href: string }[] = [
-  { label: "About Us", href: "/" },
   { label: "Courses", href: "/course" },
   { label: "Library", href: "/library" },
   { label: "Events", href: "/events" },
-  { label: "Creatives", href: "/mentors" },
   { label: "Tracks", href: "/course" },
-  { label: "Blog", href: "/" },
 ];
 
 const mobileFooterSubtitleStyle = {
@@ -152,7 +130,13 @@ function MobileFooterColumn({
   );
 }
 
-export function LandingMobileFooter() {
+export function LandingMobileFooter({
+  courseLinks,
+  softwareLinks,
+}: {
+  courseLinks: { label: string; href: string }[];
+  softwareLinks: { label: string; href: string }[];
+}) {
   const year = new Date().getFullYear();
 
   return (
@@ -277,10 +261,14 @@ export function LandingMobileFooter() {
       />
 
       <div className="mt-[22px] flex flex-col gap-[20px] min-[744px]:mt-[32px] min-[744px]:grid min-[744px]:grid-cols-2 min-[744px]:gap-x-[108px] min-[744px]:gap-y-[65px]">
-        <MobileFooterColumn title="Categories" links={categoriesLinks} />
-        <MobileFooterColumn title="Software" links={softwareLinks} />
+        <MobileFooterColumn title="ALL COURSES" links={courseLinks} viewMoreHref="/course" />
+        <MobileFooterColumn
+          title="SOFTWARE"
+          links={softwareLinks}
+          viewMoreHref="/tracks/design-softwares"
+        />
         <MobileFooterColumn title="Discover" links={discoverLinks} />
-        <MobileFooterColumn title="Sections" links={sectionLinks} viewMoreHref="/" />
+        <MobileFooterColumn title="Sections" links={sectionLinks} />
       </div>
 
       <div className="mt-[16px] -translate-y-[40px] pt-0 min-[744px]:translate-y-0">

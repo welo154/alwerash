@@ -12,6 +12,10 @@ export type LearnPopularTile = {
   /** Course-type chip: New, Best seller, Most viewed, and so on. */
   typeLabel?: string | null;
   coverImageSrc: string | null;
+  /** Watch time shown in place of the like count, e.g. "2h 15m". */
+  durationLabel?: string | null;
+  /** Beginner, Intermediate, or Advanced. */
+  levelLabel?: string | null;
   /** Learner completion % (0–100); when set, shown instead of placeholder rating. */
   progressPercent?: number | null;
   comingSoon?: boolean;

@@ -60,7 +60,7 @@ export function CoursesMegaMenuPanel() {
   }, []);
 
   const allCourses = visibleLinks(menu?.allCourses ?? []);
-  const software = visibleLinks(menu?.software ?? []);
+  const software = (menu?.software ?? []).slice(0, MAX_COLUMN_ITEMS);
 
   return (
     <div
@@ -92,7 +92,7 @@ export function CoursesMegaMenuPanel() {
           {software.length > 0 ? (
             <ul className="space-y-0 text-[18px] font-normal text-black">
               {software.map((item) => (
-                <li key={item.href}>
+                <li key={item.label}>
                   <Link href={item.href} className={itemClassName}>
                     {t(item.label)}
                   </Link>

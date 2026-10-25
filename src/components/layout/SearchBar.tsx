@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { useT } from "@/components/i18n/Tr";
 import { LocalizedText } from "@/components/i18n/LocalizedText";
@@ -58,6 +59,207 @@ type SearchBarProps = {
   /** iPad inner-site bar is shorter than the home/hero bar */
   tabletSearch?: "home" | "site";
 };
+
+function firstSearchHref(results: SearchResult | null): string | null {
+  const track = results?.tracks[0];
+  if (track) return `/tracks/${track.slug}`;
+  const course = results?.courses[0];
+  if (course) return `/course/${course.id}`;
+  return null;
+}
+
+/** Home header search: same field and arrow as the hero, wired to `/api/search`. */
+export function HeroHeaderSearch() {
+  const t = useT();
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const containerRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const requestIdRef = useRef(0);
+  const listboxId = `hero-search-results-${useId().replace(/:/g, "")}`;
+
+  const fetchResults = useCallback(async (q: string) => {
+    const trimmed = q.trim();
+    if (!trimmed) {
+      setResults(null);
+      setOpen(false);
+      setLoading(false);
+      return;
+    }
+    const id = ++requestIdRef.current;
+    setLoading(true);
+    setOpen(true);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}&limit=8`, {
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      });
+      if (id !== requestIdRef.current) return;
+      if (res.ok) setResults((await res.json()) as SearchResult);
+      else setResults({ tracks: [], courses: [] });
+    } catch {
+      if (id !== requestIdRef.current) return;
+      setResults({ tracks: [], courses: [] });
+    } finally {
+      if (id === requestIdRef.current) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => fetchResults(query), 250);
+    return () => clearTimeout(timer);
+  }, [query, fetchResults]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const hasResults = Boolean(results && (results.tracks.length > 0 || results.courses.length > 0));
+  const showDropdown = open && query.trim() !== "";
+
+  function openFirstResult() {
+    const href = firstSearchHref(results);
+    if (href) {
+      setOpen(false);
+      router.push(href);
+      return;
+    }
+    inputRef.current?.focus();
+  }
+
+  return (
+    <form
+      ref={containerRef}
+      className="relative z-[3100] flex items-center gap-[15px]"
+      onSubmit={(e) => {
+        e.preventDefault();
+        openFirstResult();
+      }}
+    >
+      <div
+        className="flex shrink-0 items-center justify-center bg-white"
+        style={{
+          width: 350,
+          height: 40,
+          padding: "0 12px",
+          gap: 10,
+          borderRadius: 20,
+          border: "0.3px solid rgb(0 0 0 / 40%)",
+          background: "#FFF",
+          boxSizing: "border-box",
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          placeholder={t("Search for courses")}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => query.trim() && setOpen(true)}
+          className="min-w-0 flex-1 bg-transparent text-[18px] text-[#73726C] placeholder:text-[#73726C] focus:outline-none"
+          style={{ fontFamily: pangeaFontFamily }}
+          aria-label={t("Search for courses")}
+          role="combobox"
+          aria-expanded={showDropdown}
+          aria-controls={listboxId}
+          aria-haspopup="listbox"
+          autoComplete="off"
+          suppressHydrationWarning
+        />
+      </div>
+      <button
+        type="submit"
+        aria-label={t("Search")}
+        className="flex h-10 w-10 shrink-0 items-center justify-center"
+        suppressHydrationWarning
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 41 41"
+          fill="none"
+          aria-hidden
+        >
+          <path
+            d="M20.25 12.25L28.25 20.25L20.25 28.25M28.25 20.25H12.25M40.25 20.25C40.25 31.2957 31.2957 40.25 20.25 40.25C9.2043 40.25 0.25 31.2957 0.25 20.25C0.25 9.2043 9.2043 0.25 20.25 0.25C31.2957 0.25 40.25 9.2043 40.25 20.25Z"
+            stroke="var(--Black, #000)"
+            strokeWidth="0.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {showDropdown ? (
+        <div
+          id={listboxId}
+          role="listbox"
+          className="absolute left-0 top-full z-[3200] mt-2 w-[350px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
+        >
+          {loading && !results ? (
+            <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-slate-500">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
+              Searching...
+            </div>
+          ) : !hasResults ? (
+            <div className="px-4 py-8 text-center text-sm text-slate-500">
+              No tracks or courses found for &quot;{query.trim()}&quot;
+            </div>
+          ) : (
+            <div className="max-h-[min(70vh,380px)] overflow-y-auto py-1">
+              {results!.tracks.length > 0 ? (
+                <ul className="py-1">
+                  {results!.tracks.map((track) => (
+                    <li key={track.id}>
+                      <Link
+                        href={`/tracks/${track.slug}`}
+                        className="block px-4 py-2.5 text-sm text-slate-800 hover:bg-[#8AF396]"
+                        onClick={() => setOpen(false)}
+                      >
+                        <LocalizedText en={track.title} ar={track.titleAr} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {results!.courses.length > 0 ? (
+                <ul className="py-1">
+                  {results!.courses.map((course) => (
+                    <li key={course.id}>
+                      <Link
+                        href={`/course/${course.id}`}
+                        className="block px-4 py-2.5 text-sm text-slate-800 hover:bg-[#8AF396]"
+                        onClick={() => setOpen(false)}
+                      >
+                        <LocalizedText en={course.title} ar={course.titleAr} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </form>
+  );
+}
 
 export function SearchBar({
   variant = "default",

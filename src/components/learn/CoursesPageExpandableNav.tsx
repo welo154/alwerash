@@ -28,7 +28,7 @@ const NAV_LINE = { width: NAV_WIDTH_PX, height: 0.3, background: "#000" } as con
 const EXPAND_TRANSITION =
   "grid-template-rows 480ms cubic-bezier(0.22, 1, 0.36, 1)";
 
-type SectionId = "courses" | "categories" | "areas" | "software";
+type SectionId = "courses" | "categories" | "software";
 
 type NavItem = {
   key: string;
@@ -177,18 +177,18 @@ function NavTextButton({
 export function CoursesPageExpandableNav({
   courseFilters,
   categories,
-  areaItems,
   activeCategoryKey,
+  defaultSection = "courses",
 }: {
   courseFilters: readonly string[];
   categories: NavItem[];
-  areaItems: readonly NavItem[];
   activeCategoryKey?: string;
+  defaultSection?: SectionId;
 }) {
   const router = useRouter();
   const uid = useId();
   const reduceMotion = usePrefersReducedMotion();
-  const [openSection, setOpenSection] = useState<SectionId | null>(null);
+  const [openSection, setOpenSection] = useState<SectionId | null>(defaultSection);
 
   const toggle = (id: SectionId) => {
     setOpenSection((current) => (current === id ? null : id));
@@ -271,27 +271,6 @@ export function CoursesPageExpandableNav({
                   {item.label}
                 </NavTextButton>
               )}
-            </li>
-          ))}
-        </ul>
-      </ExpandableSection>
-
-      <ExpandableSection
-        id={`${uid}-areas`}
-        label="AREAS"
-        headingLevel={3}
-        open={openSection === "areas"}
-        onToggle={() => toggle("areas")}
-        showTopGap
-        showUnderline
-        reduceMotion={reduceMotion}
-      >
-        <ul className="m-0 list-none space-y-0.5 p-0">
-          {areaItems.map((item) => (
-            <li key={item.key}>
-              <NavTextButton onClick={() => onCategorySelect(item)}>
-                {item.label}
-              </NavTextButton>
             </li>
           ))}
         </ul>

@@ -114,7 +114,7 @@ export function LandingGetStartedCtaSection({
 
           <Link
             href={SUBSCRIPTION_PRICING_PATH}
-            className="mt-[53px] inline-flex h-[44px] items-center justify-center rounded-[8px] border-[0.2px] border-black px-4 text-center text-[24px] font-normal no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[58px] min-[744px]:h-[91px] min-[744px]:w-[300px] min-[744px]:border-[0.3px] min-[744px]:px-4 min-[744px]:text-[36px] min-[744px]:font-bold"
+            className="mt-[53px] inline-flex h-[44px] items-center justify-center rounded-[30px] border-[0.2px] border-black px-4 text-center text-[24px] font-normal no-underline transition-colors duration-200 hover:!bg-[#64E1FF] min-[744px]:mt-[58px] min-[744px]:h-[91px] min-[744px]:w-[300px] min-[744px]:border-[0.3px] min-[744px]:px-4 min-[744px]:text-[36px] min-[744px]:font-bold"
             style={{
               background: "var(--Green, #8AF396)",
               color: "var(--Text-Primary, #141413)",
@@ -197,7 +197,7 @@ export function LandingGetStartedCtaSection({
 
         <Link
           href={SUBSCRIPTION_PRICING_PATH}
-          className="mt-[50px] flex h-[123px] w-[390px] max-w-full shrink-0 items-center justify-center rounded-[8px] border-[0.3px] border-black bg-[#8AF396] px-4 py-0 text-center font-bold uppercase tracking-[0] transition-colors hover:bg-[#64E1FF]"
+          className="mt-[50px] flex h-[123px] w-[390px] max-w-full shrink-0 items-center justify-center rounded-[30px] border-[0.3px] border-black bg-[#8AF396] px-4 py-0 text-center font-bold uppercase tracking-[0] transition-colors hover:bg-[#64E1FF]"
           style={{
             fontFamily: pangeaFont,
             color: CTA_BUTTON_TEXT,

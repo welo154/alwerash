@@ -72,6 +72,12 @@ enum PaymentEventStatus {
   FAILED
 }
 
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 enum SubmissionStatus {
   DRAFT
   SUBMITTED
@@ -298,6 +304,8 @@ model Course {
   // Card stats (admin-editable or derived): total duration in minutes, display rating
   totalDurationMinutes   Int?     @map("total_duration_minutes")
   rating                 Float?   // e.g. 4.5
+  /// Skill level shown on course cards.
+  level                  CourseLevel @default(BEGINNER)
 
   // Learn catalog filter tags (admin checkboxes)
   tagGuided              Boolean  @default(false) @map("tag_guided")

@@ -6,8 +6,8 @@ export type CourseFilterAction = {
 };
 
 export const COURSE_FILTER_ACTIONS: Record<string, CourseFilterAction> = {
-  "All Couses": { type: "all", scrollTargetId: "all-courses" },
-  "Top Rated": { type: "topRated", scrollTargetId: "all-courses" },
+  "All Courses": { type: "all", scrollTargetId: "all-courses" },
   "Deep Dive": { type: "deepDive", scrollTargetId: "all-courses" },
-  "Popular Courses": { scrollTargetId: "popular-classes" },
+  Basics: { scrollTargetId: "all-courses" },
+  "Popular Classes": { scrollTargetId: "popular-classes" },
 };

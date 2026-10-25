@@ -7,17 +7,17 @@ const pangeaFont = pangeaFontFamily;
 
 const FAQ_ITEMS: readonly { question: string; answer: string }[] = [
   {
-    question: "What is ElWerash?",
+    question: "What is Alwerash?",
     answer:
-      "ElWerash is an online learning platform where you can take courses in design, creative skills, and more—taught by working professionals, on your schedule.",
+      "Alwerash is an online learning platform where you can take courses in design, creative skills, and more—taught by working professionals, on your schedule.",
   },
   {
-    question: "What is included in my ElWerash membership?",
+    question: "What is included in my Alwerash membership?",
     answer:
       "A membership unlocks the full catalog: stream lessons, download resources where available, and track your progress across courses and tracks.",
   },
   {
-    question: "What can I learn from ElWerash?",
+    question: "What can I learn from Alwerash?",
     answer:
       "You can learn illustration, motion, UI/UX, photography, and related creative disciplines—structured paths from foundations to portfolio-ready projects.",
   },
@@ -27,7 +27,7 @@ const FAQ_ITEMS: readonly { question: string; answer: string }[] = [
       "When your trial ends, you can choose a plan to keep access. If you do not subscribe, your account switches to limited access until you upgrade.",
   },
   {
-    question: "Can I teach on ElWerash?",
+    question: "Can I teach on Alwerash?",
     answer:
       "We partner with qualified instructors. If you are interested in teaching, reach out through our contact or instructor application flow when it is open.",
   },

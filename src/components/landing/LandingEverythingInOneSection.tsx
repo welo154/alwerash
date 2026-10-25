@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentType, CSSProperties } from "react";
+import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -52,57 +53,10 @@ function FeatureGlyphExperts({ className }: GlyphProps) {
 function FeatureGlyphPaths({ className }: GlyphProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43 43" fill="none" className={className} aria-hidden>
+      <circle cx="10.5" cy="32.5" r="6" stroke="currentColor" strokeWidth={3} />
+      <circle cx="32.5" cy="10.5" r="6" stroke="currentColor" strokeWidth={3} />
       <path
-        d="M26.5 17.5C24.84 17.5 23.5 16.16 23.5 14.5V4.5C23.5 2.84 24.84 1.5 26.5 1.5C28.16 1.5 29.5 2.84 29.5 4.5V14.5C29.5 16.16 28.16 17.5 26.5 17.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M38.5 17.5H35.5V14.5C35.5 12.84 36.84 11.5 38.5 11.5C40.16 11.5 41.5 12.84 41.5 14.5C41.5 16.16 40.16 17.5 38.5 17.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16.5 25.5C18.16 25.5 19.5 26.84 19.5 28.5V38.5C19.5 40.16 18.16 41.5 16.5 41.5C14.84 41.5 13.5 40.16 13.5 38.5V28.5C13.5 26.84 14.84 25.5 16.5 25.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4.5 25.5H7.5V28.5C7.5 30.16 6.16 31.5 4.5 31.5C2.84 31.5 1.5 30.16 1.5 28.5C1.5 26.84 2.84 25.5 4.5 25.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M25.5 26.5C25.5 24.84 26.84 23.5 28.5 23.5H38.5C40.16 23.5 41.5 24.84 41.5 26.5C41.5 28.16 40.16 29.5 38.5 29.5H28.5C26.84 29.5 25.5 28.16 25.5 26.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M28.5 35.5H25.5V38.5C25.5 40.16 26.84 41.5 28.5 41.5C30.16 41.5 31.5 40.16 31.5 38.5C31.5 36.84 30.16 35.5 28.5 35.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M17.5 16.5C17.5 14.84 16.16 13.5 14.5 13.5H4.5C2.84 13.5 1.5 14.84 1.5 16.5C1.5 18.16 2.84 19.5 4.5 19.5H14.5C16.16 19.5 17.5 18.16 17.5 16.5Z"
-        stroke="currentColor"
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.5 7.5H17.5V4.5C17.5 2.84 16.16 1.5 14.5 1.5C12.84 1.5 11.5 2.84 11.5 4.5C11.5 6.16 12.84 7.5 14.5 7.5Z"
+        d="M16.5 32.5H22C27.5 32.5 27.5 21.5 22 21.5H16C10.5 21.5 10.5 16.5 16 16.5H26.5"
         stroke="currentColor"
         strokeWidth={3}
         strokeLinecap="round"
@@ -140,17 +94,45 @@ type FeatureRow = {
   title: string;
   body: string;
   Icon: ComponentType<GlyphProps>;
+  comingSoon?: boolean;
 };
+
+function ComingSoonStamp() {
+  const t = useT();
+  const label = t("Coming soon");
+  const lines = label.split(/\s+/).filter(Boolean);
+
+  return (
+    <span
+      className="relative inline-flex h-[48px] w-[48px] shrink-0 -rotate-[14deg] items-center justify-center rounded-full border-2 border-[#FF8CFF] text-[#FF8CFF] min-[744px]:h-[68px] min-[744px]:w-[68px]"
+      style={{ fontFamily: pangeaFont }}
+      aria-label={label}
+    >
+      <span
+        className="pointer-events-none absolute inset-[3px] rounded-full border border-[#FF8CFF] min-[744px]:inset-[4px]"
+        aria-hidden
+      />
+      <span
+        className="flex max-w-[40px] flex-col items-center text-center text-[7px] font-semibold uppercase leading-[1.05] tracking-[0.04em] min-[744px]:max-w-[54px] min-[744px]:text-[10px]"
+        aria-hidden
+      >
+        {lines.map((line) => (
+          <span key={line}>{line}</span>
+        ))}
+      </span>
+    </span>
+  );
+}
 
 const FEATURES: FeatureRow[] = [
   {
-    title: "COUNTLESS CLASSES",
-    body: "Thousands of creative classes. Beginner to pro.",
+    title: "VARIOUS CLASSES",
+    body: "Distinct creative classes. Beginner to pro.",
     Icon: FeatureGlyphCountless,
   },
   {
     title: "ON-DEMAND VIEWING",
-    body: "Watch at your pace and even offline.",
+    body: "Watch at your pace in any place.",
     Icon: FeatureGlyphOnDemand,
   },
   {
@@ -167,6 +149,7 @@ const FEATURES: FeatureRow[] = [
     title: "1-ON-1 SESSIONS",
     body: "Book time for personalized feedback with a teacher.",
     Icon: FeatureGlyphOneOnOne,
+    comingSoon: true,
   },
 ];
 
@@ -308,7 +291,7 @@ export function LandingEverythingInOneSection({
               : "mt-[37px] mb-0 gap-[35px] min-[744px]:mt-[51px] min-[744px]:gap-[45px]"
           }`}
         >
-          {FEATURES.map(({ title, body, Icon }) => (
+          {FEATURES.map(({ title, body, Icon, comingSoon }) => (
             <li key={title} className={`flex items-center ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}>
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
@@ -327,7 +310,7 @@ export function LandingEverythingInOneSection({
                 }
               >
                 <h3
-                  className={isCourseRows ? "m-0 text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0"}
+                  className={isCourseRows ? "m-0 w-fit text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0 w-fit"}
                   style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}
                 >
                   {title}
@@ -343,9 +326,13 @@ export function LandingEverythingInOneSection({
                   {body}
                 </p>
               </div>
-              {hideChecks ? null : (
+              {hideChecks && !comingSoon ? null : (
               <span className="ml-[33px] shrink-0 min-[744px]:ml-auto">
-                <FeatureCheckGlyph className="h-[33.171px] w-[33.171px] min-[744px]:h-[44.893px] min-[744px]:w-[44.893px]" />
+                {comingSoon ? (
+                  <ComingSoonStamp />
+                ) : (
+                  <FeatureCheckGlyph className="h-[33.171px] w-[33.171px] min-[744px]:h-[44.893px] min-[744px]:w-[44.893px]" />
+                )}
               </span>
               )}
             </li>
@@ -381,7 +368,7 @@ export function LandingEverythingInOneSection({
           </h2>
 
           <ul className="mb-[35px] flex list-none flex-col gap-[35px] p-0">
-            {FEATURES.map(({ title, body, Icon }) => (
+            {FEATURES.map(({ title, body, Icon, comingSoon }) => (
               <li key={title} className="flex items-start">
                 <span className="mt-1 mr-4 flex shrink-0 items-center justify-center text-[#1E1E1E] sm:mr-6">
                   <Icon className="h-[36px] w-[44px] shrink-0" />
@@ -390,7 +377,7 @@ export function LandingEverythingInOneSection({
                   className="mr-[115px] w-[480px] max-w-full shrink-0"
                   style={{ fontFamily: pangeaFont }}
                 >
-                  <h3 className="text-[24px] font-semibold not-italic leading-[127%] text-black">
+                  <h3 className="m-0 w-fit text-[24px] font-semibold not-italic leading-[127%] text-black">
                     {title}
                   </h3>
                   <p className="mt-2 text-[24px] font-normal not-italic leading-[127%] text-black">
@@ -398,7 +385,7 @@ export function LandingEverythingInOneSection({
                   </p>
                 </div>
                 <span className="-translate-x-[40px] shrink-0">
-                  <FeatureCheck />
+                  {comingSoon ? <ComingSoonStamp /> : <FeatureCheck />}
                 </span>
               </li>
             ))}

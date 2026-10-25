@@ -45,6 +45,8 @@ export function LearnPopularFigmaTile(
     tagPrimary,
     typeLabel,
     coverImageSrc,
+    durationLabel,
+    levelLabel,
     comingSoon = false,
     className = "",
     size = "default",
@@ -270,6 +272,7 @@ export function LearnPopularFigmaTile(
             >
               {startLabel}
             </span>
+            {comingSoon ? null : (
             <span
               className="absolute"
               aria-hidden
@@ -313,83 +316,57 @@ export function LearnPopularFigmaTile(
                 />
               </svg>
             </span>
+            )}
           </div>
         </div>
-        <div
-          className="absolute"
-          style={
-            arabic
-              ? { left: 33, bottom: 30, width: 16.3, height: 13.583 }
-              : { right: 126.7, bottom: 37.5, width: 16.3, height: 13.583 }
-          }
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16.3"
-            height="13.583"
-            viewBox="0 0 18 16"
-            fill="none"
-            aria-hidden
-            style={{ display: "block", opacity: 0.6 }}
-          >
-            <path
-              d="M4.89067 6.86241L8.20321 0.75C8.86211 0.75 9.49403 0.964662 9.95994 1.34676C10.4259 1.72886 10.6876 2.2471 10.6876 2.78747V5.5041H15.3748C15.6149 5.50187 15.8527 5.54247 16.0718 5.6231C16.2908 5.70372 16.4859 5.82244 16.6434 5.97103C16.801 6.11961 16.9172 6.29451 16.9842 6.48361C17.0511 6.67271 17.0671 6.87148 17.0311 7.06616L15.8883 13.1786C15.8284 13.5025 15.6278 13.7977 15.3234 14.0099C15.0191 14.222 14.6315 14.3368 14.232 14.3331H4.89067M4.89067 6.86241V14.3331M4.89067 6.86241H2.40627C1.967 6.86241 1.54572 7.00552 1.23511 7.26025C0.924499 7.51499 0.75 7.86048 0.75 8.22072V12.9748C0.75 13.3351 0.924499 13.6806 1.23511 13.9353C1.54572 14.19 1.967 14.3331 2.40627 14.3331H4.89067"
-              stroke="var(--Black, #000)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        {durationLabel || levelLabel ? (
           <div
-            className="absolute flex items-center"
-            style={{ left: 16.3 + 6.5, top: "50%", transform: "translateY(-50%)" }}
+            className="absolute flex items-center gap-[8px]"
+            style={arabic ? { left: 24, bottom: 36 } : { right: 22, bottom: 36 }}
           >
-            <span
-              style={{
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: 15,
-                fontStyle: "normal",
-                fontWeight: 400,
-                lineHeight: "normal",
-                opacity: 0.6,
-              }}
-            >
-              {arabic ? "٩٨٪" : "98%"}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="15"
-              height="12"
-              viewBox="0 0 17 14"
-              fill="none"
-              aria-hidden
-              style={{ display: "block", flexShrink: 0, marginLeft: 8.5, opacity: 0.6 }}
-            >
-              <path
-                d="M11.6591 12.75V11.4167C11.6591 10.7094 11.3718 10.0311 10.8603 9.53105C10.3488 9.03095 9.65514 8.75 8.93182 8.75H3.47727C2.75396 8.75 2.06026 9.03095 1.5488 9.53105C1.03734 10.0311 0.75 10.7094 0.75 11.4167V12.75M15.75 12.75V11.4167C15.7495 10.8258 15.5484 10.2518 15.1782 9.78488C14.808 9.31791 14.2896 8.98438 13.7045 8.83667M10.9773 0.836667C11.5639 0.983534 12.0839 1.31713 12.4552 1.78487C12.8265 2.25261 13.0281 2.82789 13.0281 3.42C13.0281 4.01211 12.8265 4.58739 12.4552 5.05513C12.0839 5.52287 11.5639 5.85647 10.9773 6.00333M8.93182 3.41667C8.93182 4.88943 7.71078 6.08333 6.20455 6.08333C4.69831 6.08333 3.47727 4.88943 3.47727 3.41667C3.47727 1.94391 4.69831 0.75 6.20455 0.75C7.71078 0.75 8.93182 1.94391 8.93182 3.41667Z"
-                stroke="var(--Black, #000)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span
-              style={{
-                marginLeft: 6,
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: 15,
-                fontStyle: "italic",
-                fontWeight: 400,
-                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-                opacity: 0.6,
-              }}
-            >
-              {arabic ? "٢٣٤" : "234"}
-            </span>
+            {durationLabel ? (
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaFont,
+                  fontSize: 15,
+                  fontWeight: 400,
+                  lineHeight: "normal",
+                  opacity: 0.7,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {durationLabel}
+              </span>
+            ) : null}
+            {levelLabel ? (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 26,
+                  padding: "0 10px",
+                  borderRadius: 23,
+                  border: "0.3px solid #000",
+                  background:
+                    levelLabel === "Advanced"
+                      ? "#141413"
+                      : levelLabel === "Intermediate"
+                        ? "#64E1FF"
+                        : "#8AF396",
+                  color: levelLabel === "Advanced" ? "#fff" : "#141413",
+                  fontFamily: pangeaFont,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  lineHeight: "19.6px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {t(levelLabel)}
+              </span>
+            ) : null}
           </div>
-        </div>
+        ) : null}
       </div>
       </Link>
   );

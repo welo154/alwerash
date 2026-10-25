@@ -7,6 +7,7 @@ import { LandingSocialSignInRow } from "./LandingSocialSignInRow";
 import { CoursesMegaMenuPanel } from "@/components/layout/CoursesMegaMenu";
 import { MobileSiteNavActions, MobileSiteNavLogo } from "@/components/layout/MobileSiteNavBar";
 import { HeaderLanguageToggle } from "@/components/layout/HeaderLanguageToggle";
+import { HeroHeaderSearch } from "@/components/layout/SearchBar";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily, pangeaVar } from "@/lib/fonts/pangea";
@@ -173,53 +174,7 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
               </nav>
 
               <div className="ml-[30px] hidden flex-wrap items-center lg:flex">
-                <div className="flex items-center gap-[15px]">
-                  <div
-                    className="flex shrink-0 items-center justify-center bg-white"
-                    style={{
-                      width: 350,
-                      height: 40,
-                      padding: "0 12px",
-                      gap: 10,
-                      borderRadius: 20,
-                      border: "0.3px solid rgb(0 0 0 / 40%)",
-                      background: "#FFF",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder={t("Search for courses")}
-                      className="min-w-0 flex-1 bg-transparent text-[18px] text-[#73726C] placeholder:text-[#73726C] focus:outline-none"
-                      style={{ fontFamily: pangeaFont }}
-                      suppressHydrationWarning
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    aria-label="Search"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center"
-                    suppressHydrationWarning
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="40"
-                      height="40"
-                      viewBox="0 0 41 41"
-                      fill="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M20.25 12.25L28.25 20.25L20.25 28.25M28.25 20.25H12.25M40.25 20.25C40.25 31.2957 31.2957 40.25 20.25 40.25C9.2043 40.25 0.25 31.2957 0.25 20.25C0.25 9.2043 9.2043 0.25 20.25 0.25C31.2957 0.25 40.25 9.2043 40.25 20.25Z"
-                        stroke="var(--Black, #000)"
-                        strokeWidth="0.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                <HeroHeaderSearch />
 
                 <div className="ml-[75px] flex w-[238px] min-w-[238px] max-w-[238px] shrink-0 items-center justify-end gap-[15px] overflow-visible">
                   <Link
@@ -367,12 +322,12 @@ export function HeroSection({ tracks: _tracks }: { tracks: HeroTrack[] }) {
               }}
             >
               {arabic
-                ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
-                : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
+                ? "استكشف الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والخط، والمزيد. تُدرس بواسطة محترفين في الصناعة."
+                : "Explore online classes in design, typography, illustration, calligraphy, and more. Taught by industry professionals."}
             </p>
             <Link
               href={SUBSCRIPTION_PRICING_PATH}
-              className={arabic ? "mt-[50px]" : "mt-[30px]"}
+              className={`${arabic ? "mt-[50px]" : "mt-[30px]"} transition-colors duration-200 hover:!bg-[#64E1FF]`}
               style={{
                 display: "flex",
                 width: 270,
@@ -541,16 +496,16 @@ function GuestHeroMobileCopy({ variant = "mobile" }: { variant?: "mobile" | "tab
         }}
       >
         {arabic
-          ? "استكشف الآلاف من الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والتصوير، والمزيد. تُدرس بواسطة محترفين في الصناعة."
-          : "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals."}
+          ? "استكشف الدروس عبر الإنترنت في التصميم، والطباعة، والرسم، والخط، والمزيد. تُدرس بواسطة محترفين في الصناعة."
+          : "Explore online classes in design, typography, illustration, calligraphy, and more. Taught by industry professionals."}
       </p>
 
       <Link
         href={SUBSCRIPTION_PRICING_PATH}
         className={
           isTablet
-            ? `${arabic ? "mt-[50px]" : "mt-[61px]"} flex h-[91px] w-[300px] items-center justify-center rounded-[8px] bg-white px-4 text-center text-[36px] font-normal text-[#141413]`
-            : "mt-[50px] inline-flex h-[44px] items-center rounded-[8px] border-[0.2px] bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413]"
+            ? `${arabic ? "mt-[50px]" : "mt-[61px]"} flex h-[91px] w-[300px] items-center justify-center rounded-[30px] bg-white px-4 text-center text-[36px] font-normal text-[#141413] transition-colors duration-200 hover:!bg-[#64E1FF]`
+            : "mt-[50px] inline-flex h-[44px] items-center rounded-[30px] border-[0.2px] bg-white px-4 text-[24px] font-normal leading-[19.6px] text-[#141413] transition-colors duration-200 hover:!bg-[#64E1FF]"
         }
         style={{
           fontFamily: pangeaFont,

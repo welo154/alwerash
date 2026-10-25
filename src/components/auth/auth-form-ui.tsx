@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/components/i18n/Tr";
 import { AUTH_OAUTH_ICONS } from "./auth-oauth-icons";
 import { pangeaFont } from "./auth-theme";
 
@@ -53,7 +56,7 @@ export const authSubmitButtonStyle: React.CSSProperties = {
   width: 300,
   height: 91,
   padding: "0 16px",
-  borderRadius: 8,
+  borderRadius: 30,
   color: "#141413",
   textAlign: "center",
   fontFamily: pangeaFont,
@@ -75,11 +78,12 @@ export function AuthFieldError({
   id: string;
   message?: string | null;
 }) {
+  const t = useT();
   if (!message) return null;
 
   return (
     <p id={id} className="m-0 mt-2" style={authFieldErrorStyle} role="alert">
-      {message}
+      {t(message)}
     </p>
   );
 }
@@ -138,6 +142,7 @@ export function AuthTextField({
   className?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
+  const t = useT();
   const describedBy = error && errorId ? errorId : undefined;
 
   return (
@@ -149,7 +154,7 @@ export function AuthTextField({
           type={type}
           autoComplete={autoComplete}
           inputMode={inputMode}
-          placeholder={placeholder}
+          placeholder={t(placeholder)}
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
@@ -180,6 +185,7 @@ export function AuthPasswordField({
   errorId?: string;
   onValueChange?: () => void;
 }) {
+  const t = useT();
   const describedBy = error ? errorId : undefined;
 
   return (
@@ -190,7 +196,7 @@ export function AuthPasswordField({
           name="password"
           type={showPassword ? "text" : "password"}
           autoComplete={autoComplete}
-          placeholder="Password"
+          placeholder={t("Password")}
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
@@ -208,7 +214,7 @@ export function AuthPasswordField({
           onPointerLeave={onHidePassword}
           onPointerCancel={onHidePassword}
           className="flex shrink-0 touch-none items-center justify-center border-none bg-transparent p-0 select-none"
-          aria-label="Hold to show password"
+          aria-label={t("Hold to show password")}
           aria-pressed={showPassword}
         >
           <PasswordEyeIcon />
@@ -224,11 +230,13 @@ export function AuthOAuthSection({
 }: {
   onOAuthSignIn?: (providerId: string) => void;
 }) {
+  const t = useT();
+
   return (
     <>
       <div className="auth-oauth-label-gap h-[17px] shrink-0" aria-hidden />
       <p className="auth-oauth-label m-0 text-center text-black" style={authText24}>
-        Or continue with
+        {t("Or continue with")}
       </p>
       <div className="auth-oauth-icons-gap h-[18px] shrink-0" aria-hidden />
       <div className="auth-oauth-icons flex items-center justify-center gap-[12px]">

@@ -325,7 +325,7 @@ export function LearnFeaturedCoursesPanel({
               FEATURED
             </span>
             <span className="text-[24px] font-normal not-italic min-[744px]:max-lg:text-[32px] lg:text-[36px]">
-              {"\u00A0"}COURSES
+              {"\u00A0"}TRACKS
             </span>
           </h1>
           <button

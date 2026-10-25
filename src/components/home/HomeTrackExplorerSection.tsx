@@ -100,7 +100,6 @@ function useMobileSwiperInset() {
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
-/** Same continuous drift as LearnTrendingClassesSection. */
 const MARQUEE_PIXELS_PER_SECOND = 47;
 
 const pillFont = {
@@ -153,22 +152,39 @@ function MobileDiscoverCta({
         }}
       >
         {t(
-          "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+          onDark
+            ? "Explore online articles, books, references and podcasts and more. Taught by industry professionals."
+            : "Explore online classes in design, typography, illustration, calligraphy, and more. Taught by industry professionals.",
         )}
       </p>
+      {onDark ? (
+        <span
+          className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[30px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
+          style={{
+            ...pillFont,
+            backgroundColor: "var(--Blue, #64E1FF)",
+            borderRadius: 30,
+            color: "var(--Text-Primary, #141413)",
+            lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          }}
+        >
+          {t("Coming soon")}
+        </span>
+      ) : (
       <Link
         href="/course"
-        className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[8px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
+        className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[30px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
         style={{
           ...pillFont,
           backgroundColor: "var(--Blue, #64E1FF)",
-          borderRadius: "var(--Radius-MD, 8px)",
+          borderRadius: 30,
           color: "var(--Text-Primary, #141413)",
           lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
         }}
       >
         {t("Discover")}
       </Link>
+      )}
     </div>
   );
 }
@@ -529,6 +545,12 @@ export function HomeTrackExplorerSection({
     () => [...trackPillRow1, ...trackPillRow2],
     [trackPillRow1, trackPillRow2]
   );
+  /** Guest marquee: every track on both rows, second row shifted so the order differs. */
+  const marqueeRow2 = useMemo(() => {
+    if (allPills.length < 2) return allPills;
+    const shift = Math.floor(allPills.length / 2);
+    return [...allPills.slice(shift), ...allPills.slice(0, shift)];
+  }, [allPills]);
   const pillRow1 = maxPills != null ? allPills.slice(0, maxPills) : trackPillRow1;
   const pillRow2 = maxPills != null ? [] : trackPillRow2;
 
@@ -605,12 +627,12 @@ export function HomeTrackExplorerSection({
       {marqueeTrackPills ? (
         <div>
           <TrackPillsMarqueeRow
-            pills={trackPillRow1}
+            pills={allPills}
             renderPill={(pill, key) => renderTrackPill(pill, key)}
           />
-          {trackPillRow2.length > 0 ? (
+          {marqueeRow2.length > 0 ? (
             <TrackPillsMarqueeRow
-              pills={trackPillRow2}
+              pills={marqueeRow2}
               renderPill={(pill, key) => renderTrackPill(pill, key)}
               className="mt-[10px] min-[744px]:mt-[11px]"
               reverse
@@ -1265,13 +1287,13 @@ export function HomeTrackExplorerSection({
                 style={bodyTextFont}
               >
                 {t(
-                  "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+                  "Explore online classes in design, typography, illustration, calligraphy, and more. Taught by industry professionals.",
                 )}
               </p>
               <Link
                 href="/course"
-                className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
-                style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)" }}
+                className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[30px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                style={{ ...pillFont, backgroundColor: "var(--Blue, #64E1FF)", borderRadius: 30 }}
               >
                 {t("Discover")}
               </Link>
@@ -1304,20 +1326,20 @@ export function HomeTrackExplorerSection({
                   style={{ ...bodyTextFont, marginLeft: 90 }}
                 >
                   {t(
-                    "Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by industry professionals.",
+                    "Explore online articles, books, references and podcasts and more. Taught by industry professionals.",
                   )}
                 </p>
-                <Link
-                  href="/course"
-                  className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+                <span
+                  className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[30px] border border-black px-4 text-center text-[36px] font-normal leading-[19.6px] text-[color:var(--Text-Primary,#141413)]"
                   style={{
                     ...pillFont,
                     backgroundColor: "var(--Blue, #64E1FF)",
+                    borderRadius: 30,
                     marginRight: 65,
                   }}
                 >
-                  {t("Discover")}
-                </Link>
+                  {t("Coming soon")}
+                </span>
               </div>
             </div>
           </div>

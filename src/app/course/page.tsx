@@ -3,7 +3,6 @@ import { loadCoursePageCatalog, type CourseForCard } from "@/server/content/publ
 import { LandingCurrentMostsSection } from "@/components/landing";
 import { LearnFeaturedCoursesPanel } from "@/components/learn/LearnFeaturedCoursesPanel";
 import { LearnPopularClassesSection } from "@/components/learn/LearnPopularClassesSection";
-import { LearnTrendingClassesSection } from "@/components/learn/LearnTrendingClassesSection";
 import LearnAllCoursesSection from "@/components/learn/LearnAllCoursesSection";
 import type { LearnAllCourseItem } from "@/components/learn/learn-all-courses-types";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
@@ -14,6 +13,7 @@ import {
 import { LearnCoursesPageFilterBar } from "@/components/learn/LearnCoursesPageFilterBar";
 import { markPage } from "@/server/observability/query-timing";
 import { LocaleMirror } from "@/components/providers/LocaleProvider";
+import { courseCardStats } from "@/lib/content/course-card-stats";
 
 function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
   return courses.map((c) => ({
@@ -27,6 +27,7 @@ function toPopularTiles(courses: CourseForCard[]): LearnPopularTile[] {
     typeLabel: c.typeLabel,
     coverImageSrc: c.coverImage,
     comingSoon: c.comingSoon,
+    ...courseCardStats(c),
   }));
 }
 
@@ -46,6 +47,7 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
     lessonCount: c.lessonCount,
     totalDurationMinutes: c.totalDurationMinutes,
     comingSoon: c.comingSoon,
+    ...courseCardStats(c),
   }));
 }
 
@@ -57,7 +59,6 @@ export default async function LearnPage() {
   } catch {
     catalog = {
       popularClassCourses: [],
-      trendingCourses: [],
       allCourses: [],
       tracks: [],
       trackShowcaseSlides: [],
@@ -67,7 +68,6 @@ export default async function LearnPage() {
 
   const {
     popularClassCourses,
-    trendingCourses,
     allCourses,
     tracks,
     trackShowcaseSlides,
@@ -75,10 +75,8 @@ export default async function LearnPage() {
   } = catalog;
 
   const popularTiles = toPopularTiles(popularClassCourses);
-  const trendingTiles = toPopularTiles(trendingCourses);
   const allCourseItems = toAllCourseItems(allCourses);
-  const trackOptions = tracks.map((track) => ({ slug: track.slug, title: track.title }));
-  const hasCarouselSections = popularTiles.length > 0 || trendingTiles.length > 0;
+  const hasCarouselSections = popularTiles.length > 0;
   const sidebarCategories = buildLearnSidebarCategories(tracks);
 
   return (
@@ -99,7 +97,7 @@ export default async function LearnPage() {
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
-                aria-label="Featured courses"
+                aria-label="Featured tracks"
                 className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ms-[73px]"
               >
                 <LearnFeaturedCoursesPanel
@@ -118,20 +116,11 @@ export default async function LearnPage() {
                   </section>
                 ) : null}
 
-                {trendingTiles.length > 0 ? (
-                  <div className={popularTiles.length > 0 ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
-                    <section aria-label="Recently added classes">
-                      <LearnTrendingClassesSection tiles={trendingTiles} fullBleed="right" hideNavOnMobile />
-                    </section>
-                  </div>
-                ) : null}
-
                 {allCourseItems.length > 0 ? (
                   <div className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
                     <Suspense fallback={null}>
                       <LearnAllCoursesSection
                         courses={allCourseItems}
-                        tracks={trackOptions}
                         fullBleed="right"
                         hideNavOnMobile
                       />

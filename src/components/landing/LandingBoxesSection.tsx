@@ -315,15 +315,16 @@ export function LandingBoxesSection({
               fontFamily: pangeaFontFamily,
             }}
           >
-            Explore thousands of online classes in design, typography, illustration, photography, and more. Taught by
+            Explore online classes in design, typography, illustration, calligraphy, and more. Taught by
             industry professionals.
           </p>
           <Link
             href="/course"
-            className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[8px] border border-black px-4 text-center text-[36px] font-normal not-italic leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
+            className="inline-flex h-[91px] w-[247px] shrink-0 items-center justify-center rounded-[30px] border border-black px-4 text-center text-[36px] font-normal not-italic leading-[19.6px] text-[color:var(--Text-Primary,#141413)] no-underline transition-opacity hover:opacity-90"
             style={{
               fontFamily: pangeaFontFamily,
               backgroundColor: "var(--Blue, #64E1FF)",
+              borderRadius: 30,
             }}
           >
             Discover

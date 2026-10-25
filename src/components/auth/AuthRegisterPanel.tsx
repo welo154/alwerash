@@ -16,6 +16,8 @@ import {
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
 import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 import { CheckEmailModal } from "./CheckEmailModal";
+import { useT } from "@/components/i18n/Tr";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REQUIREMENTS = {
@@ -77,6 +79,8 @@ export function AuthRegisterPanel({
     formData: FormData
   ) => Promise<{ success: true; email: string } | { success: false; error: string }>;
 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
   const nextParam = safeInternalPath(searchParams.get("next"));
@@ -149,11 +153,11 @@ export function AuthRegisterPanel({
   return (
     <div className="auth-mobile-panel auth-register-panel flex w-full flex-col">
       <h1 className="auth-login-title m-0 text-black" style={authHeadingStyle}>
-        SIGN IN
+        {t("SIGN UP")}
       </h1>
       <div className="auth-register-title-gap h-[12px] shrink-0" aria-hidden />
       <p className="auth-register-subtitle m-0 h-[29px] w-[598px] max-w-full text-black" style={authText24}>
-        Learn from the best and showcase your creative work.
+        {t("Learn from the best and showcase your creative work.")}
       </p>
       <div className="auth-register-fields-gap h-[33px] shrink-0" aria-hidden />
 
@@ -195,9 +199,9 @@ export function AuthRegisterPanel({
         />
         <div className="auth-register-payment">
           <div className="auth-register-payment-label-gap shrink-0" aria-hidden />
-          <p className="auth-register-payment-label m-0 text-black">Payment Method</p>
+          <p className="auth-register-payment-label m-0 text-black">{t("Payment Method")}</p>
           <div className="auth-register-payment-tabs-gap shrink-0" aria-hidden />
-          <div className="auth-register-payment-tabs" role="tablist" aria-label="Payment method">
+          <div className="auth-register-payment-tabs" role="tablist" aria-label={t("Payment method")}>
             <button
               type="button"
               role="tab"
@@ -224,7 +228,7 @@ export function AuthRegisterPanel({
                   strokeLinejoin="round"
                 />
               </svg>
-              Credit card
+              {t("Credit card")}
             </button>
             <button
               type="button"
@@ -242,7 +246,7 @@ export function AuthRegisterPanel({
                 height={30}
                 className="auth-register-pay-icon shrink-0"
               />
-              Apple pay
+              {t("Apple pay")}
             </button>
           </div>
           <input type="hidden" name="paymentMethod" value={paymentMethod} />
@@ -284,13 +288,13 @@ export function AuthRegisterPanel({
 
         <div className="auth-login-centered flex flex-col">
         <p className="auth-register-terms m-0 h-[65px] w-[549px] max-w-full text-black" style={authText24}>
-          By signing up, you agree to our{" "}
+          {t("By signing up, you agree to our")}{" "}
           <Link href="/" className="auth-login-join-link text-black underline">
-            Terms of Use
+            {t("Terms of Use")}
           </Link>{" "}
-          and{" "}
+          {locale === "ar" ? "و" : "and"}{" "}
           <Link href="/" className="auth-login-join-link text-black underline">
-            Privacy Policy
+            {t("Privacy Policy")}
           </Link>
           .
         </p>
@@ -299,10 +303,10 @@ export function AuthRegisterPanel({
         <button
           type="submit"
           disabled={loading}
-          className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white transition-colors duration-200 hover:!bg-[#64E1FF] disabled:cursor-not-allowed disabled:opacity-50"
           style={authSubmitButtonStyle}
         >
-          {loading ? "Creating account..." : "GET STARTED"}
+          {loading ? t("Creating account...") : t("GET STARTED")}
         </button>
 
       <AuthOAuthSection
@@ -312,9 +316,9 @@ export function AuthRegisterPanel({
       <div className="auth-login-resend-gap h-[40px] shrink-0" aria-hidden />
 
       <p className="auth-login-join m-0 text-center text-black" style={authText24}>
-        Already have an account?{" "}
+        {t("Already have an account?")}{" "}
         <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
-          Log in
+          {t("Log in")}
         </Link>
       </p>
         </div>

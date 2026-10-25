@@ -326,7 +326,7 @@ label:has(input[type="radio"]) {
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 30px;
     border: 0.3px solid #000 !important;
     border-width: 0.3px !important;
     background: #fff;
@@ -662,7 +662,7 @@ label:has(input[type="radio"]) {
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 30px;
     border: 0.3px solid #000 !important;
     border-width: 0.3px !important;
     background: #fff;
@@ -895,7 +895,7 @@ label:has(input[type="radio"]) {
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 30px;
     border: 1px solid #000 !important;
     border-width: 1px !important;
     background: #fff;
@@ -1061,7 +1061,7 @@ label:has(input[type="radio"]) {
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 30px;
     border: 0.3px solid #000 !important;
     border-width: 0.3px !important;
     background: #fff;
@@ -1149,12 +1149,14 @@ label:has(input[type="radio"]) {
   .auth-login-social-icon {
     width: 49px !important;
     height: 51px !important;
+    border-radius: 30px;
   }
 
   .auth-login-lang {
     display: flex;
     width: 153px !important;
     height: 47px !important;
+    border-radius: 30px;
     margin-left: 37px !important;
     padding: 0 12px !important;
     justify-content: center;

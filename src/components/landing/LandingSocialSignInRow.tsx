@@ -6,7 +6,6 @@ import { buildOAuthCallbackUrl } from "@/components/auth/auth-oauth-icons";
 
 const LANDING_SOCIAL_ICONS = [
   { label: "Google", providerId: "google", image: "/social/google.png", enabled: true },
-  { label: "Apple", providerId: "apple", image: "/social/apple.png", enabled: false },
 ] as const;
 
 const SIZE_PRESETS = {

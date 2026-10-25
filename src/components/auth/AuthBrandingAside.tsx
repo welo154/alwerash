@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
+import { useT } from "@/components/i18n/Tr";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { AuthLocaleButton } from "./AuthLocaleButton";
 import { AUTH_SOCIAL_LINKS, pangeaFont } from "./auth-theme";
 
 const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
@@ -27,6 +31,34 @@ function AuthLogoBlock() {
   );
 }
 
+export function AuthHeadlineSentence({ fontSize }: { fontSize: number }) {
+  const { locale } = useLocale();
+  const werashStyle = {
+    color: "#000",
+    fontFamily: pangeaFont,
+    fontSize,
+    fontStyle: "italic" as const,
+    fontWeight: 700,
+    lineHeight: "120%",
+  };
+
+  if (locale === "ar") {
+    return (
+      <>
+        أتقن مهارات جديدة، وابنِ ملفاً احترافياً، وتعلّم من الأفضل في المجال. فقط على{" "}
+        <span style={werashStyle}>الورَش</span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      Master new skills, build a professional portfolio, and learn from the best in the industry. Only at Al
+      <span style={werashStyle}>Werash</span>
+    </>
+  );
+}
+
 /** Figma 260-1744 — hero headline */
 function AuthHeadlineBlock() {
   return (
@@ -40,25 +72,14 @@ function AuthHeadlineBlock() {
         lineHeight: "120%",
       }}
     >
-      Master new skills, build a professional portfolio, and learn from the best in the industry. Only at Al
-      <span
-        style={{
-          color: "#000",
-          fontFamily: pangeaFont,
-          fontSize: 36,
-          fontStyle: "italic",
-          fontWeight: 700,
-          lineHeight: "120%",
-        }}
-      >
-        Werash
-      </span>
+      <AuthHeadlineSentence fontSize={36} />
     </p>
   );
 }
 
 /** Figma 260-1745 — supporting copy */
 function AuthSupportingCopy() {
+  const t = useT();
   return (
     <p
       className="m-0 w-[409px] max-w-full text-black"
@@ -71,27 +92,23 @@ function AuthSupportingCopy() {
         opacity: 0.6,
       }}
     >
-      Thousands of creative classes. Beginner to pro, watch at your pace and even offline.
+      {t("Thousands of creative classes. Beginner to pro, watch at your pace and even offline.")}
     </p>
   );
 }
 
 function AuthLanguageSelector() {
   return (
-    <button
-      type="button"
-      className="flex shrink-0 items-center justify-center gap-[10px] rounded-[8px] border border-black bg-white text-[18px] font-normal text-black"
+    <AuthLocaleButton
+      className="flex shrink-0 items-center justify-center gap-[10px] rounded-[30px] border border-black bg-white text-[18px] font-normal text-black"
       style={{
         fontFamily: pangeaFont,
         width: 153,
         height: 47,
         padding: "0 12px",
+        borderRadius: 30,
       }}
-      suppressHydrationWarning
-    >
-      English
-      <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
-    </button>
+    />
   );
 }
 
@@ -105,7 +122,7 @@ export function AuthBrandingAside() {
       <div className="h-[35px] shrink-0" aria-hidden />
       <AuthSupportingCopy />
       <div className="h-[67px] shrink-0" aria-hidden />
-      <div className="flex w-[425px] max-w-full items-center gap-[37px]">
+      <div className="flex w-full items-center gap-[16px]">
         <div className="flex items-center gap-[11px]">
           {AUTH_SOCIAL_LINKS.map((item) => (
             <a
@@ -114,10 +131,11 @@ export function AuthBrandingAside() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={item.label}
-              className="shrink-0 border border-white"
+              className="shrink-0 overflow-hidden border border-white"
               style={{
                 width: 56,
                 height: 56,
+                borderRadius: 30,
                 background: `url(${item.image}) #fff 50% / contain no-repeat`,
               }}
             />

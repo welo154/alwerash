@@ -12,66 +12,13 @@ export type TrackCourseItem = LearnPopularTile & {
   popularOrder: number | null;
 };
 
-type RatingsSort = "default" | "high" | "low";
-type PopularSort = "default" | "popular";
-type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
 type MobileCourseSort = "popular" | "watched" | "rated";
-
-type FilterId = "ratings" | "level" | "popular";
 
 const MOBILE_SORT_OPTIONS: { value: MobileCourseSort; label: string }[] = [
   { value: "popular", label: "Popular" },
   { value: "watched", label: "Most watched" },
   { value: "rated", label: "Top rated" },
 ];
-
-const FILTER_LABELS: Record<FilterId, string> = {
-  ratings: "Ratings",
-  level: "Level",
-  popular: "Popular",
-};
-
-function FilterChevron() {
-  return (
-    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden className="shrink-0">
-      <path
-        d="M1 1L5 5L9 1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function TrackFilterButton({
-  label,
-  open,
-  onClick,
-}: {
-  label: string;
-  open: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-expanded={open}
-      onClick={onClick}
-      className="inline-flex h-8 w-[106px] shrink-0 items-center justify-between rounded-[8px] border border-black bg-white px-4 text-black transition-colors hover:bg-slate-50"
-      style={{
-        fontFamily: pangeaFont,
-        fontSize: "16px",
-        fontWeight: 400,
-        lineHeight: "19.6px",
-      }}
-    >
-      <span className="truncate">{label}</span>
-      <FilterChevron />
-    </button>
-  );
-}
 
 function sortByPopularOrder(courses: TrackCourseItem[]) {
   return [...courses].sort((a, b) => {
@@ -83,8 +30,6 @@ function sortByPopularOrder(courses: TrackCourseItem[]) {
 
 function sortCourses(
   courses: TrackCourseItem[],
-  ratingsSort: RatingsSort,
-  popularSort: PopularSort,
   mobileSort: MobileCourseSort | null
 ): TrackCourseItem[] {
   if (mobileSort === "watched" || mobileSort === "popular") {
@@ -93,20 +38,7 @@ function sortCourses(
   if (mobileSort === "rated") {
     return [...courses].sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
   }
-
-  const items = [...courses];
-
-  if (popularSort === "popular") {
-    return sortByPopularOrder(items);
-  }
-
-  if (ratingsSort === "high") {
-    items.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
-  } else if (ratingsSort === "low") {
-    items.sort((a, b) => (a.rating ?? Number.MAX_SAFE_INTEGER) - (b.rating ?? Number.MAX_SAFE_INTEGER));
-  }
-
-  return items;
+  return courses;
 }
 
 export function TrackCoursesSection({
@@ -116,14 +48,9 @@ export function TrackCoursesSection({
   trackTitle: string;
   courses: TrackCourseItem[];
 }) {
-  const [openFilter, setOpenFilter] = useState<FilterId | null>(null);
-  const [ratingsSort, setRatingsSort] = useState<RatingsSort>("default");
-  const [popularSort, setPopularSort] = useState<PopularSort>("default");
-  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [mobileSort, setMobileSort] = useState<MobileCourseSort>("popular");
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
   const mobileSortRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -135,30 +62,22 @@ export function TrackCoursesSection({
   }, []);
 
   const visibleCourses = useMemo(
-    () => sortCourses(courses, ratingsSort, popularSort, isDesktop ? null : mobileSort),
-    [courses, ratingsSort, popularSort, isDesktop, mobileSort]
+    () => sortCourses(courses, isDesktop ? null : mobileSort),
+    [courses, isDesktop, mobileSort]
   );
   const mobileSortLabel =
     MOBILE_SORT_OPTIONS.find((option) => option.value === mobileSort)?.label ?? "Popular";
 
-  const toggleFilter = (id: FilterId) => {
-    setOpenFilter((prev) => (prev === id ? null : id));
-  };
-
-  const closeMenu = () => setOpenFilter(null);
-
   useEffect(() => {
-    if (!openFilter && !mobileSortOpen) return;
+    if (!mobileSortOpen) return;
     const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (openFilter && !menuRef.current?.contains(target)) closeMenu();
-      if (mobileSortOpen && !mobileSortRef.current?.contains(target)) {
+      if (!mobileSortRef.current?.contains(e.target as Node)) {
         setMobileSortOpen(false);
       }
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [openFilter, mobileSortOpen]);
+  }, [mobileSortOpen]);
 
   return (
     <div className="min-w-0 max-lg:mt-[15px] lg:mt-0">
@@ -234,110 +153,16 @@ export function TrackCoursesSection({
         </div>
       </div>
 
-      <div className="mt-6 hidden flex-wrap items-start justify-between gap-6 lg:mt-0 lg:flex">
-        <h1
-          className="m-0 min-w-0 flex-1 uppercase text-black lg:text-[48px]"
-          style={{
-            fontFamily: pangeaFont,
-            fontWeight: 400,
-            lineHeight: "120%",
-          }}
-        >
-          {trackTitle}
-        </h1>
-
-        <div ref={menuRef} className="relative hidden shrink-0 flex-wrap items-center gap-3 lg:flex">
-          {(Object.keys(FILTER_LABELS) as FilterId[]).map((id) => (
-            <TrackFilterButton
-              key={id}
-              label={FILTER_LABELS[id]}
-              open={openFilter === id}
-              onClick={() => toggleFilter(id)}
-            />
-          ))}
-
-          {openFilter === "ratings" ? (
-            <div
-              className="absolute top-[calc(100%+8px)] right-0 z-20 min-w-[160px] rounded-[8px] border border-black bg-white py-1 shadow-md"
-              style={{ fontFamily: pangeaFont }}
-            >
-              {(
-                [
-                  ["default", "Default"],
-                  ["high", "Highest rated"],
-                  ["low", "Lowest rated"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${ratingsSort === value ? "font-medium" : "font-normal"}`}
-                  onClick={() => {
-                    setRatingsSort(value);
-                    closeMenu();
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {openFilter === "level" ? (
-            <div
-              className="absolute top-[calc(100%+8px)] right-[118px] z-20 min-w-[160px] rounded-[8px] border border-black bg-white py-1 shadow-md"
-              style={{ fontFamily: pangeaFont }}
-            >
-              {(
-                [
-                  ["all", "All levels"],
-                  ["beginner", "Beginner"],
-                  ["intermediate", "Intermediate"],
-                  ["advanced", "Advanced"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${levelFilter === value ? "font-medium" : "font-normal"}`}
-                  onClick={() => {
-                    setLevelFilter(value);
-                    closeMenu();
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {openFilter === "popular" ? (
-            <div
-              className="absolute top-[calc(100%+8px)] right-0 z-20 min-w-[160px] rounded-[8px] border border-black bg-white py-1 shadow-md"
-              style={{ fontFamily: pangeaFont }}
-            >
-              {(
-                [
-                  ["default", "Default"],
-                  ["popular", "Most popular"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`block w-full px-4 py-2 text-left text-[16px] hover:bg-slate-50 ${popularSort === value ? "font-medium" : "font-normal"}`}
-                  onClick={() => {
-                    setPopularSort(value);
-                    closeMenu();
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
+      <h1
+        className="m-0 mt-6 hidden min-w-0 uppercase text-black lg:mt-0 lg:block lg:text-[48px]"
+        style={{
+          fontFamily: pangeaFont,
+          fontWeight: 400,
+          lineHeight: "120%",
+        }}
+      >
+        {trackTitle}
+      </h1>
 
       <div className="mt-[35px] min-w-0 max-[743px]:-ml-6 max-[743px]:w-[calc(100%+1.5rem)] max-[743px]:overflow-hidden sm:max-[743px]:-ml-8 min-[744px]:max-lg:-ml-8 min-[744px]:max-lg:w-[calc(100%+2rem)] min-[744px]:max-lg:overflow-visible lg:mt-[50px] lg:ml-0 lg:w-auto">
         {visibleCourses.length === 0 ? (

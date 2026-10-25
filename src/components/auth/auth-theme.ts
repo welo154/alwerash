@@ -14,5 +14,6 @@ export const AUTH_GREEN_PANEL = {
 export const AUTH_SOCIAL_LINKS = [
   { href: "https://instagram.com", label: "Instagram", image: "/auth/social/instagram.png" },
   { href: "https://linkedin.com", label: "LinkedIn", image: "/auth/social/linkedin.png" },
-  { href: "https://x.com", label: "X", image: "/auth/social/x.png" },
+  { href: "https://facebook.com", label: "Facebook", image: "/auth/social/facebook.png" },
+  { href: "https://www.tiktok.com", label: "TikTok", image: "/auth/social/tiktok.png" },
 ] as const;

@@ -118,6 +118,7 @@ export default async function AdminCourseDetail({
       totalDurationMinutes:
         totalDur === "" || totalDur == null ? null : Number(totalDur),
       rating: ratingVal === "" || ratingVal == null ? null : Number(ratingVal),
+      level: String(formData.get("level") ?? "BEGINNER"),
       tagGuided: formData.get("tagGuided") === "on",
       tagDeepDive: formData.get("tagDeepDive") === "on",
       tagBasics: formData.get("tagBasics") === "on",
@@ -388,6 +389,19 @@ export default async function AdminCourseDetail({
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 />
                 <p className="mt-0.5 text-xs text-slate-500">Shown on cards (e.g. 7h 38m). Empty = from lesson count.</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Level</label>
+                <select
+                  name="level"
+                  defaultValue={(course as { level?: string | null }).level ?? "BEGINNER"}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                >
+                  <option value="BEGINNER">Beginner</option>
+                  <option value="INTERMEDIATE">Intermediate</option>
+                  <option value="ADVANCED">Advanced</option>
+                </select>
+                <p className="mt-0.5 text-xs text-slate-500">Shown on course cards next to the duration.</p>
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">Rating (0–5)</label>

@@ -6,14 +6,10 @@ const pangeaFont =
   '"FwTRIAL Pangea VAR", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif';
 
 export const LEARN_SIDEBAR_COURSE_FILTERS = [
-  "All Couses",
-  "Guided Courses",
+  "All Courses",
   "Deep Dive",
-  "Specializations",
   "Basics",
-  "New Courses",
-  "Top Rated",
-  "Popular Courses",
+  "Popular Classes",
 ] as const;
 
 const sidebarCourseFilters = LEARN_SIDEBAR_COURSE_FILTERS;
@@ -106,6 +102,7 @@ export function LearnCoursesSidebar({
   activeCategoryKey,
   showCoursesSection = true,
   headingsOnly = false,
+  defaultSection = "courses",
 }: {
   categories: LearnCoursesSidebarCategory[];
   activeCategoryKey?: string;
@@ -113,6 +110,7 @@ export function LearnCoursesSidebar({
   showCoursesSection?: boolean;
   /** Courses page desktop: section titles only. */
   headingsOnly?: boolean;
+  defaultSection?: "courses" | "categories" | "software";
 }) {
   if (headingsOnly) {
     return (
@@ -120,8 +118,8 @@ export function LearnCoursesSidebar({
         <CoursesPageExpandableNav
           courseFilters={sidebarCourseFilters}
           categories={categories}
-          areaItems={sidebarExtraCategories}
           activeCategoryKey={activeCategoryKey}
+          defaultSection={defaultSection}
         />
       </LearnCoursesSidebarAside>
     );

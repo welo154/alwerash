@@ -641,7 +641,9 @@ export function CatalogShowcaseCard({
           >
             <div className="pointer-events-auto flex items-center justify-between">
               <span
-                className="inline-flex h-[36px] items-center justify-center rounded-[8px] border border-black px-4 text-[20px] leading-none text-black"
+                className={`inline-flex h-[36px] items-center justify-center border border-black px-4 text-[20px] leading-none text-black ${
+                  expandCardOnHover ? "rounded-[23px]" : "rounded-[8px]"
+                }`}
                 style={{ backgroundColor: SHOWCASE_ACCENT }}
               >
                 {levelLabel}

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { publicGetTrackBySlug, publicListTracks } from "@/server/content/public.service";
+import { courseCardStats } from "@/lib/content/course-card-stats";
 import { courseTypeBadgeLabel } from "@/lib/content/course-type-badge";
 import { AppError } from "@/server/lib/errors";
 import {
@@ -36,6 +37,7 @@ export default async function TrackPage({
     tagPrimary: track.title.toUpperCase(),
     typeLabel: courseTypeBadgeLabel(c),
     coverImageSrc: c.coverImage,
+    ...courseCardStats(c),
     rating: c.rating ?? null,
     popularOrder: c.featuredMostPlayedOrder ?? null,
   }));
@@ -63,6 +65,7 @@ export default async function TrackPage({
               categories={sidebarCategories}
               activeCategoryKey={`track-${track.id}`}
               headingsOnly
+              defaultSection="categories"
             />
           </div>
 

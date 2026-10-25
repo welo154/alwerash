@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { AuthBrandingAside } from "./AuthBrandingAside";
+import { AuthBrandingAside, AuthHeadlineSentence } from "./AuthBrandingAside";
+import { AuthLocaleButton } from "./AuthLocaleButton";
 import { AuthGreenPanel } from "./AuthGreenPanel";
 import {
   AUTH_GREEN_PANEL,
@@ -13,24 +14,6 @@ import {
 } from "./auth-theme";
 
 const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
-
-
-function AuthHeadlineWerash({ fontSize }: { fontSize: number }) {
-  return (
-    <span
-      style={{
-        color: "#000",
-        fontFamily: pangeaFont,
-        fontSize,
-        fontStyle: "italic",
-        fontWeight: 700,
-        lineHeight: "120%",
-      }}
-    >
-      Werash
-    </span>
-  );
-}
 
 function AuthLoginMobileBrand() {
   return (
@@ -60,9 +43,7 @@ function AuthLoginMobileBrand() {
           lineHeight: "120%",
         }}
       >
-        Master new skills, build a professional portfolio, and learn from the best in the
-        industry. Only at Al
-        <AuthHeadlineWerash fontSize={20} />
+        <AuthHeadlineSentence fontSize={20} />
       </p>
       <p
         className="m-0 mt-[20px] hidden w-[622px] max-w-full text-center text-black min-[744px]:block"
@@ -75,9 +56,7 @@ function AuthLoginMobileBrand() {
           lineHeight: "120%",
         }}
       >
-        Master new skills, build a professional portfolio, and learn from the best in the
-        industry. Only at Al
-        <AuthHeadlineWerash fontSize={32} />
+        <AuthHeadlineSentence fontSize={32} />
       </p>
     </div>
   );
@@ -98,13 +77,13 @@ function AuthLoginMobileSocialRow() {
             style={{
               width: 35,
               height: 37,
+              borderRadius: 30,
               background: `url(${item.image}) transparent 50% / contain no-repeat`,
             }}
           />
         ))}
       </div>
-      <button
-        type="button"
+      <AuthLocaleButton
         className="auth-login-lang flex shrink-0 items-center justify-center bg-white text-black"
         style={{
           marginLeft: 37,
@@ -112,7 +91,7 @@ function AuthLoginMobileSocialRow() {
           height: 34,
           padding: "0 12px",
           gap: 10,
-          borderRadius: 8,
+          borderRadius: 30,
           border: "0.3px solid #000",
           fontFamily: pangeaFont,
           fontSize: 14,
@@ -120,27 +99,26 @@ function AuthLoginMobileSocialRow() {
           fontWeight: 400,
           lineHeight: "19.6px",
         }}
-        suppressHydrationWarning
-      >
-        English
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={15}
-          height={7}
-          viewBox="0 0 16 8"
-          fill="none"
-          aria-hidden
-          className="shrink-0"
-        >
-          <path
-            d="M0.5 0.5L8 7.5L15.5 0.5"
-            stroke="#1E1E1E"
-            strokeWidth={1}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+        chevron={
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={15}
+            height={7}
+            viewBox="0 0 16 8"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <path
+              d="M0.5 0.5L8 7.5L15.5 0.5"
+              stroke="#1E1E1E"
+              strokeWidth={1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        }
+      />
     </div>
   );
 }

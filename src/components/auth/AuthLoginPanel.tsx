@@ -14,6 +14,7 @@ import {
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
 import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
+import { useT } from "@/components/i18n/Tr";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,6 +34,7 @@ type LoginFieldErrors = {
 };
 
 export function AuthLoginPanel() {
+  const t = useT();
   const searchParams = useSearchParams();
   const nextParam = safeInternalPath(searchParams.get("next"));
   const registered = searchParams.get("registered") === "1";
@@ -189,10 +191,10 @@ export function AuthLoginPanel() {
         <button
           type="submit"
           disabled={loading}
-          className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="auth-login-submit mx-auto flex items-center justify-center border border-black bg-white transition-colors duration-200 hover:!bg-[#64E1FF] disabled:cursor-not-allowed disabled:opacity-50"
           style={authSubmitButtonStyle}
         >
-          {loading ? "Signing in..." : "GET STARTED"}
+          {loading ? t("Signing in...") : t("GET STARTED")}
         </button>
 
       <AuthOAuthSection
