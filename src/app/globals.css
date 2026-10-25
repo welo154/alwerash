@@ -24,9 +24,17 @@ body {
   --breakpoint-lg: 1036px;
 }
 
+/* Locale switcher sets html[lang]. Higher specificity than the shared lg: utilities. */
+@custom-variant en (&:is(html[lang="en"] *));
+@custom-variant ar (&:is(html[lang="ar"] *));
+
 /* Logo: elegant serif with slight slant (Playfair Display italic) */
 .font-logo {
   font-family: var(--font-logo, Georgia), Georgia, "Times New Roman", serif;
+}
+
+.header-search-field::placeholder {
+  line-height: 19.6px;
 }
 
 /**

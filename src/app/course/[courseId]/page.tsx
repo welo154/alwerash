@@ -9,7 +9,6 @@ import {
   courseRequirementItems,
   formatCourseDurationLabel,
   formatCourseRatingLabel,
-  formatUpdatedMonthYear,
   initialsFromName,
 } from "./course-page-helpers";
 import {
@@ -27,7 +26,9 @@ import {
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { CourseBreadcrumb } from "./CourseBreadcrumb";
+import { DesktopLeftColumn } from "./DesktopLeftColumn";
 import { LocalizedText } from "@/components/i18n/LocalizedText";
+import { Tr } from "@/components/i18n/Tr";
 import { LandingEverythingInOneSection } from "@/components/landing/LandingEverythingInOneSection";
 import { StudentsRatingWorkSection } from "@/components/students/StudentsRatingWorkSection";
 import { publicListStudentStories } from "@/server/content/student-stories.service";
@@ -86,10 +87,16 @@ export default async function PublicCoursePage({
   ]);
 
   const relatedCards = relatedCourses.map((related) => ({
-    titleInstructorLine: `${related.title} -\n${related.instructorName?.trim() || "Instructor"}`,
-    lectureLine: `LECTURE - ${formatCourseDurationLabel(related.totalDurationMinutes, related.lessonCount)}`,
-    topicTitle: (related.track?.title ?? "Course").toUpperCase(),
-    continueHref: publicCoursePath(related.id),
+    id: related.id,
+    href: publicCoursePath(related.id),
+    title: related.title.trim(),
+    titleAr: related.titleAr,
+    authorLabel: related.instructorName?.trim() || "Instructor",
+    authorLabelAr: related.instructorNameAr,
+    tagPrimary: (related.track?.title ?? "COURSE").toUpperCase(),
+    typeLabel: related.typeLabel,
+    coverImageSrc: related.coverImage,
+    comingSoon: related.comingSoon,
   }));
 
   const isComingSoon = Boolean(course.comingSoon);
@@ -99,27 +106,25 @@ export default async function PublicCoursePage({
   const fullCourseHref = privateCoursePath(course.id);
 
   return (
-    <main className="mx-auto max-w-[1600px] pb-[80px] max-[743px]:pt-[12px] max-lg:overflow-x-clip max-lg:pb-0 min-[744px]:max-lg:pt-0 lg:pl-[55px] lg:pr-[60px] lg:pt-[28px]">
-      <div className="max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[34px] min-[744px]:max-lg:pt-[100px] min-[744px]:max-lg:-mt-[75.6px]">
-        <CourseBreadcrumb
-          courseTitle={course.title}
-          courseTitleAr={course.titleAr}
-          fontFamily={pangeaVar.style.fontFamily}
-        />
-      </div>
+    <main className="mx-auto w-full pb-[80px] max-[743px]:pt-[12px] max-lg:pb-0 min-[744px]:max-lg:pt-0 lg:max-w-[1600px] lg:pl-[55px] lg:pr-[60px] lg:pt-[28px]">
+      <CourseBreadcrumb
+        courseTitle={course.title}
+        courseTitleAr={course.titleAr}
+        fontFamily={pangeaVar.style.fontFamily}
+      />
 
-      <hr className="mt-[7px] block h-0 w-[393px] max-w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:max-lg:mt-[13px] min-[744px]:max-lg:w-[1440px] min-[744px]:max-lg:opacity-60 lg:mt-[13px] lg:w-[1440px] lg:opacity-60" />
-
-      <div className="max-lg:flex max-lg:flex-col max-lg:pl-[30px]">
-      <div className="mt-[15px] flex items-start gap-[62px] max-lg:contents lg:mt-[20px]">
-        <section className="w-[843px] max-w-full shrink-0 max-lg:contents">
+      <div className="mx-auto w-full max-[743px]:max-w-[393px] min-[744px]:max-lg:max-w-[744px] max-lg:overflow-x-clip">
+      <div className="max-lg:flex max-lg:flex-col max-lg:pl-[30px] max-[743px]:ar:items-start max-[743px]:ar:pl-0 max-[743px]:ar:pr-[30px] max-[743px]:ar:[direction:rtl] min-[744px]:max-lg:ar:pl-0 min-[744px]:max-lg:ar:pr-[30px] min-[744px]:max-lg:ar:[direction:rtl]">
+      <div className="mt-[15px] flex items-start gap-[80px] max-lg:contents lg:mt-[42px]">
+        <DesktopLeftColumn>
           <h1
-            className="m-0 w-[334px] max-w-full text-[18px] font-medium max-[743px]:mt-[15px] max-lg:order-1 min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[24px] lg:w-[842px] lg:text-[36px]"
+            className="m-0 w-[334px] max-w-full text-[18px] font-medium max-[743px]:mt-[15px] max-[743px]:en:w-[334px] max-[743px]:en:text-[18px] max-[743px]:en:font-medium max-lg:order-1 min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[24px] lg:w-full lg:text-[36px] lg:ar:text-right lg:ar:text-[32px]"
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaVar.style.fontFamily,
               fontStyle: "normal",
               fontWeight: 500,
+              fontVariationSettings: '"wght" 500',
               lineHeight: "normal",
             }}
           >
@@ -144,25 +149,25 @@ export default async function PublicCoursePage({
           )}
 
           {isComingSoon ? (
-            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
+            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
               <p
                 className="m-0 inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#FFF7E8] px-8 text-[20px] font-medium text-black"
                 style={{ fontFamily: pangeaVar.style.fontFamily }}
               >
-                Coming soon — not open yet
+                <Tr>Coming soon — not open yet</Tr>
               </p>
             </div>
           ) : hasSubscription ? (
-            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ml-[31px]">
+            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
               <Link
                 href={fullCourseHref}
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#004B3C] px-8 text-[24px] font-bold text-white transition-opacity hover:opacity-90"
                 style={{ fontFamily: pangeaVar.style.fontFamily }}
               >
-                Go to full course
+                <Tr>Go to full course</Tr>
               </Link>
               <div
-                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
+                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
                 aria-hidden
               >
                 <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
@@ -175,26 +180,26 @@ export default async function PublicCoursePage({
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#EA83F0] px-8 text-[24px] font-bold text-black transition-opacity hover:opacity-90"
                 style={{ fontFamily: pangeaVar.style.fontFamily }}
               >
-                Subscribe to unlock all lessons
+                <Tr>Subscribe to unlock all lessons</Tr>
               </Link>
               <div
-                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
+                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
                 aria-hidden
               >
                 <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
               </div>
             </div>
           )}
-        </section>
+        </DesktopLeftColumn>
 
-        <div className="w-[413px] shrink-0 max-lg:contents">
-          <div className="max-lg:order-3 max-[743px]:mt-[31px] max-[743px]:-ml-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:mt-[57px]">
+        <div className="w-[363px] shrink-0 max-lg:contents lg:ar:[direction:rtl]">
+          <div className="max-lg:order-3 max-[743px]:mt-[31px] max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[57px]">
           <aside
             className="overflow-hidden rounded-none border bg-transparent max-[743px]:box-border max-[743px]:flex max-[743px]:h-[306px] max-[743px]:w-[334px] max-[743px]:flex-col min-[744px]:max-lg:box-border min-[744px]:max-lg:flex min-[744px]:max-lg:h-[426.892px] min-[744px]:max-lg:w-[621.999px] min-[744px]:max-lg:flex-col"
             style={{ borderColor: "rgba(0, 0, 0, 0.6)" }}
             aria-label="Course details right section"
           >
-            <div className="box-border flex h-[66px] items-center border-b border-black/60 pl-[12px] min-[744px]:max-lg:h-[121px] min-[744px]:max-lg:items-start min-[744px]:max-lg:px-[22px] min-[744px]:max-lg:pt-[30px] lg:h-auto lg:px-[30px] lg:pb-[27px] lg:pt-[35px]">
+            <div className="box-border flex h-[66px] items-center border-b border-black/60 max-[743px]:ps-[12px] min-[744px]:max-lg:h-[121px] min-[744px]:max-lg:items-start min-[744px]:max-lg:px-[22px] min-[744px]:max-lg:pt-[30px] lg:h-auto lg:px-[30px] lg:pb-[27px] lg:pt-[35px]">
               <div
                 className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-black bg-white text-[12px] font-semibold min-[744px]:max-lg:h-[63px] min-[744px]:max-lg:w-[63px] min-[744px]:max-lg:text-[24px] lg:h-[63px] lg:w-[63px] lg:text-[24px]"
                 aria-hidden
@@ -205,51 +210,58 @@ export default async function PublicCoursePage({
               >
                 {instructorInitials}
               </div>
-              <div className="ml-[9px] min-w-0 min-[744px]:max-lg:ml-[16px] lg:ml-[16px]">
+              <div className="ms-[9px] min-w-0 min-[744px]:max-lg:ms-[16px] lg:ms-[16px]">
                 <p
-                  className="m-0 text-[18px] font-semibold min-[744px]:max-lg:text-[24px] lg:text-[24px]"
+                  className="m-0 text-[18px] font-semibold min-[744px]:max-lg:text-[24px] lg:text-[24px] lg:ar:text-right"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
                     fontStyle: "normal",
                     fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
                     lineHeight: "normal",
                   }}
                 >
                   <LocalizedText en={instructorName} ar={course.instructorNameAr} uppercase />
                 </p>
                 <p
-                  className="m-0 text-[16px] min-[744px]:max-lg:text-[24px] lg:text-[24px]"
+                  className="m-0 text-[16px] min-[744px]:max-lg:text-[24px] lg:text-[24px] lg:ar:text-right"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
                     fontStyle: "normal",
                     fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
                     lineHeight: "normal",
                     opacity: 0.6,
                   }}
                 >
-                  {instructorRole}
+                  {course.track?.titleAr ? (
+                    <LocalizedText en={instructorRole} ar={course.track?.titleAr} />
+                  ) : (
+                    <Tr>{instructorRole}</Tr>
+                  )}
                 </p>
               </div>
             </div>
 
             <div className="flex min-h-0 flex-1 max-lg:divide-x max-lg:divide-black/60 lg:block">
-            <div className="border-black/60 max-lg:w-1/2 min-[744px]:max-lg:box-border min-[744px]:max-lg:flex min-[744px]:max-lg:flex-col min-[744px]:max-lg:pl-[24px] min-[744px]:max-lg:pr-[27px] min-[744px]:max-lg:pt-[30px] lg:border-b lg:px-[30px] lg:pb-[30px] lg:pt-[20px]">
+            <div className="border-black/60 max-lg:w-1/2 min-[744px]:max-lg:box-border min-[744px]:max-lg:flex min-[744px]:max-lg:flex-col min-[744px]:max-lg:ps-[24px] min-[744px]:max-lg:pe-[27px] min-[744px]:max-lg:pt-[30px] lg:relative lg:border-b lg:px-[30px] lg:pb-[115px] lg:pt-[20px]">
               <h4
-                className="m-0 ml-[12px] mt-[15px] text-[16px] font-medium min-[744px]:max-lg:ml-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[20px] lg:ml-0 lg:mt-0 lg:text-[24px]"
+                className="m-0 mt-[15px] text-[16px] font-medium max-[743px]:ms-[12px] min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[20px] lg:mt-0 lg:text-[24px] lg:ar:text-right"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily: pangeaVar.style.fontFamily,
                   fontStyle: "normal",
                   fontWeight: 500,
+                  fontVariationSettings: '"wght" 500',
                   lineHeight: "normal",
                 }}
               >
-                Class details
+                <Tr>Class details</Tr>
               </h4>
 
-              <div className="mt-[21px] ml-[12px] mr-[11px] flex flex-col gap-[11px] min-[744px]:max-lg:ml-0 min-[744px]:max-lg:mr-0 min-[744px]:max-lg:mt-[25px] min-[744px]:max-lg:gap-[16px] lg:hidden">
+              <div className="mt-[21px] flex flex-col gap-[11px] max-[743px]:ms-[12px] max-[743px]:me-[11px] min-[744px]:max-lg:mt-[25px] min-[744px]:max-lg:gap-[16px] lg:hidden">
                 <div className="flex items-center justify-between">
                   <span
                     className="text-[16px] font-normal min-[744px]:max-lg:text-[20px]"
@@ -260,7 +272,7 @@ export default async function PublicCoursePage({
                       lineHeight: "normal",
                     }}
                   >
-                    Level
+                    <Tr>Level</Tr>
                   </span>
                   <span
                     className="text-[16px] font-medium min-[744px]:max-lg:text-[20px]"
@@ -271,7 +283,7 @@ export default async function PublicCoursePage({
                       lineHeight: "normal",
                     }}
                   >
-                    Beginner
+                    <Tr>Beginner</Tr>
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -284,7 +296,7 @@ export default async function PublicCoursePage({
                       lineHeight: "normal",
                     }}
                   >
-                    Rating
+                    <Tr>Rating</Tr>
                   </span>
                   <span className="inline-flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14" viewBox="0 0 29 26" fill="none" aria-hidden className="h-[14px] w-[16px] min-[744px]:max-lg:h-[17px] min-[744px]:max-lg:w-[19px]">
@@ -297,7 +309,7 @@ export default async function PublicCoursePage({
                       />
                     </svg>
                     <span
-                      className="ml-[6px] text-[16px] font-medium min-[744px]:max-lg:text-[20px]"
+                      className="ms-[6px] text-[16px] font-medium min-[744px]:max-lg:text-[20px]"
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily: pangeaVar.style.fontFamily,
@@ -319,7 +331,7 @@ export default async function PublicCoursePage({
                       lineHeight: "normal",
                     }}
                   >
-                    Duration
+                    <Tr>Duration</Tr>
                   </span>
                   <span className="inline-flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none" aria-hidden className="h-[16px] w-[16px] min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[20px]">
@@ -332,7 +344,7 @@ export default async function PublicCoursePage({
                       />
                     </svg>
                     <span
-                      className="ml-[6px] text-[16px] font-medium min-[744px]:max-lg:text-[20px]"
+                      className="ms-[6px] text-[16px] font-medium min-[744px]:max-lg:text-[20px]"
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily: pangeaVar.style.fontFamily,
@@ -346,7 +358,7 @@ export default async function PublicCoursePage({
                 </div>
               </div>
 
-              <div className="ml-[12px] mt-[24px] hidden max-[743px]:block">
+              <div className="mt-[24px] hidden max-[743px]:ms-[12px] max-[743px]:block">
                 <div className="relative h-[28.732px] w-[45.67px]">
                   {(
                     [
@@ -363,7 +375,7 @@ export default async function PublicCoursePage({
                       viewBox="0 0 41 41"
                       fill="none"
                       className="absolute top-0"
-                      style={{ left: avatar.left }}
+                      style={{ insetInlineStart: avatar.left }}
                       aria-hidden
                     >
                       <path
@@ -401,7 +413,7 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  Join <span style={{ fontStyle: "italic" }}>+24</span> Learners
+                  <Tr>Join</Tr> <span style={{ fontStyle: "italic" }}>+24</span> <Tr>Learners</Tr>
                 </p>
               </div>
               <div className="mt-auto hidden items-center justify-between pb-[20px] min-[744px]:max-lg:flex">
@@ -421,7 +433,7 @@ export default async function PublicCoursePage({
                       viewBox="0 0 41 41"
                       fill="none"
                       className="absolute top-0"
-                      style={{ left: avatar.left }}
+                      style={{ insetInlineStart: avatar.left }}
                       aria-hidden
                     >
                       <path
@@ -459,18 +471,18 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  Join{" "}
+                  <Tr>Join</Tr>{" "}
                   <span style={{ fontStyle: "italic", fontWeight: 400 }}>+24</span>{" "}
-                  Learners
+                  <Tr>Learners</Tr>
                 </p>
               </div>
               <div className="hidden lg:block">
               <div className="mt-[20px] flex items-center justify-between">
-                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px" }}>Level</span>
-                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>Beginner</span>
+                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400, fontVariationSettings: '"wght" 400', textAlign: "right" }}><Tr>Level</Tr></span>
+                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500, fontVariationSettings: '"wght" 500', textAlign: "right" }}><Tr>Beginner</Tr></span>
               </div>
               <div className="mt-[24px] flex items-center justify-between">
-                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px" }}>Rating</span>
+                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400, fontVariationSettings: '"wght" 400', textAlign: "right" }}><Tr>Rating</Tr></span>
                 <span className="inline-flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="26" height="23" viewBox="0 0 29 26" fill="none" aria-hidden>
                     <path
@@ -481,13 +493,13 @@ export default async function PublicCoursePage({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <span className="ml-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
+                  <span className="ms-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
                     {ratingLabel}
                   </span>
                 </span>
               </div>
               <div className="mt-[24px] flex items-center justify-between">
-                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px" }}>Duration</span>
+                <span style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400, fontVariationSettings: '"wght" 400', textAlign: "right" }}><Tr>Duration</Tr></span>
                 <span className="inline-flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 28 28" fill="none" aria-hidden>
                     <path
@@ -498,67 +510,80 @@ export default async function PublicCoursePage({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <span className="ml-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
+                  <span className="ms-[6px]" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
                     {durationMinsLabel}
                   </span>
                 </span>
               </div>
 
-              <div className="mt-[30px] flex items-center">
-                <div className="relative h-[54.258px] w-[86px]">
-                  {(
-                    [
-                      { initials: "AM", fill: "#FFFFFF", left: 0 },
-                      { initials: "RK", fill: "#89F496", left: 16 },
-                      { initials: "YT", fill: "#66E0F2", left: 32 },
-                    ] as const
-                  ).map((avatar) => (
-                    <svg
-                      key={avatar.initials}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={54.258}
-                      height={54.258}
-                      viewBox="0 0 41 41"
-                      fill="none"
-                      className="absolute top-0"
-                      style={{ left: avatar.left }}
-                      aria-hidden
-                    >
-                      <path
-                        d="M20.5 40.5C31.5457 40.5 40.5 31.5457 40.5 20.5C40.5 9.4543 31.5457 0.5 20.5 0.5C9.4543 0.5 0.5 9.4543 0.5 20.5C0.5 31.5457 9.4543 40.5 20.5 40.5Z"
-                        fill={avatar.fill}
-                        stroke="black"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <text
-                        x="20.5"
-                        y="21"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#000"
-                        style={{
-                          fontFamily: pangeaVar.style.fontFamily,
-                          fontSize: 14,
-                          fontWeight: 500,
-                        }}
-                      >
-                        {avatar.initials}
-                      </text>
-                    </svg>
-                  ))}
-                </div>
-                <p className="mb-0 ml-[20px] mt-0" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 400 }}>
-                  Join <span style={{ fontStyle: "italic" }}>+24</span> Learners
-                </p>
               </div>
+              <div className="absolute bottom-[31px] start-[28px] hidden h-[54.258px] w-[281px] lg:block">
+                {(
+                  [
+                    { initials: "AS", src: "/course/learner-avatar-as.svg", left: 0 },
+                    { initials: "MA", src: "/course/learner-avatar-ma.svg", left: 20.347 },
+                    { initials: "FM", src: "/course/learner-avatar-fm.svg", left: 42.05 },
+                  ] as const
+                ).map((avatar) => (
+                  <div
+                    key={avatar.initials}
+                    className="absolute top-0 h-[54.258px] w-[54.258px]"
+                    style={{ insetInlineStart: avatar.left }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={avatar.src}
+                      alt=""
+                      width={55.2584}
+                      height={55.2584}
+                      className="absolute max-w-none"
+                      style={{ left: -0.5, top: -0.5 }}
+                      aria-hidden
+                    />
+                    <span
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        color: "var(--Black, #000)",
+                        fontFamily: pangeaVar.style.fontFamily,
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 600,
+                        fontVariationSettings: '"wght" 600',
+                        lineHeight: "normal",
+                      }}
+                    >
+                      {avatar.initials}
+                    </span>
+                  </div>
+                ))}
+                <p
+                  className="absolute m-0 whitespace-nowrap"
+                  style={{
+                    insetInlineStart: 104,
+                    top: 12,
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaVar.style.fontFamily,
+                    fontSize: "24px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "normal",
+                  }}
+                >
+                  <span className="ar:hidden">
+                    <Tr>Join</Tr><span style={{ fontStyle: "italic" }}>+24</span> <Tr>Learners</Tr>
+                  </span>
+                  <span className="hidden ar:inline">
+                    انضم إلى <span style={{ fontStyle: "italic" }}>+24</span> متعلم
+                  </span>
+                </p>
               </div>
             </div>
 
             <div className="max-lg:flex max-lg:w-1/2 max-lg:flex-col lg:px-[30px] lg:pb-[30px] lg:pt-[20px]">
-              <div className="flex min-h-0 flex-1 flex-col lg:hidden min-[744px]:max-lg:box-border min-[744px]:max-lg:pl-[20px] min-[744px]:max-lg:pt-[30px]">
+              <div className="flex min-h-0 flex-1 flex-col lg:hidden min-[744px]:max-lg:box-border min-[744px]:max-lg:ps-[20px] min-[744px]:max-lg:pt-[30px]">
                 <h4
-                  className="m-0 ml-[11px] mt-[15px] text-[16px] font-medium min-[744px]:max-lg:ml-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[20px]"
+                  className="m-0 mt-[15px] text-[16px] font-medium max-[743px]:ms-[11px] min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[20px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
@@ -567,12 +592,12 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  Skills you’ll learn
+                  <Tr>Skills you’ll learn</Tr>
                 </h4>
                 {course.track?.title ? (
-                  <div className="ml-[11px] mt-[13px] flex w-fit flex-col gap-[9px] min-[744px]:max-lg:ml-0 min-[744px]:max-lg:mt-[28px] min-[744px]:max-lg:w-full min-[744px]:max-lg:flex-row min-[744px]:max-lg:flex-wrap">
+                  <div className="mt-[13px] flex w-fit flex-col gap-[9px] max-[743px]:ms-[11px] min-[744px]:max-lg:mt-[28px] min-[744px]:max-lg:w-full min-[744px]:max-lg:flex-row min-[744px]:max-lg:flex-wrap">
                     <span
-                      className="box-border inline-flex h-[29px] w-fit items-center justify-center overflow-hidden rounded-[8px] border-[0.3px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] px-4 text-center text-[12px] font-bold uppercase leading-[19.6px] min-[744px]:max-lg:h-[45px] min-[744px]:max-lg:text-[18px] min-[744px]:max-lg:font-bold"
+                      className="box-border inline-flex h-[29px] w-fit items-center justify-center overflow-hidden rounded-[8px] border-[0.3px] border-[var(--Black,#000)] bg-[var(--White,#FFF)] px-4 text-center text-[12px] font-bold uppercase leading-[19.6px] max-[743px]:en:flex max-[743px]:en:w-fit max-[743px]:en:rounded-[23px] max-[743px]:en:border-black/35 min-[744px]:max-lg:h-[45px] min-[744px]:max-lg:rounded-[8px] min-[744px]:max-lg:text-[18px] min-[744px]:max-lg:font-bold"
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily: pangeaVar.style.fontFamily,
@@ -580,12 +605,16 @@ export default async function PublicCoursePage({
                         lineHeight: "19.6px",
                       }}
                     >
-                      {course.track.title}
+                      {course.track.titleAr ? (
+                        <LocalizedText en={course.track.title} ar={course.track.titleAr} uppercase />
+                      ) : (
+                        <Tr>{course.track.title}</Tr>
+                      )}
                     </span>
                   </div>
                 ) : null}
                 <p
-                  className="mb-[20px] ml-[11px] mt-auto text-[10px] min-[744px]:max-lg:ml-0 min-[744px]:max-lg:text-[14px]"
+                  className="mb-[20px] mt-auto text-[10px] max-[743px]:ms-[11px] min-[744px]:max-lg:text-[14px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
@@ -595,33 +624,59 @@ export default async function PublicCoursePage({
                     opacity: 0.6,
                   }}
                 >
-                  {formatUpdatedMonthYear(course.updatedAt)}
+                  <><Tr>Last Updated</Tr> <span dir="ltr">{course.updatedAt.getMonth() + 1}/{course.updatedAt.getFullYear()}</span></>
                 </p>
               </div>
               <div className="hidden lg:block">
-              <h4 className="m-0" style={{ fontFamily: pangeaVar.style.fontFamily, fontSize: "24px", fontWeight: 500 }}>
-                Skills you’ll learn
-              </h4>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {course.track?.title ? (
-                  <span className="rounded-[8px] border border-black bg-white px-3 py-1.5 text-[20px] font-semibold uppercase">
-                    {course.track.title}
-                  </span>
-                ) : null}
-              </div>
-              <p
-                className="mb-0 mt-[20px]"
+              <h4
+                className="m-0 lg:ar:text-right"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily: pangeaVar.style.fontFamily,
                   fontSize: "24px",
                   fontStyle: "normal",
+                  fontWeight: 500,
+                  fontVariationSettings: '"wght" 500',
+                  lineHeight: "normal",
+                }}
+              >
+                <Tr>Skills you’ll learn</Tr>
+              </h4>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {course.track?.title ? (
+                  <span
+                    className="inline-flex h-[45px] items-center justify-center rounded-[25px] border-[0.3px] border-black/35 bg-[var(--White,#FFF)] px-[16px] text-center text-[18px] font-bold uppercase leading-[19.6px]"
+                    style={{
+                      color: "var(--Black, #000)",
+                      fontFamily: pangeaVar.style.fontFamily,
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      fontVariationSettings: '"wght" 700',
+                      lineHeight: "19.6px",
+                    }}
+                  >
+                    {course.track.titleAr ? (
+                      <LocalizedText en={course.track.title} ar={course.track.titleAr} uppercase />
+                    ) : (
+                      <Tr>{course.track.title}</Tr>
+                    )}
+                  </span>
+                ) : null}
+              </div>
+              <p
+                className="mb-0 mt-[20px] lg:ar:text-right"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontFamily: pangeaVar.style.fontFamily,
+                  fontSize: "18px",
+                  fontStyle: "normal",
                   fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
                   lineHeight: "normal",
                   opacity: 0.6,
                 }}
               >
-                {formatUpdatedMonthYear(course.updatedAt)}
+                <><Tr>Last Updated</Tr> <span dir="ltr">{course.updatedAt.getMonth() + 1}/{course.updatedAt.getFullYear()}</span></>
               </p>
               </div>
             </div>
@@ -629,82 +684,95 @@ export default async function PublicCoursePage({
           </aside>
           </div>
 
-          <section className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:mt-[45px]">
+          <section className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[45px] lg:ar:mt-[58px]">
             <div className="flex items-center gap-[16px]">
               <h3
-                className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+                className="m-0 text-[16px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
                 style={{
                   color: "var(--Black, #000)",
                   fontFamily: pangeaVar.style.fontFamily,
                   fontStyle: "normal",
                   fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
                   lineHeight: "normal",
-                  opacity: 0.6,
                 }}
               >
-                About this class
+                <Tr>About this class</Tr>
               </h3>
             </div>
             <p
-              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] min-[744px]:max-lg:mt-[12px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[18px] lg:mt-[19px] lg:text-[24px]"
+              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] min-[744px]:max-lg:mt-[12px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[18px] lg:mt-[19px] lg:text-[24px] lg:en:mt-[19px] lg:en:w-[363px] lg:en:text-[18px] lg:ar:mt-[12px] lg:ar:w-[363px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
               }}
             >
-              {aboutText}
+              <span className="ar:hidden">{aboutText}</span>
+              <span className="hidden ar:inline">
+                {`ستظهر لك الدورة النهائية للرسم الرقمي كيفية إنشاء فن متقدم يمكن أن يتنافس كعمل احترافي. ستعزز هذه الدورة مهاراتك في عالم الرسم الرقمي - أو استرداد أموالك.
+
+الدورة هي مسارك للحصول على مهارات الرسم والرسم الرقمي كما كنت تعرف دائماً أنه يجب أن تكون لديك! سواء لمشاريعك الخاصة أو للرسم للعملاء.
+
+ستأخذك هذه الدورة من مستوى المعرفة القليل في الرسم الرقمي إلى إنشاء فن متقدم وفهم عميق لأساسيات الرسم.`}
+              </span>
             </p>
           </section>
 
-          <section className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ml-[31px] min-[744px]:max-lg:mt-[36px]">
+          <section className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[36px]">
             <h3
-              className="m-0 mt-[30px] text-[16px] max-[743px]:mt-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+              className="m-0 mt-[30px] text-[16px] max-[743px]:mt-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:mt-[39px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
                 opacity: 0.6,
               }}
             >
-              Requirements
+              <Tr>Requirements</Tr>
             </h3>
             <ul
-              className="m-0 mt-[13px] list-disc pl-[28px] text-[16px] min-[744px]:max-lg:mt-[10px] min-[744px]:max-lg:w-[294px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+              className="m-0 mt-[13px] list-disc ps-[28px] text-[16px] min-[744px]:max-lg:mt-[10px] min-[744px]:max-lg:w-[294px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
               }}
             >
               {requirementItems.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item} className="ar:hidden">{item}</li>
               ))}
+              <li className="hidden ar:list-item">لوحة رسم أو آيباد</li>
+              <li className="hidden ar:list-item">برنامج رسم رقمي</li>
             </ul>
-            <div className="mt-[35px] flex w-[359px] max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[51px] min-[744px]:max-lg:-ml-[27px] min-[744px]:max-lg:w-[676px] lg:mt-[57px] lg:block lg:w-[413px]" aria-hidden>
-              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] min-[744px]:max-lg:bg-black lg:h-px lg:w-[413px] lg:max-w-full lg:border-0" />
+            <div className="mt-[35px] flex w-[359px] max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[51px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:mt-[57px] lg:block lg:w-full" aria-hidden>
+              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] min-[744px]:max-lg:bg-black lg:h-px lg:w-full lg:border-0" />
             </div>
           </section>
 
-          <section className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ml-[31px]">
+          <section className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ms-[31px]">
             <h3
-              className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+              className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
                 opacity: 0.6,
               }}
             >
-              About your instructor
+              <Tr>About your instructor</Tr>
             </h3>
 
             <div className="mt-[23px] flex items-start min-[744px]:max-lg:mt-[30px] lg:mt-[43px]">
@@ -730,35 +798,42 @@ export default async function PublicCoursePage({
                 )}
               </div>
 
-              <div className="ml-[21px] min-w-0 min-[744px]:max-lg:ml-[24px] lg:ml-[30px]">
+              <div className="ms-[21px] min-w-0 min-[744px]:max-lg:ms-[24px] lg:ms-[24px]">
                 <p
-                  className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+                  className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
                     fontStyle: "normal",
                     fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
                     lineHeight: "normal",
                   }}
                 >
                   <LocalizedText en={instructorName} ar={course.instructorNameAr} uppercase />
                 </p>
                 <p
-                  className="m-0 text-[14px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px]"
+                  className="m-0 text-[14px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
                     fontStyle: "normal",
                     fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
                     lineHeight: "normal",
                   }}
                 >
-                  {instructorRole}
+                  {course.track?.titleAr ? (
+                    <LocalizedText en={instructorRole} ar={course.track?.titleAr} />
+                  ) : (
+                    <Tr>{instructorRole}</Tr>
+                  )}
                 </p>
 
                 <div className="mt-[20px] flex items-center min-[744px]:max-lg:mt-[12px] lg:mt-[16px]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[20px] lg:w-[21px]" aria-hidden>
                     <path
+                      className="lg:en:[stroke-width:1.5px]"
                       d="M11.5 1L14.7445 7.58254L22 8.64458L16.75 13.7655L17.989 21L11.5 17.5825L5.011 21L6.25 13.7655L1 8.64458L8.2555 7.58254L11.5 1Z"
                       stroke="var(--Black, #000)"
                       strokeWidth="2"
@@ -767,22 +842,25 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
+                    className="ms-[14px] text-[14px] min-[744px]:max-lg:ms-[18px] min-[744px]:max-lg:text-[16px] lg:ms-0 lg:text-[18px] lg:en:text-[16px] lg:ar:text-[16px] lg:ar:text-right"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
                       fontStyle: "normal",
                       fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
                       lineHeight: "normal",
                     }}
                   >
-                    4.8 Instructor Rating
+                    <span className="ar:hidden">4.8 <Tr>Instructor Rating</Tr></span>
+                    <span className="hidden ar:inline">تقييم المعلم 4.8</span>
                   </span>
                 </div>
 
                 <div className="mt-[13px] flex items-center min-[744px]:max-lg:mt-[11px]">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 20" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[18px] lg:w-[21px]" aria-hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 20" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[18px] lg:w-[21px] lg:en:h-[20px]" aria-hidden>
                     <path
+                      className="lg:en:[stroke-width:1.5px]"
                       d="M16.2727 19V17C16.2727 15.9391 15.8705 14.9217 15.1544 14.1716C14.4384 13.4214 13.4672 13 12.4545 13H4.81818C3.80554 13 2.83437 13.4214 2.11832 14.1716C1.40227 14.9217 1 15.9391 1 17V19M22 19V17C21.9994 16.1137 21.7178 15.2528 21.1995 14.5523C20.6812 13.8519 19.9555 13.3516 19.1364 13.13M15.3182 1.13C16.1395 1.3503 16.8674 1.8507 17.3873 2.55231C17.9071 3.25392 18.1893 4.11683 18.1893 5.005C18.1893 5.89317 17.9071 6.75608 17.3873 7.45769C16.8674 8.1593 16.1395 8.6597 15.3182 8.88M12.4545 5C12.4545 7.20914 10.7451 9 8.63636 9C6.52764 9 4.81818 7.20914 4.81818 5C4.81818 2.79086 6.52764 1 8.63636 1C10.7451 1 12.4545 2.79086 12.4545 5Z"
                       stroke="var(--Black, #000)"
                       strokeWidth="2"
@@ -791,22 +869,24 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
+                    className="ms-[14px] text-[14px] min-[744px]:max-lg:ms-[18px] min-[744px]:max-lg:text-[16px] lg:ms-0 lg:text-[18px] lg:en:text-[16px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
                       fontStyle: "normal",
                       fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
                       lineHeight: "normal",
                     }}
                   >
-                    231 Students
+                    231 <Tr>Students</Tr>
                   </span>
                 </div>
 
                 <div className="mt-[13px] flex items-center min-[744px]:max-lg:mt-[11px]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 23 22" fill="none" className="h-[18px] w-[19px] shrink-0 min-[744px]:max-lg:h-[20px] min-[744px]:max-lg:w-[21px] lg:h-[20px] lg:w-[21px]" aria-hidden>
                     <path
+                      className="lg:en:[stroke-width:1.5px]"
                       d="M11.5 5.44444C11.5 4.2657 11.0575 3.13524 10.2698 2.30175C9.4822 1.46825 8.41391 1 7.3 1H1V17.6667H8.35C9.18543 17.6667 9.98665 18.0179 10.5774 18.643C11.1681 19.2681 11.5 20.1159 11.5 21M11.5 5.44444V21M11.5 5.44444C11.5 4.2657 11.9425 3.13524 12.7302 2.30175C13.5178 1.46825 14.5861 1 15.7 1H22V17.6667H14.65C13.8146 17.6667 13.0134 18.0179 12.4226 18.643C11.8319 19.2681 11.5 20.1159 11.5 21"
                       stroke="var(--Black, #000)"
                       strokeWidth="2"
@@ -815,20 +895,21 @@ export default async function PublicCoursePage({
                     />
                   </svg>
                   <span
-                    className="ml-[14px] text-[14px] min-[744px]:max-lg:ml-[18px] min-[744px]:max-lg:text-[16px] lg:ml-[18px] lg:text-[18px]"
+                    className="ms-[14px] text-[14px] min-[744px]:max-lg:ms-[18px] min-[744px]:max-lg:text-[16px] lg:ms-0 lg:text-[18px] lg:en:text-[16px]"
                     style={{
                       color: "var(--Black, #000)",
                       fontFamily: pangeaVar.style.fontFamily,
                       fontStyle: "normal",
                       fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
                       lineHeight: "normal",
                     }}
                   >
-                    4 courses
+                    4 <Tr>courses</Tr>
                   </span>
                 </div>
                 <p
-                  className="m-0 mt-[43px] hidden w-[620px] -ml-[178px] text-[18px] min-[744px]:max-lg:block"
+                  className="m-0 mt-[43px] hidden w-[620px] -ms-[178px] text-[18px] min-[744px]:max-lg:block"
                   style={{
                     color: "var(--Black, #000)",
                     fontFamily: pangeaVar.style.fontFamily,
@@ -837,33 +918,42 @@ export default async function PublicCoursePage({
                     lineHeight: "normal",
                   }}
                 >
-                  {aboutText}
+                  <span className="ar:hidden">{aboutText}</span>
+                  <span className="hidden ar:inline">
+                    أنا محترف مبدع أعمل في صناعة الألعاب. أعمل كفنان مفاهيمي ورسام مستقل. لقد عملت في استوديو رسوم متحركة ولكنني حالياً أعمل من المنزل. كمدرس، أسعى لتقديم أفضل تجربة تعليمية ممكنة لطلابي من خلال إنشاء محتوى واضح والحفاظ على سلوك شخصي.
+                  </span>
                 </p>
               </div>
             </div>
 
             <p
-              className="m-0 mt-[23px] w-[334px] max-w-full text-[16px] min-[744px]:max-lg:hidden lg:mt-[35px] lg:text-[24px]"
+              className="m-0 mt-[23px] w-[334px] max-w-full text-[16px] min-[744px]:max-lg:hidden lg:mt-[35px] lg:text-[24px] lg:en:w-[363px] lg:en:text-[18px] lg:ar:w-[363px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
                 lineHeight: "normal",
               }}
             >
-              <span className="hidden max-[743px]:inline">“</span>
-              {aboutText}
-              <span className="hidden max-[743px]:inline">”</span>
+              <span className="ar:hidden">
+                <span className="hidden max-[743px]:inline">“</span>
+                {aboutText}
+                <span className="hidden max-[743px]:inline">”</span>
+              </span>
+              <span className="hidden ar:inline">
+                أنا محترف مبدع أعمل في صناعة الألعاب. أعمل كفنان مفاهيمي ورسام مستقل. لقد عملت في استوديو رسوم متحركة ولكنني حالياً أعمل من المنزل. كمدرس، أسعى لتقديم أفضل تجربة تعليمية ممكنة لطلابي من خلال إنشاء محتوى واضح والحفاظ على سلوك شخصي.
+              </span>
             </p>
-            <div className="mt-[35px] hidden max-[743px]:flex max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center lg:hidden" aria-hidden>
+            <div className="mt-[35px] hidden max-[743px]:flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center lg:hidden" aria-hidden>
               <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
             </div>
           </section>
         </div>
       </div>
 
-      <div className="mt-[35px] max-lg:order-8 max-lg:-ml-[30px] max-lg:w-[calc(100%+30px)] min-[744px]:max-lg:mt-[50px] lg:hidden">
+      <div className="mt-[35px] max-lg:order-8 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:w-[calc(100%+30px)] min-[744px]:max-lg:mt-[50px] lg:hidden">
         <div
           className="hidden min-[744px]:max-lg:flex min-[744px]:max-lg:justify-center"
           aria-hidden
@@ -878,7 +968,7 @@ export default async function PublicCoursePage({
         />
       </div>
 
-      <div className="max-lg:order-9 max-lg:-ml-[30px] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
+      <div className="max-lg:order-9 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
         <StudentsRatingWorkSection variant="mobile" cards={studentStories ?? undefined} />
       </div>
 
@@ -886,8 +976,9 @@ export default async function PublicCoursePage({
         <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
       </div>
 
-      <div className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
+      <div className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:[direction:ltr] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
         <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />
+      </div>
       </div>
       </div>
     </main>

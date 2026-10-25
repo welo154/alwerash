@@ -662,7 +662,7 @@ export async function publicGetCourseById(courseId: string) {
       trackId: true,
       published: true,
       comingSoon: true,
-      track: { select: { published: true, slug: true, title: true } },
+      track: { select: { published: true, slug: true, title: true, titleAr: true } },
       modules: {
         orderBy: [{ order: "asc" }, { createdAt: "asc" }],
         select: {
@@ -735,6 +735,7 @@ export async function publicGetPreviewLesson(courseId: string, lessonId: string)
 export type PublicFreePreviewVideo = {
   lessonId: string;
   title: string;
+  titleAr?: string | null;
   type: string;
   hasVideo: boolean;
   posterUrl: string | null;
@@ -758,6 +759,7 @@ export async function publicGetFreePreviewVideos(
     select: {
       id: true,
       title: true,
+      titleAr: true,
       type: true,
       video: { select: { lessonId: true } },
       article: { select: { body: true } },
@@ -775,6 +777,7 @@ export async function publicGetFreePreviewVideos(
       {
         lessonId,
         title: lesson.title,
+        titleAr: lesson.titleAr,
         type: lesson.type,
         hasVideo,
         posterUrl: null,
