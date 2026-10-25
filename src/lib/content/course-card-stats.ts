@@ -20,7 +20,7 @@ export function courseCardStats(course: {
     0;
   const durationLabel = formatCatalogDurationLabel(course.totalDurationMinutes, lessonCount);
   return {
-    durationLabel: durationLabel === "0m" ? null : durationLabel,
+    durationLabel: durationLabel === "0m" ? "" : durationLabel,
     levelLabel: courseLevelLabel(course.level),
   };
 }

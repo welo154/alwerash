@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
+import { LearnCarouselEdgeNav } from "@/components/learn/LearnCarouselEdgeNav";
+import { learnCarouselMousewheel } from "@/components/learn/learn-carousel-swiper-config";
+import { useLearnCarouselSwiper } from "@/components/learn/useLearnCarouselSwiper";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { LandingMentorCard } from "./LandingMentorCard";
 import { LandingMentorModal } from "./LandingMentorModal";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
@@ -12,8 +19,9 @@ const TABLET_HEADING_LEFT_PX = 63;
 const TABLET_CARD_W = 301;
 const TABLET_CARD_H = 311.979;
 const TABLET_GAP_X = 18;
-const TABLET_GAP_Y = 50;
-const TABLET_GRID_W = TABLET_CARD_W * 2 + TABLET_GAP_X;
+/** Same horizontal gap as the desktop mentor card grid. */
+const DESKTOP_CARD_GAP_PX = 26;
+const DESKTOP_PAGE_INSET_PX = 120;
 
 function CurrentMostsHeading({
   id,
@@ -66,7 +74,7 @@ function CurrentMostsHeading({
 
 /**
  * “THE CURRENT MOSTS” strip — below Everything-in-one-place.
- * Phone: stacked 329×341 cards.
+ * Phone: horizontal swiper of 317×341 cards.
  * iPad (744–lg): 40px heading, 2×301×311.979 cards, 18×50 gaps.
  * lg+: same heading type; 383×357 cards in the page’s column count.
  */
@@ -88,6 +96,8 @@ export function LandingCurrentMostsSection({
   mentorCardHeightPx,
   /** Guest home only: line under the heading on iPad. */
   showExploreCopy = false,
+  /** Sentence beside the desktop heading. Logged-in home hides it. */
+  showDesktopSupportingCopy = true,
   className,
 }: {
   mentors: LandingMostsMentorCardDto[];
@@ -113,10 +123,20 @@ export function LandingCurrentMostsSection({
   mentorCardWidthPx?: number;
   mentorCardHeightPx?: number;
   showExploreCopy?: boolean;
+  showDesktopSupportingCopy?: boolean;
   className?: string;
 }) {
   const [selectedMentor, setSelectedMentor] =
     useState<LandingMostsMentorCardDto | null>(null);
+  const arabic = useArabicLayout();
+  const {
+    atBeginning,
+    atEnd,
+    handleSwiper,
+    handleNavSync,
+    slideNext,
+    slidePrev,
+  } = useLearnCarouselSwiper();
 
   const visibleMentors = mentors.slice(0, (mentorsPerRow ?? (forceTwoPerRow ? 2 : 3)) * 2);
 
@@ -202,12 +222,48 @@ export function LandingCurrentMostsSection({
       >
         <h2
           id="landing-current-mosts-heading-mobile"
-          className="m-0 w-[269px] text-left uppercase text-black"
-          style={{
-            fontFamily: pangeaFont,
-            marginLeft: mobileHeadingInsetPx ?? 30,
-          }}
+          className={`m-0 w-[269px] text-black ${arabic ? "text-right" : "text-left uppercase"}`}
+          style={
+            arabic
+              ? {
+                  width: 269,
+                  marginRight: 29,
+                  marginLeft: "auto",
+                  color: "#000",
+                  textAlign: "right",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }
+              : {
+                  fontFamily: pangeaFont,
+                  marginLeft: mobileHeadingInsetPx ?? 30,
+                }
+          }
         >
+          {arabic ? (
+            <>
+              الأكثر{" "}
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  fontVariationSettings: '"wght" 600',
+                  lineHeight: "120%",
+                }}
+              >
+                شيوعًا
+              </span>{" "}
+              حاليًا
+            </>
+          ) : (
+            <>
           <span
             style={{
               color: "#000",
@@ -232,20 +288,42 @@ export function LandingCurrentMostsSection({
           >
             MOSTS
           </span>
+            </>
+          )}
         </h2>
 
-        {visibleMentors.length > 0 ? (
-          <div className="relative left-1/2 mt-[40px] flex w-screen max-w-[100vw] -translate-x-1/2 flex-col items-center gap-y-[40px] px-4">
-            {visibleMentors.map((m) => (
-              <LandingMentorCard
-                key={m.id}
-                layout="mobile"
-                variant={m.variant}
-                name={m.name}
-                profession={m.profession}
-                onOpen={() => setSelectedMentor(m)}
-              />
-            ))}
+        {mentors.length > 0 ? (
+          <div className="relative mt-[40px] w-full overflow-x-clip">
+            <Swiper
+              key={arabic ? "mosts-phone-ar" : "mosts-phone-en"}
+              dir={arabic ? "rtl" : "ltr"}
+              modules={[Mousewheel]}
+              slidesPerView="auto"
+              spaceBetween={20}
+              slidesPerGroup={1}
+              slidesOffsetBefore={mobileHeadingInsetPx ?? 30}
+              speed={400}
+              grabCursor
+              allowTouchMove
+              simulateTouch
+              observer
+              observeParents
+              watchOverflow
+              mousewheel={learnCarouselMousewheel}
+              className="learn-popular-swiper learn-popular-swiper--cards no-scrollbar ml-0! mr-0! w-full min-w-0 max-w-full"
+            >
+              {mentors.map((m) => (
+                <SwiperSlide key={m.id} className="h-auto! w-[317px]! shrink-0">
+                  <LandingMentorCard
+                    layout="mobile"
+                    variant={m.variant}
+                    name={m.name}
+                    profession={m.profession}
+                    onOpen={() => setSelectedMentor(m)}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         ) : null}
       </section>
@@ -254,50 +332,289 @@ export function LandingCurrentMostsSection({
         className={`relative left-1/2 hidden w-screen max-w-[100vw] -translate-x-1/2 min-[744px]:max-lg:block ${className ?? ""}`}
         aria-labelledby="landing-current-mosts-heading-tablet"
       >
-        <CurrentMostsHeading
-          id="landing-current-mosts-heading-tablet"
-          sizePx={tabletHeadingSizePx ?? 40}
-          paddingLeftPx={TABLET_HEADING_LEFT_PX}
-        />
+        {arabic ? (
+          <h2
+            id="landing-current-mosts-heading-tablet"
+            className="m-0 text-black"
+            style={{
+              width: "fit-content",
+              marginRight: TABLET_HEADING_LEFT_PX,
+              marginLeft: "auto",
+              color: "#000",
+              textAlign: "right",
+              fontFamily: pangeaFont,
+              fontSize: tabletHeadingSizePx ?? 40,
+              fontStyle: "normal",
+              fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "120%",
+            }}
+          >
+            الأكثر{" "}
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: tabletHeadingSizePx ?? 40,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }}
+            >
+              شيوعًا
+            </span>{" "}
+            حاليًا
+          </h2>
+        ) : (
+          <CurrentMostsHeading
+            id="landing-current-mosts-heading-tablet"
+            sizePx={tabletHeadingSizePx ?? 40}
+            paddingLeftPx={TABLET_HEADING_LEFT_PX}
+          />
+        )}
         {showExploreCopy ? (
           <p
             className="m-0 mt-[17px] h-[60px] w-[404px] text-[24px] font-normal leading-[127%] text-black"
-            style={{
-              fontFamily: pangeaFont,
-              marginLeft: TABLET_HEADING_LEFT_PX,
-            }}
+            style={
+              arabic
+                ? {
+                    width: 404,
+                    height: 60,
+                    marginRight: TABLET_HEADING_LEFT_PX,
+                    marginLeft: "auto",
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: 24,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "127%",
+                  }
+                : {
+                    fontFamily: pangeaFont,
+                    marginLeft: TABLET_HEADING_LEFT_PX,
+                  }
+            }
           >
-            Explore our most popular and most watched mentors and instructors.
+            {arabic
+              ? "استكشف معلمينا ومدربينا الأكثر شعبية والأكثر مشاهدة."
+              : "Explore our most popular and most watched mentors and instructors."}
           </p>
         ) : null}
-        {visibleMentors.length > 0 ? (
-          <div
-            className="mx-auto grid justify-items-center"
-            style={{
-              marginTop: 70,
-              width: TABLET_GRID_W,
-              maxWidth: "100%",
-              gridTemplateColumns: `repeat(2, ${TABLET_CARD_W}px)`,
-              columnGap: TABLET_GAP_X,
-              rowGap: TABLET_GAP_Y,
-            }}
-          >
-            {visibleMentors.map((m) => (
-              <LandingMentorCard
-                key={m.id}
-                layout="tablet"
-                variant={m.variant}
-                name={m.name}
-                profession={m.profession}
-                onOpen={() => setSelectedMentor(m)}
-                widthPx={TABLET_CARD_W}
-                heightPx={TABLET_CARD_H}
-              />
-            ))}
+        {mentors.length > 0 ? (
+          <div className="relative mt-[70px] w-full overflow-x-clip">
+            <Swiper
+              key={arabic ? "mosts-tablet-ar" : "mosts-tablet"}
+              dir={arabic ? "rtl" : "ltr"}
+              modules={[Mousewheel]}
+              slidesPerView="auto"
+              spaceBetween={TABLET_GAP_X}
+              slidesPerGroup={1}
+              slidesOffsetBefore={TABLET_HEADING_LEFT_PX}
+              slidesOffsetAfter={TABLET_HEADING_LEFT_PX}
+              speed={400}
+              grabCursor
+              allowTouchMove
+              simulateTouch
+              observer
+              observeParents
+              watchOverflow
+              mousewheel={learnCarouselMousewheel}
+              className="learn-popular-swiper learn-popular-swiper--cards no-scrollbar ml-0! mr-0! w-full min-w-0 max-w-full"
+            >
+              {mentors.map((m) => (
+                <SwiperSlide key={m.id} className="h-auto! w-[301px]! shrink-0">
+                  <LandingMentorCard
+                    layout="tablet"
+                    variant={m.variant}
+                    name={m.name}
+                    profession={m.profession}
+                    onOpen={() => setSelectedMentor(m)}
+                    widthPx={TABLET_CARD_W}
+                    heightPx={TABLET_CARD_H}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         ) : null}
       </section>
 
+      {!contained ? (
+      <section
+        className={`relative mb-[90px] w-full max-lg:hidden ${className ?? ""}`}
+        style={{ marginTop: 123 }}
+        data-gsap-reveal
+        aria-labelledby="landing-current-mosts-heading"
+      >
+        <div
+          dir={arabic ? "rtl" : "ltr"}
+          className="flex items-center"
+          style={{
+            paddingInlineStart: DESKTOP_PAGE_INSET_PX,
+            columnGap: arabic ? 560 : 48,
+          }}
+        >
+          <h2
+            id="landing-current-mosts-heading"
+            className="m-0 text-black"
+            style={{
+              color: "#000",
+              fontFamily: pangeaFont,
+              fontSize: "48px",
+              lineHeight: "120%",
+              textAlign: arabic ? "right" : undefined,
+            }}
+          >
+            {arabic ? (
+              <>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأكثـر{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 600,
+                    fontVariationSettings: '"wght" 600',
+                    lineHeight: "120%",
+                  }}
+                >
+                  شيوعًــا
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: "48px",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  {" "}
+                  حاليًـا
+                </span>
+              </>
+            ) : (
+              <>
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "120%",
+              }}
+            >
+              THE CURRENT{" "}
+            </span>
+            <span
+              style={{
+                color: "#000",
+                fontFamily: pangeaFont,
+                fontSize: "48px",
+                fontStyle: "italic",
+                fontWeight: 700,
+                fontVariationSettings: '"wght" 700',
+                lineHeight: "120%",
+              }}
+            >
+              MOSTS
+            </span>
+              </>
+            )}
+          </h2>
+          {showDesktopSupportingCopy ? (
+          <p
+            className="m-0 text-black"
+            style={{
+              width: arabic ? "295px" : "361px",
+              height: "60px",
+              color: "#000",
+              textAlign: arabic ? "right" : undefined,
+              fontFamily: pangeaFont,
+              fontSize: "24px",
+              fontStyle: "normal",
+              fontWeight: 400,
+              fontVariationSettings: '"wght" 400',
+              lineHeight: "127%",
+            }}
+          >
+            {arabic
+              ? "استكشف معلمينا ومدربينا الأكثر شعبية والأكثر مشاهدة."
+              : "Explore our most popular and most watched mentors and instructors."}
+          </p>
+          ) : null}
+        </div>
+
+        <div className="relative mt-[82px] w-full">
+          <Swiper
+            key={arabic ? "ar" : "en"}
+            dir={arabic ? "rtl" : "ltr"}
+            modules={[Mousewheel]}
+            slidesPerView="auto"
+            spaceBetween={DESKTOP_CARD_GAP_PX}
+            slidesPerGroup={1}
+            slidesOffsetBefore={DESKTOP_PAGE_INSET_PX}
+            speed={400}
+            grabCursor
+            allowTouchMove
+            simulateTouch
+            observer
+            observeParents
+            watchOverflow
+            mousewheel={learnCarouselMousewheel}
+            className="learn-popular-swiper learn-popular-swiper--cards ml-0! mr-0! w-full min-w-0 max-w-full overflow-visible!"
+            onSwiper={handleSwiper}
+            onSlideChange={handleNavSync}
+            onSlidesUpdated={handleNavSync}
+            onResize={handleNavSync}
+          >
+            {mentors.map((m) => (
+              <SwiperSlide key={m.id} className="h-auto! w-[383px]! shrink-0">
+                <LandingMentorCard
+                  variant={m.variant}
+                  name={m.name}
+                  profession={m.profession}
+                  onOpen={() => setSelectedMentor(m)}
+                  widthPx={mentorCardWidthPx ?? 383}
+                  heightPx={mentorCardHeightPx ?? 357}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <LearnCarouselEdgeNav
+            atBeginning={atBeginning}
+            atEnd={atEnd}
+            onPrev={slidePrev}
+            onNext={slideNext}
+            prevLabel="Previous mentor"
+            nextLabel="Next mentor"
+          />
+        </div>
+      </section>
+      ) : (
       <section
         className={`max-lg:hidden ${sectionSpacingClass} ${className ?? ""}`}
         style={sectionInlineStyle}
@@ -362,6 +679,7 @@ export function LandingCurrentMostsSection({
           </div>
         </div>
       </section>
+      )}
 
       <LandingMentorModal
         mentor={selectedMentor}

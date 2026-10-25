@@ -58,6 +58,8 @@ type SearchBarProps = {
   layout?: "mobile" | "tablet";
   /** iPad inner-site bar is shorter than the home/hero bar */
   tabletSearch?: "home" | "site";
+  /** Overrides the mobile header field width when the shell is narrower than 382px. */
+  barWidth?: number;
 };
 
 function firstSearchHref(results: SearchResult | null): string | null {
@@ -268,6 +270,7 @@ export function SearchBar({
   outlined = false,
   layout = "mobile",
   tabletSearch = "home",
+  barWidth: barWidthProp,
 }: SearchBarProps) {
   const t = useT();
   const [query, setQuery] = useState("");
@@ -352,8 +355,8 @@ export function SearchBar({
 
   if (variant === "mobileHeader") {
     const isTablet = layout === "tablet";
-    const barWidth = isTablet ? 491 : outlined ? 192 : 206;
-    const barHeight = isTablet ? 54 : 38;
+    const barWidth = barWidthProp ?? (isTablet ? 491 : outlined ? 192 : 206);
+    const barHeight = isTablet ? 66 : 38;
     return (
       <div
         ref={containerRef}

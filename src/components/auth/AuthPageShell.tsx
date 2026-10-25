@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { AuthBrandingAside, AuthHeadlineSentence } from "./AuthBrandingAside";
 import { AuthLocaleButton } from "./AuthLocaleButton";
 import { AuthGreenPanel } from "./AuthGreenPanel";
@@ -16,6 +19,8 @@ import {
 const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
 
 function AuthLoginMobileBrand() {
+  const arabic = useLocale().locale === "ar";
+
   return (
     <div className="flex w-full shrink-0 flex-col items-center lg:hidden">
       <Link
@@ -35,13 +40,27 @@ function AuthLoginMobileBrand() {
       </Link>
       <p
         className="m-0 mt-[20px] w-[334px] max-w-full text-center text-black min-[744px]:hidden"
-        style={{
-          fontFamily: pangeaFont,
-          fontSize: 20,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "120%",
-        }}
+        style={
+          arabic
+            ? {
+                width: 334,
+                color: "#000",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 20,
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "120%",
+              }
+            : {
+                fontFamily: pangeaFont,
+                fontSize: 20,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "120%",
+              }
+        }
       >
         <AuthHeadlineSentence fontSize={20} />
       </p>
@@ -53,6 +72,7 @@ function AuthLoginMobileBrand() {
           fontSize: 32,
           fontStyle: "normal",
           fontWeight: 400,
+          fontVariationSettings: arabic ? '"wght" 400' : undefined,
           lineHeight: "120%",
         }}
       >
@@ -130,6 +150,7 @@ export function AuthPageShell({
   panel?: React.ReactNode;
   mobileLayout?: "login" | "register";
 }) {
+  const arabic = useLocale().locale === "ar";
   const mobileChrome = Boolean(mobileLayout);
   const mobileGreenHeightClass =
     mobileLayout === "register"
@@ -196,20 +217,61 @@ export function AuthPageShell({
         </div>
 
         {mobileChrome ? (
-          <p
-            className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
-            style={{
-              fontFamily: pangeaFont,
-              fontSize: 14,
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "127%",
-              opacity: 0.6,
-            }}
-          >
-            Thousands of creative classes. Beginner to pro, watch at your pace and even
-            offline.
-          </p>
+          arabic ? (
+            <>
+              <p
+                className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black min-[744px]:hidden"
+                style={{
+                  width: 293,
+                  color: "#000",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "127%",
+                  opacity: 0.6,
+                }}
+              >
+                آلاف الدروس الإبداعية. من المبتدئين إلى المحترفين، شاهد بالوتيرة التي تناسبك وحتى
+                بدون اتصال بالإنترنت.
+              </p>
+              <p
+                className="auth-login-support-copy m-0 mt-[21px] hidden w-[622px] shrink-0 text-center text-black min-[744px]:block lg:hidden"
+                style={{
+                  width: 622,
+                  color: "#000",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 24,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "127%",
+                  opacity: 0.6,
+                }}
+              >
+                آلاف الدروس الإبداعية. من المبتدئين إلى المحترفين، شاهد بالوتيرة التي تناسبك وحتى
+                بدون اتصال.
+              </p>
+            </>
+          ) : (
+            <p
+              className="auth-login-support-copy m-0 mt-[21px] w-[293px] shrink-0 text-center text-black lg:hidden"
+              style={{
+                fontFamily: pangeaFont,
+                fontSize: 14,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "127%",
+                opacity: 0.6,
+              }}
+            >
+              Thousands of creative classes. Beginner to pro, watch at your pace and even
+              offline.
+            </p>
+          )
         ) : null}
         {mobileChrome ? <AuthLoginMobileSocialRow /> : null}
       </div>

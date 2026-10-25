@@ -33,6 +33,8 @@ export function AuthGreenPanel({
   }
 
   useEffect(() => {
+    if (!autoScroll) return;
+
     const el = ref.current;
     if (!el) return;
 
@@ -57,7 +59,7 @@ export function AuthGreenPanel({
 
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [autoScroll]);
 
   useEffect(() => {
     if (!autoScroll) return;
@@ -104,7 +106,9 @@ export function AuthGreenPanel({
     <div className={className} style={style}>
       <div
         ref={ref}
-        className="auth-green-panel-scroll min-h-0 max-lg:h-auto max-lg:overflow-visible max-lg:overscroll-auto max-lg:touch-pan-y lg:h-full lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain"
+        className={`auth-green-panel-scroll min-h-0 max-lg:h-auto max-lg:overflow-visible max-lg:overscroll-auto max-lg:touch-pan-y lg:h-full lg:overflow-x-hidden lg:overscroll-contain ${
+          autoScroll ? "lg:overflow-y-auto" : "overflow-y-hidden"
+        }`}
         onMouseEnter={pause}
         onMouseLeave={resume}
         onPointerDown={pause}

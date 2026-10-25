@@ -95,6 +95,15 @@ export function LearnClassesCarouselHeading({
 }) {
   const useGap = arrowGapClassName.length > 0;
   const tabletArrow = tabletArrowSize === 41;
+  const arabic = useArabicLayout();
+  const arabicTitle: { lead: string; accent: string } | null =
+    primary === "POPULAR"
+      ? { lead: "الدورات", accent: "الشائعــــة" }
+      : primary === "RECENTLY"
+        ? { lead: "المضافة", accent: "حديثًــــا" }
+        : primary === "ALL"
+          ? { lead: "جميـــع", accent: "الدورات" }
+          : null;
 
   return (
     <div
@@ -104,18 +113,56 @@ export function LearnClassesCarouselHeading({
         className={`inline-flex w-fit shrink-0 items-center rounded-[44px] bg-white pl-[22px] pr-[22px] ${pillClassName}`.trim()}
       >
         <h2
-          className="m-0 w-fit uppercase leading-[120%] text-[var(--Black,#000)]"
-          style={{ fontFamily: pangeaFont }}
+          dir={arabic ? "rtl" : undefined}
+          className={`m-0 flex w-fit items-center leading-[120%] text-[var(--Black,#000)] ${
+            arabic ? "" : "uppercase"
+          }`}
+          style={{
+            fontFamily: pangeaFont,
+            textAlign: arabic ? "right" : undefined,
+          }}
         >
-          <span className="text-[24px] font-semibold italic min-[744px]:max-lg:text-[32px] min-[744px]:max-lg:font-bold lg:text-[36px]">
-            {primary}
-          </span>
-          {secondary ? (
-            <span className="text-[24px] font-normal not-italic min-[744px]:max-lg:text-[32px] lg:text-[36px]">
-              {" "}
-              {secondary}
-            </span>
-          ) : null}
+          {arabic && arabicTitle ? (
+            <>
+              <span
+                className="text-[24px] not-italic min-[744px]:max-lg:text-[32px] lg:text-[36px]"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }}
+              >
+                {arabicTitle.lead}
+              </span>
+              <span
+                className="text-[24px] min-[744px]:max-lg:text-[32px] lg:text-[36px]"
+                style={{
+                  color: "var(--Black, #000)",
+                  fontStyle: "italic",
+                  fontWeight: 600,
+                  fontVariationSettings: '"wght" 600',
+                  lineHeight: "120%",
+                }}
+              >
+                {"\u00A0"}
+                {arabicTitle.accent}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-[24px] font-semibold italic min-[744px]:max-lg:text-[32px] min-[744px]:max-lg:font-bold lg:text-[36px]">
+                {primary}
+              </span>
+              {secondary ? (
+                <span className="text-[24px] font-normal not-italic min-[744px]:max-lg:text-[32px] lg:text-[36px]">
+                  {" "}
+                  {secondary}
+                </span>
+              ) : null}
+            </>
+          )}
         </h2>
       </div>
       {showNavButton ? (

@@ -14,10 +14,12 @@ import {
   authText24,
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 import { CheckEmailModal } from "./CheckEmailModal";
 import { useT } from "@/components/i18n/Tr";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { pangeaFont } from "./auth-theme";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REQUIREMENTS = {
@@ -81,6 +83,7 @@ export function AuthRegisterPanel({
 }) {
   const t = useT();
   const { locale } = useLocale();
+  const arabic = useArabicLayout();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
   const nextParam = safeInternalPath(searchParams.get("next"));
@@ -151,12 +154,37 @@ export function AuthRegisterPanel({
   }
 
   return (
-    <div className="auth-mobile-panel auth-register-panel flex w-full flex-col">
-      <h1 className="auth-login-title m-0 text-black" style={authHeadingStyle}>
+    <div
+      className="auth-mobile-panel auth-register-panel flex w-full flex-col"
+      data-arabic={arabic ? "true" : undefined}
+    >
+      <h1
+        className="auth-login-title m-0 text-black"
+        style={
+          arabic
+            ? {
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: 36,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }
+            : authHeadingStyle
+        }
+      >
         {t("SIGN UP")}
       </h1>
       <div className="auth-register-title-gap h-[12px] shrink-0" aria-hidden />
-      <p className="auth-register-subtitle m-0 h-[29px] w-[598px] max-w-full text-black" style={authText24}>
+      <p
+        dir={arabic ? "rtl" : undefined}
+        className={`auth-register-subtitle m-0 h-[29px] w-[598px] max-w-full text-black${
+          arabic ? " text-right" : ""
+        }`}
+        style={authText24}
+      >
         {t("Learn from the best and showcase your creative work.")}
       </p>
       <div className="auth-register-fields-gap h-[33px] shrink-0" aria-hidden />
@@ -166,7 +194,8 @@ export function AuthRegisterPanel({
           id="name"
           name="name"
           type="text"
-          placeholder="Name"
+          placeholder={arabic ? "الاسم" : "Name"}
+          className="auth-field-name"
           autoComplete="name"
           required
           error={fieldErrors.name}
@@ -179,7 +208,7 @@ export function AuthRegisterPanel({
           id="email"
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={arabic ? "البريد الإلكتروني" : "Email"}
           autoComplete="email"
           required
           error={fieldErrors.email}
@@ -193,6 +222,7 @@ export function AuthRegisterPanel({
           onShowPassword={() => setShowPassword(true)}
           onHidePassword={() => setShowPassword(false)}
           autoComplete="new-password"
+          placeholder={arabic ? "كلمة المرور" : "Password"}
           error={fieldErrors.password}
           errorId="register-password-error"
           onValueChange={() => clearFieldError("password")}
@@ -254,14 +284,15 @@ export function AuthRegisterPanel({
           <AuthTextField
             id="card-name"
             name="cardName"
-            placeholder="Name"
+            placeholder={arabic ? "الاسم على البطاقة" : "Name"}
+            className="auth-field-name"
             autoComplete="cc-name"
           />
           <div className="auth-login-password-gap h-[18px] shrink-0" aria-hidden />
           <AuthTextField
             id="card-number"
             name="cardNumber"
-            placeholder="Cards number"
+            placeholder={arabic ? "رقم البطاقة" : "Cards number"}
             autoComplete="cc-number"
             inputMode="numeric"
           />
@@ -270,7 +301,7 @@ export function AuthRegisterPanel({
             <AuthTextField
               id="card-expiry"
               name="cardExpiry"
-              placeholder="Expiry date"
+              placeholder={arabic ? "تاريخ انتهاء الصلاحية" : "Expiry date"}
               autoComplete="cc-exp"
               className="auth-field-half"
             />
@@ -287,7 +318,13 @@ export function AuthRegisterPanel({
         <div className="auth-login-forgot-gap h-[35px] shrink-0" aria-hidden />
 
         <div className="auth-login-centered flex flex-col">
-        <p className="auth-register-terms m-0 h-[65px] w-[549px] max-w-full text-black" style={authText24}>
+        <p
+          dir={arabic ? "rtl" : undefined}
+          className={`auth-register-terms m-0 h-[65px] w-[549px] max-w-full text-black${
+            arabic ? " ml-auto text-right" : ""
+          }`}
+          style={{ ...authText24, ...(arabic ? { textAlign: "right" } : {}) }}
+        >
           {t("By signing up, you agree to our")}{" "}
           <Link href="/" className="auth-login-join-link text-black underline">
             {t("Terms of Use")}
@@ -315,7 +352,11 @@ export function AuthRegisterPanel({
 
       <div className="auth-login-resend-gap h-[40px] shrink-0" aria-hidden />
 
-      <p className="auth-login-join m-0 text-center text-black" style={authText24}>
+      <p
+        dir={arabic ? "rtl" : undefined}
+        className="auth-login-join m-0 text-center text-black"
+        style={authText24}
+      >
         {t("Already have an account?")}{" "}
         <Link href={withNext("/login", nextParam)} className="auth-login-join-link text-black underline">
           {t("Log in")}

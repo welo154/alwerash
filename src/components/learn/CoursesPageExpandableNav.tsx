@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
 import { COURSE_FILTER_ACTIONS } from "@/components/learn/course-filter-actions";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -46,13 +47,69 @@ const sidebarSoftware = [
   { label: "+ See More", href: "/tracks/design-softwares" },
 ] as const;
 
-function itemStyle(active: boolean) {
+const NAV_AR: Record<string, string> = {
+  COURSES: "الدورات",
+  CATEGORIES: "الفئات",
+  Courses: "الدورات",
+  Categories: "الفئات",
+  AREAS: "المجالات",
+  SOFTWARE: "البرامج",
+  "All Couses": "كل الدورات",
+  "Guided Courses": "دورات موجهة",
+  "Deep Dive": "التعمق",
+  Specializations: "التخصصات",
+  Basics: "الأساسيات",
+  "New Courses": "دورات جديدة",
+  "Top Rated": "الأعلى تقييمًا",
+  "Popular Courses": "الدورات الشائعة",
+  "Fashion courses": "دورات الموضة",
+  "Web & App Design courses": "دورات تصميم الويب والتطبيقات",
+  "Calligraphy & Typography courses": "دورات الخط والتيبوغرافيا",
+  "Music & Audio courses": "دورات الموسيقى والصوت",
+  "Culinary courses": "دورات الطهي",
+  "Artificial Intelligence courses": "دورات الذكاء الاصطناعي",
+  "Wellness courses": "دورات العافية",
+  "How to become courses": "دورات كيف تصبح",
+  "Adobe Photoshop": "أدوبي فوتوشوب",
+  "Adobe Illustrator": "أدوبي إليستريتور",
+  "Adobe InDesign": "أدوبي إن ديزاين",
+  "Adobe After Effects": "أدوبي أفتر إفكتس",
+  Canva: "كانفا",
+  Procreate: "بروكرِيت",
+  "+ See More": "+ عرض المزيد",
+  "Creative Coding": "البرمجة الإبداعية",
+  Branding: "الهوية البصرية",
+  "3D Design": "التصميم ثلاثي الأبعاد",
+  "UI / UX": "واجهة وتجربة المستخدم",
+  "UI/UX": "واجهة وتجربة المستخدم",
+  Calligraphy: "الخط",
+  Ornamentation: "الزخرفة",
+  Illustration: "الرسم",
+  "CV & Portfolio": "السيرة والأعمال",
+  "Business & Design": "الأعمال والتصميم",
+};
+
+function courseNavLabel(label: string, arabic: boolean) {
+  if (!arabic) return label;
+  const key = label.trim();
+  return NAV_AR[key] ?? key;
+}
+
+export { courseNavLabel };
+
+function navLabel(label: string, arabic: boolean) {
+  return courseNavLabel(label, arabic);
+}
+
+function itemStyle(active: boolean, arabic: boolean) {
   return {
     fontFamily: pangeaFont,
-    fontSize: "18px",
+    fontSize: arabic ? 20 : "18px",
     fontWeight: 400,
-    lineHeight: "28.98px",
-    color: active ? "#FF8CFF" : "#000",
+    fontVariationSettings: '"wght" 400',
+    lineHeight: arabic ? "161%" : "28.98px",
+    color: active ? "#FF8CFF" : "var(--Black, #000)",
+    textAlign: arabic ? ("right" as const) : ("left" as const),
     cursor: "pointer" as const,
   };
 }
@@ -86,6 +143,7 @@ function ExpandableSection({
   showTopGap,
   showUnderline,
   reduceMotion,
+  arabic,
   children,
 }: {
   id: string;
@@ -96,6 +154,7 @@ function ExpandableSection({
   showTopGap: boolean;
   showUnderline: boolean;
   reduceMotion: boolean;
+  arabic: boolean;
   children: React.ReactNode;
 }) {
   const HeadingTag = headingLevel === 2 ? "h2" : "h3";
@@ -108,13 +167,19 @@ function ExpandableSection({
         <button
           type="button"
           id={id}
-          className="m-0 w-full cursor-pointer border-0 bg-transparent p-0 text-left uppercase outline-none hover:opacity-80 focus-visible:opacity-80"
-          style={NAV_HEADING_STYLE}
+          className={`m-0 w-full cursor-pointer border-0 bg-transparent p-0 outline-none hover:opacity-80 focus-visible:opacity-80 ${
+            arabic ? "text-right" : "text-left uppercase"
+          }`}
+          style={
+            arabic
+              ? { ...NAV_HEADING_STYLE, fontSize: 32, textAlign: "right" }
+              : NAV_HEADING_STYLE
+          }
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
         >
-          {label}
+          {navLabel(label, arabic)}
         </button>
       </HeadingTag>
 
@@ -134,9 +199,12 @@ function ExpandableSection({
             <div
               aria-hidden
               className="shrink-0 self-stretch"
-              style={{ width: 1, background: "#000" }}
+              style={{ width: 1, background: "rgb(0 0 0 / 40%)" }}
             />
-            <div className="min-w-0 flex-1" style={{ marginLeft: 11 }}>
+            <div
+              className="min-w-0 flex-1"
+              style={arabic ? { marginRight: 11 } : { marginLeft: 11 }}
+            >
               {children}
             </div>
           </div>
@@ -156,18 +224,22 @@ function ExpandableSection({
 function NavTextButton({
   children,
   active = false,
+  arabic = false,
   onClick,
 }: {
   children: React.ReactNode;
   active?: boolean;
+  arabic?: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left hover:opacity-80 focus-visible:opacity-80"
-      style={itemStyle(active)}
+      className={`block w-full cursor-pointer border-0 bg-transparent p-0 hover:opacity-80 focus-visible:opacity-80 ${
+        arabic ? "text-right" : "text-left"
+      }`}
+      style={itemStyle(active, arabic)}
     >
       {children}
     </button>
@@ -187,6 +259,7 @@ export function CoursesPageExpandableNav({
 }) {
   const router = useRouter();
   const uid = useId();
+  const arabic = useArabicLayout();
   const reduceMotion = usePrefersReducedMotion();
   const [openSection, setOpenSection] = useState<SectionId | null>(defaultSection);
 
@@ -230,12 +303,13 @@ export function CoursesPageExpandableNav({
         showTopGap={false}
         showUnderline
         reduceMotion={reduceMotion}
+        arabic={arabic}
       >
         <ul className="m-0 list-none space-y-0.5 p-0">
           {courseFilters.map((item, idx) => (
             <li key={item}>
-              <NavTextButton active={idx === 0} onClick={() => applyCourseFilter(item)}>
-                {item}
+              <NavTextButton active={idx === 0} arabic={arabic} onClick={() => applyCourseFilter(item)}>
+                {navLabel(item, arabic)}
               </NavTextButton>
             </li>
           ))}
@@ -251,6 +325,7 @@ export function CoursesPageExpandableNav({
         showTopGap
         showUnderline
         reduceMotion={reduceMotion}
+        arabic={arabic}
       >
         <ul className="m-0 list-none space-y-0.5 p-0">
           {categories.map((item) => (
@@ -258,17 +333,20 @@ export function CoursesPageExpandableNav({
               {item.href ? (
                 <Link
                   href={item.href}
-                  className="block cursor-pointer no-underline hover:opacity-80 focus-visible:opacity-80"
-                  style={itemStyle(activeCategoryKey === item.key)}
+                  className={`block cursor-pointer no-underline hover:opacity-80 focus-visible:opacity-80 ${
+                    arabic ? "text-right" : "text-left"
+                  }`}
+                  style={itemStyle(activeCategoryKey === item.key, arabic)}
                 >
-                  {item.label}
+                  {navLabel(item.label, arabic)}
                 </Link>
               ) : (
                 <NavTextButton
                   active={activeCategoryKey === item.key}
+                  arabic={arabic}
                   onClick={() => onCategorySelect(item)}
                 >
-                  {item.label}
+                  {navLabel(item.label, arabic)}
                 </NavTextButton>
               )}
             </li>
@@ -285,16 +363,19 @@ export function CoursesPageExpandableNav({
         showTopGap
         showUnderline={false}
         reduceMotion={reduceMotion}
+        arabic={arabic}
       >
         <ul className="m-0 list-none space-y-0.5 p-0">
           {sidebarSoftware.map((item) => (
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="block cursor-pointer no-underline hover:opacity-80 focus-visible:opacity-80"
-                style={itemStyle(false)}
+                className={`block cursor-pointer no-underline hover:opacity-80 focus-visible:opacity-80 ${
+                  arabic ? "text-right" : "text-left"
+                }`}
+                style={itemStyle(false, arabic)}
               >
-                {item.label}
+                {navLabel(item.label, arabic)}
               </Link>
             </li>
           ))}

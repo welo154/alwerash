@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+import { libraryCardPrice, libraryCardTitle } from "./library-card-copy";
 import {
   LibraryCategorySortFilters,
   type LibraryPopularSort,
@@ -288,35 +290,50 @@ function PodcastCardMeta({
   title: string;
   priceLabel: string;
 }) {
+  const arabic = useArabicLayout();
+  const label = libraryCardTitle(arabic, title);
   return (
     <div
+      dir={arabic ? "rtl" : undefined}
       className="flex items-start"
-      style={{ gap: 23, marginTop: -36, marginLeft: 60 }}
+      style={{
+        gap: 23,
+        marginTop: -36,
+        marginLeft: arabic ? 0 : 60,
+        width: arabic ? "100%" : undefined,
+        paddingRight: arabic ? 60 : undefined,
+      }}
     >
       <div style={{ width: 138, fontFamily: pangeaFont }}>
         <p
           className="m-0 text-black"
           style={{
             width: 138,
+            color: "#000",
+            textAlign: arabic ? "right" : undefined,
             fontSize: "18px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
+            fontVariationSettings: '"wght" 400',
           }}
         >
-          {title}
+          {label}
         </p>
         <p
           className="m-0"
           style={{
-            color: "rgba(0, 0, 0, 0.60)",
+            color: arabic ? "#707070" : "rgba(0, 0, 0, 0.60)",
+            textAlign: arabic ? "right" : undefined,
+            fontFamily: pangeaFont,
             fontSize: "18px",
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
+            fontVariationSettings: '"wght" 400',
           }}
         >
-          {priceLabel}
+          {libraryCardPrice(arabic, priceLabel)}
         </p>
       </div>
       <button

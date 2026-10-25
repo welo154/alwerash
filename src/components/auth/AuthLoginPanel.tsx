@@ -13,8 +13,10 @@ import {
   authText24,
 } from "./auth-form-ui";
 import { buildOAuthCallbackUrl } from "./auth-oauth-icons";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { safeInternalPath, withNext } from "@/lib/safe-internal-path";
 import { useT } from "@/components/i18n/Tr";
+import { pangeaFont } from "./auth-theme";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,6 +37,7 @@ type LoginFieldErrors = {
 
 export function AuthLoginPanel() {
   const t = useT();
+  const arabic = useArabicLayout();
   const searchParams = useSearchParams();
   const nextParam = safeInternalPath(searchParams.get("next"));
   const registered = searchParams.get("registered") === "1";
@@ -122,21 +125,42 @@ export function AuthLoginPanel() {
   }
 
   return (
-    <div className="auth-mobile-panel auth-login-panel flex w-full flex-col">
-      <h1 className="auth-login-title m-0 text-black" style={authHeadingStyle}>
-        LOG IN
+    <div
+      className="auth-mobile-panel auth-login-panel flex w-full flex-col"
+      data-arabic={arabic ? "true" : undefined}
+    >
+      <h1
+        className="auth-login-title m-0 text-black"
+        style={
+          arabic
+            ? {
+                color: "#000",
+                textAlign: "right",
+                fontFamily: pangeaFont,
+                fontSize: 36,
+                fontStyle: "normal",
+                fontWeight: 600,
+                fontVariationSettings: '"wght" 600',
+                lineHeight: "120%",
+              }
+            : authHeadingStyle
+        }
+      >
+        {arabic ? "تسجيل الدخول" : "LOG IN"}
       </h1>
       <div className="auth-login-title-gap h-[74px] shrink-0" aria-hidden />
 
       <form onSubmit={handleSubmit} className="flex flex-col">
         {verified && (
           <p className="mb-[18px] text-center" style={authText24}>
-            Email verified. You can sign in now.
+            {arabic
+              ? "تم التحقق من البريد الإلكتروني. يمكنك تسجيل الدخول الآن."
+              : "Email verified. You can sign in now."}
           </p>
         )}
         {registered && !verified && (
           <p className="mb-[18px] text-center" style={authText24}>
-            Registration successful. Please sign in.
+            {arabic ? "تم التسجيل بنجاح. يرجى تسجيل الدخول." : "Registration successful. Please sign in."}
           </p>
         )}
         {oauthErrorMessage && (
@@ -149,7 +173,7 @@ export function AuthLoginPanel() {
           id="email"
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={arabic ? "البريد الإلكتروني" : "Email"}
           autoComplete="email"
           required
           error={fieldErrors.email}
@@ -166,25 +190,45 @@ export function AuthLoginPanel() {
           showPassword={showPassword}
           onShowPassword={() => setShowPassword(true)}
           onHidePassword={() => setShowPassword(false)}
+          placeholder={arabic ? "كلمة المرور" : "Password"}
           error={fieldErrors.password}
           errorId="login-password-error"
           onValueChange={() => clearFieldError("password")}
         />
         <div className="auth-login-forgot-gap h-[18px] shrink-0" aria-hidden />
 
-        <p className="auth-login-forgot m-0 w-full text-right" style={authText24}>
+        <p
+          dir={arabic ? "rtl" : undefined}
+          className="auth-login-forgot m-0 w-full text-end"
+          style={authText24}
+        >
           <Link href="/forgot-password" className="text-black">
-            Forgot Password?
+            {arabic ? "نسيت كلمة المرور؟" : "Forgot Password?"}
           </Link>
         </p>
         <div className="auth-login-join-gap h-[31px] shrink-0" aria-hidden />
 
         <div className="auth-login-centered flex flex-col">
-        <p className="auth-login-join m-0 mx-auto h-[29px] w-[372px] text-center text-black" style={authText24}>
-          Don&apos;t have an account?{" "}
-          <Link href={withNext("/register", nextParam)} className="auth-login-join-link text-black underline">
-            Join for Free
-          </Link>
+        <p
+          dir={arabic ? "rtl" : undefined}
+          className="auth-login-join m-0 mx-auto h-[29px] w-[372px] text-center text-black"
+          style={authText24}
+        >
+          {arabic ? (
+            <>
+              ليس لديك حساب؟{" "}
+              <Link href={withNext("/register", nextParam)} className="auth-login-join-link text-black underline">
+                انضم مجانًا
+              </Link>
+            </>
+          ) : (
+            <>
+              Don&apos;t have an account?{" "}
+              <Link href={withNext("/register", nextParam)} className="auth-login-join-link text-black underline">
+                Join for Free
+              </Link>
+            </>
+          )}
         </p>
         <div className="auth-login-submit-gap h-[32px] shrink-0" aria-hidden />
 
@@ -203,19 +247,51 @@ export function AuthLoginPanel() {
 
       <div className="auth-login-resend-gap h-[68px] shrink-0" aria-hidden />
 
-      <p className="auth-login-resend m-0 mx-auto w-[477px] text-center text-black" style={authText24}>
-        If you haven&apos;t received the confirmation email, you can{" "}
-        <Link
-          href={
-            emailDraft.trim()
-              ? `/register?checkEmail=${encodeURIComponent(emailDraft.trim())}`
-              : "/register?checkEmail="
-          }
-          className="auth-login-resend-link text-black underline"
-        >
-          resend it
-        </Link>
-        .
+      <p
+        dir={arabic ? "rtl" : undefined}
+        className={`auth-login-resend m-0 text-black${arabic ? " w-full text-right" : " mx-auto w-[350px] text-center"}`}
+        style={{
+          color: "#000",
+          fontFamily: pangeaFont,
+          fontSize: 18,
+          fontStyle: "normal",
+          fontWeight: 400,
+          fontVariationSettings: '"wght" 400',
+          lineHeight: "120%",
+          textAlign: arabic ? "right" : "center",
+        }}
+      >
+        {arabic ? (
+          <>
+            إذا لم تتلقَ بريد التأكيد، يمكنك{" "}
+            <Link
+              href={
+                emailDraft.trim()
+                  ? `/register?checkEmail=${encodeURIComponent(emailDraft.trim())}`
+                  : "/register?checkEmail="
+              }
+              className="auth-login-resend-link text-black underline"
+            >
+              إعادة إرساله
+            </Link>
+            .
+          </>
+        ) : (
+          <>
+            If you haven&apos;t received the confirmation email, you can{" "}
+            <Link
+              href={
+                emailDraft.trim()
+                  ? `/register?checkEmail=${encodeURIComponent(emailDraft.trim())}`
+                  : "/register?checkEmail="
+              }
+              className="auth-login-resend-link text-black underline"
+            >
+              resend it
+            </Link>
+            .
+          </>
+        )}
       </p>
       <div className="auth-login-bottom-gap shrink-0" aria-hidden />
         </div>

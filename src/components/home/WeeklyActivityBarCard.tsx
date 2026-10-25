@@ -1,6 +1,11 @@
+"use client";
+
 import type { WeeklyActivitySummary } from "@/lib/learning-activity";
-import { formatSecondsAsHhMm } from "@/lib/learning-activity";
+import { formatSecondsAsArabicDuration, formatSecondsAsHhMm } from "@/lib/learning-activity";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
+
+const WEEKDAY_AR = ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"] as const;
 
 const pangeaFont = pangeaFontFamily;
 
@@ -18,6 +23,7 @@ export function WeeklyActivityBarCard({
   highlightDayIndex,
   variant = "desktop",
 }: Props) {
+  const arabic = useArabicLayout();
   const isMobile = variant === "mobile";
   const isTablet = variant === "tablet";
   const BAR_MAX_PX = isMobile ? 122 : 202;
@@ -29,9 +35,13 @@ export function WeeklyActivityBarCard({
     MIN_SCALE_SECONDS,
     ...summary.days.map((d) => d.watchSeconds)
   );
-  const weekLabel = formatSecondsAsHhMm(summary.weekTotalSeconds);
+  const weekLabel = arabic
+    ? formatSecondsAsArabicDuration(summary.weekTotalSeconds)
+    : formatSecondsAsHhMm(summary.weekTotalSeconds);
   const highlightDay = summary.days[highlightDayIndex] ?? summary.days[0];
-  const tooltipLabel = formatSecondsAsHhMm(highlightDay?.watchSeconds ?? 0);
+  const tooltipLabel = arabic
+    ? formatSecondsAsArabicDuration(highlightDay?.watchSeconds ?? 0)
+    : formatSecondsAsHhMm(highlightDay?.watchSeconds ?? 0);
 
   return (
     <div
@@ -45,11 +55,12 @@ export function WeeklyActivityBarCard({
       style={{ background: "var(--White, #FFF)" }}
       aria-label="Weekly activity"
     >
-      <div>
+      <div className="w-full" style={{ textAlign: arabic ? "right" : undefined }}>
         <p
-          className="m-0 uppercase"
+          className={`m-0 ${arabic ? "" : "uppercase"}`}
           style={{
             color: "var(--Black, #000)",
+            textAlign: arabic ? "right" : undefined,
             fontFamily: pangeaFont,
             fontSize: isMobile ? "24px" : "32px",
             fontStyle: "normal",
@@ -58,12 +69,13 @@ export function WeeklyActivityBarCard({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          ACTIVITY
+          {arabic ? "النشاط" : "ACTIVITY"}
         </p>
         <p
           className="m-0 mt-[3px]"
           style={{
             color: "var(--Black, #000)",
+            textAlign: arabic ? "right" : undefined,
             fontFamily: pangeaFont,
             fontSize: isMobile ? "14px" : "16px",
             fontStyle: "normal",
@@ -73,12 +85,13 @@ export function WeeklyActivityBarCard({
             fontVariationSettings: '"wght" 400',
           }}
         >
-          Learnt this week
+          {arabic ? "ما تعلمته هذا الأسبوع" : "Learnt this week"}
         </p>
         <p
           className={`m-0 ${isMobile ? "mt-[4px]" : "mt-[5px]"}`}
           style={{
             color: "var(--Black, #000)",
+            textAlign: arabic ? "right" : undefined,
             fontFamily: pangeaFont,
             fontSize: "32px",
             fontStyle: "normal",
@@ -159,21 +172,23 @@ export function WeeklyActivityBarCard({
           }}
         >
           {summary.days.map((d) => (
-            <p
+              <p
               key={`${d.dateKey}-lab`}
-              className="m-0 text-center"
+              className={`m-0 ${arabic ? "text-right" : "text-center"}`}
               style={{
                 width: barColWidth,
                 color: "var(--Black, #000)",
+                textAlign: arabic ? "right" : "center",
                 fontFamily: pangeaFont,
                 fontSize: isMobile ? "12px" : "16px",
                 fontStyle: "normal",
                 fontWeight: 400,
                 lineHeight: "normal",
+                opacity: arabic ? 0.6 : undefined,
                 fontVariationSettings: '"wght" 400',
               }}
             >
-              {d.label}
+              {arabic ? WEEKDAY_AR[d.dayIndex] ?? d.label : d.label}
             </p>
           ))}
         </div>

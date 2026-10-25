@@ -30,6 +30,20 @@ export function formatSecondsAsHhMm(totalSeconds: number): string {
   return `${h}h${m}m`;
 }
 
+const ARABIC_INDIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+
+export function toArabicIndicDigits(value: number | string): string {
+  return String(value).replace(/\d/g, (digit) => ARABIC_INDIC_DIGITS[Number(digit)] ?? digit);
+}
+
+/** Arabic duration, e.g. 4h35m → 4س35د. */
+export function formatSecondsAsArabicDuration(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}س${m}د`;
+}
+
 /** Sunday 00:00 UTC of the week that contains `d`. */
 export function startOfUtcWeek(d: Date): Date {
   const dow = d.getUTCDay();

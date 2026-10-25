@@ -97,6 +97,30 @@ function useMobileSwiperInset() {
   return inset;
 }
 
+/** Distance from the page edge to the first course card. Desktop keeps 120px on either side. */
+function useCourseRowStartInset() {
+  const [inset, setInset] = useState(MOBILE_SECTION_INSET_PX);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const tablet = window.matchMedia("(min-width: 744px)");
+    const update = () => {
+      if (desktop.matches) setInset(120);
+      else if (tablet.matches) setInset(TABLET_SECTION_INSET_PX);
+      else setInset(MOBILE_SECTION_INSET_PX);
+    };
+    update();
+    desktop.addEventListener("change", update);
+    tablet.addEventListener("change", update);
+    return () => {
+      desktop.removeEventListener("change", update);
+      tablet.removeEventListener("change", update);
+    };
+  }, []);
+
+  return inset;
+}
+
 /** Break out of a padded ancestor to viewport width without transform (avoids left-edge clipping). */
 const FULL_BLEED = "w-screen max-w-[100vw] ml-[calc(50%-50vw)]";
 
@@ -111,25 +135,6 @@ const bodyTextFont = {
   fontFamily: pangeaFontFamily,
 } as const;
 
-const sectionLabelFont = {
-  color: "var(--White, #FFF)",
-  fontFamily: pangeaFontFamily,
-  fontSize: "18px",
-  fontStyle: "normal",
-  fontWeight: 400,
-  lineHeight: "normal",
-} as const;
-
-function SectionLabelUnderline({ width }: { width: number }) {
-  return (
-    <div
-      className="shrink-0 bg-[#FFF]"
-      style={{ width, height: "1.2px", minHeight: "1.2px", maxHeight: "1.2px" }}
-      aria-hidden
-    />
-  );
-}
-
 function MobileDiscoverCta({
   className,
   onDark = false,
@@ -138,17 +143,23 @@ function MobileDiscoverCta({
   onDark?: boolean;
 }) {
   const t = useT();
+  const arabic = useArabicLayout();
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
       <p
         className={`m-0 w-[315px] text-[20px] font-normal leading-[127%] min-[744px]:text-[24px] ${
           onDark ? "min-[744px]:w-[514px]" : "min-[744px]:w-[620px]"
+        } ${arabic ? "max-[743px]:text-right" : ""} ${
+          onDark && arabic ? "min-[744px]:!mt-[20px]" : ""
         }`}
         style={{
           ...bodyTextFont,
           color: onDark ? "var(--White, #FFF)" : "#000",
+          fontStyle: "normal",
           fontWeight: 400,
+          fontVariationSettings: '"wght" 400',
           lineHeight: "127%",
+          ...(arabic ? { textAlign: "right" as const } : {}),
         }}
       >
         {t(
@@ -173,13 +184,16 @@ function MobileDiscoverCta({
       ) : (
       <Link
         href="/course"
-        className="mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[30px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px]"
+        className={`mt-[20px] inline-flex h-[49px] w-fit items-center self-start rounded-[30px] border-[0.2px] border-black px-4 text-[20px] font-normal leading-[19.6px] text-[#141413] no-underline transition-opacity hover:opacity-90 min-[744px]:mt-[30px] min-[744px]:h-[91px] min-[744px]:w-[247px] min-[744px]:justify-center min-[744px]:border-[0.3px] min-[744px]:text-center min-[744px]:text-[36px] ${
+          arabic ? "max-[743px]:mt-[19px] max-[743px]:self-end min-[744px]:self-end" : ""
+        }`}
         style={{
           ...pillFont,
           backgroundColor: "var(--Blue, #64E1FF)",
           borderRadius: 30,
           color: "var(--Text-Primary, #141413)",
           lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+          boxSizing: "border-box",
         }}
       >
         {t("Discover")}
@@ -234,7 +248,7 @@ function TrackSelectPill({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`flex h-[27px] w-auto items-center justify-center text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] ${
+      className={`flex h-[27px] w-auto items-center justify-center text-center text-[18px] font-bold leading-[19.6px] text-black transition-colors min-[744px]:h-[45px] min-[744px]:text-[24px] lg:!h-[45px] lg:!w-fit lg:!rounded-[25px] lg:!border-[0.3px] lg:!border-solid lg:!border-black/40 lg:!px-4 lg:!text-center lg:!text-[24px] lg:!font-bold lg:!leading-[19.6px] ${
         fillRow ? "min-w-0 flex-1 overflow-hidden" : "shrink-0"
       } ${pressed ? "bg-[#59CBE8]" : "bg-white hover:bg-slate-50"}`}
       style={{
@@ -244,6 +258,11 @@ function TrackSelectPill({
         borderRadius: 23,
         border: "0.3px solid rgb(0 0 0 / 40%)",
         boxSizing: "border-box",
+        fontStyle: "normal",
+        fontWeight: 700,
+        fontVariationSettings: '"wght" 700',
+        textAlign: "center",
+        ...(fillRow ? {} : { width: "fit-content" }),
       }}
     >
       <span className={fillRow ? "min-w-0 truncate" : undefined}>{t(pill.label)}</span>
@@ -330,10 +349,12 @@ function TabletEqualWidthPills({
     return () => ro.disconnect();
   }, [pills]);
 
+  const arabic = useArabicLayout();
   if (pills.length === 0) return null;
 
   return (
     <div
+      dir={arabic ? "rtl" : undefined}
       className="hidden min-[744px]:block lg:hidden"
       style={{ paddingLeft: TABLET_TOPIC_INSET_PX, paddingRight: TABLET_TOPIC_INSET_PX }}
     >
@@ -540,6 +561,8 @@ export function HomeTrackExplorerSection({
   } = useLearnCarouselSwiper();
   const swiperCardGap = useSwiperCardGap();
   const mobileSwiperInset = useMobileSwiperInset();
+  const courseRowStartInset = useCourseRowStartInset();
+  const courseRowRef = useRef<HTMLDivElement>(null);
 
   const allPills = useMemo(
     () => [...trackPillRow1, ...trackPillRow2],
@@ -592,6 +615,18 @@ export function HomeTrackExplorerSection({
 
   const isEmpty = trackPillSelectsCourses ? courseTiles.length === 0 : trackSlides.length === 0;
 
+  useEffect(() => {
+    const node = courseRowRef.current;
+    if (!node) return;
+    const pinStart = () => {
+      node.scrollLeft = arabic ? node.scrollWidth : 0;
+    };
+    pinStart();
+    const observer = new ResizeObserver(pinStart);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [arabic, cardGridKey, courseRowStartInset, visibleCourseTiles.length]);
+
   const contentInsetClass =
     contentLeftPx != null
       ? "max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px]"
@@ -600,7 +635,9 @@ export function HomeTrackExplorerSection({
     contentLeftPx != null ? "max-lg:gap-[9px] lg:gap-[15px]" : "gap-[25px]";
   const pillRowClass =
     contentLeftPx != null
-      ? `flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass} hidden max-[743px]:flex lg:flex`
+      ? arabic
+        ? `flex-wrap ${pillRowGapClass} hidden max-[743px]:flex max-[743px]:flex-row-reverse lg:flex max-[743px]:pr-[30px] max-[743px]:pl-0 max-lg:pl-0 min-[744px]:max-lg:pr-[61px] lg:flex-row-reverse lg:pr-[120px] lg:pl-[160px]`
+        : `flex-wrap ${pillRowGapClass} max-lg:pr-0 lg:pr-[160px] ${contentInsetClass} hidden max-[743px]:flex lg:flex`
       : `${FULL_BLEED} flex flex-wrap gap-[25px] px-6 sm:px-8`;
   const pillRowStyle =
     pillGapPx != null && contentLeftPx == null
@@ -679,17 +716,22 @@ export function HomeTrackExplorerSection({
           }`}
         >
           <h2
-            className="m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] lg:text-[36px]"
-            style={{ fontFamily: pangeaFontFamily }}
+            className={`m-0 text-[24px] font-normal leading-[120%] text-black min-[744px]:max-lg:text-[32px] ${arabic ? "text-right lg:text-[40px]" : "lg:text-[36px]"}`}
+            style={{
+              fontFamily: pangeaFontFamily,
+              fontVariationSettings: '"wght" 400',
+              textAlign: arabic ? "right" : undefined,
+            }}
           >
-            {t("WHAT TO LEARN NEXT")}
+            {arabic ? "ماذا تتعلم بعد ذلك" : t("WHAT TO LEARN NEXT")}
           </h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 45 45"
             fill="none"
             aria-hidden
-            className={`size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px] ${arabic ? "scale-x-[-1]" : ""}`}
+            className="size-[28px] shrink-0 min-[744px]:max-lg:size-[41px] lg:size-[43px]"
+            style={arabic ? { transform: "scaleX(-1)" } : undefined}
           >
             <path
               d="M22.5 44C34.3741 44 44 34.3741 44 22.5C44 10.6259 34.3741 1 22.5 1C10.6259 1 1 10.6259 1 22.5C1 34.3741 10.6259 44 22.5 44Z"
@@ -719,17 +761,23 @@ export function HomeTrackExplorerSection({
               : contentInsetClass
           }`}
           style={{
+            color: "var(--Black, #000)",
             fontFamily: pangeaFontFamily,
+            fontStyle: "normal",
+            fontWeight: 400,
+            fontVariationSettings: '"wght" 400',
+            lineHeight: "127%",
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          Recommended for you
+          {arabic ? "موصى به لك" : "Recommended for you"}
         </p>
       ) : null}
 
       {showWhatToLearnNextHeading ? (
         <div
           key={cardGridKey}
-          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[67px] lg:ml-0 lg:w-full lg:max-w-none ${
+          className={`home-learn-next-track ${FULL_BLEED} relative mt-[29px] overflow-x-clip overflow-y-visible min-[744px]:max-lg:mt-[42px] lg:mt-[35px] lg:ml-0 lg:w-full lg:max-w-none ${
             contentLeftPx != null
               ? arabic
                 ? "lg:pr-[120px] lg:pl-6"
@@ -839,10 +887,14 @@ export function HomeTrackExplorerSection({
                 : t("No tracks to show.")}
             </p>
           ) : trackPillSelectsCourses ? (
-            <div className="w-full overflow-x-auto">
+            <div ref={courseRowRef} className="no-scrollbar w-full overflow-x-auto">
               <div
-                className="flex w-max min-w-full items-start justify-center"
-                style={{ columnGap: swiperCardGap, paddingInline: mobileSwiperInset }}
+                className={`flex w-max min-w-full items-start ${arabic ? "flex-row-reverse" : ""}`}
+                style={{
+                  columnGap: swiperCardGap,
+                  paddingLeft: arabic ? 0 : courseRowStartInset,
+                  paddingRight: arabic ? courseRowStartInset : 0,
+                }}
               >
                 {visibleCourseTiles.map((tile) => (
                   <div
@@ -913,20 +965,13 @@ export function HomeTrackExplorerSection({
       ) : null}
 
       {showWhatToLearnNextHeading && landingMostsMentors.length > 0 ? (
-        <div
-          className={`mt-[55px] min-[744px]:max-lg:mt-[84px] lg:mb-[120px] ${contentLeftPx != null ? "lg:pl-[120px] lg:pr-6" : ""}`}
-        >
-          <LandingCurrentMostsSection
-            mentors={landingMostsMentors}
-            mentorCardWidthPx={383}
-            mentorCardHeightPx={357}
-            contained
-            alignCardsLeft
-            compactVerticalSpacing
-            cardsTopGapPx={58}
-            tabletHeadingSizePx={32}
-          />
-        </div>
+        <LandingCurrentMostsSection
+          mentors={landingMostsMentors}
+          mentorCardWidthPx={383}
+          mentorCardHeightPx={357}
+          showDesktopSupportingCopy={false}
+          className="mt-[55px] min-[744px]:max-lg:mt-[84px]"
+        />
       ) : null}
 
       {showViewMoreCourses && trackPillSelectsCourses ? (
@@ -944,16 +989,23 @@ export function HomeTrackExplorerSection({
       {showDiscoverCta ? (
         <>
           <div className="lg:hidden">
-          <MobileDiscoverCta className="mt-[45px] pl-[31px] min-[744px]:mt-[60px] min-[744px]:pl-[61px]" />
+          <MobileDiscoverCta
+            className={
+              arabic
+                ? "mt-[45px] max-[743px]:ml-auto max-[743px]:mr-[30px] max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:mt-[60px] min-[744px]:ml-auto min-[744px]:mr-[61px] min-[744px]:w-[620px] min-[744px]:items-end"
+                : "mt-[45px] pl-[31px] min-[744px]:mt-[60px] min-[744px]:pl-[61px]"
+            }
+          />
 
           <div
-            className="relative mx-auto mt-[45px] box-border h-[1386.999px] w-[393px] overflow-hidden min-[744px]:mt-[82px] min-[744px]:h-[1329.001px] min-[744px]:w-[732px]"
+            className="relative mx-auto mt-[45px] box-border w-[393px] max-w-[99%] overflow-hidden [container-type:inline-size] min-[744px]:mt-[82px] min-[744px]:!aspect-auto min-[744px]:h-[1329.001px] min-[744px]:w-[732px] min-[744px]:max-w-none"
             style={{
               borderRadius: 55,
               background: "var(--Dark-Green, #004B3C)",
+              aspectRatio: "393 / 1074",
             }}
           >
-            <div className="relative mx-auto h-full w-[393px] min-[744px]:w-full">
+            <div className="relative h-[1074px] w-[393px] max-[743px]:absolute max-[743px]:top-0 max-[743px]:left-1/2 max-[743px]:origin-top max-[743px]:[transform:translateX(-50%)_scale(calc(100cqw/393px))] min-[744px]:mx-auto min-[744px]:h-full min-[744px]:w-full min-[744px]:transform-none">
             {/* Figma 1181:6349 — WORK book */}
             <div
               className="absolute left-[32px] top-[40px] z-[10] flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[68px] min-[744px]:top-[82px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]"
@@ -1006,68 +1058,14 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            {/* Books label — phone only */}
-            <div className="absolute left-[265px] top-[142px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  BOOKS
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={77} />
-            </div>
-
-            <div className="absolute right-[26px] top-[295px] z-20 origin-center rotate-[5deg] min-[744px]:right-[103px] min-[744px]:top-[138px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute right-[26px] top-[195px] z-20 origin-center rotate-[5deg] min-[744px]:right-[103px] min-[744px]:top-[138px] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="origin-top-left min-[744px]:scale-x-[1.47843] min-[744px]:scale-y-[1.48077]">
                 <LibraryArticleCardVisual clipId="mobile-landing-article" />
               </div>
             </div>
 
-            {/* Articles label — phone only */}
-            <div className="absolute left-[49px] top-[421px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  ARTICLES
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={95} />
-            </div>
-
             {/* Blue day film book — same size as WORK book */}
-            <div className="absolute left-[31px] top-[558px] z-10 flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[76px] min-[744px]:top-[445px] min-[744px]:z-[30] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute left-[31px] top-[358px] z-[30] flex h-[298.201px] w-[210.303px] items-center justify-center min-[744px]:left-[76px] min-[744px]:top-[445px] min-[744px]:z-[30] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="flex-none" style={{ transform: "rotate(-4.96deg)" }}>
                 <div className="relative h-[283.146px] w-[186.543px] overflow-hidden rounded-br-[20px] rounded-tr-[20px] shadow-[16px_16px_11px_0_rgba(0,0,0,0.1)] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1083,42 +1081,8 @@ export function HomeTrackExplorerSection({
                 </div>
               </div>
             </div>
-            {/* References & Materials label — phone only */}
-            <div className="absolute left-[241px] top-[667px] inline-flex flex-col min-[744px]:hidden">
-              <div className="inline-flex flex-col">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  REFERENCES &
-                </p>
-                <SectionLabelUnderline width={125} />
-              </div>
-              <div className="inline-flex flex-col">
-                <div className="flex items-center gap-[4px]">
-                  <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                    MATERIALS
-                  </p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    className="shrink-0"
-                    aria-hidden
-                  >
-                    <path
-                      d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                      stroke="white"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <SectionLabelUnderline width={108} />
-              </div>
-            </div>
             <div
-              className="pointer-events-none absolute left-[53px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[109.826px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
+              className="pointer-events-none absolute left-[53px] top-[371px] z-[30] flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[109.826px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
               aria-hidden
             >
               <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
@@ -1133,7 +1097,7 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
             <div
-              className="pointer-events-none absolute left-[52px] top-[571px] z-10 flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[108.288px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
+              className="pointer-events-none absolute left-[52px] top-[371px] z-[30] flex h-[282px] w-[24.5px] items-center justify-center min-[744px]:left-[108.288px] min-[744px]:top-[459.988px] min-[744px]:z-[30] min-[744px]:h-[433.385px] min-[744px]:w-[37.67px]"
               aria-hidden
             >
               <div className="flex-none" style={{ transform: "rotate(85.04deg)" }}>
@@ -1148,7 +1112,7 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            <div className="absolute left-[170px] top-[813px] z-[9] origin-center h-[278.075px] w-[173.605px] overflow-visible min-[744px]:left-auto min-[744px]:right-[98px] min-[744px]:top-[524px] min-[744px]:z-[8] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
+            <div className="absolute left-[190px] top-[513px] z-[9] origin-center h-[278.075px] w-[173.605px] overflow-visible min-[744px]:left-auto min-[744px]:right-[98px] min-[744px]:top-[524px] min-[744px]:z-[8] min-[744px]:h-[435.346px] min-[744px]:w-[286.816px]">
               <div className="relative h-[278.075px] w-[173.605px] origin-top-left rotate-[5deg] min-[744px]:scale-x-[1.65212] min-[744px]:scale-y-[1.56557]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1178,36 +1142,13 @@ export function HomeTrackExplorerSection({
               </div>
             </div>
 
-            {/* Podcasts label — phone only */}
-            <div className="absolute left-[44px] top-[946px] inline-flex flex-col min-[744px]:hidden">
-              <div className="flex items-center gap-[4px]">
-                <p className="m-0 whitespace-nowrap" style={sectionLabelFont}>
-                  PODCASTS
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  className="shrink-0"
-                  aria-hidden
-                >
-                  <path
-                    d="M0.599609 12.5996L12.5996 0.59961M12.5996 12.5996L12.5996 0.59961L0.599609 0.59961"
-                    stroke="white"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <SectionLabelUnderline width={108} />
-            </div>
-
             <MobileDiscoverCta
               onDark
-              className="absolute left-[31px] top-[1170px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+              className={
+                arabic
+                  ? "absolute top-[857px] max-[743px]:right-[30px] max-[743px]:left-auto max-[743px]:w-[315px] max-[743px]:items-end min-[744px]:right-[60px] min-[744px]:left-auto min-[744px]:bottom-[82px] min-[744px]:top-auto min-[744px]:[&>a]:!mt-[37px]"
+                  : "absolute left-[31px] top-[857px] min-[744px]:left-[62px] min-[744px]:top-[1009px] min-[744px]:bottom-auto"
+              }
             />
             </div>
           </div>
@@ -1219,13 +1160,57 @@ export function HomeTrackExplorerSection({
             </div>
             <h2
               className="m-0 w-full text-center text-black"
-              style={{ fontFamily: pangeaFontFamily }}
+              style={
+                arabic
+                  ? {
+                      color: "#000",
+                      textAlign: "center",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      lineHeight: "120%",
+                    }
+                  : { fontFamily: pangeaFontFamily }
+              }
             >
-              <span className="text-[40px] font-bold italic leading-[120%]">EVERYTHING</span>
-              <span className="text-[40px] font-normal not-italic leading-[120%]">
-                {" "}
-                IN ONE PLACE
-              </span>
+              {arabic ? (
+                <>
+                  <span
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                      fontVariationSettings: '"wght" 700',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    كل شيء
+                  </span>
+                  <span
+                    style={{
+                      color: "#000",
+                      fontFamily: pangeaFontFamily,
+                      fontSize: 40,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontVariationSettings: '"wght" 400',
+                      lineHeight: "120%",
+                    }}
+                  >
+                    {" "}
+                    في مكان واحد
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[40px] font-bold italic leading-[120%]">EVERYTHING</span>
+                  <span className="text-[40px] font-normal not-italic leading-[120%]">
+                    {" "}
+                    IN ONE PLACE
+                  </span>
+                </>
+              )}
             </h2>
           </div>
           <LandingEverythingInOneSection
@@ -1281,9 +1266,12 @@ export function HomeTrackExplorerSection({
 
           <div className="max-lg:hidden">
           <div className={`${FULL_BLEED} mt-[65px] px-6 lg:pl-[116px] lg:pr-[96px]`}>
-            <div className="flex min-h-[216px] flex-wrap items-center justify-between gap-6">
+            <div
+              className={`flex min-h-[216px] flex-wrap items-center justify-between gap-6 ${arabic ? "flex-row-reverse" : ""}`}
+            >
               <p
-                className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black"
+                className={`w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-black ${arabic ? "text-right" : ""}`}
+                dir={arabic ? "rtl" : undefined}
                 style={bodyTextFont}
               >
                 {t(
@@ -1318,12 +1306,15 @@ export function HomeTrackExplorerSection({
               <LibraryFeaturedBook embedded />
 
               <div
-                className="mx-auto flex max-w-full flex-wrap items-center justify-between lg:pl-[92px] lg:pr-[72px]"
+                className={`mx-auto flex max-w-full flex-wrap items-center justify-between ${
+                  arabic ? "flex-row-reverse lg:pr-[92px] lg:pl-[72px]" : "lg:pl-[92px] lg:pr-[72px]"
+                }`}
                 style={{ marginTop: 25 }}
               >
                 <p
-                  className="w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white"
-                  style={{ ...bodyTextFont, marginLeft: 90 }}
+                  className={`w-[612px] max-w-full text-[24px] font-normal leading-[127%] text-white ${arabic ? "text-right" : ""}`}
+                  dir={arabic ? "rtl" : undefined}
+                  style={{ ...bodyTextFont, ...(arabic ? { marginRight: 90 } : { marginLeft: 90 }) }}
                 >
                   {t(
                     "Explore online articles, books, references and podcasts and more. Taught by industry professionals.",
@@ -1335,7 +1326,7 @@ export function HomeTrackExplorerSection({
                     ...pillFont,
                     backgroundColor: "var(--Blue, #64E1FF)",
                     borderRadius: 30,
-                    marginRight: 65,
+                    ...(arabic ? { marginLeft: 65 } : { marginRight: 65 }),
                   }}
                 >
                   {t("Coming soon")}

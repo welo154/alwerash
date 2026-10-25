@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { signOutToHome } from "@/lib/auth/signOutToHome";
 import { useToast } from "@/components/Toast";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { SUBSCRIPTION_PRICING_PATH } from "@/lib/subscription-routes";
 
@@ -21,12 +22,13 @@ const TABLET_SEARCH_RIGHT = 74;
 const MOBILE_SEARCH_ICON = 23;
 
 const PRIMARY_LINK = {
-  color: "#000",
+  color: "var(--Black, #000)",
   fontFamily: pangeaFont,
   fontSize: 32,
   fontStyle: "normal" as const,
   fontWeight: 400,
   lineHeight: "150%",
+  fontVariationSettings: '"wght" 400',
 };
 
 const TABLET_PRIMARY_LINK = {
@@ -35,12 +37,13 @@ const TABLET_PRIMARY_LINK = {
 };
 
 const GUEST_AUTH_LINK = {
-  color: "#000",
+  color: "var(--Black, #000)",
   fontFamily: pangeaFont,
   fontSize: 32,
   fontStyle: "normal" as const,
   fontWeight: 700,
   lineHeight: "150%",
+  fontVariationSettings: '"wght" 700',
 };
 
 const TABLET_GUEST_AUTH_LINK = {
@@ -49,12 +52,13 @@ const TABLET_GUEST_AUTH_LINK = {
 };
 
 const SECONDARY_LINK = {
-  color: "#000",
+  color: "var(--Black, #000)",
   fontFamily: pangeaFont,
   fontSize: 24,
   fontStyle: "normal" as const,
   fontWeight: 400,
   lineHeight: "150%",
+  fontVariationSettings: '"wght" 400',
 };
 
 const TABLET_SECONDARY_LINK = {
@@ -86,13 +90,21 @@ function MenuAction({
   children,
   onClick,
   style,
+  ariaLabel,
 }: {
   children: string;
   onClick: () => void;
   style: CSSProperties;
+  ariaLabel?: string;
 }) {
   return (
-    <button type="button" onClick={onClick} className="block w-full text-left text-black" style={style}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className="block w-full text-black"
+      style={style}
+    >
       {children}
     </button>
   );
@@ -107,6 +119,8 @@ export function MobileNavDrawer({
 }) {
   const { data: session } = useSession();
   const toast = useToast();
+  const { locale, toggleLocale } = useLocale();
+  const arabic = locale === "ar";
   const isGuest = !session?.user;
   const [mounted, setMounted] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -136,10 +150,28 @@ export function MobileNavDrawer({
 
   if (!mounted) return null;
 
-  const primaryLink = isTablet ? TABLET_PRIMARY_LINK : PRIMARY_LINK;
-  const guestAuthLink = isTablet ? TABLET_GUEST_AUTH_LINK : GUEST_AUTH_LINK;
-  const secondaryLink = isTablet ? TABLET_SECONDARY_LINK : SECONDARY_LINK;
+  const primaryLink = {
+    ...(isTablet ? TABLET_PRIMARY_LINK : PRIMARY_LINK),
+    textAlign: arabic ? ("right" as const) : ("left" as const),
+  };
+  const guestAuthLink = {
+    ...(isTablet ? TABLET_GUEST_AUTH_LINK : GUEST_AUTH_LINK),
+    textAlign: arabic ? ("right" as const) : ("left" as const),
+  };
+  const secondaryLink = {
+    ...(isTablet ? TABLET_SECONDARY_LINK : SECONDARY_LINK),
+    textAlign: arabic ? ("right" as const) : ("left" as const),
+  };
   const homeHref = isGuest ? "/" : "/home";
+  const primaryGroupClass = arabic
+    ? "ml-auto mr-[30px] w-[164px] text-right min-[744px]:ml-0 min-[744px]:mr-0 min-[744px]:w-full min-[744px]:pr-[30px]"
+    : "ml-[30px] w-[164px] text-left min-[744px]:ml-0 min-[744px]:w-auto min-[744px]:pl-[30px]";
+  const guestGroupClass = arabic
+    ? "mt-[20px] ml-auto mr-[30px] w-[217px] pb-[40px] text-right min-[744px]:ml-0 min-[744px]:mr-0 min-[744px]:w-full min-[744px]:pr-[30px]"
+    : "mt-[20px] ml-[30px] w-[217px] pb-[40px] text-left min-[744px]:ml-0 min-[744px]:w-auto min-[744px]:pl-[30px]";
+  const accountGroupClass = arabic
+    ? "mt-[20px] w-full pr-[30px] text-right"
+    : "mt-[20px] pl-[30px]";
 
   return createPortal(
     <aside
@@ -254,58 +286,48 @@ export function MobileNavDrawer({
       </div>
 
       <div className="pt-[30px]">
-        <nav
-          aria-label="Site"
-          className="w-[164px] pl-[30px] min-[744px]:w-auto"
-          style={primaryLink}
-        >
+        <nav aria-label="Site" className={primaryGroupClass} style={primaryLink}>
           <MenuLink href="/course" onClose={onClose} style={primaryLink}>
-            COURSES
+            {arabic ? "الدورات" : "COURSES"}
           </MenuLink>
           <MenuLink href="/library" onClose={onClose} style={primaryLink}>
-            LIBRARY
+            {arabic ? "المكتبة" : "LIBRARY"}
           </MenuLink>
           <MenuLink href="/events" onClose={onClose} style={primaryLink}>
-            EVENTS
+            {arabic ? "الفعاليات" : "EVENTS"}
           </MenuLink>
         </nav>
 
-        <div className="mt-[20px] h-[2px] w-full bg-[#8AF396]" aria-hidden />
+        <div
+          className="mt-[20px] w-full bg-[#8AF396]"
+          style={{ height: 2 }}
+          aria-hidden
+        />
 
         {isGuest ? (
-          <nav
-            aria-label="Account"
-            className="mt-[20px] w-[217px] pl-[30px] pb-[40px] min-[744px]:w-auto"
-            style={guestAuthLink}
-          >
+          <nav aria-label="Account" className={guestGroupClass} style={guestAuthLink}>
             <MenuLink href="/login" onClose={onClose} style={guestAuthLink}>
-              LOG IN
+              {arabic ? "تسجيل الدخول" : "LOG IN"}
             </MenuLink>
             <MenuLink href={SUBSCRIPTION_PRICING_PATH} onClose={onClose} style={guestAuthLink}>
-              SIGN UP
+              {arabic ? "إنشاء حساب" : "SIGN UP"}
             </MenuLink>
           </nav>
         ) : (
           <>
-            <nav
-              aria-label="Account"
-              className="mt-[20px] w-[234px] pl-[30px] min-[744px]:w-auto"
-              style={secondaryLink}
-            >
+            <nav aria-label="Account" className={accountGroupClass} style={secondaryLink}>
               <MenuLink href="/profile" onClose={onClose} style={secondaryLink}>
-                My Profile
+                {arabic ? "ملفي الشخصي" : "My Profile"}
               </MenuLink>
               <MenuAction
                 style={secondaryLink}
-                onClick={() => {
-                  toast("Language — coming soon");
-                  onClose();
-                }}
+                ariaLabel={arabic ? "Switch to English" : "Switch to Arabic"}
+                onClick={toggleLocale}
               >
-                Language
+                {arabic ? "English" : "Arabic"}
               </MenuAction>
               <MenuLink href="/subscription" onClose={onClose} style={secondaryLink}>
-                Subscription
+                {arabic ? "الاشتراك" : "Subscription"}
               </MenuLink>
               <MenuAction
                 style={secondaryLink}
@@ -314,15 +336,19 @@ export function MobileNavDrawer({
                   onClose();
                 }}
               >
-                Payment Method
+                {arabic ? "طريقة الدفع" : "Payment Method"}
               </MenuAction>
             </nav>
 
-            <div className="mt-[20px] h-[2px] w-full bg-[#8AF396]" aria-hidden />
+            <div
+              className="mt-[20px] w-full bg-[#8AF396]"
+              style={{ height: 2 }}
+              aria-hidden
+            />
 
             <nav
               aria-label="Support"
-              className="mt-[20px] w-[234px] pl-[30px] pb-[40px] min-[744px]:w-auto"
+              className={`${accountGroupClass} pb-[40px]`}
               style={secondaryLink}
             >
               <MenuAction
@@ -332,7 +358,7 @@ export function MobileNavDrawer({
                   onClose();
                 }}
               >
-                Help & Support
+                {arabic ? "المساعدة والدعم" : "Help & Support"}
               </MenuAction>
               <MenuAction
                 style={secondaryLink}
@@ -341,7 +367,7 @@ export function MobileNavDrawer({
                   void signOutToHome();
                 }}
               >
-                Log out
+                {arabic ? "تسجيل الخروج" : "Log out"}
               </MenuAction>
             </nav>
           </>

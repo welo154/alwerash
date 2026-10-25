@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useT } from "@/components/i18n/Tr";
-import { useLocale } from "@/components/providers/LocaleProvider";
+import { useArabicLayout, useLocale } from "@/components/providers/LocaleProvider";
 import { AuthLocaleButton } from "./AuthLocaleButton";
 import { AUTH_SOCIAL_LINKS, pangeaFont } from "./auth-theme";
 
@@ -11,12 +11,19 @@ const AUTH_LOGO_IMAGE = "/auth/alwerash-logo.png";
 
 /** Figma 260-1737 — logo lockup */
 function AuthLogoBlock() {
+  const arabic = useArabicLayout();
+
   return (
     <Link
       href="/"
       aria-label="Alwerash home"
       className="block shrink-0 transition-opacity hover:opacity-80"
-      style={{ width: 200, height: 60, aspectRatio: "10 / 3" }}
+      style={{
+        width: 200,
+        height: 60,
+        aspectRatio: "10 / 3",
+        marginLeft: arabic ? 215 : 0,
+      }}
     >
       <Image
         src={AUTH_LOGO_IMAGE}
@@ -61,14 +68,20 @@ export function AuthHeadlineSentence({ fontSize }: { fontSize: number }) {
 
 /** Figma 260-1744 — hero headline */
 function AuthHeadlineBlock() {
+  const arabic = useArabicLayout();
+
   return (
     <p
+      dir={arabic ? "rtl" : "ltr"}
       className="m-0 w-[415px] max-w-full text-black"
       style={{
+        color: "#000",
+        textAlign: arabic ? "right" : "left",
         fontFamily: pangeaFont,
         fontSize: 36,
         fontStyle: "normal",
         fontWeight: 400,
+        fontVariationSettings: '"wght" 400',
         lineHeight: "120%",
       }}
     >
@@ -80,14 +93,19 @@ function AuthHeadlineBlock() {
 /** Figma 260-1745 — supporting copy */
 function AuthSupportingCopy() {
   const t = useT();
+  const arabic = useArabicLayout();
   return (
     <p
+      dir={arabic ? "rtl" : "ltr"}
       className="m-0 w-[409px] max-w-full text-black"
       style={{
+        color: "#000",
+        textAlign: arabic ? "right" : "left",
         fontFamily: pangeaFont,
         fontSize: 24,
         fontStyle: "normal",
         fontWeight: 400,
+        fontVariationSettings: '"wght" 400',
         lineHeight: "127%",
         opacity: 0.6,
       }}
@@ -114,12 +132,14 @@ function AuthLanguageSelector() {
 
 /** Left auth column — logo, copy, language, social icons */
 export function AuthBrandingAside() {
+  const arabic = useArabicLayout();
+
   return (
     <aside className="flex w-full max-w-[435px] shrink-0 flex-col">
       <AuthLogoBlock />
       <div className="h-[64px] shrink-0" aria-hidden />
       <AuthHeadlineBlock />
-      <div className="h-[35px] shrink-0" aria-hidden />
+      <div className={`${arabic ? "h-[72px]" : "h-[35px]"} shrink-0`} aria-hidden />
       <AuthSupportingCopy />
       <div className="h-[67px] shrink-0" aria-hidden />
       <div className="flex w-full items-center gap-[16px]">

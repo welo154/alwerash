@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -76,6 +78,8 @@ function FaqAccordionList({
   layout?: "desktop" | "mobile";
 }) {
   const isMobile = layout === "mobile";
+  const arabic = useArabicLayout();
+  const t = useT();
 
   return (
     <>
@@ -89,10 +93,13 @@ function FaqAccordionList({
             <button
               id={buttonId}
               type="button"
+              dir={arabic ? "rtl" : "ltr"}
               className={
                 isMobile
-                  ? "mt-[18px] flex w-full shrink-0 items-center justify-between gap-4 pl-[30px] pr-[30px] text-left transition-colors hover:bg-black/[0.02] min-[744px]:mt-0 min-[744px]:py-[22px] min-[744px]:pl-[62px] min-[744px]:pr-[62px]"
-                  : "flex h-[90px] w-full shrink-0 items-center justify-between gap-4 pl-[53px] pr-[164px] text-left transition-colors hover:bg-black/[0.02]"
+                  ? `mt-[18px] flex w-full shrink-0 items-center justify-between gap-4 px-[30px] transition-colors hover:bg-black/[0.02] min-[744px]:mt-0 min-[744px]:py-[22px] min-[744px]:px-[62px] ${arabic ? "text-right" : "text-left"}`
+                  : `flex h-[90px] w-full shrink-0 items-center justify-between gap-4 transition-colors hover:bg-black/[0.02] ${
+                      arabic ? "pl-[164px] pr-[53px] text-right" : "pl-[53px] pr-[164px] text-left"
+                    }`
               }
               style={{ fontFamily: pangeaFont }}
               aria-expanded={isOpen}
@@ -116,7 +123,7 @@ function FaqAccordionList({
                   lineHeight: "normal",
                 }}
               >
-                {item.question}
+                {t(item.question)}
               </span>
               <FaqExpandIcon
                 open={isOpen}
@@ -134,15 +141,16 @@ function FaqAccordionList({
               <div
                 className={
                   isMobile
-                    ? "min-h-0 overflow-hidden pl-[30px] pr-[30px] min-[744px]:pl-[62px] min-[744px]:pr-[62px]"
-                    : "min-h-0 overflow-hidden pl-[53px] pr-[164px]"
+                    ? "min-h-0 overflow-hidden px-[30px] min-[744px]:px-[62px]"
+                    : `min-h-0 overflow-hidden ${arabic ? "pl-[164px] pr-[53px]" : "pl-[53px] pr-[164px]"}`
                 }
               >
                 <p
-                  className="pb-6 text-[16px] font-normal leading-[150%] text-black/85 sm:text-[17px]"
+                  dir={arabic ? "rtl" : "ltr"}
+                  className={`pb-6 text-[16px] font-normal leading-[150%] text-black/85 sm:text-[17px] ${arabic ? "text-right" : ""}`}
                   style={{ fontFamily: pangeaFont }}
                 >
-                  {item.answer}
+                  {t(item.answer)}
                 </p>
               </div>
             </div>
@@ -160,7 +168,7 @@ function FaqMobileRule({ includeTablet = true }: { includeTablet?: boolean }) {
   return (
     <>
       <div className={`${FULL_BLEED} mt-[21px] min-[744px]:hidden`} aria-hidden>
-        <div className="bg-black" style={{ height: "0.3px" }} />
+        <div style={{ height: "0.3px", background: "rgb(0 0 0 / 40%)" }} />
       </div>
       {includeTablet ? (
         <div
@@ -185,6 +193,7 @@ export function LandingFaqSection({
 } = {}) {
   const baseId = useId().replace(/:/g, "");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const arabic = useArabicLayout();
 
   if (variant === "mobile") {
     return (
@@ -194,33 +203,102 @@ export function LandingFaqSection({
       >
         <h2
           id="landing-faq-heading-mobile"
-          className="m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black min-[744px]:mx-auto min-[744px]:w-full min-[744px]:max-w-none min-[744px]:text-center"
+          dir={arabic ? "rtl" : "ltr"}
+          className={
+            arabic
+              ? "m-0 ml-auto mr-[30px] w-[334px] max-w-[334px] text-right text-black min-[744px]:mx-0 min-[744px]:w-full min-[744px]:max-w-none min-[744px]:pr-[62px] min-[744px]:pl-[62px] min-[744px]:text-right"
+              : "m-0 ml-[30px] w-[334px] max-w-[334px] uppercase text-black min-[744px]:mx-auto min-[744px]:w-full min-[744px]:max-w-none min-[744px]:text-center"
+          }
           style={{ fontFamily: pangeaFont }}
         >
-          <span
-            className="text-[36px] font-bold italic leading-[120%] min-[744px]:text-[40px]"
-            style={{
-              color: "#000",
-              fontFamily: pangeaFont,
-              fontStyle: "italic",
-              fontWeight: 700,
-              lineHeight: "120%",
-            }}
-          >
-            FREQUENTLY{" "}
-          </span>
-          <span
-            className="text-[36px] font-normal not-italic leading-[120%] min-[744px]:text-[40px]"
-            style={{
-              color: "#000",
-              fontFamily: pangeaFont,
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "120%",
-            }}
-          >
-            ASKED QUESTIONS
-          </span>
+          {arabic ? (
+            <>
+              <span className="min-[744px]:hidden">
+                <span
+                  style={{
+                    color: "#000",
+                    textAlign: "right",
+                    fontFamily: pangeaFont,
+                    fontSize: 36,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأسئلة{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 36,
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    fontVariationSettings: '"wght" 700',
+                    lineHeight: "120%",
+                  }}
+                >
+                  المتكررة
+                </span>
+              </span>
+              <span className="hidden min-[744px]:inline">
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 40,
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontVariationSettings: '"wght" 400',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الأسئلة{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#000",
+                    fontFamily: pangeaFont,
+                    fontSize: 40,
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    fontVariationSettings: '"wght" 700',
+                    lineHeight: "120%",
+                  }}
+                >
+                  الشائعة
+                </span>
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                className="text-[36px] font-bold italic leading-[120%] min-[744px]:text-[40px]"
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: "120%",
+                }}
+              >
+                FREQUENTLY{" "}
+              </span>
+              <span
+                className="text-[36px] font-normal not-italic leading-[120%] min-[744px]:text-[40px]"
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                ASKED QUESTIONS
+              </span>
+            </>
+          )}
         </h2>
 
         <div className={`${FULL_BLEED} min-[744px]:ml-0 min-[744px]:mt-[61px] min-[744px]:w-full min-[744px]:max-w-none`}>
@@ -242,31 +320,72 @@ export function LandingFaqSection({
       data-gsap-reveal
     >
       <div className="mx-auto max-w-[1600px]">
-        <h2 id="landing-faq-heading" className="pl-6 uppercase text-black xl:pl-[314px]">
-          <span
-            style={{
-              color: "#000",
-              fontFamily: pangeaFont,
-              fontSize: "48px",
-              fontStyle: "italic",
-              fontWeight: 700,
-              lineHeight: "120%",
-            }}
-          >
-            FREQUENTLY{" "}
-          </span>
-          <span
-            style={{
-              color: "#000",
-              fontFamily: pangeaFont,
-              fontSize: "48px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "120%",
-            }}
-          >
-            ASKED QUESTIONS
-          </span>
+        <h2
+          id="landing-faq-heading"
+          dir={arabic ? "rtl" : "ltr"}
+          className={
+            arabic
+              ? "mx-auto w-full text-center text-black"
+              : "pl-6 uppercase text-black xl:pl-[314px]"
+          }
+        >
+          {arabic ? (
+            <>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "48px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }}
+              >
+                الأسئلـة{" "}
+              </span>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "48px",
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
+                  lineHeight: "120%",
+                }}
+              >
+                المتكـــررة
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "48px",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: "120%",
+                }}
+              >
+                FREQUENTLY{" "}
+              </span>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: "48px",
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  lineHeight: "120%",
+                }}
+              >
+                ASKED QUESTIONS
+              </span>
+            </>
+          )}
         </h2>
 
         <div className="mx-auto mt-[53px] w-[1228px] max-w-full border-t border-black">

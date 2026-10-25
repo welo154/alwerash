@@ -1317,14 +1317,24 @@ const getCachedLandingMostsMentors = unstable_cache(
   CATALOG_CACHE
 );
 
+/** Temporary stand-ins so the Current Mosts grid can be reviewed before mentors are tagged for the home page. */
+const MOCK_LANDING_MOSTS_MENTORS: LandingMostsMentorCardDto[] = [
+  { id: "mock-mentor-1", variant: "popular", name: "LAYLA HASSAN", profession: "Concept Artist" },
+  { id: "mock-mentor-2", variant: "watched", name: "OMAR FARID", profession: "Motion Designer" },
+  { id: "mock-mentor-3", variant: "popular", name: "SARA NOUR", profession: "Photographer" },
+  { id: "mock-mentor-4", variant: "watched", name: "KARIM ADEL", profession: "Architect" },
+];
+
 export async function publicListLandingMostsMentors(
   limit = LANDING_MOSTS_MENTOR_LIMIT
 ): Promise<LandingMostsMentorCardDto[]> {
   try {
-    return await getCachedLandingMostsMentors(limit);
+    const mentors = await getCachedLandingMostsMentors(limit);
+    if (mentors.length > 0) return mentors;
   } catch {
-    return [];
+    // Fall through to the preview mentors.
   }
+  return MOCK_LANDING_MOSTS_MENTORS.slice(0, limit);
 }
 
 const getCachedCoursePageCatalog = unstable_cache(

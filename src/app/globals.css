@@ -120,6 +120,13 @@ label:has(input[type="radio"]) {
   overflow: visible;
 }
 
+@media (max-width: 743px) {
+  .auth-green-panel {
+    max-width: 99%;
+    container-type: inline-size;
+  }
+}
+
 .auth-green-panel-scroll {
   height: auto;
   min-height: 0;
@@ -144,6 +151,13 @@ label:has(input[type="radio"]) {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    touch-action: auto;
+  }
+
+  .auth-green-panel:has(.auth-login-panel) .auth-green-panel-scroll {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    overscroll-behavior: none;
     touch-action: auto;
   }
 
@@ -178,6 +192,7 @@ label:has(input[type="radio"]) {
 
   .auth-register-pay-tab {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     box-sizing: border-box;
     width: 304px;
@@ -200,18 +215,48 @@ label:has(input[type="radio"]) {
   }
 
   .auth-register-pay-tab-card {
-    border-radius: 8px 0 0 8px;
+    border-radius: 23px 0 0 23px;
+    border: 1px solid #000;
   }
 
   .auth-register-pay-tab-apple {
     margin-left: -1px;
-    border-radius: 0 8px 8px 0;
+    width: 304px;
+    height: 56px;
+    border-radius: 0 23px 23px 0;
+    border: 1px solid #000;
+    opacity: 0.4;
   }
 
   .auth-register-pay-icon {
     width: 32px;
     height: 32px;
     object-fit: contain;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-register-payment-label {
+    width: 100%;
+    color: #000;
+    text-align: right;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    line-height: 120%;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-register-pay-tab {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    padding: 0 26px 0 16px;
+    gap: 11px;
+    color: #000;
+    text-align: right;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    line-height: 120%;
   }
 
   .auth-register-payment-fields-gap {
@@ -244,6 +289,35 @@ label:has(input[type="radio"]) {
     height: 58px !important;
   }
 
+  @media (min-width: 1036px) {
+    .auth-register-panel .auth-field-box,
+    .auth-login-panel .auth-field-box {
+      border-radius: 23px !important;
+      border: 0.3px solid rgb(0 0 0 / 40%) !important;
+      background: #fff !important;
+    }
+
+    .auth-register-panel .auth-login-submit {
+      display: flex;
+      width: 270px !important;
+      height: 78px !important;
+      padding: 0 16px !important;
+      justify-content: center;
+      align-items: center;
+      border-radius: 30px !important;
+      border: 0.3px solid rgb(0 0 0 / 40%) !important;
+      border-width: 0.3px !important;
+      background: #fff !important;
+      color: #141413;
+      text-align: center;
+      font-size: 36px !important;
+      font-style: normal;
+      font-weight: 400;
+      font-variation-settings: "wght" 400;
+      line-height: 19.6px;
+    }
+  }
+
   .auth-register-panel .auth-login-password-gap {
     height: 16px;
   }
@@ -253,6 +327,99 @@ label:has(input[type="radio"]) {
     font-weight: 600;
     line-height: 120%;
     color: #000;
+  }
+
+  @media (min-width: 1036px) {
+    .auth-login-panel[data-arabic="true"] {
+      direction: rtl;
+    }
+
+    .auth-login-panel[data-arabic="true"] .auth-login-title {
+      color: #000;
+      text-align: right !important;
+      font-size: 36px !important;
+      font-style: normal;
+      font-weight: 600;
+      font-variation-settings: "wght" 600;
+      line-height: 120%;
+    }
+
+    .auth-login-panel[data-arabic="true"] .auth-login-field-input,
+    .auth-login-panel[data-arabic="true"] .auth-login-field-input::placeholder {
+      flex: 1 0 0;
+      color: #73726c;
+      text-align: right !important;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 400;
+      font-variation-settings: "wght" 400;
+      line-height: 19.6px;
+    }
+
+    .auth-login-panel[data-arabic="true"] .auth-login-field-input {
+      color: #000;
+    }
+
+    .auth-login-panel[data-arabic="true"] .auth-login-forgot {
+      text-align: right;
+    }
+
+    .auth-login-panel[data-arabic="true"] .auth-login-resend {
+      width: 604px !important;
+      margin-right: 0;
+      margin-left: 0;
+      text-align: right !important;
+    }
+
+    .auth-login-panel .auth-login-submit {
+      width: 270px !important;
+      height: 78px !important;
+      border-radius: 30px !important;
+      border: 0.3px solid rgb(0 0 0 / 40%) !important;
+      border-width: 0.3px !important;
+      background: #fff !important;
+      font-variation-settings: "wght" 400;
+    }
+
+    .auth-register-panel[data-arabic="true"] .auth-field-box:has(.auth-password-eye) {
+      flex-direction: row-reverse;
+    }
+
+    .auth-green-panel:has(.auth-register-panel[data-arabic="true"]) .auth-green-panel-scroll > div,
+    .auth-green-panel:has(.auth-login-panel[data-arabic="true"]) .auth-green-panel-scroll > div {
+      padding-top: 39px !important;
+      padding-right: 92px !important;
+    }
+
+    .auth-register-panel[data-arabic="true"] .auth-login-title {
+      color: #000;
+      text-align: right !important;
+      font-size: 36px !important;
+      font-style: normal;
+      font-weight: 600;
+      font-variation-settings: "wght" 600;
+      line-height: 120%;
+    }
+
+    .auth-register-panel[data-arabic="true"] .auth-login-field-input {
+      flex: 1 0 0;
+      text-align: right !important;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 400;
+      font-variation-settings: "wght" 400;
+      line-height: 19.6px;
+    }
+
+    .auth-register-panel[data-arabic="true"] .auth-login-field-input::placeholder {
+      color: #73726c;
+      text-align: right !important;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 400;
+      font-variation-settings: "wght" 400;
+      line-height: 19.6px;
+    }
   }
 
   .auth-login-panel .auth-login-title-gap {
@@ -296,7 +463,7 @@ label:has(input[type="radio"]) {
     height: auto;
     color: #000;
     text-align: center;
-    font-size: 20px !important;
+    font-size: 24px !important;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
@@ -304,7 +471,7 @@ label:has(input[type="radio"]) {
 
   .auth-login-panel .auth-login-join-link {
     color: #000;
-    font-size: 20px;
+    font-size: 24px;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
@@ -326,8 +493,8 @@ label:has(input[type="radio"]) {
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
-    border-radius: 30px;
-    border: 0.3px solid #000 !important;
+    border-radius: 30px !important;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
     border-width: 0.3px !important;
     background: #fff;
     color: #141413;
@@ -335,7 +502,15 @@ label:has(input[type="radio"]) {
     font-size: 36px !important;
     font-style: normal;
     font-weight: 400;
+    font-variation-settings: "wght" 400;
     line-height: 19.6px;
+  }
+
+  @media (min-width: 1036px) {
+    .auth-login-panel .auth-login-submit {
+      width: 270px !important;
+      height: 78px !important;
+    }
   }
 
   .auth-login-panel .auth-oauth-label-gap {
@@ -345,7 +520,7 @@ label:has(input[type="radio"]) {
   .auth-login-panel .auth-oauth-label {
     color: #000;
     text-align: center;
-    font-size: 18px !important;
+    font-size: 24px !important;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
@@ -371,14 +546,17 @@ label:has(input[type="radio"]) {
     font-size: 18px !important;
     font-style: normal;
     font-weight: 400;
+    font-variation-settings: "wght" 400;
     line-height: 120%;
   }
 
   .auth-login-panel .auth-login-resend-link {
     color: #000;
+    font-family: inherit;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
+    font-variation-settings: "wght" 400;
     line-height: 120%;
     text-decoration-line: underline;
     text-decoration-style: solid;
@@ -674,6 +852,42 @@ label:has(input[type="radio"]) {
     line-height: 19.6px;
   }
 
+  .auth-register-panel.auth-mobile-panel .auth-field-box,
+  .auth-login-panel.auth-mobile-panel .auth-field-box {
+    border-radius: 23px !important;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
+    background: #fff !important;
+  }
+
+  .auth-register-panel.auth-mobile-panel .auth-login-submit,
+  .auth-login-panel.auth-mobile-panel .auth-login-submit {
+    border-radius: 30px !important;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
+    border-width: 0.3px !important;
+    background: #fff !important;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-title,
+  .auth-login-panel[data-arabic="true"] .auth-login-title,
+  .auth-register-panel[data-arabic="true"] .auth-register-payment-label,
+  .auth-register-panel[data-arabic="true"] .auth-register-terms,
+  .auth-login-panel[data-arabic="true"] .auth-login-forgot {
+    text-align: right !important;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-field-input,
+  .auth-register-panel[data-arabic="true"] .auth-login-field-input::placeholder,
+  .auth-login-panel[data-arabic="true"] .auth-login-field-input,
+  .auth-login-panel[data-arabic="true"] .auth-login-field-input::placeholder {
+    text-align: right !important;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-field-box:has(.auth-password-eye),
+  .auth-login-panel[data-arabic="true"] .auth-field-box:has(.auth-password-eye),
+  .auth-register-panel[data-arabic="true"] .auth-register-pay-tab {
+    flex-direction: row-reverse;
+  }
+
   .auth-mobile-panel .auth-oauth-label-gap {
     height: 20px;
   }
@@ -730,6 +944,117 @@ label:has(input[type="radio"]) {
     text-underline-offset: auto;
     text-underline-position: from-font;
   }
+
+  .auth-login-panel .auth-login-centered,
+  .auth-login-panel .auth-oauth-icons {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-login-panel .auth-login-join,
+  .auth-login-panel .auth-login-resend,
+  .auth-login-panel .auth-oauth-label,
+  .auth-login-panel .auth-login-submit {
+    margin-right: auto !important;
+    margin-left: auto !important;
+    text-align: center !important;
+  }
+
+  .auth-login-panel .auth-login-resend {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 743px) {
+  .auth-login-panel[data-arabic="true"] .auth-login-title {
+    align-self: stretch;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+    padding-right: 25px;
+    text-align: right !important;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-title,
+  .auth-register-panel[data-arabic="true"] .auth-register-payment-label,
+  .auth-register-panel[data-arabic="true"] .auth-register-terms {
+    width: 333px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-register-terms {
+    margin-left: 25px;
+    margin-right: auto;
+  }
+
+  .auth-mobile-panel .auth-register-pay-tab-card {
+    flex-shrink: 0;
+    border-radius: 23px 0 0 23px;
+    border: 1px solid #000;
+  }
+
+  .auth-mobile-panel .auth-register-pay-tab-apple {
+    flex-shrink: 0;
+    width: 169px;
+    height: 51px;
+    border-radius: 0 23px 23px 0;
+    border: 1px solid #000;
+    opacity: 0.4;
+  }
+}
+
+@container (max-width: 381px) {
+  .auth-mobile-panel {
+    align-items: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .auth-mobile-panel form,
+  .auth-mobile-panel .auth-register-payment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .auth-mobile-panel .auth-login-title,
+  .auth-mobile-panel .auth-register-payment,
+  .auth-mobile-panel .auth-register-payment-tabs,
+  .auth-mobile-panel .auth-register-card-row,
+  .auth-mobile-panel .auth-login-forgot,
+  .auth-mobile-panel .auth-register-terms {
+    width: 333px;
+    max-width: 100%;
+  }
+
+  .auth-mobile-panel .auth-login-centered {
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-register-terms {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .auth-login-panel[data-arabic="true"] .auth-login-title {
+    align-self: stretch;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+    padding-right: 25px;
+    text-align: right !important;
+  }
 }
 
 @media (min-width: 744px) and (max-width: 1035px) {
@@ -780,8 +1105,8 @@ label:has(input[type="radio"]) {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    border-radius: 8px;
-    border: 0.3px solid #000 !important;
+    border-radius: 23px;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
     border-width: 0.3px !important;
     background: #fff;
     box-sizing: border-box;
@@ -823,11 +1148,26 @@ label:has(input[type="radio"]) {
 
   .auth-register-panel.auth-mobile-panel .auth-register-pay-tab-card,
   .auth-register-panel.auth-mobile-panel .auth-register-pay-tab-apple {
+    flex-shrink: 0;
     width: 308.96px;
   }
 
+  .auth-register-panel.auth-mobile-panel .auth-register-pay-tab-card {
+    border-radius: 23px 0 0 23px;
+    border: 1px solid #000;
+  }
+
   .auth-register-panel.auth-mobile-panel .auth-register-pay-tab-apple {
+    width: 312.04px;
+    height: 56px;
     margin-left: 0;
+    border-radius: 0 23px 23px 0;
+    border: 1px solid #000;
+    opacity: 0.4;
+  }
+
+  .auth-register-panel.auth-mobile-panel .auth-register-pay-tab-apple.is-selected {
+    opacity: 1;
   }
 
   .auth-register-panel.auth-mobile-panel .auth-register-payment-fields-gap {
@@ -896,8 +1236,8 @@ label:has(input[type="radio"]) {
     justify-content: center;
     align-items: center;
     border-radius: 30px;
-    border: 1px solid #000 !important;
-    border-width: 1px !important;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
+    border-width: 0.3px !important;
     background: #fff;
     color: #141413;
     text-align: center;
@@ -978,8 +1318,8 @@ label:has(input[type="radio"]) {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    border-radius: 8px;
-    border: 0.3px solid #000 !important;
+    border-radius: 23px;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
     border-width: 0.3px !important;
     background: #fff;
     box-sizing: border-box;
@@ -1030,7 +1370,7 @@ label:has(input[type="radio"]) {
     height: auto;
     color: #000;
     text-align: center;
-    font-size: 20px !important;
+    font-size: 18px !important;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
@@ -1038,7 +1378,7 @@ label:has(input[type="radio"]) {
 
   .auth-login-panel.auth-mobile-panel .auth-login-join-link {
     color: #000;
-    font-size: 20px;
+    font-size: 18px;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
@@ -1056,13 +1396,13 @@ label:has(input[type="radio"]) {
 
   .auth-login-panel.auth-mobile-panel .auth-login-submit {
     display: flex;
-    width: 279px !important;
+    width: 286.379px !important;
     height: 80px !important;
     padding: 0 16px !important;
     justify-content: center;
     align-items: center;
     border-radius: 30px;
-    border: 0.3px solid #000 !important;
+    border: 0.3px solid rgb(0 0 0 / 40%) !important;
     border-width: 0.3px !important;
     background: #fff;
     color: #141413;
@@ -1167,6 +1507,51 @@ label:has(input[type="radio"]) {
     font-style: normal;
     font-weight: 400;
     line-height: 19.6px !important;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-title,
+  .auth-login-panel[data-arabic="true"] .auth-login-title {
+    color: #000;
+    text-align: right !important;
+    font-size: 36px !important;
+    font-style: normal;
+    font-weight: 600;
+    font-variation-settings: "wght" 600;
+    line-height: 120%;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-field-input,
+  .auth-login-panel[data-arabic="true"] .auth-login-field-input {
+    flex: 1 0 0;
+    text-align: right !important;
+    font-size: 24px !important;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    line-height: 19.6px;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-login-field-input::placeholder,
+  .auth-login-panel[data-arabic="true"] .auth-login-field-input::placeholder {
+    flex: 1 0 0;
+    color: #73726c;
+    text-align: right !important;
+    font-family: inherit;
+    font-size: 24px !important;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    line-height: 19.6px;
+  }
+
+  .auth-register-panel[data-arabic="true"] .auth-register-pay-tab {
+    color: #000;
+    text-align: right;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+    line-height: 120%;
   }
 }
 
@@ -1354,7 +1739,7 @@ label:has(input[type="radio"]) {
   height: var(--landing-showcase-card-h, 499.077px) !important;
 }
 
-/* Featured course cards: grow to the right. Neighbor shifting is done in the carousel. */
+/* Featured course cards grow to the right in English and to the left in Arabic. Neighbor shifting is done in the carousel. */
 .learn-featured-swiper.landing-showcase-swiper--cards .swiper-slide {
   z-index: 1;
 }
@@ -1441,6 +1826,40 @@ label:has(input[type="radio"]) {
 .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-rest-meta {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Phone and iPad keep the resting card. Expansion is desktop only. */
+@media (max-width: 1035px) {
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-scaler {
+    width: 323px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-panel {
+    border-width: 1px !important;
+    border-color: #000 !important;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-upper {
+    height: 323.077px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-photo {
+    height: 289.744px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-card-title {
+    bottom: 296px;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-hover-only {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .learn-featured-swiper .swiper-slide.is-featured-expanded .featured-rest-meta {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .learn-featured-swiper.swiper {

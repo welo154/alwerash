@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId } from "react";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -32,8 +33,19 @@ export type LandingMentorCardProps = {
   layout?: "desktop" | "mobile" | "tablet";
 };
 
+const ARABIC_MENTOR_COPY: Record<string, string> = {
+  "LAYLA HASSAN": "ليلى حسن",
+  "OMAR FARID": "عمر فريد",
+  "SARA NOUR": "سارة نور",
+  "KARIM ADEL": "كريم عادل",
+  "Concept Artist": "فنانة مفاهيم",
+  "Motion Designer": "مصمم حركة",
+  Photographer: "مصورة",
+  Architect: "مهندس معماري",
+};
+
 const MENTOR_CARD_ASPECT = 383 / 357;
-const MOBILE_CARD_WIDTH = 329;
+const MOBILE_CARD_WIDTH = 317;
 const MOBILE_CARD_HEIGHT = 341;
 
 export function LandingMentorCard({
@@ -49,6 +61,9 @@ export function LandingMentorCard({
 }: LandingMentorCardProps) {
   const isMobile = layout === "mobile";
   const isTablet = layout === "tablet";
+  const arabic = useArabicLayout();
+  const arabicDesktop = arabic && !isMobile && !isTablet;
+  const arabicCardText = arabic;
   const cardWidth = isMobile ? MOBILE_CARD_WIDTH : (widthPx ?? 383);
   const cardHeight = isMobile ? MOBILE_CARD_HEIGHT : (heightPx ?? 357);
   const badge = variant === "popular" ? "MOST POPULAR" : "MOST WATCHED";
@@ -63,23 +78,45 @@ export function LandingMentorCard({
 
   const scaleX = cardWidth / 383;
   const scaleY = cardHeight / 357;
-  const badgeLabel = variant === "popular" ? "POPULAR" : "WATCHED";
-  const badgeSecondWordStyle = {
+  const badgeLabel = arabicCardText
+    ? variant === "popular"
+      ? "شيوعًا"
+      : "مشاهدة"
+    : variant === "popular"
+      ? "POPULAR"
+      : "WATCHED";
+  const arabicBadgeWordStyle = {
     color: "var(--Black, #000)",
     fontFamily: pangeaFont,
-    fontSize: 20,
-    fontStyle: "italic" as const,
-    fontWeight: 700,
-    lineHeight: "99%",
-  };
-  const badgeFirstWordStyle = {
-    color: "var(--Black, #000)",
-    fontFamily: pangeaFont,
-    fontSize: 20,
+    fontSize: 25,
     fontStyle: "normal" as const,
     fontWeight: 700,
+    fontVariationSettings: '"wght" 700',
     lineHeight: "99%",
+    textAlign: "right" as const,
   };
+  const badgeSecondWordStyle = arabicCardText
+    ? arabicBadgeWordStyle
+    : {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: 20,
+        fontStyle: "italic" as const,
+        fontWeight: 700,
+        lineHeight: "99%",
+      };
+  const displayName = arabicCardText ? (ARABIC_MENTOR_COPY[name] ?? name) : name;
+  const displayProfession = arabicCardText ? (ARABIC_MENTOR_COPY[profession] ?? profession) : profession;
+  const badgeFirstWordStyle = arabicCardText
+    ? arabicBadgeWordStyle
+    : {
+        color: "var(--Black, #000)",
+        fontFamily: pangeaFont,
+        fontSize: 20,
+        fontStyle: "normal" as const,
+        fontWeight: 700,
+        lineHeight: "99%",
+      };
 
   const card = (
     <article
@@ -157,33 +194,42 @@ export function LandingMentorCard({
         </g>
 
         {!isTablet ? (
-        <foreignObject x={27 * scaleX} y={0} width={356 * scaleX} height={cardHeight}>
-          <div
-            style={{
-              boxSizing: "border-box",
-              height: "100%",
-              paddingBottom: isMobile ? 24 : 38 * scaleY,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              alignItems: "flex-start",
-              maxWidth: `${356 * scaleX}px`,
-            }}
-          >
+        <foreignObject
+          x={arabicCardText && isMobile ? 27 : 27 * scaleX}
+          y={0}
+          width={arabicCardText && isMobile ? 356 : 356 * scaleX}
+          height={arabicCardText && isMobile ? 357 : cardHeight}
+        >
+            <div
+              dir={arabicCardText ? "rtl" : undefined}
+              style={{
+                boxSizing: "border-box",
+                height: "100%",
+                paddingBottom: isMobile ? 24 : 38 * scaleY,
+                paddingRight: arabicCardText ? (isMobile ? 27 : 27 * scaleX) : undefined,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                alignItems: "flex-start",
+                maxWidth: arabicCardText && isMobile ? "100%" : `${356 * scaleX}px`,
+                textAlign: arabicCardText ? "right" : undefined,
+              }}
+            >
             <div
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
                 fontFamily: pangeaFont,
-                fontSize: isMobile ? "20px" : "24px",
+                fontSize: arabicCardText ? "20px" : isMobile ? "20px" : "24px",
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: arabicCardText ? '"wght" 400' : undefined,
                 lineHeight: "normal",
                 opacity: 0.6,
                 marginBottom: isMobile ? 6 * scaleY : 6,
-                ...(isMobile ? { color: "var(--White, #FFF)" } : {}),
+                textAlign: arabicCardText ? "right" : undefined,
               }}
             >
-              MEET
+              {arabicCardText ? "التقِ" : "MEET"}
             </div>
             <div
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
@@ -192,27 +238,30 @@ export function LandingMentorCard({
                 fontSize: isMobile ? "24px" : "32px",
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: arabicCardText ? '"wght" 400' : undefined,
                 lineHeight: "normal",
                 width: isMobile ? 214 : 250,
                 maxWidth: isMobile ? 214 : 250,
                 overflowWrap: "break-word",
-                ...(isMobile ? { color: "var(--White, #FFF)" } : {}),
+                textAlign: arabicCardText ? "right" : undefined,
               }}
             >
-              {name}
+              {displayName}
             </div>
             <div
               className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
               style={{
                 fontFamily: pangeaFont,
-                fontSize: isMobile ? "20px" : "24px",
+                fontSize: arabicCardText ? "20px" : isMobile ? "20px" : "24px",
                 fontStyle: "normal",
                 fontWeight: 400,
+                fontVariationSettings: arabicCardText ? '"wght" 400' : undefined,
                 lineHeight: "normal",
-                ...(isMobile ? { color: "var(--White, #FFF)", marginTop: 3 } : {}),
+                textAlign: arabicCardText ? "right" : undefined,
+                ...(isMobile && !arabicCardText ? { marginTop: 3 } : {}),
               }}
             >
-              {profession}
+              {displayProfession}
             </div>
           </div>
         </foreignObject>
@@ -222,66 +271,70 @@ export function LandingMentorCard({
       <div
         className="pointer-events-none absolute z-[2] flex flex-col items-start overflow-visible text-left text-black transition-colors duration-200 group-hover:text-[#004B3C]"
         style={{
-          left: 24 * scaleX,
-          top: 10 * scaleY,
+          left: 24 * scaleX + (arabicDesktop ? 15 : arabicCardText && isMobile ? 30 : arabic && isTablet ? 25 : 0),
+          top: 10 * scaleY - (arabicDesktop ? 5 : arabicCardText && isMobile ? 10 : arabic && isTablet ? 10 : 0),
         }}
       >
-        <span style={badgeFirstWordStyle}>MOST</span>
+        <span style={badgeFirstWordStyle}>{arabicCardText ? "الأكثــر" : "MOST"}</span>
         <span style={badgeSecondWordStyle}>{badgeLabel}</span>
       </div>
 
       {isTablet ? (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start"
+          className={`pointer-events-none absolute inset-x-0 bottom-0 flex flex-col ${arabic ? "items-end" : "items-start"}`}
           style={{
-            paddingLeft: 27 * scaleX,
-            paddingRight: 16,
+            paddingLeft: arabic ? 16 : 27 * scaleX,
+            paddingRight: arabic ? 27 * scaleX : 16,
             paddingBottom: 38 * scaleY,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
           <div
-            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
             style={{
-              color: "var(--White, #FFF)",
               fontFamily: pangeaFont,
               fontSize: 20,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
               opacity: 0.6,
               marginBottom: 4,
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            MEET
+            {arabic ? "التقِ" : "MEET"}
           </div>
           <div
-            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
             style={{
-              color: "var(--White, #FFF)",
               fontFamily: pangeaFont,
               fontSize: 24,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
               width: 120,
               marginBottom: 6,
               overflowWrap: "break-word",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {name}
+            {displayName}
           </div>
           <div
-            className="transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
+            className="text-[color:var(--White,#FFF)] transition-colors duration-200 group-hover:text-[color:var(--Green,#8AF396)]"
             style={{
-              color: "var(--White, #FFF)",
               fontFamily: pangeaFont,
               fontSize: 20,
               fontStyle: "normal",
               fontWeight: 400,
+              fontVariationSettings: arabic ? '"wght" 400' : undefined,
               lineHeight: "normal",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {profession}
+            {displayProfession}
           </div>
         </div>
       ) : null}

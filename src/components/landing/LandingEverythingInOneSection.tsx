@@ -2,6 +2,7 @@
 
 import type { ComponentType, CSSProperties } from "react";
 import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -77,6 +78,47 @@ function FeatureGlyphOneOnOne({ className }: GlyphProps) {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+const PHONE_DECO_BOX_STYLE = {
+  width: 82,
+  height: 82,
+  borderRadius: 25,
+  border: "0.3px solid rgb(0 0 0 / 40%)",
+  background: "#E9E9E9",
+} as const;
+
+/** Phone Arabic trio. Side boxes sit 44px from the center box; 126px is center-to-center. */
+function PhoneArabicDecoCluster({ edge }: { edge: "above" | "below" }) {
+  const sidesLower = edge === "above";
+  return (
+    <div
+      className={`relative max-[743px]:-ml-[30px] max-[743px]:-mr-4 max-[743px]:h-[115px] max-[743px]:w-[calc(100%+46px)] min-[744px]:hidden ${
+        sidesLower ? "max-[743px]:mb-[50px]" : "max-[743px]:mt-[57px]"
+      }`}
+      aria-hidden
+    >
+      {(["left", "right"] as const).map((side) => (
+        <div
+          key={side}
+          className="absolute left-1/2"
+          style={{
+            ...PHONE_DECO_BOX_STYLE,
+            top: sidesLower ? 33 : 0,
+            transform: `translateX(calc(-50% ${side === "left" ? "-" : "+"} 126px)) scaleY(-1)`,
+          }}
+        />
+      ))}
+      <div
+        className="absolute left-1/2 z-[1]"
+        style={{
+          ...PHONE_DECO_BOX_STYLE,
+          top: sidesLower ? 0 : 33,
+          transform: "translateX(-50%) scaleY(-1)",
+        }}
+      />
+    </div>
   );
 }
 
@@ -191,6 +233,7 @@ const mobileFeatureTitleStyle = {
   fontSize: "20px",
   fontStyle: "normal",
   fontWeight: 600,
+  fontVariationSettings: '"wght" 600',
   lineHeight: "127%",
 } as const;
 
@@ -199,6 +242,7 @@ const mobileFeatureBodyStyle = {
   fontFamily: pangeaFont,
   fontStyle: "normal",
   fontWeight: 400,
+  fontVariationSettings: '"wght" 400',
   lineHeight: "127%",
 } as const;
 
@@ -234,6 +278,9 @@ export function LandingEverythingInOneSection({
   /** Course page uses its own row metrics; home keeps the original mobile sizes. */
   mobileRowLayout?: "home" | "course";
 } = {}) {
+  const arabic = useArabicLayout();
+  const t = useT();
+
   if (variant === "mobile") {
     const isCourseRows = mobileRowLayout === "course";
     return (
@@ -241,7 +288,9 @@ export function LandingEverythingInOneSection({
         className={`w-full ${
           isCourseRows
             ? "pl-[30px] pr-4 min-[744px]:max-lg:pl-[61px]"
-            : "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
+            : arabic
+              ? "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
+              : "px-0 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
         } ${className ?? ""}`}
         aria-labelledby="everything-in-one-place-heading-mobile"
       >
@@ -262,10 +311,56 @@ export function LandingEverythingInOneSection({
           >
             {mobileHeading}
           </h2>
+        ) : arabic ? (
+          <>
+          <PhoneArabicDecoCluster edge="above" />
+          <div className="max-[743px]:-ml-[30px] max-[743px]:-mr-4 max-[743px]:flex max-[743px]:w-[calc(100%+46px)] max-[743px]:justify-center">
+            <h2
+              id="everything-in-one-place-heading-mobile"
+              className="m-0 w-[269px] text-center text-black min-[744px]:hidden"
+              style={{
+                width: 269,
+                color: "#000",
+                textAlign: "center",
+                fontFamily: pangeaFont,
+                fontSize: 36,
+                lineHeight: "120%",
+              }}
+            >
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700',
+                  lineHeight: "120%",
+                }}
+              >
+                كل شيء
+              </span>
+              <span
+                style={{
+                  color: "#000",
+                  fontFamily: pangeaFont,
+                  fontSize: 36,
+                  fontStyle: "normal",
+                  fontWeight: 400,
+                  fontVariationSettings: '"wght" 400',
+                  lineHeight: "120%",
+                }}
+              >
+                {" "}
+                في مكان واحد
+              </span>
+            </h2>
+          </div>
+          </>
         ) : (
         <h2
           id="everything-in-one-place-heading-mobile"
-          className="m-0 w-[269px] text-left text-black min-[744px]:hidden"
+          className="m-0 ml-[30px] w-[269px] text-left text-black min-[744px]:hidden"
           style={{ fontFamily: pangeaFont }}
         >
           <span
@@ -292,7 +387,14 @@ export function LandingEverythingInOneSection({
           }`}
         >
           {FEATURES.map(({ title, body, Icon, comingSoon }) => (
-            <li key={title} className={`flex items-center ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}>
+            <li
+              key={title}
+              className={`flex items-center ${arabic ? "flex-row-reverse" : ""} ${
+                !arabic && !isCourseRows
+                  ? "max-[743px]:mx-auto max-[743px]:w-[95%] max-[743px]:max-w-[95%]"
+                  : ""
+              } ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}
+            >
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
                   className={`shrink-0 ${
@@ -305,29 +407,47 @@ export function LandingEverythingInOneSection({
               <div
                 className={
                   isCourseRows
-                    ? "ml-[14px] min-w-0 min-[744px]:max-lg:ml-[27px]"
-                    : "ml-[21px] w-[221px] shrink-0 min-[744px]:ml-[27px] min-[744px]:w-[480px]"
+                    ? `${arabic ? "mr-[14px] text-right min-[744px]:max-lg:mr-[27px]" : "ml-[14px] min-[744px]:max-lg:ml-[27px]"} min-w-0`
+                    : arabic
+                      ? "mr-[21px] w-[221px] shrink-0 text-right min-[744px]:mr-[27px] min-[744px]:h-[60px] min-[744px]:w-[379px]"
+                      : "ml-[21px] w-[221px] min-w-0 shrink min-[744px]:ml-[27px] min-[744px]:w-[480px] min-[744px]:shrink-0"
                 }
               >
                 <h3
-                  className={isCourseRows ? "m-0 w-fit text-[16px] min-[744px]:max-lg:text-[20px]" : "m-0 w-fit"}
+                  className={
+                    isCourseRows
+                      ? "m-0 w-fit text-[16px] min-[744px]:max-lg:text-[20px]"
+                      : arabic
+                        ? "m-0 min-[744px]:!text-[24px] min-[744px]:!leading-[150%]"
+                        : "m-0 w-fit"
+                  }
                   style={isCourseRows ? courseFeatureTitleStyle : mobileFeatureTitleStyle}
                 >
-                  {title}
+                  {t(title)}
                 </h3>
                 <p
                   className={
                     isCourseRows
                       ? "m-0 text-[14px] min-[744px]:max-lg:text-[20px]"
-                      : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
+                      : arabic
+                        ? "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:!text-[20px] min-[744px]:!leading-[150%]"
+                        : "m-0 mt-2 text-[14px] min-[744px]:mt-0 min-[744px]:text-[20px]"
                   }
                   style={isCourseRows ? courseFeatureBodyStyle : mobileFeatureBodyStyle}
                 >
-                  {body}
+                  {t(body)}
                 </p>
               </div>
               {hideChecks && !comingSoon ? null : (
-              <span className="ml-[33px] shrink-0 min-[744px]:ml-auto">
+              <span
+                className={`shrink-0 ${
+                  arabic
+                    ? "mr-[33px] min-[744px]:mr-auto"
+                    : isCourseRows
+                      ? "ml-[33px] min-[744px]:ml-auto"
+                      : "ml-auto"
+                }`}
+              >
                 {comingSoon ? (
                   <ComingSoonStamp />
                 ) : (
@@ -338,6 +458,7 @@ export function LandingEverythingInOneSection({
             </li>
           ))}
         </ul>
+        {arabic && !mobileHeading && !isCourseRows ? <PhoneArabicDecoCluster edge="below" /> : null}
       </section>
     );
   }
@@ -360,31 +481,85 @@ export function LandingEverythingInOneSection({
         <div className="min-w-0 w-full max-w-[640px] flex-1 xl:max-w-none xl:px-4">
           <h2
             id="everything-in-one-place-heading"
-            className="mb-[64px] text-center text-[48px] leading-[120%] text-black"
-            style={{ fontFamily: pangeaFont }}
+            className={`${arabic ? "mb-[38px]" : "mb-[64px]"} text-center text-[48px] leading-[120%] text-black`}
+            style={{
+              color: "#000",
+              textAlign: "center",
+              fontFamily: pangeaFont,
+              fontSize: 48,
+              lineHeight: "120%",
+            }}
           >
-            <span className="font-bold italic">EVERYTHING</span>
-            <span className="font-normal not-italic"> IN ONE PLACE</span>
+            {arabic ? (
+              <>
+                <span style={{ color: "#000", fontFamily: pangeaFont, fontSize: 48, fontStyle: "italic", fontWeight: 700, lineHeight: "120%" }}>
+                  كــل شــيء
+                </span>
+                <span style={{ color: "#000", fontFamily: pangeaFont, fontSize: 48, fontStyle: "normal", fontWeight: 400, lineHeight: "120%" }}>
+                  {" "}
+                  في مكان واحد
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="font-bold italic">EVERYTHING</span>
+                <span className="font-normal not-italic"> IN ONE PLACE</span>
+              </>
+            )}
           </h2>
 
-          <ul className="mb-[35px] flex list-none flex-col gap-[35px] p-0">
+          <ul className={`mb-[35px] flex list-none flex-col p-0 ${arabic ? "gap-[20px]" : "gap-[35px]"}`}>
             {FEATURES.map(({ title, body, Icon, comingSoon }) => (
-              <li key={title} className="flex items-start">
-                <span className="mt-1 mr-4 flex shrink-0 items-center justify-center text-[#1E1E1E] sm:mr-6">
+              <li key={title} className={`flex ${arabic ? "flex-row-reverse items-center" : "items-start"}`}>
+                <span
+                  className={`flex shrink-0 items-center justify-center text-[#1E1E1E] ${arabic ? "ml-4 sm:ml-6" : "mt-1 mr-4 sm:mr-6"}`}
+                >
                   <Icon className="h-[36px] w-[44px] shrink-0" />
                 </span>
                 <div
-                  className="mr-[115px] w-[480px] max-w-full shrink-0"
+                  className={`w-[480px] max-w-full shrink-0 ${arabic ? "ml-[115px] text-right" : "mr-[115px]"}`}
                   style={{ fontFamily: pangeaFont }}
                 >
-                  <h3 className="m-0 w-fit text-[24px] font-semibold not-italic leading-[127%] text-black">
-                    {title}
+                  <h3
+                    className={arabic ? "m-0" : "m-0 w-fit text-[24px] font-semibold not-italic leading-[127%] text-black"}
+                    style={
+                      arabic
+                        ? {
+                            color: "#000",
+                            textAlign: "right",
+                            fontFamily: pangeaFont,
+                            fontSize: "32px",
+                            fontStyle: "normal",
+                            fontWeight: 600,
+                            fontVariationSettings: '"wght" 600',
+                            lineHeight: "150%",
+                          }
+                        : undefined
+                    }
+                  >
+                    {t(title)}
                   </h3>
-                  <p className="mt-2 text-[24px] font-normal not-italic leading-[127%] text-black">
-                    {body}
+                  <p
+                    className={arabic ? "m-0" : "mt-2 text-[24px] font-normal not-italic leading-[127%] text-black"}
+                    style={
+                      arabic
+                        ? {
+                            color: "#000",
+                            textAlign: "right",
+                            fontFamily: pangeaFont,
+                            fontSize: "24px",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            fontVariationSettings: '"wght" 400',
+                            lineHeight: "150%",
+                          }
+                        : undefined
+                    }
+                  >
+                    {t(body)}
                   </p>
                 </div>
-                <span className="-translate-x-[40px] shrink-0">
+                <span className={`shrink-0 ${arabic ? "translate-x-[40px]" : "-translate-x-[40px]"}`}>
                   {comingSoon ? <ComingSoonStamp /> : <FeatureCheck />}
                 </span>
               </li>

@@ -173,6 +173,7 @@ export function AuthPasswordField({
   onShowPassword,
   onHidePassword,
   autoComplete = "current-password",
+  placeholder = "Password",
   error,
   errorId = "password-error",
   onValueChange,
@@ -181,6 +182,7 @@ export function AuthPasswordField({
   onShowPassword: () => void;
   onHidePassword: () => void;
   autoComplete?: string;
+  placeholder?: string;
   error?: string | null;
   errorId?: string;
   onValueChange?: () => void;
@@ -196,7 +198,7 @@ export function AuthPasswordField({
           name="password"
           type={showPassword ? "text" : "password"}
           autoComplete={autoComplete}
-          placeholder={t("Password")}
+          placeholder={t(placeholder)}
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
