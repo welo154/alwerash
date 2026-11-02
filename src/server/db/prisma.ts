@@ -255,6 +255,8 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
 });
 
-if (isDev) {
+// Warm the client in local development only; tests and builds must be able to
+// import this module without a database URL.
+if (process.env.NODE_ENV === "development") {
   getClient();
 }
