@@ -24,9 +24,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@backend/*": [
-        "./backend/src/*"
       ]
     },
     "target": "ES2017"
@@ -39,8 +36,6 @@
   ],
   "exclude": [
     "node_modules",
-    "frontend",
-    "backend",
     "docs",
     "**/*.canvas.tsx"
   ]
