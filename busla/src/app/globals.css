@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/*
+  Busla palette: warm paper, deep Nile-night ink, and a market-stall spread of
+  saffron, brick, Nile green, rose, sky and lime. Colors are used as solid
+  blocks (poster style), not gradients.
+*/
+@theme {
+  --color-paper: #f6f0e4;
+  --color-paper-2: #ede4d3;
+  --color-ink: #10292b;
+  --color-ink-2: #1d3b3d;
+  --color-saffron: #f3b230;
+  --color-brick: #e0532c;
+  --color-nile: #0f7a69;
+  --color-rose: #f4a7b9;
+  --color-sky: #9cc5ea;
+  --color-lime: #c9d94b;
+  --color-cream: #fffaf0;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-body: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-reem), var(--font-bricolage), sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-marquee-rev: marquee 46s linear infinite reverse;
+  --animate-spin-slow: spin 40s linear infinite;
+  --animate-wobble: wobble 6s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes wobble {
+    0%, 100% { transform: rotate(-4deg) translateY(0); }
+    50% { transform: rotate(4deg) translateY(-6px); }
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-paper);
+  overflow-x: clip;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--color-saffron); color: var(--color-ink); }
+
+:focus-visible {
+  outline: 3px solid var(--color-brick);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Paper grain over everything; pointer-events off so it never blocks clicks. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@layer components {
+  .display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.035em; line-height: 0.92; }
+  .serif-i { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Hard, offset "print" shadows instead of soft blurs. */
+  .card-pop {
+    border: 2px solid var(--color-ink);
+    box-shadow: 6px 6px 0 var(--color-ink);
+    transition: transform 0.25s cubic-bezier(.2,.9,.3,1.3), box-shadow 0.25s;
+  }
+  .card-pop:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--color-ink); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    padding: 0.85rem 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    box-shadow: 4px 4px 0 var(--color-ink);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--color-ink); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--color-ink); }
+
+  .field {
+    width: 100%;
+    background: var(--color-cream);
+    border: 2px solid var(--color-ink);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    transition: box-shadow 0.2s, background 0.2s;
+  }
+  .field:focus { outline: none; box-shadow: 4px 4px 0 var(--color-nile); background: #fff; }
+  .field[aria-invalid="true"] { border-color: var(--color-brick); box-shadow: 4px 4px 0 var(--color-brick); }
+
+  /* Hand-drawn underline used on key words in headings. */
+  .scribble {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M2 9 C 40 2, 70 13, 110 6 S 170 3, 198 8' fill='none' stroke='%23e0532c' stroke-width='4' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat;
+    background-size: 100% 0.32em;
+    background-position: 0 96%;
+    padding-bottom: 0.08em;
+  }
+}
+
+.chat-md p { margin: 0 0 0.6em; }
+.chat-md p:last-child { margin-bottom: 0; }
+.chat-md ul { list-style: disc; padding-left: 1.2em; margin: 0.3em 0 0.6em; }
+.chat-md li { margin: 0.15em 0; }
+.chat-md strong { font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+}
