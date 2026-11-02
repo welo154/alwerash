@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
     const parsed = RegisterInput.safeParse(raw);
     if (!parsed.success) {
-      const first = parsed.error.errors[0];
+      const first = parsed.error.issues[0];
       const message = first?.message ?? "Invalid input";
       return { success: false, error: message };
     }
