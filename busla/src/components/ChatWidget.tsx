@@ -29,32 +29,41 @@ function inline(text: string) {
   });
 }
 
+const LIST_ITEM = /^\s*([-*•]|\d+\.)\s+/;
+
 function Markdown({ text }: { text: string }) {
-  const blocks = text.trim().split(/\n{2,}/);
+  // Group consecutive lines into runs of list items or plain text, so a lead-in
+  // line followed directly by bullets ("Don't miss:\n- A\n- B") still renders a list.
+  const runs: { list: boolean; lines: string[] }[] = [];
+  for (const block of text.trim().split(/\n{2,}/)) {
+    let prevList: boolean | null = null;
+    for (const line of block.split("\n")) {
+      const isList = LIST_ITEM.test(line);
+      if (isList === prevList) runs[runs.length - 1].lines.push(line);
+      else runs.push({ list: isList, lines: [line] });
+      prevList = isList;
+    }
+  }
   return (
     <div className="chat-md" dir="auto">
-      {blocks.map((b, i) => {
-        const lines = b.split("\n");
-        if (lines.every((l) => /^\s*([-*•]|\d+\.)\s+/.test(l))) {
-          return (
-            <ul key={i}>
-              {lines.map((l, j) => (
-                <li key={j}>{inline(l.replace(/^\s*([-*•]|\d+\.)\s+/, ""))}</li>
-              ))}
-            </ul>
-          );
-        }
-        return (
+      {runs.map((r, i) =>
+        r.list ? (
+          <ul key={i}>
+            {r.lines.map((l, j) => (
+              <li key={j}>{inline(l.replace(LIST_ITEM, ""))}</li>
+            ))}
+          </ul>
+        ) : (
           <p key={i}>
-            {lines.map((l, j) => (
+            {r.lines.map((l, j) => (
               <Fragment key={j}>
                 {j > 0 && <br />}
                 {inline(l.replace(/^#+\s*/, ""))}
               </Fragment>
             ))}
           </p>
-        );
-      })}
+        ),
+      )}
     </div>
   );
 }
