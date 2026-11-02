@@ -4,7 +4,7 @@ export default function ForbiddenPage() {
       <div className="p-6 space-y-2">
         <h1 className="text-2xl font-semibold">403</h1>
         <p>Forbidden</p>
-        <a className="underline" href="/dashboard">Go back</a>
+        <a className="underline" href="/">Go to home</a>
       </div>
     );
   }

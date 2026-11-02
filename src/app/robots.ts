@@ -13,7 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         "/mentor$",
         "/mentor/",
         "/instructor",
-        "/dashboard",
         "/home",
         "/profile",
         "/settings",
