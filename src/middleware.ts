@@ -43,8 +43,9 @@ export async function middleware(req: NextRequest) {
   const isAdminApi = pathname.startsWith("/api/admin");
   const isInstructorPath = pathname.startsWith("/instructor");
   const isInstructorApi = pathname.startsWith("/api/instructor");
-  const isMentorPath = pathname.startsWith("/mentor");
-  const isMentorApi = pathname.startsWith("/api/mentor");
+  // Exact segment match: the public /mentors directory is not the mentor portal.
+  const isMentorPath = pathname === "/mentor" || pathname.startsWith("/mentor/");
+  const isMentorApi = pathname === "/api/mentor" || pathname.startsWith("/api/mentor/");
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
