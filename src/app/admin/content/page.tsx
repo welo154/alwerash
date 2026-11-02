@@ -68,7 +68,6 @@ export default function AdminContentHome() {
           </Link>
         </div>
       </div>
-      <Link className="text-sm text-[var(--color-text-muted)] hover:text-black underline" href="/dashboard">← Back to Dashboard</Link>
     </div>
   );
 }

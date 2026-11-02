@@ -50,7 +50,7 @@ const CATEGORY_CARDS: LibraryCategoryCardProps[] = [
 
 export function LibraryCategoryGrid() {
   return (
-    <section className="mt-[128px] ml-[137px]" aria-label="Library categories">
+    <section data-reveal className="mt-[128px] ml-[137px]" aria-label="Library categories">
       <div className="grid w-fit grid-cols-2 gap-[40px]">
         {CATEGORY_CARDS.map((card) => (
           <LibraryCategoryCard

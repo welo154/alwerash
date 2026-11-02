@@ -26,7 +26,7 @@ export default async function ResetPasswordPage({
 
     const parsed = PasswordSchema.safeParse(String(formData.get("password") ?? ""));
     if (!parsed.success) {
-      return { ok: false, error: parsed.error.errors[0]?.message ?? "Invalid password" };
+      return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid password" };
     }
 
     const result = await resetPassword(String(formData.get("token") ?? ""), parsed.data);

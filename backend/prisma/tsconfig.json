@@ -1,8 +1,0 @@
-{
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "rootDir": ".."
-  },
-  "include": ["*.ts", "../src/auth/password.ts"],
-  "exclude": ["node_modules"]
-}

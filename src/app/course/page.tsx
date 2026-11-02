@@ -55,6 +55,10 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
   }));
 }
 
+// Rendered per request so a deploy never bakes in an empty catalog; the data
+// itself is cached (unstable_cache, tag "public-catalog") for 60 seconds.
+export const dynamic = "force-dynamic";
+
 export default async function LearnPage() {
   markPage("/course");
   let catalog: Awaited<ReturnType<typeof loadCoursePageCatalog>>;
@@ -107,6 +111,7 @@ export default async function LearnPage() {
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
+                data-reveal
                 aria-label="Featured tracks"
                 className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ms-[73px]"
               >
@@ -121,13 +126,13 @@ export default async function LearnPage() {
 
               <div className="mt-[45px] min-w-0 w-full overflow-x-visible min-[744px]:max-lg:mt-[69px] lg:mt-[90px]">
                 {popularTiles.length > 0 ? (
-                  <section id="popular-classes" aria-label="Popular classes" className="scroll-mt-8">
+                  <section data-reveal id="popular-classes" aria-label="Popular classes" className="scroll-mt-8">
                     <LearnPopularClassesSection tiles={popularTiles} fullBleed="right" hideNavOnMobile />
                   </section>
                 ) : null}
 
                 {allCourseItems.length > 0 ? (
-                  <div className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
+                  <div data-reveal className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
                     <Suspense fallback={null}>
                       <LearnAllCoursesSection
                         courses={allCourseItems}
@@ -145,13 +150,15 @@ export default async function LearnPage() {
       </div>
 
       {landingMostsMentors.length > 0 ? (
-        <LandingCurrentMostsSection
-          mentors={landingMostsMentors}
-          mentorCardWidthPx={383}
-          mentorCardHeightPx={357}
-          showDesktopSupportingCopy={false}
-          className="mt-[55px] min-[744px]:max-lg:mt-[84px]"
-        />
+        <div data-reveal>
+          <LandingCurrentMostsSection
+            mentors={landingMostsMentors}
+            mentorCardWidthPx={383}
+            mentorCardHeightPx={357}
+            showDesktopSupportingCopy={false}
+            className="mt-[55px] min-[744px]:max-lg:mt-[84px]"
+          />
+        </div>
       ) : null}
     </LocaleMirror>
   );

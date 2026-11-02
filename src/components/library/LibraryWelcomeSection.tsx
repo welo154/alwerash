@@ -3,7 +3,7 @@ const pangeaFont =
 
 export function LibraryWelcomeSection() {
   return (
-    <section
+    <section data-reveal
       className="mt-[80px] ml-[137px] flex items-start gap-[324px]"
       aria-labelledby="library-welcome-heading"
       style={{ fontFamily: pangeaFont }}

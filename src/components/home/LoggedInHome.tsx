@@ -446,22 +446,26 @@ export function LoggedInHome({
           </h2>
         </div>
 
-        <ContinueLearningSection
-          courses={continueLearningCourses}
-          showDesktopIntro={false}
-          className="max-[743px]:mt-[62px] min-[744px]:max-lg:mt-[48px]"
-        />
+        <div data-reveal>
+          <ContinueLearningSection
+            courses={continueLearningCourses}
+            showDesktopIntro={false}
+            className="max-[743px]:mt-[62px] min-[744px]:max-lg:mt-[48px]"
+          />
+        </div>
 
-        <TrackActivitySection
-          weeklyActivity={weeklyActivity}
-          activityHighlightDayIndex={activityHighlightDayIndex}
-          learningProgressPercent={learningProgressPercent}
-          className={
-            continueLearningCourses.length > 0
-              ? "max-[743px]:mt-[60px] min-[744px]:max-lg:mt-[73px] lg:mt-[101px]"
-              : "mt-[48px]"
-          }
-        />
+        <div data-reveal>
+          <TrackActivitySection
+            weeklyActivity={weeklyActivity}
+            activityHighlightDayIndex={activityHighlightDayIndex}
+            learningProgressPercent={learningProgressPercent}
+            className={
+              continueLearningCourses.length > 0
+                ? "max-[743px]:mt-[60px] min-[744px]:max-lg:mt-[73px] lg:mt-[101px]"
+                : "mt-[48px]"
+            }
+          />
+        </div>
 
         <h2
           className={`m-0 mt-[60px] uppercase max-[743px]:block hidden ${arabic ? "pr-[30px] text-right" : "pl-[30px]"}`}
@@ -583,21 +587,23 @@ export function LoggedInHome({
           )}
         </h2>
 
-        <HomeTrackExplorerSection
-          trackPillRow1={trackExplorer.trackPillRow1}
-          trackPillRow2={trackExplorer.trackPillRow2}
-          slidesByFilter={trackExplorer.slidesByFilter}
-          trackPillSelectsCourses
-          courseTilesByTrackSlug={trackExplorer.courseTilesByTrackSlug}
-          showDiscoverCta={false}
-          sectionClassName="max-[743px]:mt-[18px] min-[744px]:max-lg:mt-[30px] lg:mt-[24px]"
-          contentLeftPx={120}
-          pillGapPx={15}
-          maxPills={8}
-          showWhatToLearnNextHeading
-          landingMostsMentors={landingMostsMentors}
-          studentStories={studentStories}
-        />
+        <div data-reveal>
+          <HomeTrackExplorerSection
+            trackPillRow1={trackExplorer.trackPillRow1}
+            trackPillRow2={trackExplorer.trackPillRow2}
+            slidesByFilter={trackExplorer.slidesByFilter}
+            trackPillSelectsCourses
+            courseTilesByTrackSlug={trackExplorer.courseTilesByTrackSlug}
+            showDiscoverCta={false}
+            sectionClassName="max-[743px]:mt-[18px] min-[744px]:max-lg:mt-[30px] lg:mt-[24px]"
+            contentLeftPx={120}
+            pillGapPx={15}
+            maxPills={8}
+            showWhatToLearnNextHeading
+            landingMostsMentors={landingMostsMentors}
+            studentStories={studentStories}
+          />
+        </div>
       </section>
     </div>
   );

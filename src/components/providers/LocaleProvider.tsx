@@ -7,42 +7,75 @@ import {
   useEffect,
   useMemo,
   useState,
+  useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
+import {
+  LEGACY_LOCALE_STORAGE_KEY,
+  isSiteLocale,
+  localeCookieString,
+  readLocaleCookie,
+  type SiteLocale,
+} from "@/lib/i18n/locale";
 
-export type SiteLocale = "en" | "ar";
-
-const STORAGE_KEY = "alwerash-locale";
+export type { SiteLocale };
 
 type LocaleContextValue = {
   locale: SiteLocale;
+  setLocale: (locale: SiteLocale) => void;
   toggleLocale: () => void;
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<SiteLocale>("en");
-  const [ready, setReady] = useState(false);
+function persistLocale(locale: SiteLocale) {
+  document.cookie = localeCookieString(locale, window.location.protocol === "https:");
+  document.documentElement.lang = locale;
+}
 
+/**
+ * Client view of the site language. `initialLocale` comes from the cookie the
+ * root layout read, so server and client render the same language.
+ */
+export function LocaleProvider({
+  initialLocale,
+  children,
+}: {
+  initialLocale: SiteLocale;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const [locale, setLocaleState] = useState<SiteLocale>(initialLocale);
+  const [, startTransition] = useTransition();
+
+  const setLocale = useCallback(
+    (next: SiteLocale) => {
+      setLocaleState(next);
+      persistLocale(next);
+      // Re-render server components (and <html lang>) in the new language.
+      startTransition(() => router.refresh());
+    },
+    [router]
+  );
+
+  // One-time move of a choice saved before the cookie existed.
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "ar" || stored === "en") {
-      setLocale(stored);
+    if (readLocaleCookie(document.cookie)) return;
+    let legacy: string | null = null;
+    try {
+      legacy = window.localStorage.getItem(LEGACY_LOCALE_STORAGE_KEY);
+      window.localStorage.removeItem(LEGACY_LOCALE_STORAGE_KEY);
+    } catch {
+      /* Storage can be blocked; the default language is fine then. */
     }
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    document.documentElement.lang = locale;
-    window.localStorage.setItem(STORAGE_KEY, locale);
-  }, [locale, ready]);
+    if (isSiteLocale(legacy) && legacy !== initialLocale) setLocale(legacy);
+  }, [initialLocale, setLocale]);
 
   const toggleLocale = useCallback(() => {
-    setLocale((current) => (current === "en" ? "ar" : "en"));
-  }, []);
+    setLocale(locale === "en" ? "ar" : "en");
+  }, [locale, setLocale]);
 
-  const value = useMemo(() => ({ locale, toggleLocale }), [locale, toggleLocale]);
+  const value = useMemo(() => ({ locale, setLocale, toggleLocale }), [locale, setLocale, toggleLocale]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

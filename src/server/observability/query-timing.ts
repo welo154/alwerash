@@ -333,26 +333,12 @@ export function beginQuery(model: string | undefined, operation: string): QueryF
   };
 }
 
-let poolDegradedReported = false;
-
 /**
- * Announce that the pool latch has tripped and this instance is now returning
- * empty results for every query.
- *
- * Deliberately logged regardless of PERF_TIMING, and to stdout, because the
- * existing error silencing hides the underlying Prisma error and the failure is
- * otherwise completely invisible.
+ * Log pool exhaustion. Always on (not gated by PERF_TIMING), because it means
+ * requests are failing with 503 and the pool size or pooler mode needs attention.
  */
-export function reportPoolDegraded(): void {
-  if (poolDegradedReported) return;
-  poolDegradedReported = true;
+export function reportPoolExhausted(model: string | undefined, operation: string): void {
   writeLine(
-    "[db] connection limit exceeded — this server instance will now return EMPTY results " +
-      "for every query until it restarts. Pages will render with missing data and no error."
+    `[db] connection pool exhausted after retries (${model ?? "raw"}.${operation}); returned 503`
   );
-}
-
-/** Test seam: clears the once-only guard on the degraded-pool warning. */
-export function resetPoolDegradedReportForTests(): void {
-  poolDegradedReported = false;
 }

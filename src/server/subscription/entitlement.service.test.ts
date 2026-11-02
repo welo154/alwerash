@@ -7,19 +7,23 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 const userFindUnique = vi.fn();
 const paymentEventFindUnique = vi.fn();
-const paymentEventUpsert = vi.fn();
-const paymentEventUpdate = vi.fn();
+const paymentEventCreateMany = vi.fn();
+const paymentEventUpdateMany = vi.fn();
+const lockQuery = vi.fn();
 const entitlementFindUnique = vi.fn();
 const entitlementUpsert = vi.fn();
+const entitlementUpdate = vi.fn();
 
 const tx = {
   paymentEvent: {
-    upsert: (...a: unknown[]) => paymentEventUpsert(...a),
-    update: (...a: unknown[]) => paymentEventUpdate(...a),
+    createMany: (...a: unknown[]) => paymentEventCreateMany(...a),
+    updateMany: (...a: unknown[]) => paymentEventUpdateMany(...a),
   },
+  $queryRaw: (...a: unknown[]) => lockQuery(...a),
   entitlement: {
     findUnique: (...a: unknown[]) => entitlementFindUnique(...a),
     upsert: (...a: unknown[]) => entitlementUpsert(...a),
+    update: (...a: unknown[]) => entitlementUpdate(...a),
   },
 };
 
@@ -36,6 +40,7 @@ const {
   grantEntitlementForVerifiedPayment,
   grantSelfServeEntitlement,
   isSelfServeGrantEnabled,
+  reverseEntitlementForRefund,
 } = await import("./entitlement.service");
 const { AppError } = await import("@/server/lib/errors");
 
@@ -43,10 +48,12 @@ beforeEach(() => {
   for (const fn of [
     userFindUnique,
     paymentEventFindUnique,
-    paymentEventUpsert,
-    paymentEventUpdate,
+    paymentEventCreateMany,
+    paymentEventUpdateMany,
+    lockQuery,
     entitlementFindUnique,
     entitlementUpsert,
+    entitlementUpdate,
   ]) {
     fn.mockReset();
   }
@@ -54,8 +61,9 @@ beforeEach(() => {
   paymentEventFindUnique.mockResolvedValue(null);
   entitlementFindUnique.mockResolvedValue(null);
   entitlementUpsert.mockResolvedValue({});
-  paymentEventUpsert.mockResolvedValue({});
-  paymentEventUpdate.mockResolvedValue({});
+  paymentEventCreateMany.mockResolvedValue({ count: 1 });
+  paymentEventUpdateMany.mockResolvedValue({ count: 1 });
+  lockQuery.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -78,11 +86,32 @@ describe("grantEntitlementForVerifiedPayment", () => {
       create: { status: string };
     };
     expect(upsertArg.create.status).toBe("ACTIVE");
-    expect(paymentEventUpdate).toHaveBeenCalledTimes(1);
-    const updateArg = paymentEventUpdate.mock.calls[0][0] as {
+    expect(paymentEventCreateMany).toHaveBeenCalledTimes(1);
+    expect(paymentEventUpdateMany).toHaveBeenCalledTimes(1);
+    const updateArg = paymentEventUpdateMany.mock.calls[0][0] as {
+      where: { status: { not: string } };
       data: { status: string };
     };
+    expect(updateArg.where.status).toEqual({ not: "PROCESSED" });
     expect(updateArg.data.status).toBe("PROCESSED");
+    expect(lockQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not extend access when a concurrent delivery claimed the event first", async () => {
+    // Both deliveries passed the pre-check; this one lost the claim.
+    paymentEventUpdateMany.mockResolvedValue({ count: 0 });
+    entitlementFindUnique.mockResolvedValue({ expiresAt: new Date("2030-01-01") });
+
+    const res = await grantEntitlementForVerifiedPayment({
+      provider: "POLAR",
+      providerEventId: "order:1",
+      eventType: "order.paid",
+      userId: "user-1",
+      durationMonths: 12,
+    });
+
+    expect(res).toEqual({ applied: false, expiresAt: new Date("2030-01-01") });
+    expect(entitlementUpsert).not.toHaveBeenCalled();
   });
 
   it("is idempotent: a replayed event does not extend access again", async () => {
@@ -156,6 +185,32 @@ describe("grantEntitlementForVerifiedPayment", () => {
         durationMonths: 999,
       })
     ).rejects.toBeInstanceOf(AppError);
+  });
+});
+
+describe("reverseEntitlementForRefund", () => {
+  const refund = {
+    provider: "POLAR" as const,
+    providerEventId: "refund:1",
+    eventType: "order.refunded",
+    userId: "user-1",
+    durationMonths: 12,
+  };
+
+  it("takes back the refunded months", async () => {
+    const expiresAt = new Date(Date.now() + 400 * 24 * 60 * 60 * 1000);
+    entitlementFindUnique.mockResolvedValue({ id: "ent-1", expiresAt });
+
+    await expect(reverseEntitlementForRefund(refund)).resolves.toEqual({ applied: true });
+    const arg = entitlementUpdate.mock.calls[0][0] as { data: { expiresAt: Date; status?: string } };
+    expect(arg.data.status).toBeUndefined();
+    expect(arg.data.expiresAt.getTime()).toBeLessThan(expiresAt.getTime());
+  });
+
+  it("does nothing when another delivery already applied the refund", async () => {
+    paymentEventUpdateMany.mockResolvedValue({ count: 0 });
+    await expect(reverseEntitlementForRefund(refund)).resolves.toEqual({ applied: false });
+    expect(entitlementUpdate).not.toHaveBeenCalled();
   });
 });
 

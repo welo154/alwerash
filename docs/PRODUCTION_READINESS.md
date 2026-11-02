@@ -1,3 +1,9 @@
+> **Snapshot from 2026-10-15; partly out of date.** Since then: Polar payments,
+> security headers, rate limiting, object storage and unit tests landed, and the
+> November stabilisation fixed the database fallback, page generation, dependency
+> advisories, payment idempotency and startup config checks. The current launch
+> checklist is in the root `README.md`.
+
 # Alwerash production readiness
 
 **Overall launch readiness:** Blocked  

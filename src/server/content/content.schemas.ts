@@ -151,7 +151,7 @@ export const AssignmentCreateSchema = z.object({
   title: z.string().min(2, "Title too short").max(200),
   titleAr: OptionalArabicName,
   instructions: z.string().max(10_000).optional(),
-  rubricJson: z.record(z.unknown()).optional(),
+  rubricJson: z.record(z.string(), z.unknown()).optional(),
   published: z.boolean().optional(),
 });
 

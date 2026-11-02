@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
+import { unstable_cache } from "next/cache";
+import { PUBLIC_CATALOG_CACHE_TAG } from "@/server/content/revalidate-public-paths";
 import { AppError } from "@/server/lib/errors";
 import type { StudentRatingCard } from "@/components/students/student-rating-types";
 
@@ -53,14 +55,21 @@ function sortOrderFrom(value: unknown, fallback = 0): number {
 }
 
 /** Published stories for the public section. Null when the table is not migrated yet. */
-export async function publicListStudentStories(): Promise<StudentRatingCard[] | null> {
-  try {
-    const rows = await prisma.studentStory.findMany({
+const getCachedPublishedStories = unstable_cache(
+  async () =>
+    prisma.studentStory.findMany({
       where: { published: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       take: 4,
       select: { name: true, jobTitle: true, quote: true, projectImage: true },
-    });
+    }),
+  ["public-student-stories"],
+  { revalidate: 60, tags: [PUBLIC_CATALOG_CACHE_TAG] }
+);
+
+export async function publicListStudentStories(): Promise<StudentRatingCard[] | null> {
+  try {
+    const rows = await getCachedPublishedStories();
     return rows.map(toCard);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {

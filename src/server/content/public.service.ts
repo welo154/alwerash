@@ -1234,17 +1234,24 @@ export async function publicSearch(query: string, limit = 10) {
 }
 
 /** Public list of mentors for the Mentors page. */
+const getCachedMentorDirectory = unstable_cache(
+  async () =>
+    prisma.mentor.findMany({
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        name: true,
+        photo: true,
+        certificateName: true,
+        aboutMe: true,
+      },
+    }),
+  ["public-list-mentors"],
+  CATALOG_CACHE
+);
+
 export async function publicListMentors() {
-  return prisma.mentor.findMany({
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      name: true,
-      photo: true,
-      certificateName: true,
-      aboutMe: true,
-    },
-  });
+  return getCachedMentorDirectory();
 }
 
 export type { LandingMostsMentorCardDto };

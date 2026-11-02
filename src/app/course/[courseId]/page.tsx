@@ -684,7 +684,7 @@ export default async function PublicCoursePage({
           </aside>
           </div>
 
-          <section className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[45px] lg:ar:mt-[58px]">
+          <section data-reveal className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[45px] lg:ar:mt-[58px]">
             <div className="flex items-center gap-[16px]">
               <h3
                 className="m-0 text-[16px] opacity-60 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
@@ -722,7 +722,7 @@ export default async function PublicCoursePage({
             </p>
           </section>
 
-          <section className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[36px]">
+          <section data-reveal className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[36px]">
             <h3
               className="m-0 mt-[30px] text-[16px] max-[743px]:mt-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:mt-[39px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
@@ -759,7 +759,7 @@ export default async function PublicCoursePage({
             </div>
           </section>
 
-          <section className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ms-[31px]">
+          <section data-reveal className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ms-[31px]">
             <h3
               className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
@@ -968,15 +968,15 @@ export default async function PublicCoursePage({
         />
       </div>
 
-      <div className="max-lg:order-9 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
+      <div data-reveal className="max-lg:order-9 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
         <StudentsRatingWorkSection variant="mobile" cards={studentStories ?? undefined} />
       </div>
 
-      <div className="mt-[66px] w-full max-w-full max-lg:hidden">
+      <div data-reveal className="mt-[66px] w-full max-w-full max-lg:hidden">
         <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
       </div>
 
-      <div className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:[direction:ltr] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
+      <div data-reveal className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:[direction:ltr] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
         <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />
       </div>
       </div>

@@ -143,7 +143,7 @@ export default async function MentorDetailsPage({ params }: Props) {
 
           {/* Right: About Me, then big gap, then Courses clearly below */}
           <main className="min-w-0 flex-1">
-            <section className="min-h-[540px]">
+            <section data-reveal className="min-h-[540px]">
               <h2 className="text-xl font-bold tracking-tight text-black sm:text-2xl">
                 About Me
               </h2>
@@ -170,12 +170,12 @@ export default async function MentorDetailsPage({ params }: Props) {
                       <h2 className="text-xl font-bold tracking-tight text-black sm:text-2xl">
                         {trackTitle ?? "Other courses"}
                       </h2>
-                      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      <div data-reveal-stagger className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {trackCourses.map((course) => (
                           <Link
                             key={course.id}
                             href={`/course/${course.id}`}
-                            className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+                            className="motion-lift group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300"
                           >
                             <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-200">
                               {course.coverImage ? (

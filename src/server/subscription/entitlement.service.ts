@@ -76,6 +76,37 @@ async function upsertActiveEntitlement(
 }
 
 /**
+ * Claim a provider event inside `tx`. Returns false when another delivery of
+ * the same event already claimed it.
+ *
+ * The insert is ON CONFLICT DO NOTHING, and the conditional UPDATE row-locks the
+ * event: a concurrent delivery blocks on that lock, then re-checks the WHERE
+ * after the first transaction commits and matches nothing. If the first
+ * transaction rolls back, the event stays unclaimed and a retry can apply it.
+ */
+async function claimPaymentEvent(
+  tx: Prisma.TransactionClient,
+  event: { provider: SubscriptionProvider; providerEventId: string; eventType: string },
+  now: Date
+): Promise<boolean> {
+  const { provider, providerEventId, eventType } = event;
+  await tx.paymentEvent.createMany({
+    data: [{ provider, providerEventId, type: eventType, status: "RECEIVED" }],
+    skipDuplicates: true,
+  });
+  const claimed = await tx.paymentEvent.updateMany({
+    where: { provider, providerEventId, status: { not: "PROCESSED" } },
+    data: { status: "PROCESSED", processedAt: now },
+  });
+  return claimed.count === 1;
+}
+
+/** Row-lock the learner's entitlement so two different payments cannot interleave. */
+async function lockEntitlement(tx: Prisma.TransactionClient, userId: string): Promise<void> {
+  await tx.$queryRaw`SELECT id FROM entitlements WHERE user_id = ${userId} AND product::text = ${ENTITLEMENT_PRODUCT} FOR UPDATE`;
+}
+
+/**
  * Activate paid access in response to an already-verified provider event.
  *
  * Callers MUST verify the provider signature (HMAC for Paymob) before calling.
@@ -120,26 +151,15 @@ export async function grantEntitlementForVerifiedPayment(params: {
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    // Claim the event first so concurrent deliveries collide here, not on the
-    // entitlement write.
-    await tx.paymentEvent.upsert({
-      where: { provider_providerEventId: { provider, providerEventId } },
-      create: {
-        provider,
-        providerEventId,
-        type: eventType,
-        status: "RECEIVED",
-      },
-      update: {},
-    });
-
+    if (!(await claimPaymentEvent(tx, { provider, providerEventId, eventType }, now))) {
+      const current = await tx.entitlement.findUnique({
+        where: { userId_product: { userId, product: ENTITLEMENT_PRODUCT } },
+        select: { expiresAt: true },
+      });
+      return { applied: false, expiresAt: current?.expiresAt ?? null };
+    }
+    await lockEntitlement(tx, userId);
     const expiresAt = await upsertActiveEntitlement(tx, userId, durationMonths, now);
-
-    await tx.paymentEvent.update({
-      where: { provider_providerEventId: { provider, providerEventId } },
-      data: { status: "PROCESSED", processedAt: now },
-    });
-
     return { applied: true, expiresAt };
   });
 }
@@ -166,12 +186,10 @@ export async function reverseEntitlementForRefund(params: {
 
   const now = new Date();
   return prisma.$transaction(async (tx) => {
-    await tx.paymentEvent.upsert({
-      where: { provider_providerEventId: { provider, providerEventId } },
-      create: { provider, providerEventId, type: eventType, status: "RECEIVED" },
-      update: {},
-    });
-
+    if (!(await claimPaymentEvent(tx, { provider, providerEventId, eventType }, now))) {
+      return { applied: false };
+    }
+    await lockEntitlement(tx, userId);
     const existing = await tx.entitlement.findUnique({
       where: { userId_product: { userId, product: ENTITLEMENT_PRODUCT } },
     });
@@ -185,11 +203,6 @@ export async function reverseEntitlementForRefund(params: {
             : { status: "REVOKED", expiresAt: now, updatedAt: now },
       });
     }
-
-    await tx.paymentEvent.update({
-      where: { provider_providerEventId: { provider, providerEventId } },
-      data: { status: "PROCESSED", processedAt: now },
-    });
     return { applied: true };
   });
 }
