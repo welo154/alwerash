@@ -172,20 +172,26 @@ API groups under `src/app/api/`: `admin/*` (admin only), `instructor/*`, `mentor
 
 ## Environment variables
 
-`.env.example` documents every variable. In production the server **refuses to start** if a required one is missing or still a placeholder (`src/server/env.ts`). The deploy log then lists every problem at once. `SKIP_ENV_VALIDATION=1` bypasses the check in an emergency.
+`.env.example` documents every variable. At startup `src/server/env.ts` checks them and logs one list of problems in the runtime logs:
 
-| Group | Variables | Required in production |
+- **Stops the server** (production): `DATABASE_URL` missing or invalid, `AUTH_SECRET` missing, or `SUBSCRIPTION_SELF_GRANT_ENABLED=true`. The site cannot work, or would give paid access away, in these cases.
+- **Warns and keeps serving**: missing or placeholder video, email, storage or payment credentials, a weak `AUTH_SECRET`, or a missing or non-https `AUTH_URL`. The affected feature fails until configured; everything else works. Look for `[env] Configuration warnings` in the Vercel logs after each deploy.
+
+`SKIP_ENV_VALIDATION=1` bypasses the check entirely in an emergency.
+
+| Group | Variables | If missing in production |
 |---|---|---|
-| Database | `DATABASE_URL`, `DIRECT_URL` | Yes |
-| Auth | `AUTH_SECRET` (at least 32 characters), `AUTH_URL` (https) | Yes |
-| Google sign-in | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No |
-| Video | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_SIGNING_KEY_ID`, `MUX_PRIVATE_KEY`, `MUX_WEBHOOK_SECRET` | Yes |
-| Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Yes |
-| Storage | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (optional `STORAGE_PRIVATE_BUCKET`, `STORAGE_PUBLIC_BUCKET`) | Yes |
-| Payments | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=production` | Yes (a sandbox `POLAR_SERVER` only warns) |
-| Analytics | `NEXT_PUBLIC_CLARITY_PROJECT_ID` | No |
-| Tuning | `DB_CONNECTION_LIMIT`, `PERF_TIMING`, `CATALOG_SHOW_UNPUBLISHED` | No |
-| Never in production | `SUBSCRIPTION_SELF_GRANT_ENABLED=true` (lets anyone unlock access for free) | Refused at startup |
+| Database | `DATABASE_URL`, `DIRECT_URL` | Server stops |
+| Auth | `AUTH_SECRET` (at least 32 characters) | Server stops if missing; warning if short |
+| Auth | `AUTH_URL` (https) | Warning: email links and payment redirects point at localhost |
+| Google sign-in | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional |
+| Video | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_SIGNING_KEY_ID`, `MUX_PRIVATE_KEY`, `MUX_WEBHOOK_SECRET` | Warning: uploads and playback fail |
+| Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Warning: verification and reset emails fail |
+| Storage | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (optional `STORAGE_PRIVATE_BUCKET`, `STORAGE_PUBLIC_BUCKET`) | Warning: photo and submission uploads fail |
+| Payments | `POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=production` | Warning: checkout fails (a sandbox `POLAR_SERVER` also warns) |
+| Analytics | `NEXT_PUBLIC_CLARITY_PROJECT_ID` | Optional |
+| Tuning | `DB_CONNECTION_LIMIT`, `PERF_TIMING`, `CATALOG_SHOW_UNPUBLISHED` | Optional |
+| Never in production | `SUBSCRIPTION_SELF_GRANT_ENABLED=true` (lets anyone unlock access for free) | Server stops |
 
 Database URLs: use the Supabase session pooler (`aws-0-REGION.pooler.supabase.com:5432`, user `postgres.PROJECT_REF`). URL-encode special characters in the password. Production defaults to one connection per server instance; raise it with `DB_CONNECTION_LIMIT` only after checking the pooler's capacity (Supabase session mode allows 15 in total).
 
@@ -193,10 +199,10 @@ Database URLs: use the Supabase session pooler (`aws-0-REGION.pooler.supabase.co
 
 Target: Vercel (region `dub1`, next to the database).
 
-1. Set every production variable above in the Vercel project.
+1. Set every production variable above in the Vercel project (Production environment).
 2. Apply migrations **before** the new code serves traffic: `npm run db:deploy` with production `DATABASE_URL` and `DIRECT_URL`. Migrations must stay backward-compatible with the previous release (add columns first, remove them in a later release) so a rollback never meets an incompatible schema.
 3. Deploy. The build needs no database; catalog pages render per request and cache their data for 60 seconds.
-4. Check `GET /api/health` returns `200`, then do one sign-in and one lesson playback.
+4. Check `GET /api/health` returns `200`, look for `[env] Configuration warnings` in the runtime logs, then do one sign-in and one lesson playback.
 5. Webhooks: Mux → `https://<domain>/api/webhooks/mux`; Polar → `https://<domain>/api/webhooks/polar` with `order.paid` and `order.refunded`.
 
 **Rollback:** promote the previous deployment in Vercel. Because migrations are backward-compatible, no database change is needed. Never roll back by editing migration history.

@@ -28,20 +28,28 @@ describe("checkServerEnv", () => {
     expect(checkServerEnv(productionEnv)).toEqual({ errors: [], warnings: [] });
   });
 
-  it("reports each missing production feature", () => {
-    const { errors } = checkServerEnv({ ...productionEnv, POLAR_WEBHOOK_SECRET: "", SUPABASE_URL: undefined });
-    expect(errors).toEqual([
-      "File storage is not configured: missing SUPABASE_URL.",
-      "Payments is not configured: missing POLAR_WEBHOOK_SECRET.",
+  it("warns about each missing production feature without blocking startup", () => {
+    const { errors, warnings } = checkServerEnv({ ...productionEnv, POLAR_WEBHOOK_SECRET: "", SUPABASE_URL: undefined });
+    expect(errors).toEqual([]);
+    expect(warnings).toEqual([
+      "File storage will not work: missing SUPABASE_URL.",
+      "Payments will not work: missing POLAR_WEBHOOK_SECRET.",
     ]);
   });
 
   it("treats .env.example placeholders as missing", () => {
-    const { errors } = checkServerEnv({
+    const { warnings } = checkServerEnv({
       ...productionEnv,
       POLAR_ACCESS_TOKEN: "replace-with-polar-organization-access-token",
     });
-    expect(errors).toEqual(["Payments is not configured: missing POLAR_ACCESS_TOKEN."]);
+    expect(warnings).toEqual(["Payments will not work: missing POLAR_ACCESS_TOKEN."]);
+  });
+
+  it("blocks startup only without a database URL or auth secret", () => {
+    const { errors } = checkServerEnv({ ...productionEnv, DATABASE_URL: "", AUTH_SECRET: "" });
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toMatch(/DATABASE_URL/);
+    expect(errors[1]).toMatch(/AUTH_SECRET/);
   });
 
   it("refuses the free self-grant in production", () => {
@@ -49,9 +57,10 @@ describe("checkServerEnv", () => {
     expect(errors[0]).toMatch(/SUBSCRIPTION_SELF_GRANT_ENABLED/);
   });
 
-  it("requires a strong secret and an https AUTH_URL in production", () => {
-    const { errors } = checkServerEnv({ ...productionEnv, AUTH_SECRET: "short", AUTH_URL: "http://alwerash.com" });
-    expect(errors).toHaveLength(2);
+  it("warns about a weak secret or a non-https AUTH_URL", () => {
+    const { errors, warnings } = checkServerEnv({ ...productionEnv, AUTH_SECRET: "short", AUTH_URL: "http://alwerash.com" });
+    expect(errors).toEqual([]);
+    expect(warnings).toHaveLength(2);
   });
 
   it("warns when production checkout still points at the Polar sandbox", () => {
@@ -69,6 +78,19 @@ describe("checkServerEnv", () => {
 describe("assertServerEnv", () => {
   it("throws in production when configuration is invalid", () => {
     expect(() => assertServerEnv({ NODE_ENV: "production" })).toThrow(/Invalid server configuration/);
+  });
+
+  it("keeps serving in production when only feature credentials are missing", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(() =>
+      assertServerEnv({
+        NODE_ENV: "production",
+        DATABASE_URL: "postgresql://u:p@host:5432/db",
+        AUTH_SECRET: SECRET,
+      })
+    ).not.toThrow();
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/Payments will not work/));
+    warn.mockRestore();
   });
 
   it("can be bypassed with SKIP_ENV_VALIDATION=1", () => {

@@ -1,18 +1,19 @@
 /**
  * Startup check for server configuration.
  *
- * A production deploy with a missing secret otherwise boots fine and fails
- * later, one feature at a time: uploads 500, emails never arrive, paid orders
- * never unlock access. Checking once at startup turns that into one clear error
- * in the deploy logs.
+ * Only settings without which the site cannot work at all (database, auth
+ * secret) or would give paid access away (self-grant) stop the server. Missing
+ * feature credentials (video, email, storage, payments) are logged as one clear
+ * warning list at startup, and the rest of the site keeps serving. Those
+ * features fail on their own until configured.
  */
 
 type Env = Record<string, string | undefined>;
 
 export type EnvReport = {
-  /** Problems that make the deployment unsafe or broken. Fatal in production. */
+  /** The site cannot run safely. Fatal in production. */
   errors: string[];
-  /** Suspicious but survivable settings. Logged only. */
+  /** A feature is missing or misconfigured. Logged; the site keeps serving. */
   warnings: string[];
 };
 
@@ -30,8 +31,8 @@ function firstSet(env: Env, names: string[]): string {
   return "";
 }
 
-/** Groups of variables the production app cannot work without. */
-const REQUIRED_IN_PRODUCTION: { feature: string; names: string[] }[] = [
+/** Feature credentials expected in production. Missing ones are warnings. */
+const FEATURES_IN_PRODUCTION: { feature: string; names: string[] }[] = [
   { feature: "Video", names: ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET", "MUX_SIGNING_KEY_ID", "MUX_PRIVATE_KEY", "MUX_WEBHOOK_SECRET"] },
   { feature: "Email", names: ["RESEND_API_KEY", "RESEND_FROM_EMAIL"] },
   { feature: "File storage", names: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] },
@@ -56,24 +57,22 @@ export function checkServerEnv(env: Env = process.env): EnvReport {
   } else if (PLACEHOLDER.test(secret)) {
     errors.push("AUTH_SECRET is still a placeholder value.");
   } else if (secret.length < 32) {
-    (production ? errors : warnings).push("AUTH_SECRET is shorter than 32 characters.");
+    warnings.push("AUTH_SECRET is shorter than 32 characters. Use: openssl rand -base64 32");
   }
 
   const authUrl = firstSet(env, ["AUTH_URL", "NEXTAUTH_URL"]);
   if (!authUrl) {
-    (production ? errors : warnings).push(
-      "AUTH_URL is not set. Email links and payment redirects would point at localhost."
-    );
+    warnings.push("AUTH_URL is not set. Email links and payment redirects will point at localhost.");
   } else if (production && !authUrl.startsWith("https://")) {
-    errors.push(`AUTH_URL must use https in production (got ${authUrl}).`);
+    warnings.push(`AUTH_URL should use https in production (got ${authUrl}).`);
   }
 
   if (!production) return { errors, warnings };
 
-  for (const { feature, names } of REQUIRED_IN_PRODUCTION) {
+  for (const { feature, names } of FEATURES_IN_PRODUCTION) {
     const missing = names.filter((name) => !value(env, name) || PLACEHOLDER.test(value(env, name)));
     if (missing.length > 0) {
-      errors.push(`${feature} is not configured: missing ${missing.join(", ")}.`);
+      warnings.push(`${feature} will not work: missing ${missing.join(", ")}.`);
     }
   }
 
@@ -95,14 +94,17 @@ export function checkServerEnv(env: Env = process.env): EnvReport {
 }
 
 /**
- * Log the report and, in production, refuse to start on errors.
+ * Log the report and, in production, refuse to start on errors (database or
+ * auth secret missing, or self-grant on). Warnings never stop the server.
  * Set SKIP_ENV_VALIDATION=1 to bypass in an emergency.
  */
 export function assertServerEnv(env: Env = process.env): void {
   if (value(env, "SKIP_ENV_VALIDATION") === "1") return;
 
   const { errors, warnings } = checkServerEnv(env);
-  for (const warning of warnings) console.warn(`[env] ${warning}`);
+  if (warnings.length > 0) {
+    console.warn(`[env] Configuration warnings:\n${warnings.map((w) => `  - ${w}`).join("\n")}`);
+  }
   if (errors.length === 0) return;
 
   const message = `Invalid server configuration:\n${errors.map((e) => `  - ${e}`).join("\n")}`;
