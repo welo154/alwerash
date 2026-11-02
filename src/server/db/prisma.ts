@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { isPoolExhaustedText, silencePoolErrors } from "@/server/db/silence-pool-errors";
-import { beginQuery, reportPoolDegraded } from "@/server/observability/query-timing";
-
-silencePoolErrors();
+import { AppError } from "@/server/lib/errors";
+import { beginQuery, reportPoolExhausted } from "@/server/observability/query-timing";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -41,13 +39,29 @@ function stripEnvValue(raw: string): string {
 
 function errorText(error: unknown): string {
   if (error instanceof Error) {
-    return `${error.name} ${error.message} ${error.stack ?? ""}`;
+    const cause = (error as Error & { cause?: unknown }).cause;
+    return `${error.name} ${error.message} ${cause instanceof Error ? cause.message : ""}`;
   }
   return String(error);
 }
 
-function isPoolError(error: unknown): boolean {
-  return isPoolExhaustedText(errorText(error));
+/**
+ * Connection-pool exhaustion, from either Prisma's own pool (P2024) or the
+ * Supabase pooler. Matched narrowly: any other database error must surface as-is.
+ */
+const POOL_MARKERS = [
+  "P2024",
+  "Timed out fetching a new connection from the connection pool",
+  "EMAXCONNSESSION",
+  "MaxClientsInSessionMode",
+  "max clients reached",
+];
+
+export function isPoolExhaustedError(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  if (code === "P2024") return true;
+  const text = errorText(error);
+  return POOL_MARKERS.some((marker) => text.includes(marker));
 }
 
 const POOL_RETRY_DELAYS_MS = [200, 500];
@@ -56,21 +70,14 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function emptyQueryResult(operation: string): unknown {
-  switch (operation) {
-    case "findMany":
-    case "$queryRaw":
-    case "$queryRawUnsafe":
-      return [];
-    case "count":
-    case "$executeRaw":
-    case "$executeRawUnsafe":
-      return 0;
-    case "aggregate":
-    case "groupBy":
-      return {};
-    default:
-      return null;
+/**
+ * Thrown when the pool stays exhausted after retries. Callers see a 503 instead
+ * of an empty result, so an outage never looks like "no courses" or "not subscribed".
+ */
+export class DatabaseUnavailableError extends AppError {
+  constructor(cause: unknown) {
+    super("UNAVAILABLE", 503, "The database is busy. Please try again in a moment.");
+    this.cause = cause;
   }
 }
 
@@ -174,12 +181,11 @@ function resolveDirectUrl(databaseUrl: string): string {
   return raw ? rewriteDirectUrl(raw) : databaseUrl;
 }
 
-const PRISMA_CLIENT_REV = 2;
+const PRISMA_CLIENT_REV = 3;
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaRev?: number;
-  prismaPoolBroken?: boolean;
 };
 
 function createClient(): PrismaClient {
@@ -204,39 +210,24 @@ function createClient(): PrismaClient {
     query: {
       async $allOperations({ model, operation, args, query }) {
         const finish = beginQuery(model, operation);
-
-        if (globalForPrisma.prismaPoolBroken) {
-          finish?.({ shortCircuited: true });
-          return emptyQueryResult(operation);
-        }
-        try {
-          const result = await query(args);
-          finish?.({ rows: Array.isArray(result) ? result.length : undefined });
-          return result;
-        } catch (error) {
-          if (!isPoolError(error)) {
-            finish?.({ failed: true });
-            throw error;
-          }
-          for (const delayMs of POOL_RETRY_DELAYS_MS) {
-            await sleep(delayMs);
-            try {
-              const result = await query(args);
-              finish?.({ rows: Array.isArray(result) ? result.length : undefined });
-              return result;
-            } catch (retryError) {
-              if (!isPoolError(retryError)) {
-                finish?.({ failed: true });
-                throw retryError;
-              }
-              error = retryError;
+        let lastError: unknown;
+        for (let attempt = 0; attempt <= POOL_RETRY_DELAYS_MS.length; attempt++) {
+          if (attempt > 0) await sleep(POOL_RETRY_DELAYS_MS[attempt - 1]);
+          try {
+            const result = await query(args);
+            finish?.({ rows: Array.isArray(result) ? result.length : undefined });
+            return result;
+          } catch (error) {
+            if (!isPoolExhaustedError(error)) {
+              finish?.({ failed: true });
+              throw error;
             }
+            lastError = error;
           }
-          globalForPrisma.prismaPoolBroken = true;
-          finish?.({ failed: true });
-          reportPoolDegraded();
-          return emptyQueryResult(operation);
         }
+        finish?.({ failed: true });
+        reportPoolExhausted(model, operation);
+        throw new DatabaseUnavailableError(lastError);
       },
     },
   });
