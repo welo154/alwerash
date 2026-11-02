@@ -4,7 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { EVENT } from "@/lib/event";
 
-function diff(target: number) {
+type Parts = { days: number; hours: number; mins: number; secs: number };
+
+function diff(target: number): Parts {
   const ms = Math.max(0, target - Date.now());
   return {
     days: Math.floor(ms / 86_400_000),
@@ -14,51 +16,83 @@ function diff(target: number) {
   };
 }
 
-function Digit({ value, label }: { value: number | null; label: string }) {
-  const text = value === null ? "--" : String(value).padStart(2, "0");
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative h-[1.1em] overflow-hidden font-[family-name:var(--font-mono)] text-3xl font-bold tabular-nums sm:text-4xl">
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span
-            key={text}
-            className="block"
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
-          >
-            {text}
-          </motion.span>
-        </AnimatePresence>
-      </div>
-      <span className="eyebrow mt-1 !text-[0.65rem] opacity-70">{label}</span>
-    </div>
-  );
-}
-
-export function Countdown({ className = "" }: { className?: string }) {
+export function useCountdown() {
   const target = new Date(EVENT.date).getTime();
-  const [t, setT] = useState<ReturnType<typeof diff> | null>(null);
-
+  const [t, setT] = useState<Parts | null>(null);
   useEffect(() => {
     setT(diff(target));
     const id = setInterval(() => setT(diff(target)), 1000);
     return () => clearInterval(id);
   }, [target]);
+  return t;
+}
 
-  const done = t && t.days + t.hours + t.mins + t.secs === 0;
-  if (done) return <p className={`display text-3xl ${className}`}>It&apos;s happening today ✦</p>;
+const pad = (n: number | undefined, len = 2) => (n === undefined ? "--" : String(n).padStart(len, "0"));
 
+function Flip({ text }: { text: string }) {
   return (
-    <div className={`flex items-end gap-3 sm:gap-5 ${className}`} aria-label="Countdown to the event" role="timer">
-      <Digit value={t?.days ?? null} label="days" />
-      <span className="pb-6 text-2xl opacity-40">:</span>
-      <Digit value={t?.hours ?? null} label="hrs" />
-      <span className="pb-6 text-2xl opacity-40">:</span>
-      <Digit value={t?.mins ?? null} label="min" />
-      <span className="pb-6 text-2xl opacity-40">:</span>
-      <Digit value={t?.secs ?? null} label="sec" />
+    <span className="relative inline-block overflow-hidden align-bottom">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={text}
+          className="block"
+          initial={{ y: "-100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", stiffness: 320, damping: 26 }}
+        >
+          {text}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** Tile countdown used on the ticket. */
+export function CountdownTiles({ className = "" }: { className?: string }) {
+  const t = useCountdown();
+  const cells = [
+    { v: pad(t?.days), l: "Days" },
+    { v: pad(t?.hours), l: "Hours" },
+    { v: pad(t?.mins), l: "Min" },
+    { v: pad(t?.secs), l: "Sec", accent: true },
+  ];
+  return (
+    <div className={`grid grid-cols-4 gap-2 ${className}`} role="timer" aria-label="Countdown to the event">
+      {cells.map((c) => (
+        <div
+          key={c.l}
+          className={`rounded-xl border-[3px] border-ink py-1.5 text-center shadow-[3px_3px_0_var(--color-ink)] ${c.accent ? "bg-saffron" : "bg-paper"}`}
+        >
+          <div className="display text-3xl tabular-nums sm:text-4xl">
+            <Flip text={c.v} />
+          </div>
+          <div className="eyebrow !text-[0.6rem]">{c.l}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Compact inline countdown for the nav bar. */
+export function CountdownInline({ className = "" }: { className?: string }) {
+  const t = useCountdown();
+  const cells = [
+    { v: pad(t?.days), l: "Days" },
+    { v: pad(t?.hours), l: "Hrs" },
+    { v: pad(t?.mins), l: "Min" },
+    { v: pad(t?.secs), l: "Sec" },
+  ];
+  return (
+    <div className={`flex items-baseline gap-3 ${className}`} aria-hidden>
+      {cells.map((c) => (
+        <span key={c.l} className="flex items-baseline gap-1 text-xs text-cream/70">
+          <span className="display text-2xl tabular-nums text-saffron">
+            <Flip text={c.v} />
+          </span>
+          {c.l}
+        </span>
+      ))}
     </div>
   );
 }

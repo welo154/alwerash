@@ -4,7 +4,7 @@ import { EVENT } from "@/lib/event";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz", "wdth"], variable: "--font-bricolage", display: "swap" });
 const instrument = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
 const dmsans = DM_Sans({ subsets: ["latin"], variable: "--font-dmsans", display: "swap" });
 const reem = Reem_Kufi({ subsets: ["arabic"], variable: "--font-reem", display: "swap" });

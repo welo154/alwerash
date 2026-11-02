@@ -157,7 +157,7 @@ export function Register() {
   }
 
   return (
-    <section id="register" className="relative overflow-hidden bg-nile py-24 text-cream sm:py-32">
+    <section id="register" className="relative overflow-hidden border-y-4 border-ink bg-nile py-24 text-cream sm:py-32">
       <div aria-hidden className="absolute -right-20 top-20 h-72 w-72 rounded-full bg-saffron" />
       <div aria-hidden className="absolute -left-10 bottom-10 h-40 w-40 rotate-12 bg-brick" />
 

@@ -8,6 +8,7 @@ import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { MentorSection } from "@/components/MentorSection";
 import { Nav } from "@/components/Nav";
+import { Numbers } from "@/components/Numbers";
 import { Partners } from "@/components/Partners";
 import { Register } from "@/components/Register";
 import { Schedule } from "@/components/Schedule";
@@ -36,6 +37,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <About />
+        <Numbers />
         <Activities />
         <MentorSection />
         <Schedule />

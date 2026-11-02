@@ -25,7 +25,7 @@ const DEMO = [
 
 export function MentorSection() {
   return (
-    <section id="mentor" className="relative overflow-hidden bg-rose py-24 sm:py-32">
+    <section id="mentor" className="relative overflow-hidden border-y-4 border-ink bg-rose py-24 sm:py-32">
       <div aria-hidden className="absolute -left-16 top-10 h-56 w-56 animate-spin-slow rounded-full border-[3px] border-dashed border-ink/30" />
       <div aria-hidden className="absolute -bottom-24 right-[-5rem] h-80 w-80 rounded-full bg-saffron" />
 

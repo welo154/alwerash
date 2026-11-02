@@ -16,7 +16,7 @@ const BLOBS = [
 
 export function Speakers() {
   return (
-    <section className="bg-paper-2 py-24 sm:py-32">
+    <section className="border-y-4 border-ink bg-paper-2 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
