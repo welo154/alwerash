@@ -1,6 +1,10 @@
 // file: src/app/tracks/page.tsx
 import { publicListTracks } from "@/server/content/public.service";
 
+// Rendered per request so a deploy never bakes in an empty catalog; the data
+// itself is cached (unstable_cache, tag "public-catalog") for 60 seconds.
+export const dynamic = "force-dynamic";
+
 export default async function TracksPage() {
   const tracks = await publicListTracks();
 

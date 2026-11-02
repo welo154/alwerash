@@ -55,6 +55,10 @@ function toAllCourseItems(courses: CourseForCard[]): LearnAllCourseItem[] {
   }));
 }
 
+// Rendered per request so a deploy never bakes in an empty catalog; the data
+// itself is cached (unstable_cache, tag "public-catalog") for 60 seconds.
+export const dynamic = "force-dynamic";
+
 export default async function LearnPage() {
   markPage("/course");
   let catalog: Awaited<ReturnType<typeof loadCoursePageCatalog>>;

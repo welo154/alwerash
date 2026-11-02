@@ -3,6 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { publicListMentors } from "@/server/content/public.service";
 
+// Rendered per request so a deploy never bakes in an empty catalog; the data
+// itself is cached (unstable_cache, tag "public-catalog") for 60 seconds.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Mentors",
   description: "Learn from creative experts. Our mentors are industry leaders excited to share their tools, techniques, and professional journeys with you.",
