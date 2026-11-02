@@ -1595,6 +1595,43 @@ label:has(input[type="radio"]) {
   color: rgb(255 255 255);
 }
 
+/*
+ * ── Site motion (src/components/motion/MotionProvider.tsx) ──────────────────
+ * [data-reveal]          fades and rises into view once
+ * [data-reveal-stagger]  its children reveal one after another
+ * .motion-lift           card lifts on hover
+ * Hidden states apply only while <html data-motion="on"> (set before paint,
+ * never set for reduced motion), so content is visible without JavaScript.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion="on"] [data-reveal]:not([data-revealed]),
+  html[data-motion="on"] [data-reveal-stagger]:not([data-revealed]) > * {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+  html[data-motion="on"] [data-reveal][data-revealed]:not([data-reveal-done]),
+  html[data-motion="on"] [data-reveal-stagger][data-revealed]:not([data-reveal-done]) > * {
+    transition:
+      opacity 0.7s var(--ease-out-smooth),
+      transform 0.7s var(--ease-out-smooth);
+  }
+  html[data-motion="on"] [data-reveal-stagger][data-revealed]:not([data-reveal-done]) > * {
+    transition-delay: calc(var(--reveal-i, 0) * 70ms);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .motion-lift {
+    transition:
+      transform 0.35s var(--ease-out-smooth),
+      box-shadow 0.35s var(--ease-out-smooth);
+  }
+  .motion-lift:hover {
+    transform: translate3d(0, -6px, 0);
+    box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.35);
+  }
+}
+
 /* Fade-in animation for sections */
 @keyframes fade-in-up {
   from {

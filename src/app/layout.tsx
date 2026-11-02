@@ -7,6 +7,8 @@ import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { LenisProvider } from "@/components/providers/LenisProvider";
 import { LocaleProvider } from "@/components/providers/LocaleProvider";
+import { MotionProvider } from "@/components/motion/MotionProvider";
+import { MOTION_BOOT_SCRIPT } from "@/components/motion/motion-boot";
 import { pangeaVar } from "@/lib/fonts/pangea";
 import { getLocale } from "@/server/i18n";
 import "./globals.css";
@@ -51,6 +53,9 @@ export default async function RootLayout({
   const locale = await getLocale();
   return (
     <html lang={locale} suppressHydrationWarning className={`${pangeaVar.variable} ${pangeaVar.className}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: MOTION_BOOT_SCRIPT }} />
+      </head>
       <body suppressHydrationWarning className="font-sans antialiased">
         <ToastProvider>
           <Suspense fallback={null}>
@@ -59,6 +64,7 @@ export default async function RootLayout({
           <SessionProvider>
             <LocaleProvider initialLocale={locale}>
               <MicrosoftClarity />
+              <MotionProvider />
               <LenisProvider>
                 <ConditionalLayout>{children}</ConditionalLayout>
               </LenisProvider>

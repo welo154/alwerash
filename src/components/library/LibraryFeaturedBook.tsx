@@ -119,7 +119,7 @@ export function LibraryFeaturedBook({
   embedded?: boolean;
 }) {
   return (
-    <section
+    <section data-reveal
       className={
         embedded
           ? "flex w-full items-start justify-center overflow-visible"

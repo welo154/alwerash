@@ -4,7 +4,7 @@ import { LIBRARY_BOOKS } from "./library-books";
 
 export function LibraryBookGridSection() {
   return (
-    <section
+    <section data-reveal
       className="mt-[122px] ml-[137px] w-fit"
       aria-label="Library books grid"
     >

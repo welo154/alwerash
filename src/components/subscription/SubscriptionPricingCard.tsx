@@ -273,7 +273,7 @@ export const PRICING_FEATURES = [
 
 export function SubscriptionPricingCards() {
   return (
-    <div className="flex gap-[25px]">
+    <div data-reveal-stagger className="flex gap-[25px]">
       {SUBSCRIPTION_PLANS.map((plan) => (
         <SubscriptionPricingCard
           key={plan.id}
