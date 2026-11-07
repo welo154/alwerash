@@ -5,8 +5,9 @@
  * Run: npm run scripts:setup-mentors
  */
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 const CREATE_MENTORS_TABLE = `
 CREATE TABLE IF NOT EXISTS "mentors" (

@@ -247,12 +247,6 @@ export function getLibraryBooksByCategory(categorySlug: string): LibraryBook[] {
   return LIBRARY_BOOKS.filter((book) => book.categorySlug === categorySlug);
 }
 
-export function getRelatedLibraryBooks(book: LibraryBook, limit = 4): LibraryBook[] {
-  return LIBRARY_BOOKS.filter(
-    (item) => item.categorySlug === book.categorySlug && item.id !== book.id
-  ).slice(0, limit);
-}
-
 export function searchLibraryBooks(query: string): LibraryBook[] {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (terms.length === 0) return [];
@@ -269,10 +263,6 @@ export function getBookDetailTitle(book: LibraryBook): string {
 
 export function getBookAuthorsLabel(book: LibraryBook): string {
   return `Author/s: ${book.authors ?? book.author}`;
-}
-
-export function getBookDetailImageSrc(book: LibraryBook): string {
-  return book.detailImageSrc ?? book.imageSrc;
 }
 
 export function getBookAboutExcerpt(book: LibraryBook): string {

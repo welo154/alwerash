@@ -5,7 +5,6 @@ import {
   emptyWeeklyActivitySummary,
   startOfUtcWeek,
   WEEKDAY_LABELS,
-  type MonthActivitySummary,
   type WeeklyActivitySummary,
   type WeeklyDayActivity,
 } from "@/lib/learning-activity";
@@ -26,20 +25,12 @@ export {
 /** Max seconds credited toward aggregates per debounced PATCH (abuse / clock skew guard). */
 export const MAX_WATCH_DELTA_PER_PATCH = 300;
 
-export function utcCalendarDate(d: Date): Date {
+function utcCalendarDate(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
 function dateKeyUtc(d: Date): string {
   return d.toISOString().slice(0, 10);
-}
-
-function emptyMonthActivitySummary(now: Date): MonthActivitySummary {
-  return {
-    year: now.getUTCFullYear(),
-    monthIndex: now.getUTCMonth(),
-    monthTotalSeconds: 0,
-  };
 }
 
 export async function getWeeklyActivitySummary(
@@ -85,32 +76,6 @@ export async function getWeeklyActivitySummary(
     const message = err instanceof Error ? err.message : String(err);
     console.warn("[learning-activity] getWeeklyActivitySummary unavailable:", message);
     return emptyWeeklyActivitySummary(now);
-  }
-}
-
-export async function getMonthActivitySummary(
-  userId: string,
-  now: Date = new Date()
-): Promise<MonthActivitySummary> {
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  const start = new Date(Date.UTC(y, m, 1));
-  const end = new Date(Date.UTC(y, m + 1, 0));
-
-  try {
-    const agg = await prisma.userLearningDay.aggregate({
-      where: { userId, day: { gte: start, lte: end } },
-      _sum: { watchSecondsTotal: true },
-    });
-
-    return {
-      year: y,
-      monthIndex: m,
-      monthTotalSeconds: agg._sum.watchSecondsTotal ?? 0,
-    };
-  } catch (err) {
-    console.error("[learning-activity] getMonthActivitySummary failed", err);
-    return emptyMonthActivitySummary(now);
   }
 }
 

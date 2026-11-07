@@ -9,11 +9,10 @@ const CATALOG_CACHE: { revalidate: number; tags: string[] } = {
 };
 import {
   catalogShowcasePropsFromTrackAggregate,
-  type CatalogShowcaseCardProps,
   type LandingShowcaseSlide,
 } from "@/components/cards/catalog-showcase-map";
 import { Prisma } from "@prisma/client";
-import { prisma } from "@/server/db/prisma";
+import { DatabaseUnavailableError, isPoolExhaustedError, prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import {
   resolveCourseCoverImage,
@@ -21,12 +20,11 @@ import {
 } from "@/lib/catalog-cover-images";
 import { sqlGetLandingPopularMentorIds } from "./landing-popular-mentor-sql";
 import type { LandingMostsMentorCardDto } from "@/types/landing-mosts-mentor";
-import { getFreeLessonIds, isFreeLesson } from "@/lib/course-access";
+import { getFreeLessonIds } from "@/lib/course-access";
 import type { LearnPopularTile } from "@/components/learn/learn-popular-types";
 import { courseCardStats } from "@/lib/content/course-card-stats";
 import { courseTypeBadgeLabel, courseTypeBadgeSelect } from "@/lib/content/course-type-badge";
 import { sqlGetFeaturedMentorIds } from "@/server/content/featured-mentor-sql";
-import { sqlGetTrendingCourseIds } from "@/server/content/featured-trending-sql";
 import { sqlGetCourseRequirements } from "@/server/content/course-requirements-sql";
 import type {
   HomeTrackExplorerBundle,
@@ -35,7 +33,6 @@ import type {
 } from "@/types/home-track-explorer";
 
 export type { HomeTrackExplorerBundle, HomeTrackMetaFilter, HomeTrackPill };
-
 
 function effectiveCoverImage(
   coverImage: string | null,
@@ -60,40 +57,13 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
-function catalogErrorText(e: unknown): string {
-  if (e == null) return "";
-  if (typeof e === "string") return e;
-  if (e instanceof Error) {
-    const extra = e as Error & { cause?: unknown };
-    return `${e.name} ${e.message} ${e.stack ?? ""} ${catalogErrorText(extra.cause)}`;
-  }
-  try {
-    return JSON.stringify(e);
-  } catch {
-    return String(e);
-  }
-}
-
-function isPrismaPoolExhaustedError(e: unknown): boolean {
-  const msg = catalogErrorText(e);
-  return (
-    msg.includes("PrismaClientUnknownRequestError") ||
-    msg.includes("max clients reached") ||
-    msg.includes("EMAXCONNSESSION") ||
-    msg.includes("pool_size") ||
-    msg.includes("session mode") ||
-    msg.includes("Timed out fetching a new connection from the connection pool")
-  );
-}
-
 function isUnreachableDatabaseError(e: unknown): boolean {
+  if (e instanceof DatabaseUnavailableError || isPoolExhaustedError(e)) return true;
   const msg = e instanceof Error ? e.message : String(e);
   return (
     msg.includes("Can't reach database server") ||
     msg.includes("P1001") ||
-    msg.includes("Timed out fetching a new connection") ||
-    msg.includes("Connection terminated unexpectedly") ||
-    isPrismaPoolExhaustedError(e)
+    msg.includes("Connection terminated unexpectedly")
   );
 }
 
@@ -103,7 +73,7 @@ function logCatalogError(scope: string, e: unknown) {
   // Catalog callers already fall back to empty lists — warn so the page still renders.
   if (isUnreachableDatabaseError(e)) {
     console.warn(
-      `[catalog] ${scope}: database unreachable (Supabase pooler). Using an empty catalog fallback.`
+      `[catalog] ${scope}: database unreachable or busy. Using an empty catalog fallback.`
     );
     return;
   }
@@ -388,7 +358,7 @@ export async function publicGetHomeTrackExplorerBundle(): Promise<HomeTrackExplo
 }
 
 /** All published tracks as catalog showcase slides (learn page featured tracks carousel). */
-export async function publicListTrackShowcaseSlides(): Promise<LandingShowcaseSlide[]> {
+async function publicListTrackShowcaseSlides(): Promise<LandingShowcaseSlide[]> {
   try {
     const rows = await fetchPublishedTracksWithCourses();
     return buildShowcaseSlides(rows);
@@ -535,46 +505,7 @@ const getCachedCoursesMenu = unstable_cache(
   CATALOG_CACHE
 );
 
-/**
- * Published track whose slug matches a landing showcase tile (case-insensitive).
- * Used for deep links / learn filters that still key off a showcase slug.
- */
-export async function publicGetShowcaseTrackCardForSlug(
-  showcaseSlug: string
-): Promise<CatalogShowcaseCardProps | null> {
-  try {
-    const track = await prisma.track.findFirst({
-      where: {
-        ...publishedWhere(catalogRequiresPublished()),
-        slug: { equals: showcaseSlug, mode: "insensitive" },
-      },
-      select: {
-        title: true,
-        slug: true,
-        courses: trackCourseSelect,
-      },
-    });
-    if (!track) return null;
-
-    return catalogShowcasePropsFromTrackAggregate({
-      title: track.title,
-      slug: track.slug,
-      courses: track.courses.map((c) => ({
-        totalDurationMinutes: c.totalDurationMinutes,
-        lessonCount: c.modules.reduce((acc, m) => acc + m._count.lessons, 0),
-      })),
-    });
-  } catch {
-    return null;
-  }
-}
-
 export type GuestLandingTrackBundle = HomeTrackExplorerBundle;
-
-/** @deprecated Use publicGetHomeTrackExplorerBundle */
-export async function publicGetGuestLandingTrackBundle(): Promise<GuestLandingTrackBundle> {
-  return publicGetHomeTrackExplorerBundle();
-}
 
 export async function publicGetTrackBySlug(slug: string) {
   const requirePublished = catalogRequiresPublished();
@@ -623,23 +554,6 @@ export async function publicGetTrackBySlug(slug: string) {
       lessonCount: modules.reduce((acc, m) => acc + m._count.lessons, 0),
     })),
   };
-}
-
-/** Middle-card tiles for a track's course listing page. */
-export async function publicListTrackCoursesForTile(trackSlug: string): Promise<LearnPopularTile[]> {
-  const track = await publicGetTrackBySlug(trackSlug);
-  return track.courses.map((c) => ({
-    id: c.id,
-    href: `/course/${c.id}`,
-    title: c.title,
-    titleAr: c.titleAr,
-    authorLabel: c.instructorName?.trim() || "Instructor",
-    authorLabelAr: c.instructorNameAr,
-    tagPrimary: track.title.toUpperCase(),
-    typeLabel: courseTypeBadgeLabel(c),
-    ...courseCardStats(c),
-    coverImageSrc: c.coverImage,
-  }));
 }
 
 export async function publicGetCourseById(courseId: string) {
@@ -697,39 +611,6 @@ export async function publicGetCourseById(courseId: string) {
       course.track?.slug
     ),
   };
-}
-
-/** Public preview lesson — only for free intro videos on the marketing course page. */
-export async function publicGetPreviewLesson(courseId: string, lessonId: string) {
-  const course = await publicGetCourseById(courseId);
-
-  if (!isFreeLesson(lessonId, course.modules)) {
-    throw new AppError("FORBIDDEN", 403, "This lesson requires a subscription");
-  }
-
-  // Preview lessons are videos only — avoid selecting `article` so this works
-  // even when the generated Prisma client is behind the schema.
-  const lesson = await prisma.lesson.findFirst({
-    where: {
-      id: lessonId,
-      published: true,
-      module: { courseId, course: { published: true } },
-    },
-    select: {
-      id: true,
-      title: true,
-      type: true,
-      video: { select: { lessonId: true } },
-      module: {
-        select: {
-          course: { select: { id: true, title: true } },
-        },
-      },
-    },
-  });
-
-  if (!lesson) throw new AppError("NOT_FOUND", 404, "Lesson not found");
-  return lesson;
 }
 
 export type PublicFreePreviewVideo = {
@@ -914,10 +795,7 @@ export async function publicListNewCourses(): Promise<CourseForCard[]> {
   return publicListFeaturedCourses(3);
 }
 
-/** Learn page “Popular classes” carousel — courses with featuredMostPlayedOrder. */
-export const POPULAR_CLASS_TRACK_SLUGS = ["calligraphy", "3d-designs"] as const;
-
-export async function publicListPopularClassCourses(
+async function publicListPopularClassCourses(
   limit = 40
 ): Promise<CourseForCard[]> {
   return publicListMostPlayedCourses(limit);
@@ -960,57 +838,6 @@ export async function publicListMostPlayedCourses(limit = 12): Promise<CourseFor
     }
   } catch (e) {
     logCatalogError("publicListMostPlayedCourses", e);
-  }
-  return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
-}
-
-export const MAX_TRENDING_CLASS_COURSES = 6;
-
-/** Learn page “Trending” carousel — up to 6 courses with featuredTrendingOrder. */
-export async function publicListTrendingCourses(
-  limit = MAX_TRENDING_CLASS_COURSES
-): Promise<CourseForCard[]> {
-  try {
-    const orderedIds = await sqlGetTrendingCourseIds(limit);
-    if (orderedIds.length === 0) {
-      return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
-    }
-
-    const requirePublished = catalogRequiresPublished();
-    const courses = await prisma.course.findMany({
-      where: {
-        id: { in: orderedIds },
-        ...publishedWhere(requirePublished),
-      },
-      select: {
-        id: true,
-        title: true,
-        summary: true,
-        coverImage: true,
-        introVideoMuxPlaybackId: true,
-        instructorName: true,
-        instructorNameAr: true,
-        titleAr: true,
-        ...courseTypeBadgeSelect,
-        instructorImage: true,
-        track: { select: { title: true, slug: true } },
-        modules: { select: { _count: { select: { lessons: true } } } },
-      },
-    });
-    const byId = new Map(courses.map((c) => [c.id, c]));
-    const ordered = orderedIds
-      .map((id) => byId.get(id))
-      .filter((c): c is NonNullable<typeof c> => c != null);
-
-    const studentCounts = await getStudentCountsByCourseId(ordered.map((c) => c.id));
-    return ordered.map((c) =>
-      mapCourseToCard(
-        { ...c, totalDurationMinutes: undefined, rating: undefined },
-        studentCounts.get(c.id) ?? 0
-      )
-    );
-  } catch (e) {
-    logCatalogError("publicListTrendingCourses", e);
   }
   return publicListAllPublishedCourses().then((courses) => courses.slice(0, limit));
 }
@@ -1063,7 +890,7 @@ const getCachedAllPublishedCourses = unstable_cache(
   CATALOG_CACHE
 );
 
-export async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
+async function publicListAllPublishedCourses(): Promise<CourseForCard[]> {
   const requirePublished = catalogRequiresPublished();
   try {
     return await getCachedAllPublishedCourses(requirePublished);
@@ -1257,7 +1084,7 @@ export async function publicListMentors() {
 export type { LandingMostsMentorCardDto };
 
 /** Max mentors on Learn / course page strip — 2 rows × 3. */
-export const LEARN_FEATURED_MENTOR_LIMIT = 6;
+const LEARN_FEATURED_MENTOR_LIMIT = 6;
 
 /** Max mentors on guest/home “Current Mosts” — 2 rows × 3. */
 const LANDING_MOSTS_MENTOR_LIMIT = 6;
@@ -1294,7 +1121,7 @@ const getCachedFeaturedMentors = unstable_cache(
   CATALOG_CACHE
 );
 
-export async function publicListFeaturedMentors(
+async function publicListFeaturedMentors(
   limit = LEARN_FEATURED_MENTOR_LIMIT
 ): Promise<LandingMostsMentorCardDto[]> {
   try {

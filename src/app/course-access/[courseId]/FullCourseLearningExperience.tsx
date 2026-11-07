@@ -660,7 +660,10 @@ export function FullCourseLearningExperience({
     : -1;
   const nextModule =
     selectedModuleIndex >= 0 ? modules[selectedModuleIndex + 1] ?? null : null;
-  const currentUnitLessonIds = selectedModule?.lessons.map((lesson) => lesson.id) ?? [];
+  const currentUnitLessonIds = useMemo(
+    () => selectedModule?.lessons.map((lesson) => lesson.id) ?? [],
+    [selectedModule]
+  );
   const persistableUnitLessonIds = currentUnitLessonIds.filter(
     (id) => !isDemoLessonId(id)
   );

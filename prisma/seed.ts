@@ -17,8 +17,9 @@ import {
   EntitlementStatus,
 } from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
+import { createScriptPrismaClient } from "../scripts/lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 function mustGetEnv(name: string): string {
   const v = process.env[name];

@@ -1,11 +1,12 @@
 import "dotenv/config";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 import { PrismaClient } from "@prisma/client";
 import {
   catalogCoverUrlForCourse,
   catalogCoverUrlForTrack,
 } from "../src/lib/catalog-cover-images";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 const PHOTO_IDS = [
   "photo-1618005182384-a83a8bd57fbe",

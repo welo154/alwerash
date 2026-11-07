@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 function isMissing(url: string | null | undefined): boolean {
   const v = url?.trim();

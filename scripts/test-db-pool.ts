@@ -1,22 +1,10 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-
-function resolveDatabaseUrl(): string {
-  const raw = process.env.DATABASE_URL!;
-  const url = new URL(raw.replace(/^postgresql:\/\//, "http://"));
-  const limit = Number(url.searchParams.get("connection_limit") ?? "0");
-  if (!Number.isFinite(limit) || limit < 15) {
-    url.searchParams.set("connection_limit", "15");
-  }
-  url.searchParams.set("pool_timeout", "30");
-  if (url.port === "5432") url.searchParams.delete("pgbouncer");
-  return url.toString().replace(/^http:\/\//, "postgresql://");
-}
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
 async function main() {
-  const prisma = new PrismaClient({
-    datasources: { db: { url: resolveDatabaseUrl() } },
-  });
+  // Six parallel queries need a pool of at least six connections.
+  process.env.DB_CONNECTION_LIMIT = "6";
+  const prisma = createScriptPrismaClient();
   await Promise.all([
     prisma.$queryRawUnsafe("SELECT 1"),
     prisma.$queryRawUnsafe("SELECT 2"),

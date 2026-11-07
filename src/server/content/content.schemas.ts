@@ -80,7 +80,11 @@ export const TrackUpdateSchema = TrackCreateSchema.partial();
 
 // --- Course ---
 
-export const OptionalCuid = z.union([Cuid, z.literal(""), z.undefined()]).transform((v) => (v === "" || v === undefined ? undefined : v));
+/** A cuid, "" (form "none") or absent. `.optional()` is required in Zod 4 for the key to be omittable. */
+export const OptionalCuid = z
+  .union([Cuid, z.literal("")])
+  .optional()
+  .transform((v) => (v === "" ? undefined : v));
 
 export const CourseCreateSchema = z.object({
   trackId: OptionalCuid,

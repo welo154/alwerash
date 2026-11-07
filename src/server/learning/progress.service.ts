@@ -341,35 +341,3 @@ export type CourseProgressSummary = {
   totalCount: number;
   progressPercent: number;
 };
-
-/**
- * Batch course progress for catalog views (e.g. track page cards).
- */
-export async function getCourseProgressForCourses(
-  userId: string,
-  courseIds: string[]
-): Promise<CourseProgressSummary[]> {
-  if (courseIds.length === 0) return [];
-
-  const results = await Promise.all(
-    courseIds.map(async (courseId) => {
-      const progress = await getCourseProgress(userId, courseId);
-      if (!progress) {
-        return {
-          courseId,
-          completedCount: 0,
-          totalCount: 0,
-          progressPercent: 0,
-        };
-      }
-      return {
-        courseId: progress.courseId,
-        completedCount: progress.completedCount,
-        totalCount: progress.totalCount,
-        progressPercent: progress.progressPercent,
-      };
-    })
-  );
-
-  return results;
-}

@@ -10,7 +10,7 @@ function must(name: string): string {
 let _mux: Mux | null = null;
 
 /** Lazy-init Mux client so build can succeed without Mux env vars. Throws when used if vars are missing. */
-export function getMux(): Mux {
+function getMux(): Mux {
   if (!_mux) {
     _mux = new Mux({
       tokenId: must("MUX_TOKEN_ID"),

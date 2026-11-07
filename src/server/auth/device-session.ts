@@ -163,7 +163,7 @@ export async function checkDeviceSession(
   return { state: "ACTIVE", kind: row.kind };
 }
 
-export const DEVICE_REVOKED_MESSAGE =
+const DEVICE_REVOKED_MESSAGE =
   "This device was signed out because the account was used on another device.";
 
 /**
@@ -205,13 +205,4 @@ export async function revokeAllDeviceSessions(userId: string, reason: string): P
     data: { status: "REVOKED", revokedAt: new Date(), revokedReason: reason },
   });
   return result.count;
-}
-
-/** Active devices for the account's own device list. */
-export async function listActiveDeviceSessions(userId: string) {
-  return prisma.deviceSession.findMany({
-    where: { userId, status: "ACTIVE" },
-    select: { id: true, kind: true, label: true, createdAt: true, lastSeenAt: true },
-    orderBy: { lastSeenAt: "desc" },
-  });
 }

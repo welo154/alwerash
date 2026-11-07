@@ -6,7 +6,7 @@ import { prisma } from "@/server/db/prisma";
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 12;
 
-export function generateCertificateCode(): string {
+function generateCertificateCode(): string {
   const bytes = randomBytes(CODE_LENGTH);
   let code = "";
   for (let i = 0; i < CODE_LENGTH; i += 1) {
@@ -15,7 +15,7 @@ export function generateCertificateCode(): string {
   return code;
 }
 
-export function normalizeCertificateCode(raw: string): string {
+function normalizeCertificateCode(raw: string): string {
   return raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 

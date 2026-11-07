@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 async function main() {
   const coursesWithVideo = await prisma.course.findMany({

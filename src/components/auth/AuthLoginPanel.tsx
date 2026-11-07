@@ -111,6 +111,9 @@ export function AuthLoginPanel() {
     const isMentor = roles.includes("MENTOR");
     const isInstructor = roles.includes("INSTRUCTOR");
 
+    // Full page loads on purpose: the whole app must re-render with the new
+    // session cookie. nextParam is already restricted to same-site paths.
+    /* eslint-disable @next/next/no-location-assign-relative-destination */
     if (nextParam) {
       window.location.href = nextParam.includes("?") ? `${nextParam}&${toast}` : `${nextParam}?${toast}`;
     } else if (isAdmin) {
@@ -122,6 +125,7 @@ export function AuthLoginPanel() {
     } else {
       window.location.href = `/home?${toast}`;
     }
+    /* eslint-enable @next/next/no-location-assign-relative-destination */
   }
 
   return (

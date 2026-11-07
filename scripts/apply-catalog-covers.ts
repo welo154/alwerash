@@ -8,6 +8,7 @@
  *   npm run scripts:apply-catalog-covers -- --execute
  */
 import "dotenv/config";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 import { PrismaClient } from "@prisma/client";
 import {
   catalogCoverNeedsRefresh,
@@ -15,7 +16,7 @@ import {
   catalogCoverUrlForTrack,
 } from "../src/lib/catalog-cover-images";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 const EXECUTE = process.argv.includes("--execute");
 const FORCE = process.argv.includes("--force");
 

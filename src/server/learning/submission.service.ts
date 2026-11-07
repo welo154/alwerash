@@ -4,17 +4,18 @@ import { prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import { getMentorIdForUser } from "@/server/auth/mentor-context";
 
-const UpsertSubmissionSchema = z.object({
+export const UpsertSubmissionSchema = z.object({
   textAnswer: z.string().max(50_000).optional(),
   externalLink: z
     .string()
     .max(2000)
     .optional()
     .transform((v) => (v?.trim() || undefined))
-    .pipe(z.union([z.string().url(), z.undefined()])),
+    // http(s) only: mentors open this link, so javascript: or data: URLs must never be stored.
+    .pipe(z.url({ protocol: /^https?$/ }).optional()),
 });
 
-export async function getSubmissionForUser(assignmentId: string, userId: string) {
+async function getSubmissionForUser(assignmentId: string, userId: string) {
   return prisma.submission.findFirst({
     where: { assignmentId, userId },
     include: {

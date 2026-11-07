@@ -10,8 +10,9 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 function must(name: string): string {
   const v = process.env[name];

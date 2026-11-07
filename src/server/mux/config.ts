@@ -26,8 +26,6 @@ export function getMuxConfigFresh() {
   return getMuxConfig();
 }
 
-export const muxConfig = getMuxConfig();
-
 export function isMuxApiConfigured(): boolean {
   const c = getMuxConfig();
   return Boolean(c.tokenId && c.tokenSecret);
@@ -40,10 +38,6 @@ export function getMissingMuxApiVars(): string[] {
   if (!c.tokenId) missing.push("MUX_TOKEN_ID");
   if (!c.tokenSecret) missing.push("MUX_TOKEN_SECRET");
   return missing;
-}
-
-export function isMuxWebhookConfigured(): boolean {
-  return Boolean(getMuxConfig().webhookSecret);
 }
 
 export function isSignedPlaybackConfigured(): boolean {
