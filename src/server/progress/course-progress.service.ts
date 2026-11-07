@@ -48,16 +48,6 @@ export async function getCompletedLessonIds(
 }
 
 /**
- * Get set of lesson IDs the user has completed (completedAt != null) for lessons in this course.
- */
-export async function getCompletedLessonIdsForCourse(
-  userId: string,
-  orderedLessonIds: string[]
-): Promise<Set<string>> {
-  return getCompletedLessonIds(userId, orderedLessonIds);
-}
-
-/**
  * Course is completed when all its lessons (in order) are completed.
  */
 export function isCourseCompleted(
@@ -84,58 +74,6 @@ export function getUnlockedCourseIdsInTrack(
     } else {
       const prevId = orderedCourseIds[i - 1]!;
       if (completedCourseIds.has(prevId)) unlocked.add(courseId);
-    }
-  }
-  return unlocked;
-}
-
-/**
- * Module is unlocked when the previous module's last lesson is completed (or it's the first module).
- */
-export function isModuleUnlocked(
-  orderedLessonIds: string[],
-  completedLessonIds: Set<string>,
-  moduleLessonIds: string[]
-): boolean {
-  if (moduleLessonIds.length === 0) return true;
-  const firstInModule = moduleLessonIds[0]!;
-  const index = orderedLessonIds.indexOf(firstInModule);
-  if (index <= 0) return true;
-  const previousId = orderedLessonIds[index - 1]!;
-  return completedLessonIds.has(previousId);
-}
-
-/**
- * Lesson is unlocked if it's the first in course order, or the previous lesson is completed.
- */
-export function isLessonUnlocked(
-  orderedLessonIds: string[],
-  completedLessonIds: Set<string>,
-  lessonId: string
-): { unlocked: boolean; previousLessonId: string | null } {
-  const index = orderedLessonIds.indexOf(lessonId);
-  if (index < 0) return { unlocked: false, previousLessonId: null };
-  if (index === 0) return { unlocked: true, previousLessonId: null };
-  const previousId = orderedLessonIds[index - 1] ?? null;
-  const unlocked = previousId !== null && completedLessonIds.has(previousId);
-  return { unlocked, previousLessonId: previousId };
-}
-
-/**
- * Build a Set of lesson IDs that are unlocked for this user (for course page UI).
- */
-export function getUnlockedLessonIds(
-  orderedLessonIds: string[],
-  completedLessonIds: Set<string>
-): Set<string> {
-  const unlocked = new Set<string>();
-  for (let i = 0; i < orderedLessonIds.length; i++) {
-    const lessonId = orderedLessonIds[i]!;
-    if (i === 0) {
-      unlocked.add(lessonId);
-    } else {
-      const prevId = orderedLessonIds[i - 1]!;
-      if (completedLessonIds.has(prevId)) unlocked.add(lessonId);
     }
   }
   return unlocked;

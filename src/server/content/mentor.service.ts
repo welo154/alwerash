@@ -270,11 +270,3 @@ export async function mentorListSubmissionMessages(mentorUserId: string, limit =
     },
   });
 }
-
-export async function mentorOwnsSubmissionCourse(mentorId: string, submissionId: string) {
-  const row = await prisma.submission.findFirst({
-    where: { id: submissionId, ...mentorSubmissionWhere(mentorId) },
-    select: { id: true },
-  });
-  return Boolean(row);
-}

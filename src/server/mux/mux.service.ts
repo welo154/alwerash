@@ -4,7 +4,7 @@
  */
 import Mux from "@mux/mux-node";
 import { prisma } from "@/server/db/prisma";
-import { getMuxConfigFresh, isMuxApiConfigured } from "./config";
+import { getMuxConfigFresh } from "./config";
 import { pickMuxPlaybackId } from "./playback-id";
 
 let muxClient: Mux | null = null;
@@ -64,7 +64,7 @@ export async function createDirectUpload(lessonId: string): Promise<CreateDirect
 /**
  * Fetch asset by ID and return the first playback ID (for HLS).
  */
-export async function getPlaybackIdForAsset(assetId: string): Promise<string | null> {
+async function getPlaybackIdForAsset(assetId: string): Promise<string | null> {
   const mux = getMux();
   const asset = await mux.video.assets.retrieve(assetId);
   return pickMuxPlaybackId(asset?.playback_ids);
@@ -73,7 +73,7 @@ export async function getPlaybackIdForAsset(assetId: string): Promise<string | n
 /**
  * Create LessonVideo when we have asset id and playback id (e.g. from webhook).
  */
-export async function linkVideoToLesson(
+async function linkVideoToLesson(
   lessonId: string,
   muxAssetId: string,
   muxPlaybackId: string
@@ -82,19 +82,6 @@ export async function linkVideoToLesson(
     where: { lessonId },
     create: { lessonId, muxAssetId, muxPlaybackId },
     update: { muxAssetId, muxPlaybackId },
-  });
-}
-
-/**
- * Mark the VideoUpload for this lesson as READY and set assetId (from webhook).
- */
-export async function markVideoUploadReady(
-  lessonId: string,
-  assetId: string
-): Promise<void> {
-  await prisma.videoUpload.updateMany({
-    where: { lessonId, status: "CREATED" },
-    data: { assetId, status: "READY" },
   });
 }
 

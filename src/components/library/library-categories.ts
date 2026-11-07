@@ -1,4 +1,4 @@
-import { getLibraryBooksByCategory } from "./library-books";
+
 
 export type LibraryCategory = {
   key: string;
@@ -35,12 +35,6 @@ export const LIBRARY_CATEGORIES: LibraryCategory[] = [
     label: "References & Materials",
   },
 ];
-
-export function getLibraryCategoriesWithBooks(): LibraryCategory[] {
-  return LIBRARY_CATEGORIES.filter(
-    (category) => getLibraryBooksByCategory(category.slug).length > 0
-  );
-}
 
 export function getLibraryCategoryBySlug(slug: string): LibraryCategory | undefined {
   return LIBRARY_CATEGORIES.find((category) => category.slug === slug);

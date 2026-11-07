@@ -5,7 +5,7 @@ export type CourseModuleForAccess = {
 };
 
 /** First curriculum section (module) — fully free for trial on the public course page. */
-export function getFreeTrialModule<T extends { title: string }>(modules: T[]): T | undefined {
+function getFreeTrialModule<T extends { title: string }>(modules: T[]): T | undefined {
   return modules[0];
 }
 
@@ -33,11 +33,6 @@ export function publicCoursePath(courseId: string): string {
 /** Private full-course experience — subscribed users only. */
 export function privateCoursePath(courseId: string): string {
   return `/course-access/${encodeURIComponent(courseId)}`;
-}
-
-/** Free intro lesson stays on the public course page — never a nested route. */
-export function publicPreviewLessonPath(courseId: string, _lessonId?: string): string {
-  return publicCoursePath(courseId);
 }
 
 /**

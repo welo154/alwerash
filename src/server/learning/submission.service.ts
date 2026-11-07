@@ -14,7 +14,7 @@ const UpsertSubmissionSchema = z.object({
     .pipe(z.union([z.string().url(), z.undefined()])),
 });
 
-export async function getSubmissionForUser(assignmentId: string, userId: string) {
+async function getSubmissionForUser(assignmentId: string, userId: string) {
   return prisma.submission.findFirst({
     where: { assignmentId, userId },
     include: {

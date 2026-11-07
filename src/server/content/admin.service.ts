@@ -569,7 +569,7 @@ export async function adminSetCoursePopular(courseId: string, popular: boolean) 
   }
 }
 
-export const MAX_TRENDING_COURSES = 6;
+const MAX_TRENDING_COURSES = 6;
 
 /** Toggle Learn page “Trending” carousel (max {@link MAX_TRENDING_COURSES} courses). */
 export async function adminSetCourseTrending(courseId: string, trending: boolean) {
@@ -698,12 +698,6 @@ export async function adminListLessons(moduleId?: string) {
     where: moduleId ? { moduleId } : undefined,
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
   });
-}
-
-export async function adminGetLesson(id: string) {
-  const l = await prisma.lesson.findUnique({ where: { id }, include: { module: true } });
-  if (!l) throw new AppError("NOT_FOUND", 404, "Lesson not found");
-  return l;
 }
 
 export async function adminCreateLesson(input: unknown) {

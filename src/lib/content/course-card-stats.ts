@@ -2,7 +2,7 @@ import { formatCatalogDurationLabel } from "@/components/cards/catalog-showcase-
 
 export type CourseLevelValue = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
-export function courseLevelLabel(level: string | null | undefined): string {
+function courseLevelLabel(level: string | null | undefined): string {
   if (level === "INTERMEDIATE") return "Intermediate";
   if (level === "ADVANCED") return "Advanced";
   return "Beginner";

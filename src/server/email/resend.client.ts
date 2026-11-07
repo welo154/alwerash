@@ -5,10 +5,6 @@ const fromEmail = process.env.RESEND_FROM_EMAIL ?? "Alwerash <onboarding@resend.
 
 const resend = apiKey ? new Resend(apiKey) : null;
 
-export function isEmailConfigured(): boolean {
-  return Boolean(apiKey);
-}
-
 export function getAppBaseUrl(): string {
   const raw =
     process.env.AUTH_URL?.trim() ||
