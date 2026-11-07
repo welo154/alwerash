@@ -2,7 +2,7 @@
 
 Subscription learning platform for design and creative skills, aimed at the Middle East and North Africa. Learners buy a yearly membership and get every course: video lessons taught by industry mentors, with progress tracking, assignments reviewed by mentors, and certificates. The interface is in English and Arabic.
 
-This README is the single source of truth for developers. Deeper write-ups live in `docs/` (security reviews, performance measurements).
+This README is the single source of truth for setup and operations. Also see `docs/CODEBASE_GUIDE.md` (what every file does, technologies), `docs/IMPROVEMENTS_AND_PAYMENTS.md` (speed, responsiveness, security, roadmap, Polar and Paymob plan), and the security and performance write-ups in `docs/`.
 
 ## Contents
 
@@ -217,7 +217,7 @@ Target: Vercel (region `dub1`, next to the database).
 
 ## Security model
 
-- Authorization lives in the application: edge middleware for routes, plus `requireRole` / `requireAuth` / `authorizeLessonAccess` in handlers. Postgres row-level security is not used, so the Supabase Data API must stay disabled, or every table must deny the `anon` and `authenticated` roles.
+- Authorization lives in the application: edge middleware for routes, plus `requireRole` / `requireAuth` / `authorizeLessonAccess` in handlers. Row-level security is enabled on every table with no policies for Supabase's `anon` and `authenticated` roles, so the Supabase Data API cannot read or write application data (migration `20260929130000_enable_rls_lock_data_api`). The app connects as the table owner, which bypasses RLS. **Every new table must enable RLS in its migration**, as later migrations do.
 - Passwords use argon2id (old bcrypt hashes are still accepted). Email verification is required, and responses never reveal whether an email is registered.
 - Rate limits, stored in Postgres, cover sign-in, registration, emails, password reset, search, playback tokens, uploads and checkout (`src/server/security/rate-limit.ts`). If the limiter's database is unavailable it allows requests rather than locking everyone out.
 - Paid access comes only from verified webhooks. Webhook signatures (Mux, Polar) are verified.
@@ -233,7 +233,8 @@ Before launch:
 - [ ] Polar: production product, `POLAR_SERVER=production`, webhook configured, one real purchase and refund tested.
 - [ ] Decide on the plan cards: Studio, Starter and Pro currently share one price and one Polar product.
 - [ ] Hide the Paymob and Stripe buttons, or connect them.
-- [ ] Supabase: Data API disabled (or deny-all RLS), point-in-time recovery on, restore tested.
+- [ ] Supabase: confirm RLS is on for every table (Table editor shows no "RLS disabled" warnings), point-in-time recovery on, restore tested.
+- [ ] Optional hardening: run `scripts/sql/create-app-role.sql` and switch the runtime `DATABASE_URL` to that least-privilege role.
 - [ ] Review content security policy reports on staging, then switch to an enforced policy.
 - [ ] Add error tracking (for example Sentry) and an uptime monitor on `/api/health`.
 - [ ] End-to-end test of register → verify → sign in → pay → watch.
