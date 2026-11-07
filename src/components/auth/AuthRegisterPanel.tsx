@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -269,7 +270,7 @@ export function AuthRegisterPanel({
               }`}
               onClick={() => setPaymentMethod("apple")}
             >
-              <img
+              <Image
                 src="/auth/apple-pay.png"
                 alt=""
                 width={27}
