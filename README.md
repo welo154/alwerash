@@ -168,7 +168,7 @@ Staff: `/admin/**`, `/instructor/**`, `/mentor/**`.
 
 Legacy `/learn/**` URLs redirect to `/course` or `/course-access/[courseId]`.
 
-API groups under `src/app/api/`: `admin/*` (admin only), `instructor/*`, `mentor/*`, `learning/*` (progress, assignments, submissions), `catalog/*`, `video/playback/*`, `webhooks/{mux,polar}`, `auth/*`, `me`, `profile`, `search`, `stats`, `health`.
+API groups under `src/app/api/`: `admin/*` (admin only), `instructor/*`, `mentor/*`, `learning/*` (progress, assignments, submissions), `catalog/*`, `video/playback/*`, `webhooks/{mux,polar}`, `auth/*`, `me`, `profile`, `search`, `health`.
 
 ## Environment variables
 
