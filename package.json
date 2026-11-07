@@ -51,7 +51,6 @@
     "prisma": "^6.19.3",
     "react": "^19",
     "react-dom": "^19",
-    "react-easy-crop": "^5.5.6",
     "resend": "^6.9.3",
     "swiper": "^12.1.2",
     "tsx": "^4",
