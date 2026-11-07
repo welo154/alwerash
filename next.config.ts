@@ -50,9 +50,6 @@ const nextConfig: NextConfig = {
       "./node_modules/@prisma/client/**",
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {

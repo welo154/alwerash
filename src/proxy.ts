@@ -1,5 +1,6 @@
-// file: src/middleware.ts
-// Edge-compatible: use getToken only (no auth() so we don't pull in argon2/Node code).
+// file: src/proxy.ts
+// Next.js 16 "proxy" (formerly middleware): runs before every matched request.
+// Uses getToken only (no auth()), so it stays light and needs no database.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -7,7 +8,7 @@ import { isUnder } from "@/lib/route-match";
 
 const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Legacy /learn → catalog or private course access (never resurrect /learn pages)

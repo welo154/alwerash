@@ -1,5 +1,5 @@
 /**
- * Route-guard matrix for the edge middleware: who may reach which area.
+ * Route-guard matrix for the proxy (formerly middleware): who may reach which area.
  * getToken is mocked; everything else is the real middleware.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,14 +8,14 @@ import { NextRequest } from "next/server";
 const getToken = vi.fn();
 vi.mock("next-auth/jwt", () => ({ getToken: (...a: unknown[]) => getToken(...a) }));
 
-const { middleware } = await import("./middleware");
+const { proxy } = await import("./proxy");
 const { isUnder } = await import("@/lib/route-match");
 
 type Who = "guest" | "LEARNER" | "MENTOR" | "INSTRUCTOR" | "ADMIN";
 
 async function visit(path: string, who: Who) {
   getToken.mockResolvedValue(who === "guest" ? null : { sub: "user-1", roles: [who] });
-  const res = await middleware(new NextRequest(new URL(path, "https://alwerash.test")));
+  const res = await proxy(new NextRequest(new URL(path, "https://alwerash.test")));
   const location = res.headers.get("location");
   return {
     status: res.status,
