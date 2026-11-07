@@ -137,9 +137,17 @@ export function AuthRegisterPanel({
       return;
     }
 
+    // Send only the account fields. The payment inputs on this panel are design
+    // placeholders: card data must never reach this server (payment happens on
+    // the provider's hosted checkout).
+    const accountData = new FormData();
+    accountData.set("name", name);
+    accountData.set("email", email);
+    accountData.set("password", password);
+
     setLoading(true);
     try {
-      const result = await action(formData);
+      const result = await action(accountData);
       if (!result.success) {
         setFieldErrors(mapServerError(result.error));
         return;
@@ -287,14 +295,14 @@ export function AuthRegisterPanel({
             name="cardName"
             placeholder={arabic ? "الاسم على البطاقة" : "Name"}
             className="auth-field-name"
-            autoComplete="cc-name"
+            autoComplete="off"
           />
           <div className="auth-login-password-gap h-[18px] shrink-0" aria-hidden />
           <AuthTextField
             id="card-number"
             name="cardNumber"
             placeholder={arabic ? "رقم البطاقة" : "Cards number"}
-            autoComplete="cc-number"
+            autoComplete="off"
             inputMode="numeric"
           />
           <div className="auth-login-password-gap h-[18px] shrink-0" aria-hidden />
@@ -303,14 +311,14 @@ export function AuthRegisterPanel({
               id="card-expiry"
               name="cardExpiry"
               placeholder={arabic ? "تاريخ انتهاء الصلاحية" : "Expiry date"}
-              autoComplete="cc-exp"
+              autoComplete="off"
               className="auth-field-half"
             />
             <AuthTextField
               id="card-cvv"
               name="cardCvv"
               placeholder="CVV"
-              autoComplete="cc-csc"
+              autoComplete="off"
               inputMode="numeric"
               className="auth-field-half"
             />
