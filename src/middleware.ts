@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { isUnder } from "@/lib/route-match";
 
 const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
@@ -36,16 +37,15 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const isCourseAccessPath =
-    pathname === "/course-access" || pathname.startsWith("/course-access/");
+  const isCourseAccessPath = isUnder(pathname, "/course-access");
   const isLessonsPath = pathname.startsWith("/lessons/");
-  const isAdminPath = pathname.startsWith("/admin");
-  const isAdminApi = pathname.startsWith("/api/admin");
-  const isInstructorPath = pathname.startsWith("/instructor");
-  const isInstructorApi = pathname.startsWith("/api/instructor");
-  // Exact segment match: the public /mentors directory is not the mentor portal.
-  const isMentorPath = pathname === "/mentor" || pathname.startsWith("/mentor/");
-  const isMentorApi = pathname === "/api/mentor" || pathname.startsWith("/api/mentor/");
+  const isAdminPath = isUnder(pathname, "/admin");
+  const isAdminApi = isUnder(pathname, "/api/admin");
+  const isInstructorPath = isUnder(pathname, "/instructor");
+  const isInstructorApi = isUnder(pathname, "/api/instructor");
+  // Segment match: the public /mentors directory is not the mentor portal.
+  const isMentorPath = isUnder(pathname, "/mentor");
+  const isMentorApi = isUnder(pathname, "/api/mentor");
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
