@@ -5,8 +5,9 @@
  * Run from your terminal (where DB is reachable): npm run scripts:apply-course-mentor-and-assign
  */
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 const MIGRATION_SQL = [
   `ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "mentor_id" TEXT`,

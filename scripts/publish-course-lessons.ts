@@ -5,8 +5,9 @@
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 const courseArg = process.argv[2]?.trim();
 if (!courseArg) {
   console.error("Usage: npx tsx scripts/publish-course-lessons.ts \"Course title\" | <courseId>");

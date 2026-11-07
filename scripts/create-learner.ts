@@ -5,8 +5,9 @@
 import "dotenv/config";
 import { PrismaClient, Role } from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 const [rawEmail, PASSWORD] = process.argv.slice(2);
 
 if (!rawEmail || !PASSWORD) {

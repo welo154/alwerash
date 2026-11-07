@@ -10,8 +10,9 @@
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 const EXECUTE = process.argv.includes("--execute");
 
 /** Tracks whose courses appear in Learn → Popular classes. */

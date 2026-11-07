@@ -43,7 +43,7 @@ Set `AUTH_URL=http://localhost:3070` so sign-in callbacks and email links match 
 |---|---|
 | `npm run dev` | Dev server on port 3070 |
 | `npm run build` / `npm start` | Production build and server. The build does not need a database. |
-| `npm run lint` | ESLint (Next.js rules) |
+| `npm run lint` | ESLint on `src/` (flat config in `eslint.config.mjs`) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | Unit tests (Vitest). No database needed. |
 | `npm run db:deploy` | Apply pending migrations (`prisma migrate deploy`) |
@@ -68,9 +68,9 @@ The `import-*`, `apply-*`, `assign-*`, `mark-*` and `migrate-*` scripts were one
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 (App Router), React 19, TypeScript |
+| Framework | Next.js 16 (App Router, Turbopack builds), React 19.3, TypeScript |
 | Styling | Tailwind CSS 4 (tokens in `src/app/globals.css`), GSAP and Swiper for motion and carousels |
-| Database | PostgreSQL on Supabase, Prisma 6 |
+| Database | PostgreSQL on Supabase, Prisma 7 through the `@prisma/adapter-pg` driver adapter |
 | Auth | NextAuth v4: email and password (argon2id), optional Google sign-in, JWT sessions plus a server-side device-session table |
 | Video | Mux direct uploads, signed HLS playback, hls.js player, per-viewer watermark |
 | Payments | Polar (merchant of record, USD card checkout) |
@@ -99,7 +99,7 @@ src/
 │   ├── security/        Rate limiting, request context, security event log
 │   └── env.ts           Startup configuration check
 ├── auth.ts              NextAuth configuration
-├── middleware.ts        Edge route guards by role
+├── proxy.ts             Route guards by role (Next.js 16 name for middleware)
 └── instrumentation.ts   Runs the env check and warms Prisma at server start
 prisma/                  schema.prisma, migrations/, seed.ts
 scripts/                 Operational and one-off scripts
@@ -193,6 +193,8 @@ API groups under `src/app/api/`: `admin/*` (admin only), `instructor/*`, `mentor
 | Tuning | `DB_CONNECTION_LIMIT`, `PERF_TIMING`, `CATALOG_SHOW_UNPUBLISHED` | Optional |
 | Never in production | `SUBSCRIPTION_SELF_GRANT_ENABLED=true` (lets anyone unlock access for free) | Server stops |
 
+Database connection (Prisma 7): the app connects through `src/server/db/connection.ts`, which turns the URL into node-postgres pool settings. Supabase connections are always encrypted; set `DATABASE_CA_CERT` to the PEM certificate from Supabase → Project Settings → Database → SSL to also verify the server's certificate. The Prisma CLI (`migrate`, `studio`, seed) reads `prisma.config.ts` and uses `DIRECT_URL` when set.
+
 Database URLs: use the Supabase session pooler (`aws-0-REGION.pooler.supabase.com:5432`, user `postgres.PROJECT_REF`). URL-encode special characters in the password. Production defaults to one connection per server instance; raise it with `DB_CONNECTION_LIMIT` only after checking the pooler's capacity (Supabase session mode allows 15 in total).
 
 ## Deployment
@@ -217,7 +219,7 @@ Target: Vercel (region `dub1`, next to the database).
 
 ## Security model
 
-- Authorization lives in the application: edge middleware for routes, plus `requireRole` / `requireAuth` / `authorizeLessonAccess` in handlers. Row-level security is enabled on every table with no policies for Supabase's `anon` and `authenticated` roles, so the Supabase Data API cannot read or write application data (migration `20260929130000_enable_rls_lock_data_api`). The app connects as the table owner, which bypasses RLS. **Every new table must enable RLS in its migration**, as later migrations do.
+- Authorization lives in the application: the proxy (`src/proxy.ts`) for routes, plus `requireRole` / `requireAuth` / `authorizeLessonAccess` in handlers. Row-level security is enabled on every table with no policies for Supabase's `anon` and `authenticated` roles, so the Supabase Data API cannot read or write application data (migration `20260929130000_enable_rls_lock_data_api`). The app connects as the table owner, which bypasses RLS. **Every new table must enable RLS in its migration**, as later migrations do.
 - Passwords use argon2id (old bcrypt hashes are still accepted). Email verification is required, and responses never reveal whether an email is registered.
 - Rate limits, stored in Postgres, cover sign-in, registration, emails, password reset, search, playback tokens, uploads and checkout (`src/server/security/rate-limit.ts`). If the limiter's database is unavailable it allows requests rather than locking everyone out.
 - Paid access comes only from verified webhooks. Webhook signatures (Mux, Polar) are verified.

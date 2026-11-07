@@ -25,12 +25,12 @@ Last reviewed: November 2026 (416 files under `src/`).
 
 | Area | Technology | Version | Used for |
 |---|---|---|---|
-| Framework | Next.js (App Router) | 15.5 | Routing, server rendering, server actions, API routes, middleware, image optimisation |
-| UI library | React | 19 | Components; server components by default, client components where marked `"use client"` |
+| Framework | Next.js (App Router, Turbopack) | 16.4 | Routing, server rendering, server actions, API routes, proxy (route guards), image optimisation |
+| UI library | React | 19.3 | Components; server components by default, client components where marked `"use client"` |
 | Language | TypeScript | 5 | Whole codebase, strict type checking |
 | Styling | Tailwind CSS | 4 | Utility classes; design tokens and custom `en:` / `ar:` variants in `src/app/globals.css` |
 | Database | PostgreSQL on Supabase | — | All application data (34 Prisma models) |
-| ORM | Prisma | 6.19 | Typed database access, migrations (`prisma/migrations`) |
+| ORM | Prisma + `@prisma/adapter-pg` (node-postgres) | 7.10 | Typed database access through a driver adapter; migrations (`prisma/migrations`) |
 | Authentication | NextAuth (Auth.js v4) | 4.24 | Email and password sign-in, optional Google sign-in, JWT session cookie |
 | Password hashing | argon2 (argon2id); bcrypt | 0.41; 6 | New passwords use argon2id; bcrypt only verifies old hashes |
 | Validation | Zod | 4 | Request bodies, forms, environment checks |
@@ -44,7 +44,7 @@ Last reviewed: November 2026 (416 files under `src/`).
 | Icons | lucide-react | 0.575 | UI icons |
 | Analytics | Microsoft Clarity | — | Heatmaps and session replays (production only) |
 | Tests | Vitest | 3.2 | Unit and route tests (`*.test.ts`) |
-| Linting | ESLint + `eslint-config-next` | 9; 15.5 | Code quality and React rules |
+| Linting | ESLint (flat config) + `eslint-config-next` | 9; 16.4 | Code quality, React and React Compiler rules |
 | Hosting | Vercel (region `dub1`, Dublin) | — | Builds and serves the app; preview deploy per branch |
 | CI | GitHub Actions | — | Lint, typecheck, tests and build on every pull request |
 
@@ -54,7 +54,7 @@ Last reviewed: November 2026 (416 files under `src/`).
 Browser
   │
   ▼
-src/middleware.ts ─── reads the JWT cookie, redirects by role
+src/proxy.ts ──────── reads the JWT cookie, redirects by role
   │                   (guests → /login, learners kept out of /admin, admins kept in staff areas)
   ▼
 src/app/layout.tsx ── reads the language cookie, sets <html lang>, wraps every page
@@ -83,8 +83,8 @@ External services call back into the app through webhooks: Mux at `/api/webhooks
 | `tsconfig.json` | TypeScript settings; `@/*` points at `src/*` |
 | `vitest.config.ts` | Test runner: runs `src/**/*.test.ts` in Node |
 | `postcss.config.mjs` | Tailwind 4 through PostCSS |
-| `.eslintrc.json` | Lint rules (`next/core-web-vitals`) |
-| `prisma.config.ts` | Prisma schema, migrations folder and seed command |
+| `eslint.config.mjs` | Lint rules (flat config: `eslint-config-next/core-web-vitals`, React Compiler rules as warnings) |
+| `prisma.config.ts` | Prisma CLI settings: schema, migrations folder, seed command and the migration database URL (`DIRECT_URL`) |
 | `vercel.json` | Pins the Vercel region to `dub1` |
 | `.env.example` | Every environment variable, documented |
 | `.github/workflows/ci.yml` | CI: install, lint, typecheck, test, build |
@@ -98,8 +98,8 @@ External services call back into the app through webhooks: Mux at `/api/webhooks
 
 | File | Responsibility |
 |---|---|
-| `middleware.ts` | Runs before every page and API request. Reads the session cookie and enforces who may enter each area: redirects guests to log in, sends learners away from staff areas, keeps admins inside staff areas, redirects legacy `/learn` URLs |
-| `middleware.test.ts` | 26 tests covering every role against every protected area |
+| `proxy.ts` | Next.js 16 "proxy" (formerly middleware). Runs before every page and API request. Reads the session cookie and enforces who may enter each area: redirects guests to log in, sends learners away from staff areas, keeps admins inside staff areas, redirects legacy `/learn` URLs |
+| `proxy.test.ts` | 26 tests covering every role against every protected area |
 | `auth.ts` | NextAuth configuration: credentials and Google sign-in, login rate limits, security event logging, JWT callback that re-reads roles on every request and registers device sessions |
 | `auth.test.ts` | Tests that device sessions are only registered where the cookie can actually be saved |
 | `instrumentation.ts` | Runs once when the server starts: checks configuration (`server/env.ts`) and warms up the database client |
@@ -116,7 +116,7 @@ Next.js maps folders to URLs. `page.tsx` is the page, `layout.tsx` wraps its chi
 |---|---|
 | `layout.tsx` | Root HTML for every page: reads the language cookie, sets `<html lang>`, Arabic or English metadata, the motion boot script, and wraps pages in toast, session, language, motion, smooth-scroll and layout providers |
 | `globals.css` | Tailwind setup, design tokens (colours, fonts, easing), `en:`/`ar:` variants, motion and reveal styles, custom component styles |
-| `page.tsx` | `/`: guest landing page (signed-in users are redirected by middleware) |
+| `page.tsx` | `/`: guest landing page (signed-in users are redirected by the proxy) |
 | `error.tsx` | Error screen for a failing page |
 | `global-error.tsx` | Last-resort error screen when the root layout itself fails |
 | `not-found.tsx` | 404 page |
@@ -232,7 +232,7 @@ Next.js maps folders to URLs. `page.tsx` is the page, `layout.tsx` wraps its chi
 
 ## `src/app/api`: HTTP endpoints
 
-Each `route.ts` exports functions named after HTTP methods. All admin routes are also protected by middleware.
+Each `route.ts` exports functions named after HTTP methods. All admin routes are also protected by the proxy.
 
 | Route | Methods | Responsibility |
 |---|---|---|
@@ -316,7 +316,7 @@ Code safe to use on both server and client.
 | `i18n/dictionary.ts` | English → Arabic UI dictionary and `translateUi` |
 | `i18n/locale.ts` | Language cookie name, parsing, direction (`rtl`/`ltr`) |
 | `learning-activity.ts` | Activity types and formatting (hours:minutes, Arabic digits) |
-| `route-match.ts` | `isUnder`: segment-exact path matching for middleware |
+| `route-match.ts` | `isUnder`: segment-exact path matching for the proxy |
 | `safe-internal-path.ts` | Accepts only same-site paths for `?next=` redirects (prevents open redirects) |
 | `site-url.ts` | The site's public URL |
 | `subscription-plans.ts` | Plans and the membership price (EGP and USD, 12 months) |
@@ -410,7 +410,8 @@ Server-only code. Pages, API routes and server actions call into these modules; 
 | `security/security-events.ts` | Append-only security log (sign-ins, rate limits, device replacements) |
 | `email/resend.client.ts` | Sends emails through Resend; the app's base URL |
 | `email/verification.service.ts` | Creates and checks email verification tokens |
-| `db/prisma.ts` | Prisma client: pool size, connection URL handling, retry on pool exhaustion, 503 when the pool stays exhausted |
+| `db/prisma.ts` | Prisma client through the Postgres driver adapter; retry on pool exhaustion, 503 when the pool stays exhausted |
+| `db/connection.ts` | Turns `DATABASE_URL` into pool settings: size, timeouts, TLS (verified with `DATABASE_CA_CERT`), schema |
 | `env.ts` | Startup configuration check (fatal only for database, auth secret or self-grant) |
 | `i18n.ts` | Server-side language (`getLocale`) and translation (`getServerT`) |
 | `lib/errors.ts` | `AppError`: expected errors with an HTTP status |
@@ -438,6 +439,7 @@ Server-only code. Pages, API routes and server actions call into these modules; 
 | `scripts/ensure-user-can-login.ts`, `reset-user-password.ts`, `verify-user-email.ts`, `create-learner.ts` | Account support tasks |
 | `scripts/grant-subscription.ts`, `subscribe-user.ts` | Give membership by hand (respects the self-grant guard) |
 | `scripts/delete-user.ts`, `remove-admin-role.ts` | Account administration |
+| `scripts/lib/prisma-client.ts` | Prisma client for scripts and the seed, with the same connection settings as the app |
 | `scripts/import-*.ts`, `apply-*.ts`, `assign-*.ts`, `mark-*.ts`, `migrate-*.ts`, `scripts/catalog/`, `scripts/lib/catalog-import.ts` | One-off content imports and data fixes; check before running |
 | `scripts/apply-instructor-columns.sql` | Hand-written SQL used during an earlier migration |
 | `scripts/sql/create-app-role.sql` | Creates a restricted Postgres role for the app (see `docs/security/`) |
@@ -448,7 +450,7 @@ Server-only code. Pages, API routes and server actions call into these modules; 
 
 | Area | Test files |
 |---|---|
-| Route protection | `middleware.test.ts` |
+| Route protection | `proxy.test.ts` |
 | Sign-in and sessions | `auth.test.ts`, `server/auth/device-session.test.ts`, `device-classification.test.ts`, `password-reset.test.ts` |
 | Lesson access | `server/authz/lesson-access.test.ts` |
 | Payments | `app/api/webhooks/polar/route.test.ts`, `app/subscription/checkout/actions.test.ts`, `server/subscription/entitlement.service.test.ts`, `checkout-attempt.test.ts`, `lib/subscription-routes.test.ts` |

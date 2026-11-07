@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
       static: 180,
     },
   },
-  serverExternalPackages: ["@prisma/client", ".prisma/client", "prisma", "argon2", "bcrypt"],
+  serverExternalPackages: ["@prisma/client", ".prisma/client", "@prisma/adapter-pg", "pg", "prisma", "argon2", "bcrypt"],
   outputFileTracingIncludes: {
     "/": [
       "./node_modules/.prisma/client/**",

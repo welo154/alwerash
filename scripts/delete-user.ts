@@ -3,13 +3,14 @@
  * Run: npx tsx scripts/delete-user.ts <email>
  */
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
 if (!process.argv[2]) {
   console.error("Usage: npx tsx scripts/delete-user.ts <email>");
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 const EMAIL = process.argv[2].toLowerCase().trim();
 

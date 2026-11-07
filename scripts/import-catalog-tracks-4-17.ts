@@ -12,8 +12,9 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { CATALOG_TRACKS_4_17 } from "./catalog/tracks-4-17.data";
 import { printCatalogSummary, runCatalogImport } from "./lib/catalog-import";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 const EXECUTE = process.argv.includes("--execute");
 const LABEL = "Catalog tracks 4–17 import";
 

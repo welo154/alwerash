@@ -161,10 +161,10 @@ Argon2id passwords; email verification; no email enumeration; rate limits on sig
 
 | Upgrade | Why | Effort |
 |---|---|---|
-| Next.js 16 | Newer caching model (`use cache`), Turbopack builds, clears remaining Next advisories | M |
-| Auth.js v5 or Better Auth | next-auth v4 is in maintenance; v5 removes the vulnerable bundled `@auth/core` | M |
-| Prisma 7 | Faster client, clears CLI advisories | M |
-| React Compiler | Automatic memoisation, fewer re-renders in the heavy player and home components | S |
+| ~~Next.js 16~~ | **Done** (16.4.5): Turbopack builds, `proxy.ts`, ESLint CLI | — |
+| Auth.js v5 or Better Auth | next-auth v4 is in maintenance. Auth.js v5 is still **beta** (5.0.0-beta.32), and its cookie names differ, so upgrading signs everyone out. Wait for a stable v5, or plan a move to Better Auth. | M |
+| ~~Prisma 7~~ | **Done** (7.10.1): driver adapter (`@prisma/adapter-pg`), connection settings in `src/server/db/connection.ts` | — |
+| React Compiler | Automatic memoisation, fewer re-renders in the heavy player and home components. First rework the 42 patterns the new lint rules flag (24 `set-state-in-effect`, 12 `refs`, 6 `immutability`; warnings in `npm run lint`). | M |
 | Split large files | `ActivityScheduleCard` (1,395 lines), `public.service.ts` (1,280), `HomeTrackExplorerSection` (1,342), `FullCourseLearningExperience` (1,250), `ContinueLearningSection` (1,028): split into data hooks and small components when next touched | M each |
 | Remove migration fallbacks | `public.service.ts` / `admin.service.ts` still handle columns missing from old migrations; delete once production is confirmed up to date | S |
 | End-to-end tests | Playwright against a seeded staging database: register → verify → sign in → pay (Polar sandbox) → watch | M |

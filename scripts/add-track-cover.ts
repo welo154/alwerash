@@ -3,8 +3,9 @@
  * Run: npx tsx scripts/add-track-cover.ts
  */
 import { PrismaClient } from "@prisma/client";
+import { createScriptPrismaClient } from "./lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = createScriptPrismaClient();
 
 async function main() {
   await prisma.$executeRawUnsafe(
