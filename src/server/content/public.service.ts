@@ -12,7 +12,7 @@ import {
   type LandingShowcaseSlide,
 } from "@/components/cards/catalog-showcase-map";
 import { Prisma } from "@prisma/client";
-import { prisma } from "@/server/db/prisma";
+import { DatabaseUnavailableError, isPoolExhaustedError, prisma } from "@/server/db/prisma";
 import { AppError } from "@/server/lib/errors";
 import {
   resolveCourseCoverImage,
@@ -57,40 +57,13 @@ function isPrismaMissingColumnError(e: unknown): boolean {
   return msg.includes("does not exist") || metaMsg.includes("does not exist");
 }
 
-function catalogErrorText(e: unknown): string {
-  if (e == null) return "";
-  if (typeof e === "string") return e;
-  if (e instanceof Error) {
-    const extra = e as Error & { cause?: unknown };
-    return `${e.name} ${e.message} ${e.stack ?? ""} ${catalogErrorText(extra.cause)}`;
-  }
-  try {
-    return JSON.stringify(e);
-  } catch {
-    return String(e);
-  }
-}
-
-function isPrismaPoolExhaustedError(e: unknown): boolean {
-  const msg = catalogErrorText(e);
-  return (
-    msg.includes("PrismaClientUnknownRequestError") ||
-    msg.includes("max clients reached") ||
-    msg.includes("EMAXCONNSESSION") ||
-    msg.includes("pool_size") ||
-    msg.includes("session mode") ||
-    msg.includes("Timed out fetching a new connection from the connection pool")
-  );
-}
-
 function isUnreachableDatabaseError(e: unknown): boolean {
+  if (e instanceof DatabaseUnavailableError || isPoolExhaustedError(e)) return true;
   const msg = e instanceof Error ? e.message : String(e);
   return (
     msg.includes("Can't reach database server") ||
     msg.includes("P1001") ||
-    msg.includes("Timed out fetching a new connection") ||
-    msg.includes("Connection terminated unexpectedly") ||
-    isPrismaPoolExhaustedError(e)
+    msg.includes("Connection terminated unexpectedly")
   );
 }
 
@@ -100,7 +73,7 @@ function logCatalogError(scope: string, e: unknown) {
   // Catalog callers already fall back to empty lists — warn so the page still renders.
   if (isUnreachableDatabaseError(e)) {
     console.warn(
-      `[catalog] ${scope}: database unreachable (Supabase pooler). Using an empty catalog fallback.`
+      `[catalog] ${scope}: database unreachable or busy. Using an empty catalog fallback.`
     );
     return;
   }
