@@ -43,16 +43,18 @@ async function loadArticleBodiesByLessonId(
   return new Map(articles.map((row) => [row.lessonId, row.body?.trim() || null]));
 }
 
-/** Ensure first module has an INTRO at the start and an ARTICLE at the end for styling QA. */
+/** Ensure first module has INTRO, VIDEO, and ARTICLE lessons for styling QA. */
 function withTestTextLessons(
   modules: FullAccessModule[],
-  courseSummary: string | null
+  courseSummary: string | null,
+  coverImage: string | null
 ): FullAccessModule[] {
   if (modules.length === 0) return modules;
   const first = modules[0]!;
   const hasIntro = first.lessons.some((l) => l.type.toUpperCase() === "INTRO");
+  const hasVideo = first.lessons.some((l) => l.type.toUpperCase() === "VIDEO");
   const hasArticle = first.lessons.some((l) => l.type.toUpperCase() === "ARTICLE");
-  if (hasIntro && hasArticle) return modules;
+  if (hasIntro && hasVideo && hasArticle) return modules;
 
   const body = courseSummary?.trim() || SAMPLE_TEXT_BODY;
   const lessons: FullAccessLesson[] = [...first.lessons];
@@ -69,6 +71,23 @@ function withTestTextLessons(
       posterUrl: null,
       articleBody: body,
       description: null,
+    });
+  }
+
+  if (!hasVideo) {
+    const introIndex = lessons.findIndex((l) => l.type.toUpperCase() === "INTRO");
+    const insertAt = introIndex >= 0 ? introIndex + 1 : 0;
+    lessons.splice(insertAt, 0, {
+      id: `demo-video-${first.id}`,
+      title: "Lesson video",
+      titleAr: "درس فيديو",
+      type: "VIDEO",
+      moduleId: first.id,
+      moduleTitle: first.title,
+      hasVideo: true,
+      posterUrl: coverImage,
+      articleBody: null,
+      description: body,
     });
   }
 
@@ -141,7 +160,7 @@ export default async function PrivateCoursePage({
     })),
   }));
 
-  const modules = withTestTextLessons(modulesBase, course.summary);
+  const modules = withTestTextLessons(modulesBase, course.summary, course.coverImage);
 
   return (
     <main className="min-h-screen bg-white">

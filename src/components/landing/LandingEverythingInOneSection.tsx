@@ -287,7 +287,7 @@ export function LandingEverythingInOneSection({
       <section
         className={`w-full ${
           isCourseRows
-            ? "pl-[30px] pr-4 max-[743px]:ar:pl-4 max-[743px]:ar:pr-[30px] min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:ar:pl-4 min-[744px]:max-lg:ar:pr-[61px]"
+            ? "px-[30px] min-[744px]:max-lg:px-[61px]"
             : arabic
               ? "pl-[30px] pr-4 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
               : "px-0 min-[744px]:pl-[63px] min-[744px]:pr-[61px]"
@@ -391,11 +391,18 @@ export function LandingEverythingInOneSection({
           {FEATURES.map(({ title, body, Icon, comingSoon }) => (
             <li
               key={title}
-              className={`flex items-center ${arabic ? "flex-row-reverse" : ""} ${
+              dir={isCourseRows && arabic ? "rtl" : undefined}
+              className={`flex items-center ${
+                isCourseRows
+                  ? "gap-[23px] min-[744px]:max-lg:items-start min-[744px]:max-lg:gap-[27px]"
+                  : arabic
+                    ? "flex-row-reverse gap-[23px] min-[744px]:gap-[27px]"
+                    : "gap-[21px] min-[744px]:gap-[27px]"
+              } ${
                 !arabic && !isCourseRows
                   ? "max-[743px]:mx-auto max-[743px]:w-[95%] max-[743px]:max-w-[95%]"
                   : ""
-              } ${isCourseRows ? "min-[744px]:max-lg:items-start" : ""}`}
+              }`}
             >
               <span className="flex shrink-0 items-center justify-center text-[#1E1E1E] min-[744px]:text-[var(--sds-color-icon-default-default,#1E1E1E)]">
                 <Icon
@@ -409,10 +416,10 @@ export function LandingEverythingInOneSection({
               <div
                 className={
                   isCourseRows
-                    ? `${arabic ? "mr-[14px] text-right min-[744px]:max-lg:mr-[27px]" : "ml-[14px] min-[744px]:max-lg:ml-[27px]"} min-w-0`
+                    ? "w-[221px] shrink-0 text-start min-[744px]:max-lg:w-auto"
                     : arabic
-                      ? "mr-[21px] w-[221px] shrink-0 text-right min-[744px]:mr-[27px] min-[744px]:h-[60px] min-[744px]:w-[379px]"
-                      : "ml-[21px] w-[221px] min-w-0 shrink min-[744px]:ml-[27px] min-[744px]:w-[480px] min-[744px]:shrink-0"
+                      ? "w-[221px] shrink-0 text-right min-[744px]:h-[60px] min-[744px]:w-[379px]"
+                      : "w-[221px] min-w-0 shrink min-[744px]:w-[480px] min-[744px]:shrink-0"
                 }
               >
                 <h3
@@ -443,10 +450,10 @@ export function LandingEverythingInOneSection({
               {hideChecks && !comingSoon ? null : (
               <span
                 className={`shrink-0 ${
-                  arabic
-                    ? "mr-[33px] min-[744px]:mr-auto"
-                    : isCourseRows
-                      ? "ml-[33px] min-[744px]:ml-auto"
+                  isCourseRows
+                    ? "ms-auto"
+                    : arabic
+                      ? "mr-[33px] min-[744px]:mr-auto"
                       : "ml-auto"
                 }`}
               >

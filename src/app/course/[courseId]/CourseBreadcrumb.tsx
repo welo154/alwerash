@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
 import { LocalizedText } from "@/components/i18n/LocalizedText";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
@@ -56,33 +55,8 @@ function BreadcrumbChevron({ pointLeft }: { pointLeft: boolean }) {
   );
 }
 
-/** Pull the rule out to the visible page edges, inside the layout viewport. */
-function useFullPageWidthRule() {
-  const ref = useRef<HTMLHRElement>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const apply = () => {
-      const width = document.documentElement.clientWidth;
-      el.style.marginLeft = "0px";
-      el.style.width = `${width}px`;
-      const left = el.getBoundingClientRect().left;
-      el.style.marginLeft = `${-left}px`;
-    };
-
-    apply();
-    window.addEventListener("resize", apply);
-    return () => window.removeEventListener("resize", apply);
-  }, []);
-
-  return ref;
-}
-
 export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: CourseBreadcrumbProps) {
   const arabic = useArabicLayout();
-  const ruleRef = useFullPageWidthRule();
   const textStyle = {
     color: "var(--Black, #000)",
     fontFamily,
@@ -95,18 +69,23 @@ export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: Cou
   };
 
   return (
-    <>
+    <div className="w-full">
+      {/* Path inset: 38px from the start edge (right in Arabic, left in English) */}
       <div
-        className={`mx-auto w-full max-[743px]:max-w-[393px] min-[744px]:max-lg:max-w-[744px] min-[744px]:max-lg:pt-[100px] min-[744px]:max-lg:-mt-[75.6px] ${
+        className={`w-full min-[744px]:max-lg:pt-[100px] min-[744px]:max-lg:-mt-[75.6px] ${
           arabic
-            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[34px]"
-            : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[34px]"
+            ? "max-[743px]:pr-[30px] min-[744px]:pr-[38px]"
+            : "max-[743px]:pl-[30px] min-[744px]:pl-[38px]"
         }`}
       >
         <nav
           aria-label="Breadcrumb"
           dir={arabic ? "rtl" : "ltr"}
-          className="flex w-full items-center gap-[18px] min-[744px]:gap-[15px]"
+          className={
+            arabic
+              ? "flex w-full items-center gap-[18px] min-[744px]:gap-[15px]"
+              : "inline-flex max-w-full items-center gap-[18px] min-[744px]:gap-[15px]"
+          }
         >
           <Link
             href="/course"
@@ -130,10 +109,11 @@ export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: Cou
         </nav>
       </div>
 
-      <hr
-        ref={ruleRef}
-        className="mt-[7px] block h-0 border-0 border-t border-black bg-black opacity-30 min-[744px]:mt-[13px] min-[744px]:opacity-60"
+      {/* Full-width hairline under the path */}
+      <div
+        aria-hidden
+        className="mt-[7px] box-border h-0 w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:mt-[13px]"
       />
-    </>
+    </div>
   );
 }

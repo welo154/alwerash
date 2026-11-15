@@ -26,6 +26,7 @@ import {
 import { hasActiveSubscription } from "@/server/subscription/access.service";
 import { AppError } from "@/server/lib/errors";
 import { CourseBreadcrumb } from "./CourseBreadcrumb";
+import { CourseSectionRule } from "./CourseSectionRule";
 import { DesktopLeftColumn } from "./DesktopLeftColumn";
 import { LocalizedText } from "@/components/i18n/LocalizedText";
 import { Tr } from "@/components/i18n/Tr";
@@ -77,13 +78,14 @@ export default async function PublicCoursePage({
     `Learn ${course.title} with step-by-step lessons designed to build practical skills from the ground up.`;
   const requirementItems = courseRequirementItems(course.requirements);
 
+  const isComingSoon = Boolean(course.comingSoon);
   const [relatedCourses, studentStories] = await Promise.all([
     course.track?.slug != null
       ? publicGetSimilarCourses(course.id, course.track.slug, 8)
       : publicListFeaturedCourses(9).then((items) =>
           items.filter((item) => item.id !== course.id).slice(0, 8)
         ),
-    publicListStudentStories(),
+    isComingSoon ? Promise.resolve(null) : publicListStudentStories(),
   ]);
 
   const relatedCards = relatedCourses.map((related) => ({
@@ -99,14 +101,13 @@ export default async function PublicCoursePage({
     comingSoon: related.comingSoon,
   }));
 
-  const isComingSoon = Boolean(course.comingSoon);
   const freeLessonIds = isComingSoon ? [] : getFreeLessonIds(course.modules);
   const trialVideos = isComingSoon ? [] : await publicGetFreePreviewVideos(course.id);
   const subscribeHref = getLockedLessonRedirect(course.id, viewerAccess);
   const fullCourseHref = privateCoursePath(course.id);
 
   return (
-    <main className="mx-auto w-full pb-[80px] max-[743px]:pt-[12px] max-lg:pb-0 min-[744px]:max-lg:pt-0 lg:max-w-[1600px] lg:pl-[55px] lg:pr-[60px] lg:pt-[28px]">
+    <main className="mx-auto w-full max-w-[1440px] pb-[80px] max-[743px]:pt-[12px] max-lg:pb-0 min-[744px]:max-lg:pt-0 lg:pt-[28px]">
       <CourseBreadcrumb
         courseTitle={course.title}
         courseTitleAr={course.titleAr}
@@ -114,9 +115,28 @@ export default async function PublicCoursePage({
       />
 
       <div className="mx-auto w-full max-[743px]:max-w-[393px] min-[744px]:max-lg:max-w-[744px] max-lg:overflow-x-clip">
-      <div className="max-lg:flex max-lg:flex-col max-lg:pl-[30px] max-[743px]:ar:items-start max-[743px]:ar:pl-0 max-[743px]:ar:pr-[30px] max-[743px]:ar:[direction:rtl] min-[744px]:max-lg:ar:pl-0 min-[744px]:max-lg:ar:pr-[30px] min-[744px]:max-lg:ar:[direction:rtl]">
-      <div className="mt-[15px] flex items-start gap-[80px] max-lg:contents lg:mt-[42px]">
+      <div className="max-lg:flex max-lg:flex-col max-lg:items-stretch max-lg:pl-[30px] max-[743px]:ar:pl-0 max-[743px]:ar:pr-[30px] max-[743px]:ar:[direction:rtl] min-[744px]:max-lg:ar:pl-0 min-[744px]:max-lg:ar:pr-[30px] min-[744px]:max-lg:ar:[direction:rtl]">
+      <div
+        className={`mt-[15px] flex items-start gap-[80px] max-lg:contents ${
+          isComingSoon ? "lg:mt-[65px]" : "lg:mt-[42px]"
+        }`}
+      >
         <DesktopLeftColumn>
+          {isComingSoon ? (
+            <div className="max-lg:order-1 max-[743px]:mt-[15px] min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:ms-[31px]">
+              <CourseComingSoonPanel
+                courseTitle={course.title}
+                courseTitleAr={course.titleAr}
+                instructorName={instructorName}
+                instructorNameAr={course.instructorNameAr}
+                instructorRole={instructorRole}
+                instructorRoleAr={course.track?.titleAr}
+                description={aboutText}
+                fontFamily={pangeaVar.style.fontFamily}
+              />
+            </div>
+          ) : (
+            <>
           <h1
             className="m-0 w-[334px] max-w-full text-[18px] font-medium max-[743px]:mt-[15px] max-[743px]:en:w-[334px] max-[743px]:en:text-[18px] max-[743px]:en:font-medium max-lg:order-1 min-[744px]:max-lg:mt-[41px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[24px] lg:w-full lg:text-[36px] lg:ar:text-right lg:ar:text-[32px]"
             style={{
@@ -131,11 +151,6 @@ export default async function PublicCoursePage({
             <LocalizedText en={course.title} ar={course.titleAr} />
           </h1>
 
-          {isComingSoon ? (
-            <div className="max-lg:order-2">
-              <CourseComingSoonPanel courseTitle={course.title} />
-            </div>
-          ) : (
             <CoursePreviewExperience
               coverImage={course.coverImage}
               trials={trialVideos}
@@ -146,19 +161,11 @@ export default async function PublicCoursePage({
               freeLessonIds={freeLessonIds}
               viewerAccess={viewerAccess}
             />
+            </>
           )}
 
-          {isComingSoon ? (
-            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
-              <p
-                className="m-0 inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#FFF7E8] px-8 text-[20px] font-medium text-black"
-                style={{ fontFamily: pangeaVar.style.fontFamily }}
-              >
-                <Tr>Coming soon — not open yet</Tr>
-              </p>
-            </div>
-          ) : hasSubscription ? (
-            <div className="mt-[40px] max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
+          {isComingSoon ? null : hasSubscription ? (
+            <div className="mt-[40px] w-full max-lg:order-6 min-[744px]:max-lg:ms-[31px]">
               <Link
                 href={fullCourseHref}
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#004B3C] px-8 text-[24px] font-bold text-white transition-opacity hover:opacity-90"
@@ -166,15 +173,10 @@ export default async function PublicCoursePage({
               >
                 <Tr>Go to full course</Tr>
               </Link>
-              <div
-                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
-                aria-hidden
-              >
-                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
-              </div>
+              <CourseSectionRule />
             </div>
           ) : (
-            <div className="mt-[40px] max-lg:order-6">
+            <div className="mt-[40px] w-full max-lg:order-6">
               <Link
                 href={subscribeHref}
                 className="inline-flex h-[56px] items-center justify-center rounded-[8px] border border-black bg-[#EA83F0] px-8 text-[24px] font-bold text-black transition-opacity hover:opacity-90"
@@ -182,12 +184,7 @@ export default async function PublicCoursePage({
               >
                 <Tr>Subscribe to unlock all lessons</Tr>
               </Link>
-              <div
-                className="mt-[35px] flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[49px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:hidden"
-                aria-hidden
-              >
-                <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px]" />
-              </div>
+              <CourseSectionRule />
             </div>
           )}
         </DesktopLeftColumn>
@@ -684,6 +681,8 @@ export default async function PublicCoursePage({
           </aside>
           </div>
 
+          {!isComingSoon ? (
+          <>
           <section data-reveal className="mt-[30px] max-lg:order-4 max-[743px]:mt-[35px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[45px] lg:ar:mt-[58px]">
             <div className="flex items-center gap-[16px]">
               <h3
@@ -701,7 +700,7 @@ export default async function PublicCoursePage({
               </h3>
             </div>
             <p
-              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] min-[744px]:max-lg:mt-[12px] min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[18px] lg:mt-[19px] lg:text-[24px] lg:en:mt-[19px] lg:en:w-[363px] lg:en:text-[18px] lg:ar:mt-[12px] lg:ar:w-[363px] lg:ar:text-right lg:ar:text-[18px]"
+              className="m-0 mt-[15px] w-[334px] max-w-full whitespace-pre-line text-[16px] min-[744px]:max-lg:mt-[12px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:max-w-[95%] min-[744px]:max-lg:text-[18px] lg:mt-[19px] lg:text-[24px] lg:en:mt-[19px] lg:en:w-[363px] lg:en:text-[18px] lg:ar:mt-[12px] lg:ar:w-[363px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
                 color: "var(--Black, #000)",
                 fontFamily: pangeaVar.style.fontFamily,
@@ -722,7 +721,7 @@ export default async function PublicCoursePage({
             </p>
           </section>
 
-          <section data-reveal className="max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[36px]">
+          <section data-reveal className="w-full max-lg:order-5 max-[743px]:mt-[15px] min-[744px]:max-lg:ms-[31px] min-[744px]:max-lg:mt-[36px]">
             <h3
               className="m-0 mt-[30px] text-[16px] max-[743px]:mt-0 min-[744px]:max-lg:mt-0 min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:mt-[39px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
@@ -754,12 +753,10 @@ export default async function PublicCoursePage({
               <li className="hidden ar:list-item">لوحة رسم أو آيباد</li>
               <li className="hidden ar:list-item">برنامج رسم رقمي</li>
             </ul>
-            <div className="mt-[35px] flex w-[359px] max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center min-[744px]:max-lg:mt-[51px] min-[744px]:max-lg:-ms-[27px] min-[744px]:max-lg:w-[676px] lg:mt-[57px] lg:block lg:w-full" aria-hidden>
-              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60 min-[744px]:max-lg:w-[676px] min-[744px]:max-lg:bg-black lg:h-px lg:w-full lg:border-0" />
-            </div>
+            <CourseSectionRule show="column" />
           </section>
 
-          <section data-reveal className="mt-[30px] max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ms-[31px]">
+          <section data-reveal className="mt-[30px] w-full max-lg:order-7 max-[743px]:mt-[35px] min-[744px]:max-lg:mt-[38px] min-[744px]:max-lg:ms-[31px]">
             <h3
               className="m-0 text-[16px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:en:text-[18px] lg:ar:text-right lg:ar:text-[18px]"
               style={{
@@ -946,20 +943,15 @@ export default async function PublicCoursePage({
                 أنا محترف مبدع أعمل في صناعة الألعاب. أعمل كفنان مفاهيمي ورسام مستقل. لقد عملت في استوديو رسوم متحركة ولكنني حالياً أعمل من المنزل. كمدرس، أسعى لتقديم أفضل تجربة تعليمية ممكنة لطلابي من خلال إنشاء محتوى واضح والحفاظ على سلوك شخصي.
               </span>
             </p>
-            <div className="mt-[35px] hidden max-[743px]:flex max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center lg:hidden" aria-hidden>
-              <div className="h-0 w-[359px] border-0 border-t border-black bg-black opacity-60" />
-            </div>
+            <CourseSectionRule show="phone" />
           </section>
+          </>
+          ) : null}
         </div>
       </div>
 
       <div className="mt-[35px] max-lg:order-8 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:w-[calc(100%+30px)] min-[744px]:max-lg:mt-[50px] lg:hidden">
-        <div
-          className="hidden min-[744px]:max-lg:flex min-[744px]:max-lg:justify-center"
-          aria-hidden
-        >
-          <div className="h-0 w-[676px] border-0 border-t border-black bg-black opacity-60" />
-        </div>
+        <CourseSectionRule show="tablet" />
         <LandingEverythingInOneSection
           variant="mobile"
           hideChecks
@@ -968,13 +960,17 @@ export default async function PublicCoursePage({
         />
       </div>
 
-      <div data-reveal className="max-lg:order-9 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
-        <StudentsRatingWorkSection variant="mobile" cards={studentStories ?? undefined} />
-      </div>
+      {!isComingSoon ? (
+        <div data-reveal className="max-lg:order-9 max-lg:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:ml-0 min-[744px]:max-lg:ar:-mr-[30px] min-[744px]:max-lg:ar:[direction:ltr] max-lg:flex max-lg:w-[calc(100%+30px)] max-lg:justify-center min-[744px]:max-lg:mt-[70px] lg:hidden">
+          <StudentsRatingWorkSection variant="mobile" cards={studentStories ?? undefined} />
+        </div>
+      ) : null}
 
-      <div data-reveal className="mt-[66px] w-full max-w-full max-lg:hidden">
-        <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
-      </div>
+      {!isComingSoon ? (
+        <div data-reveal className="mt-[66px] w-full max-w-full max-lg:hidden">
+          <StudentsRatingWorkSection cards={studentStories ?? undefined} sectionClassName="py-0" />
+        </div>
+      ) : null}
 
       <div data-reveal className="max-lg:order-10 max-[743px]:-ml-[30px] max-[743px]:ar:ml-0 max-[743px]:ar:-mr-[30px] max-[743px]:ar:[direction:ltr] min-[744px]:max-lg:ar:[direction:ltr] max-[743px]:mb-[65px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:mb-[82px]">
         <RelatedClassesSection fontFamily={pangeaVar.style.fontFamily} cards={relatedCards} />

@@ -169,7 +169,7 @@ export function CourseContentAccordion({
 
   return (
     <>
-      <div className="mt-[35px] flex items-center justify-between min-[744px]:max-lg:mt-[43px] min-[744px]:max-lg:w-[676px] lg:mt-[100px] lg:w-[758px]">
+      <div className="mt-[35px] flex w-full items-center justify-between max-[743px]:ar:mx-auto max-[743px]:ar:w-[334px] min-[744px]:max-lg:mt-[43px] min-[744px]:max-lg:w-[622px] lg:mt-[100px] lg:w-[758px]">
         <p
           className="m-0 text-[24px] min-[744px]:max-lg:text-[32px] lg:text-[36px] lg:ar:text-right lg:ar:text-[32px]"
           style={{
@@ -209,34 +209,39 @@ export function CourseContentAccordion({
           >
             {arabic ? `${lessonCount} درساً` : `${lessonCount} ${t(lessonCount === 1 ? "Lesson" : "Lessons")}`}
           </span>
-          <svg className="ms-[22px]" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 27 27" fill="none" aria-hidden>
-            <path
-              d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
-              stroke="var(--Black, #000)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {/* dir=ltr keeps the clock on the left of the duration in Arabic RTL parents */}
           <span
-            className="ms-[13px]"
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily,
-              fontSize: arabic ? 18 : 24,
-              fontStyle: "normal",
-              fontWeight: 400,
-              fontVariationSettings: '"wght" 400',
-              lineHeight: "normal",
-              textAlign: arabic ? "right" : undefined,
-            }}
+            dir="ltr"
+            className={`inline-flex items-center ${arabic ? "ms-[22px] gap-[4px]" : "ms-[22px]"}`}
           >
-            {arabic ? arabicDurationLabel : durationLabel}
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 27 27" fill="none" aria-hidden>
+              <path
+                d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
+                stroke="var(--Black, #000)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span
+              className={arabic ? undefined : "ms-[13px]"}
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily,
+                fontSize: arabic ? 18 : 24,
+                fontStyle: "normal",
+                fontWeight: 400,
+                fontVariationSettings: '"wght" 400',
+                lineHeight: "normal",
+              }}
+            >
+              {arabic ? arabicDurationLabel : durationLabel}
+            </span>
           </span>
         </div>
       </div>
 
-      <div className="mt-[5px] flex items-center justify-between max-[743px]:pe-[29px] min-[744px]:max-lg:mt-[9px] min-[744px]:max-lg:w-[676px] lg:mt-[26px] lg:w-[758px]">
+      <div className="mt-[5px] flex w-full items-center justify-between max-[743px]:pe-[29px] max-[743px]:ar:mx-auto max-[743px]:ar:w-[334px] max-[743px]:ar:pe-0 min-[744px]:max-lg:mt-[9px] min-[744px]:max-lg:w-[622px] lg:mt-[26px] lg:w-[758px]">
         <p
           className="m-0 text-[14px] min-[744px]:max-lg:text-[18px] lg:text-[24px] lg:ar:text-right lg:ar:text-[18px]"
           style={{
@@ -265,58 +270,76 @@ export function CourseContentAccordion({
               lineHeight: "normal",
             }}
           >
-            {lessonCount} {t(lessonCount === 1 ? "Lesson" : "Lessons")}
+            {arabic
+              ? `${lessonCount} ${lessonCount === 1 ? "درس" : "دروس"}`
+              : `${lessonCount} ${t(lessonCount === 1 ? "Lesson" : "Lessons")}`}
           </span>
-          <svg className="ms-[12px] min-[744px]:max-lg:hidden" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 27 27" fill="none" aria-hidden>
-            <path
-              d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
-              stroke="var(--Black, #000)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <svg
-            className="ms-[17px] hidden min-[744px]:max-lg:block"
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M9.75 4.35V9.75L13.35 11.55M18.75 9.75C18.75 14.7206 14.7206 18.75 9.75 18.75C4.77944 18.75 0.75 14.7206 0.75 9.75C0.75 4.77944 4.77944 0.75 9.75 0.75C14.7206 0.75 18.75 4.77944 18.75 9.75Z"
-              stroke="var(--Black, #000)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {/* dir=ltr keeps the clock on the left of the duration in Arabic RTL parents */}
           <span
-            className="ms-[12px] min-[744px]:max-lg:hidden"
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily,
-              fontSize: "14px",
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "normal",
-            }}
+            dir="ltr"
+            className={`inline-flex items-center ${
+              arabic ? "ms-[12px] gap-[4px]" : "ms-[12px] min-[744px]:max-lg:ms-[17px]"
+            }`}
           >
-            {durationLabel}
-          </span>
-          <span
-            className="ms-[7px] me-[50px] hidden text-[18px] min-[744px]:max-lg:inline"
-            style={{
-              color: "var(--Black, #000)",
-              fontFamily,
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "normal",
-            }}
-          >
-            {durationLabelCompact}
+            <svg
+              className="min-[744px]:max-lg:hidden"
+              xmlns="http://www.w3.org/2000/svg"
+              width="13"
+              height="13"
+              viewBox="0 0 27 27"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M13.5 6V13.5L18.5 16M26 13.5C26 20.4036 20.4036 26 13.5 26C6.59644 26 1 20.4036 1 13.5C1 6.59644 6.59644 1 13.5 1C20.4036 1 26 6.59644 26 13.5Z"
+                stroke="var(--Black, #000)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <svg
+              className="hidden min-[744px]:max-lg:block"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M9.75 4.35V9.75L13.35 11.55M18.75 9.75C18.75 14.7206 14.7206 18.75 9.75 18.75C4.77944 18.75 0.75 14.7206 0.75 9.75C0.75 4.77944 4.77944 0.75 9.75 0.75C14.7206 0.75 18.75 4.77944 18.75 9.75Z"
+                stroke="var(--Black, #000)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span
+              className={`min-[744px]:max-lg:hidden ${arabic ? "" : "ms-[12px]"}`}
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily,
+                fontSize: "14px",
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+              }}
+            >
+              {arabic ? arabicDurationLabel : durationLabel}
+            </span>
+            <span
+              className={`hidden text-[18px] min-[744px]:max-lg:inline ${arabic ? "" : "ms-[7px]"}`}
+              style={{
+                color: "var(--Black, #000)",
+                fontFamily,
+                fontStyle: "normal",
+                fontWeight: 400,
+                lineHeight: "normal",
+              }}
+            >
+              {arabic ? arabicDurationLabel : durationLabelCompact}
+            </span>
           </span>
         </div>
         <button
@@ -474,24 +497,16 @@ export function CourseContentAccordion({
                     : "inline-flex h-[31px] shrink-0 items-center rounded-[8px] border border-black bg-white px-[16px] text-[18px]";
 
                   const lessonTitle = localizedText(arabic, lesson.title, lesson.titleAr);
-                  const lessonName = arabic
-                    ? `${lesson.index + 1}.${lessonTitle}`
-                    : `${lesson.index + 1}. ${lessonTitle}`;
+                  // Arabic: number on the right of the title — `1. قراءة…` with dir=rtl
+                  const lessonName = `${lesson.index + 1}. ${lessonTitle}`;
                   const rowContent = (
                     <>
                       <p
-                        dir={arabic ? "ltr" : undefined}
+                        dir={arabic ? "rtl" : undefined}
                         className="m-0 min-w-0 flex-1 truncate text-[16px] min-[744px]:max-lg:text-[24px] lg:text-[24px]"
                         style={labelStyle}
                       >
-                        {arabic ? (
-                          <>
-                            {lesson.index + 1}
-                            .<span>{lessonTitle}</span>
-                          </>
-                        ) : (
-                          lessonName
-                        )}
+                        {lessonName}
                       </p>
                       {lesson.isAction ? (
                         <span className={badgeClassName} style={badgeStyle}>
