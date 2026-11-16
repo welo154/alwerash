@@ -465,12 +465,12 @@ export function ProfileEditButton({
           className={`absolute box-border border-0 bg-transparent p-0 ${className}`.trim()}
           style={{
             top: 26,
-            right: 27,
+            ...(arabic ? { left: 27 } : { right: 27 }),
             width: 39,
             height: 39,
             cursor: "pointer",
           }}
-          aria-label="Edit profile"
+          aria-label={t("Edit profile")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

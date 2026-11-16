@@ -46,7 +46,7 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
       className={`h-[327px] w-[587px] max-w-full shrink-0 rounded-[36px] bg-white pb-[38px] ${
         arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"
       }`}
-      style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+      style={{ border: "0.3px solid rgba(0, 0, 0, 0.2)" }}
     >
       <div
         className={`flex h-full items-start justify-between gap-[16px] ${
@@ -82,7 +82,7 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
           >
             <div
               className="flex h-[63px] w-[63px] items-center justify-center rounded-full bg-white"
-              style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+              style={{ border: "0.3px solid rgba(0, 0, 0, 0.2)" }}
             >
               <span
                 style={{
@@ -120,7 +120,7 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
                   padding: "0 16px",
                   alignItems: "center",
                   borderRadius: 25,
-                  border: "0.3px solid rgba(0, 0, 0, 0.35)",
+                  border: "0.3px solid rgba(0, 0, 0, 0.2)",
                   background: "var(--Blue, #64E1FF)",
                   color: "var(--Text-Primary, #141413)",
                   fontFamily: pangeaFont,
@@ -137,7 +137,7 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
         </div>
         <div
           className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] bg-[#E7E7E7]"
-          style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+          style={{ border: "0.3px solid rgba(0, 0, 0, 0.2)" }}
         />
       </div>
     </div>
@@ -154,17 +154,17 @@ export function ProfileProjectsSection({
   const visible = cards.slice(0, 2);
   const arabic = useArabicLayout();
 
+  const titleInsetClass = arabic
+    ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] lg:pr-[120px] lg:pl-[120px]"
+    : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px] lg:pl-[120px]";
+
   return (
     <div
-      className={`${
-        arabic
-          ? "text-right max-[743px]:pr-[30px] max-lg:pl-0 min-[744px]:max-lg:pr-[61px] lg:pr-[120px] lg:pl-[120px]"
-          : "max-[743px]:pl-[30px] max-lg:pr-0 min-[744px]:max-lg:pl-[61px] lg:pl-[120px] lg:pr-[120px]"
-      } ${className}`.trim()}
+      className={`${arabic ? "text-right" : ""} ${className}`.trim()}
       aria-label="Projects"
     >
       <h2
-        className={`m-0 hidden max-[743px]:block ${arabic ? "" : "uppercase"}`}
+        className={`m-0 hidden max-[743px]:block ${titleInsetClass} ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -186,7 +186,7 @@ export function ProfileProjectsSection({
       </h2>
 
       <h2
-        className={`m-0 hidden min-[744px]:max-lg:block ${arabic ? "" : "uppercase"}`}
+        className={`m-0 hidden min-[744px]:max-lg:block ${titleInsetClass} ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -208,7 +208,7 @@ export function ProfileProjectsSection({
       </h2>
 
       <h2
-        className={`m-0 hidden lg:block ${arabic ? "" : "uppercase"}`}
+        className={`m-0 hidden lg:block ${titleInsetClass} ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -229,20 +229,48 @@ export function ProfileProjectsSection({
         )}
       </h2>
 
-      <div className="mt-[27px] flex flex-col items-center gap-[30px] pr-[30px] min-[744px]:hidden">
-        {visible.map((card, idx) => (
-          <MobileStudentRatingCard key={`${card.name}-${idx}`} card={card} />
-        ))}
+      <div
+        className={`mt-[27px] overflow-x-clip min-[744px]:hidden ${
+          arabic ? "pr-[30px]" : "pl-[30px]"
+        }`}
+      >
+        <Swiper
+          key={arabic ? "mobile-rtl" : "mobile-ltr"}
+          dir={arabic ? "rtl" : "ltr"}
+          slidesPerView="auto"
+          spaceBetween={16}
+          slidesPerGroup={1}
+          slidesOffsetBefore={0}
+          slidesOffsetAfter={30}
+          speed={400}
+          grabCursor
+          allowTouchMove
+          simulateTouch
+          className="overflow-visible!"
+        >
+          {visible.map((card, idx) => (
+            <SwiperSlide key={`${card.name}-${idx}`} className="w-[327px]!">
+              <div className="[&>div]:mx-0">
+                <MobileStudentRatingCard card={card} />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
 
-      <div className="relative left-1/2 mt-[27px] hidden w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip min-[744px]:max-lg:block">
+      <div
+        className={`mt-[27px] hidden overflow-x-clip min-[744px]:max-lg:block ${
+          arabic ? "pr-[61px]" : "pl-[61px]"
+        }`}
+      >
         <Swiper
           key={arabic ? "rtl" : "ltr"}
           dir={arabic ? "rtl" : "ltr"}
           slidesPerView="auto"
           spaceBetween={31}
           slidesPerGroup={1}
-          slidesOffsetBefore={61}
+          slidesOffsetBefore={0}
+          slidesOffsetAfter={61}
           speed={400}
           grabCursor
           allowTouchMove
@@ -258,8 +286,8 @@ export function ProfileProjectsSection({
       </div>
 
       <div
-        className={`mt-[45px] hidden flex-nowrap items-start lg:flex ${
-          arabic ? "flex-row-reverse justify-start" : ""
+        className={`mt-[45px] hidden flex-nowrap items-start lg:flex ${titleInsetClass} ${
+          arabic ? "flex-row-reverse justify-start" : "lg:pr-[120px]"
         }`}
         style={{ gap: 31 }}
       >

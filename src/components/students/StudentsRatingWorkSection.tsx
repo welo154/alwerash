@@ -194,10 +194,14 @@ export function MobileStudentRatingCard({
   const t = useT();
   return (
     <div
-      className={`mx-auto box-border rounded-[36px] border border-black bg-white pb-[38px] pl-[25px] pr-[25px] ${
+      className={`mx-auto box-border rounded-[36px] bg-white pb-[38px] pl-[25px] pr-[25px] ${
         arabic ? "pt-[41px]" : "pt-[25px]"
       }`}
-      style={{ width, height }}
+      style={{
+        width,
+        height,
+        border: "0.3px solid rgba(0, 0, 0, 0.2)",
+      }}
     >
       <div className={`flex items-start gap-[9px] ${arabic ? "flex-row-reverse" : ""}`}>
         <p
@@ -218,7 +222,7 @@ export function MobileStudentRatingCard({
         <StudentProjectThumb
           src={card.projectImage}
           name={card.name}
-          className="h-[168px] w-[112px] shrink-0 overflow-hidden rounded-[20px] border-[0.2px] border-black bg-[#E7E7E7]"
+          className="h-[168px] w-[112px] shrink-0 overflow-hidden rounded-[20px] border-[0.3px] border-black/20 bg-[#E7E7E7]"
         />
       </div>
       <div className="pt-[18px]">
@@ -233,8 +237,12 @@ export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
   const t = useT();
   return (
     <div
-      className={`box-border rounded-[36px] border border-black bg-white pb-[38px] ${arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"}`}
-      style={{ width: 621, height: 339 }}
+      className={`box-border rounded-[36px] bg-white pb-[38px] ${arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"}`}
+      style={{
+        width: 621,
+        height: 339,
+        border: "0.3px solid rgba(0, 0, 0, 0.2)",
+      }}
     >
       <div className={`flex h-full items-start justify-between gap-[16px] ${arabic ? "flex-row-reverse" : ""}`}>
         <div className={`flex h-full min-h-0 min-w-0 flex-1 flex-col pt-[64px] ${arabic ? "items-end" : ""}`}>
@@ -260,7 +268,7 @@ export function TabletStudentRatingCard({ card }: { card: StudentRatingCard }) {
         <StudentProjectThumb
           src={card.projectImage}
           name={card.name}
-          className="mt-[29px] h-[260px] w-[203px] shrink-0 overflow-hidden rounded-[36px] border border-black bg-[#E7E7E7]"
+          className="mt-[29px] h-[260px] w-[203px] shrink-0 overflow-hidden rounded-[36px] border-[0.3px] border-black/20 bg-[#E7E7E7]"
         />
       </div>
     </div>

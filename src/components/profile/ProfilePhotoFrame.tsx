@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -25,6 +26,7 @@ export function ProfilePhotoFrameMobile({
   photoSrc?: string | null;
   profession?: string | null;
 }) {
+  const t = useT();
   const rawId = useId().replace(/:/g, "");
   const clipId = `profile-photo-mobile-clip-${rawId}`;
   const maskId = `profile-photo-mobile-mask-${rawId}`;
@@ -99,7 +101,7 @@ export function ProfilePhotoFrameMobile({
             opacity: 0.6,
           }}
         >
-          {professionLabel}
+          {t(professionLabel)}
         </p>
       ) : null}
     </div>
@@ -119,6 +121,8 @@ export function ProfilePhotoFrameTablet({
   photoSrc?: string | null;
   profession?: string | null;
 }) {
+  const t = useT();
+  const arabic = useArabicLayout();
   const rawId = useId().replace(/:/g, "");
   const clipId = `profile-photo-tablet-clip-${rawId}`;
   const maskId = `profile-photo-tablet-mask-${rawId}`;
@@ -179,7 +183,8 @@ export function ProfilePhotoFrameTablet({
           className="absolute m-0"
           style={{
             top: 329,
-            left: 80,
+            left: arabic ? undefined : 80,
+            right: arabic ? 80 : undefined,
             width: 160,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -188,9 +193,10 @@ export function ProfilePhotoFrameTablet({
             fontWeight: 400,
             lineHeight: "100%",
             opacity: 0.6,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {professionLabel}
+          {t(professionLabel)}
         </p>
       ) : null}
     </div>

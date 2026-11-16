@@ -7,6 +7,7 @@ import { ContinueLearningSection } from "@/components/home/ContinueLearningSecti
 import { TrackActivitySection } from "@/components/home/TrackActivitySection";
 import { ProfileProjectsSection } from "@/components/profile/ProfileProjectsSection";
 import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import type { ContinueLearningCardDto } from "@/server/home/continue-learning.service";
 import type { WeeklyActivitySummary } from "@/lib/learning-activity";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
@@ -67,6 +68,45 @@ function AccountSettingsLink() {
   );
 }
 
+function AccountSettingsIconButton({ side = "right" }: { side?: "left" | "right" }) {
+  const t = useT();
+  const label = t("Account Settings");
+
+  return (
+    <Link
+      href="/profile?edit=1"
+      className="absolute flex items-center justify-center"
+      style={{
+        ...(side === "left" ? { left: 61 } : { right: 61 }),
+        top: "50%",
+        transform: "translateY(-50%)",
+        width: 28,
+        height: 28,
+        textDecoration: "none",
+      }}
+      aria-label={label}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={28}
+        height={28}
+        viewBox="0 0 30 30"
+        fill="none"
+        aria-hidden
+        className="block shrink-0"
+      >
+        <path
+          d="M18.5682 14.75C18.5682 16.8587 16.8587 18.5682 14.75 18.5682C12.6413 18.5682 10.9318 16.8587 10.9318 14.75C10.9318 12.6413 12.6413 10.9318 14.75 10.9318C16.8587 10.9318 18.5682 12.6413 18.5682 14.75ZM24.1682 18.5682C23.9988 18.9521 23.9482 19.3779 24.0231 19.7907C24.0979 20.2036 24.2948 20.5846 24.5882 20.8845L24.6645 20.9609C24.9012 21.1973 25.089 21.478 25.2171 21.7871C25.3452 22.0961 25.4111 22.4273 25.4111 22.7618C25.4111 23.0963 25.3452 23.4276 25.2171 23.7366C25.089 24.0456 24.9012 24.3263 24.6645 24.5627C24.4281 24.7994 24.1474 24.9871 23.8384 25.1152C23.5294 25.2433 23.1981 25.3093 22.8636 25.3093C22.5291 25.3093 22.1979 25.2433 21.8889 25.1152C21.5799 24.9871 21.2991 24.7994 21.0627 24.5627L20.9864 24.4864C20.6864 24.193 20.3054 23.9961 19.8926 23.9213C19.4797 23.8464 19.0539 23.8969 18.67 24.0664C18.2936 24.2277 17.9725 24.4956 17.7464 24.837C17.5203 25.1785 17.3989 25.5786 17.3973 25.9882V26.2045C17.3973 26.8796 17.1291 27.5271 16.6517 28.0045C16.1744 28.4818 15.5269 28.75 14.8518 28.75C14.1767 28.75 13.5293 28.4818 13.0519 28.0045C12.5745 27.5271 12.3064 26.8796 12.3064 26.2045V26.09C12.2965 25.6687 12.1602 25.2602 11.915 24.9174C11.6699 24.5747 11.3273 24.3136 10.9318 24.1682C10.5479 23.9988 10.1221 23.9482 9.70925 24.0231C9.29638 24.0979 8.91541 24.2948 8.61545 24.5882L8.53909 24.6645C8.30269 24.9012 8.02195 25.089 7.71294 25.2171C7.40393 25.3452 7.07269 25.4111 6.73818 25.4111C6.40367 25.4111 6.07244 25.3452 5.76342 25.2171C5.45441 25.089 5.17368 24.9012 4.93727 24.6645C4.70061 24.4281 4.51286 24.1474 4.38476 23.8384C4.25666 23.5294 4.19072 23.1981 4.19072 22.8636C4.19072 22.5291 4.25666 22.1979 4.38476 21.8889C4.51286 21.5799 4.70061 21.2991 4.93727 21.0627L5.01364 20.9864C5.30705 20.6864 5.50387 20.3054 5.57873 19.8926C5.65359 19.4797 5.60306 19.0539 5.43364 18.67C5.2723 18.2936 5.00442 17.9725 4.66296 17.7464C4.3215 17.5203 3.92136 17.3989 3.51182 17.3973H3.29545C2.62036 17.3973 1.97291 17.1291 1.49555 16.6517C1.01818 16.1744 0.75 15.5269 0.75 14.8518C0.75 14.1767 1.01818 13.5293 1.49555 13.0519C1.97291 12.5745 2.62036 12.3064 3.29545 12.3064H3.41C3.83127 12.2965 4.23982 12.1602 4.58256 11.915C4.9253 11.6699 5.18637 11.3273 5.33182 10.9318C5.50124 10.5479 5.55178 10.1221 5.47691 9.70925C5.40205 9.29638 5.20523 8.91541 4.91182 8.61545L4.83545 8.53909C4.59879 8.30269 4.41104 8.02195 4.28294 7.71294C4.15484 7.40393 4.08891 7.07269 4.08891 6.73818C4.08891 6.40367 4.15484 6.07244 4.28294 5.76342C4.41104 5.45441 4.59879 5.17368 4.83545 4.93727C5.07186 4.70061 5.35259 4.51286 5.66161 4.38476C5.97062 4.25666 6.30185 4.19072 6.63636 4.19072C6.97088 4.19072 7.30211 4.25666 7.61112 4.38476C7.92013 4.51286 8.20087 4.70061 8.43727 4.93727L8.51364 5.01364C8.81359 5.30705 9.19457 5.50387 9.60743 5.57873C10.0203 5.65359 10.4461 5.60306 10.83 5.43364H10.9318C11.3083 5.2723 11.6293 5.00442 11.8554 4.66296C12.0816 4.3215 12.2029 3.92136 12.2045 3.51182V3.29545C12.2045 2.62036 12.4727 1.97291 12.9501 1.49555C13.4275 1.01818 14.0749 0.75 14.75 0.75C15.4251 0.75 16.0725 1.01818 16.5499 1.49555C17.0273 1.97291 17.2955 2.62036 17.2955 3.29545V3.41C17.2971 3.81955 17.4184 4.21968 17.6446 4.56114C17.8707 4.9026 18.1917 5.17048 18.5682 5.33182C18.9521 5.50124 19.3779 5.55178 19.7907 5.47691C20.2036 5.40205 20.5846 5.20523 20.8845 4.91182L20.9609 4.83545C21.1973 4.59879 21.478 4.41104 21.7871 4.28294C22.0961 4.15484 22.4273 4.08891 22.7618 4.08891C23.0963 4.08891 23.4276 4.15484 23.7366 4.28294C24.0456 4.41104 24.3263 4.59879 24.5627 4.83545C24.7994 5.07186 24.9871 5.35259 25.1152 5.66161C25.2433 5.97062 25.3093 6.30185 25.3093 6.63636C25.3093 6.97088 25.2433 7.30211 25.1152 7.61112C24.9871 7.92013 24.7994 8.20087 24.5627 8.43727L24.4864 8.51364C24.193 8.81359 23.9961 9.19457 23.9213 9.60743C23.8464 10.0203 23.8969 10.4461 24.0664 10.83V10.9318C24.2277 11.3083 24.4956 11.6293 24.837 11.8554C25.1785 12.0816 25.5786 12.2029 25.9882 12.2045H26.2045C26.8796 12.2045 27.5271 12.4727 28.0045 12.9501C28.4818 13.4275 28.75 14.0749 28.75 14.75C28.75 15.4251 28.4818 16.0725 28.0045 16.5499C27.5271 17.0273 26.8796 17.2955 26.2045 17.2955H26.09C25.6805 17.2971 25.2803 17.4184 24.9389 17.6446C24.5974 17.8707 24.3295 18.1917 24.1682 18.5682Z"
+          stroke="var(--Purple, #FF8CFF)"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Link>
+  );
+}
+
 const TABS = ["Learning", "Activity", "Projects"] as const;
 type ProfileTab = (typeof TABS)[number];
 
@@ -84,7 +124,7 @@ function FullBleedRule({ className = "" }: { className?: string }) {
       style={{
         height: 0,
         borderTop: "1px solid #000",
-        opacity: 0.6,
+        opacity: 0.35,
       }}
       aria-hidden
     />
@@ -99,7 +139,7 @@ function MobileRule() {
           width: 391,
           maxWidth: "100%",
           height: 0,
-          opacity: 0.6,
+          opacity: 0.35,
           background: "#000",
           borderTop: "1px solid #000",
         }}
@@ -125,6 +165,7 @@ export function ProfileSectionTabs({
   const pathname = usePathname();
   const router = useRouter();
   const t = useT();
+  const arabic = useArabicLayout();
   const [selected, setSelected] = useState<ProfileTab>(
     () => parseProfileTab(searchParams.get("tab")) ?? initialTab
   );
@@ -153,21 +194,27 @@ export function ProfileSectionTabs({
   function renderTabs(opts: {
     fontSize: number;
     gap: number;
-    paddingLeft: number;
+    paddingLeft?: number;
+    paddingRight?: number;
     height: number;
+    justify?: "flex-start" | "center" | "flex-end";
+    reverse?: boolean;
   }) {
+    const tabs = opts.reverse ? [...TABS].reverse() : TABS;
     return (
       <div
         className="flex items-center"
         style={{
           height: opts.height,
           paddingLeft: opts.paddingLeft,
+          paddingRight: opts.paddingRight,
           gap: opts.gap,
+          justifyContent: opts.justify ?? "flex-start",
         }}
         role="tablist"
         aria-label="Profile sections"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const isSelected = selected === tab;
           return (
             <button
@@ -202,13 +249,31 @@ export function ProfileSectionTabs({
     <div id="profile-sections">
       <div className="min-[744px]:hidden" style={{ marginTop: 23 }}>
         <MobileRule />
-        {renderTabs({ fontSize: 20, gap: 61, paddingLeft: 30, height: 56 })}
+        {renderTabs({
+          fontSize: 20,
+          gap: 61,
+          paddingLeft: arabic ? undefined : 30,
+          height: 56,
+          justify: arabic ? "center" : "flex-start",
+          reverse: arabic,
+        })}
         <MobileRule />
       </div>
 
       <div className="mt-[23px] hidden min-[744px]:block lg:hidden">
         <FullBleedRule />
-        {renderTabs({ fontSize: 24, gap: 61, paddingLeft: 61, height: 56 })}
+        <div className="relative" style={{ height: 56 }}>
+          {renderTabs({
+            fontSize: 24,
+            gap: 61,
+            paddingLeft: arabic ? undefined : 61,
+            paddingRight: arabic ? 61 : undefined,
+            height: 56,
+            justify: arabic ? "flex-end" : "flex-start",
+            reverse: arabic,
+          })}
+          <AccountSettingsIconButton side={arabic ? "left" : "right"} />
+        </div>
         <FullBleedRule />
       </div>
 

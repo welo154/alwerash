@@ -9,6 +9,7 @@ import { pangeaFontFamily } from "@/lib/fonts/pangea";
 const pangeaFont = pangeaFontFamily;
 
 const MAX_VISIBLE_SKILLS = 3;
+const MAX_MOBILE_VISIBLE_SKILLS = 2;
 
 const FALLBACK_BIO =
   "I'm a working professional creative in the graphic design industry. I work as a concept artist and freelance illustrator. I've worked in-house at an animation studio but currently, work from home.";
@@ -159,6 +160,8 @@ export function ProfileInfoPanel({
             columnGap: 6.5,
             rowGap: 9,
             justifyContent: arabic ? "flex-start" : undefined,
+            maxHeight: 29 * 2 + 9,
+            overflow: "hidden",
           }}
         >
           {visibleSkills.map((label) => (
@@ -166,13 +169,13 @@ export function ProfileInfoPanel({
               key={label}
               className="box-border inline-flex items-center justify-center"
               style={{
-                display: "inline-flex",
-                width: "auto",
-                height: 35,
+                display: "flex",
+                width: "fit-content",
+                height: 29,
                 padding: "0 16px",
                 justifyContent: "center",
                 alignItems: "center",
-                borderRadius: 25,
+                borderRadius: 23,
                 border: "0.3px solid rgba(0, 0, 0, 0.35)",
                 background: "#FFF",
               }}
@@ -197,9 +200,8 @@ export function ProfileInfoPanel({
           ))}
         </div>
         {hasMoreSkills ? (
-          <button
-            type="button"
-            className="mt-[9px] border-0 bg-transparent p-0"
+          <p
+            className="m-0 mt-[9px]"
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
@@ -207,15 +209,15 @@ export function ProfileInfoPanel({
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "normal",
-              opacity: 0.6,
-              cursor: "pointer",
-              display: "block",
-              marginLeft: arabic ? "auto" : undefined,
-              width: "fit-content",
+              opacity: 0.4,
+              textAlign: arabic ? "right" : "left",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            {t("view more")}
-          </button>
+            {t("show more")}
+          </p>
         ) : null}
       </div>
 
@@ -250,13 +252,17 @@ export function ProfileInfoPanelMobile({
   bio: string;
   skills: string[];
 }) {
+  const t = useT();
+  const arabic = useArabicLayout();
   const bioText = bio.trim() || FALLBACK_BIO;
-  const visibleSkills = skills.slice(0, MAX_VISIBLE_SKILLS);
+  const visibleSkills = skills.slice(0, MAX_MOBILE_VISIBLE_SKILLS);
+  const hasMoreSkills = skills.length > MAX_MOBILE_VISIBLE_SKILLS;
   const visibleName = name.trim().split(/\s+/).slice(0, 2).join(" ");
+  const align = arabic ? ("right" as const) : undefined;
 
   return (
     <div
-      className="relative box-border shrink-0 overflow-hidden"
+      className="relative box-border flex shrink-0 flex-col overflow-hidden"
       style={{
         marginLeft: 6,
         width: 221,
@@ -265,11 +271,18 @@ export function ProfileInfoPanelMobile({
         background: "#89F496",
         paddingTop: 20,
         paddingLeft: 13,
+        paddingRight: 13,
+        paddingBottom: 16,
       }}
     >
       <div
         className="absolute flex items-center justify-center"
-        style={{ top: 20, right: 14, width: 31, height: 31 }}
+        style={{
+          top: 20,
+          ...(arabic ? { left: 14 } : { right: 14 }),
+          width: 31,
+          height: 31,
+        }}
         aria-hidden
       >
         <svg
@@ -307,25 +320,28 @@ export function ProfileInfoPanelMobile({
         </svg>
       </div>
       <p
-        className="m-0"
+        className="m-0 shrink-0"
         style={{
-          paddingRight: 45,
+          paddingRight: arabic ? 0 : 45,
+          paddingLeft: arabic ? 45 : 0,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
           fontSize: 16,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "normal",
+          textAlign: align,
         }}
       >
-        {visibleName}
+        {t(visibleName)}
       </p>
       {email ? (
         <p
-          className="m-0"
+          className="m-0 shrink-0"
           style={{
             marginTop: 3,
-            paddingRight: 45,
+            paddingRight: arabic ? 0 : 45,
+            paddingLeft: arabic ? 45 : 0,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: 12,
@@ -333,13 +349,14 @@ export function ProfileInfoPanelMobile({
             fontWeight: 400,
             lineHeight: "120%",
             opacity: 0.6,
+            textAlign: align,
           }}
         >
           {email}
         </p>
       ) : null}
       <p
-        className="m-0"
+        className="m-0 shrink-0"
         style={{
           marginTop: 16,
           color: "var(--Black, #000)",
@@ -349,77 +366,117 @@ export function ProfileInfoPanelMobile({
           fontWeight: 400,
           lineHeight: "120%",
           opacity: 0.6,
+          textAlign: align,
         }}
       >
-        Bio
+        {t("Bio")}
       </p>
       <p
-        className="m-0"
+        className="m-0 min-h-0"
+        dir={arabic ? "rtl" : undefined}
         style={{
           marginTop: 3,
           width: 194,
           maxWidth: "100%",
+          marginLeft: arabic ? "auto" : undefined,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
           fontSize: 14,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "normal",
+          overflow: "hidden",
+          display: "-webkit-box",
+          WebkitLineClamp: 4,
+          WebkitBoxOrient: "vertical",
+          textAlign: align,
         }}
       >
-        {bioText}
+        {t(bioText)}
       </p>
-      <p
-        className="m-0"
-        style={{
-          marginTop: 18,
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: 12,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "120%",
-          opacity: 0.6,
-        }}
-      >
-        Skills
-      </p>
-      <div
-        className="flex flex-wrap items-center"
-        style={{
-          marginTop: 7,
-          columnGap: 6,
-          rowGap: 4,
-        }}
-      >
-        {visibleSkills.map((label) => (
-          <div
-            key={label}
-            className="box-border flex items-center justify-center"
-            style={{
-              height: 29,
-              padding: "0 16px",
-              borderRadius: "var(--Radius-MD, 8px)",
-              border: "0.3px solid var(--Black, #000)",
-              background: "#FFF",
-            }}
-          >
-            <span
+      <div className="mt-auto shrink-0 pt-[12px]">
+        <p
+          className="m-0"
+          style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 12,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "120%",
+            opacity: 0.6,
+            textAlign: align,
+          }}
+        >
+          {t("Skills")}
+        </p>
+        <div
+          className="flex flex-wrap items-center"
+          dir={arabic ? "rtl" : undefined}
+          style={{
+            marginTop: 7,
+            columnGap: 6,
+            rowGap: 4,
+            maxHeight: 29 * 2 + 4,
+            overflow: "hidden",
+            justifyContent: arabic ? "flex-start" : undefined,
+          }}
+        >
+          {visibleSkills.map((label) => (
+            <div
+              key={label}
+              className="box-border flex items-center justify-center"
               style={{
-                color: "var(--Black, #000)",
-                textAlign: "center",
-                fontFamily: pangeaFont,
-                fontSize: 14,
-                fontStyle: "normal",
-                fontWeight: 500,
-                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-                whiteSpace: "nowrap",
+                display: "flex",
+                width: "fit-content",
+                maxWidth: "100%",
+                height: 29,
+                padding: "0 16px",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 23,
+                border: "0.3px solid rgba(0, 0, 0, 0.35)",
+                background: "#FFF",
               }}
             >
-              {label}
-            </span>
-          </div>
-        ))}
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  fontWeight: 500,
+                  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100%",
+                }}
+              >
+                {t(label)}
+              </span>
+            </div>
+          ))}
+        </div>
+        {hasMoreSkills ? (
+          <p
+            className="m-0 mt-[7px]"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 12,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              opacity: 0.4,
+              whiteSpace: "nowrap",
+              textAlign: align,
+            }}
+          >
+            {t("show more")}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -433,6 +490,9 @@ export function ProfileInfoPanelTablet({
   initialSkills,
   onProfessionChange,
 }: ProfileInfoPanelProps) {
+  const t = useT();
+  const arabic = useArabicLayout();
+  const align = arabic ? ("right" as const) : undefined;
   const [name, setName] = useState(initialName);
   const [profession, setProfession] = useState(initialProfession);
   const [bio, setBio] = useState(initialBio || FALLBACK_BIO);
@@ -441,12 +501,13 @@ export function ProfileInfoPanelTablet({
   );
 
   const visibleSkills = skills.slice(0, MAX_VISIBLE_SKILLS);
+  const hasMoreSkills = skills.length > MAX_VISIBLE_SKILLS;
   const bioText = bio.trim() || FALLBACK_BIO;
   const visibleName = name.trim();
 
   return (
     <div
-      className="relative box-border shrink-0"
+      className="relative box-border shrink-0 overflow-hidden"
       style={{
         marginLeft: 9,
         width: 426,
@@ -455,28 +516,32 @@ export function ProfileInfoPanelTablet({
         background: "#89F496",
         paddingTop: 28,
         paddingLeft: 27,
+        paddingRight: 27,
       }}
     >
       <p
         className="m-0"
         style={{
-          paddingRight: 48,
+          paddingRight: arabic ? 0 : 48,
+          paddingLeft: arabic ? 48 : 0,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
           fontSize: 24,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "normal",
+          textAlign: align,
         }}
       >
-        {visibleName}
+        {t(visibleName)}
       </p>
       {email ? (
         <p
           className="m-0"
           style={{
             marginTop: 4,
-            paddingRight: 48,
+            paddingRight: arabic ? 0 : 48,
+            paddingLeft: arabic ? 48 : 0,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: 14,
@@ -484,6 +549,7 @@ export function ProfileInfoPanelTablet({
             fontWeight: 400,
             lineHeight: "120%",
             opacity: 0.6,
+            textAlign: align,
           }}
         >
           {email}
@@ -500,25 +566,29 @@ export function ProfileInfoPanelTablet({
           fontWeight: 400,
           lineHeight: "120%",
           opacity: 0.6,
+          textAlign: align,
         }}
       >
-        Bio
+        {t("Bio")}
       </p>
       <p
         className="m-0"
+        dir={arabic ? "rtl" : undefined}
         style={{
           marginTop: 4,
           width: 372,
           maxWidth: "100%",
+          marginLeft: arabic ? "auto" : undefined,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
           fontSize: 18,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "normal",
+          textAlign: align,
         }}
       >
-        {bioText}
+        {t(bioText)}
       </p>
       <p
         className="m-0"
@@ -531,47 +601,86 @@ export function ProfileInfoPanelTablet({
           fontWeight: 400,
           lineHeight: "120%",
           opacity: 0.6,
+          textAlign: align,
         }}
       >
-        Skills
+        {t("Skills")}
       </p>
       <div
-        className="flex flex-wrap items-center"
+        className="shrink-0"
         style={{
-          marginTop: 7,
-          columnGap: 6,
-          rowGap: 6,
-          paddingRight: 16,
+          paddingRight: arabic ? 0 : 16,
+          paddingLeft: arabic ? 16 : 0,
+          paddingBottom: 16,
         }}
       >
-        {visibleSkills.map((label) => (
-          <div
-            key={label}
-            className="box-border flex items-center justify-center"
-            style={{
-              height: 29,
-              padding: "0 16px",
-              borderRadius: "var(--Radius-MD, 8px)",
-              border: "0.3px solid var(--Black, #000)",
-              background: "#FFF",
-            }}
-          >
-            <span
+        <div
+          className="flex flex-wrap items-center"
+          dir={arabic ? "rtl" : undefined}
+          style={{
+            marginTop: 7,
+            columnGap: 6,
+            rowGap: 6,
+            maxHeight: 29 * 2 + 6,
+            overflow: "hidden",
+            justifyContent: arabic ? "flex-start" : undefined,
+          }}
+        >
+          {visibleSkills.map((label) => (
+            <div
+              key={label}
+              className="box-border flex items-center justify-center"
               style={{
-                color: "var(--Black, #000)",
-                textAlign: "center",
-                fontFamily: pangeaFont,
-                fontSize: 14,
-                fontStyle: "normal",
-                fontWeight: 500,
-                lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
-                whiteSpace: "nowrap",
+                display: "flex",
+                width: "fit-content",
+                maxWidth: "100%",
+                height: 29,
+                padding: "0 16px",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 23,
+                border: "0.3px solid rgba(0, 0, 0, 0.35)",
+                background: "#FFF",
               }}
             >
-              {label}
-            </span>
-          </div>
-        ))}
+              <span
+                style={{
+                  color: "var(--Black, #000)",
+                  textAlign: "center",
+                  fontFamily: pangeaFont,
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  fontWeight: 500,
+                  lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100%",
+                }}
+              >
+                {t(label)}
+              </span>
+            </div>
+          ))}
+        </div>
+        {hasMoreSkills ? (
+          <p
+            className="m-0 mt-[7px]"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 14,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              opacity: 0.4,
+              whiteSpace: "nowrap",
+              textAlign: align,
+            }}
+          >
+            {t("show more")}
+          </p>
+        ) : null}
       </div>
 
       <Suspense fallback={null}>

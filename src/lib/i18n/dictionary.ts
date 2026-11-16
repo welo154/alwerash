@@ -36,6 +36,7 @@ export const arabicUi: Record<string, string> = {
   Bio: "السيرة الذاتية",
   Skills: "المهارات",
   "view more": "عرض المزيد",
+  "show more": "عرض المزيد",
   Learning: "التعلم",
   Activity: "النشاط",
   Projects: "المشاريع",
