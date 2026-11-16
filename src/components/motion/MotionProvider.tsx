@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 /**
  * Site-wide motion, driven by data attributes so pages stay server components:
  *
- *   <section data-reveal>…</section>              fades and rises into view once
- *   <div data-reveal-stagger>{cards}</div>        children reveal one after another
+ *   <section data-reveal="">…</section>              fades and rises into view once
+ *   <div data-reveal-stagger="">{cards}</div>        children reveal one after another
  *   className="motion-lift"                       card lifts on hover (CSS only)
  *
  * Plus a short fade of <main> on client-side navigation.

@@ -3,7 +3,6 @@
 
 import { useId } from "react";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
-import { toArabicIndicDigits } from "@/lib/learning-activity";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
 
 const pangeaFont = pangeaFontFamily;
@@ -145,12 +144,14 @@ type Props = {
   progressPercent: number;
   showTrackTicks?: boolean;
   variant?: "mobile" | "tablet" | "tabletWide" | "desktop";
+  encouragement?: string;
 };
 
 export function ActivityProgressMobileCard({
   progressPercent,
   showTrackTicks = false,
   variant = "mobile",
+  encouragement,
 }: Props) {
   const arabic = useArabicLayout();
   const displayPercent = Math.min(100, Math.max(0, Math.round(progressPercent)));
@@ -160,6 +161,9 @@ export function ActivityProgressMobileCard({
   const arcTop = isDesktop ? 36 : isTablet ? 28 : 21;
   const arcHeight = isTablet ? 302.077 : 238;
   const largeType = isTablet;
+  const keepGoing =
+    encouragement ??
+    (arabic ? "استمر - أنت على المسار الصحيح!" : "Keep going - You're on track!");
 
   return (
     <div
@@ -203,16 +207,22 @@ export function ActivityProgressMobileCard({
           fontVariationSettings: '"wght" 400',
         }}
       >
-        {arabic ? `${toArabicIndicDigits(displayPercent)}٪` : `${displayPercent}%`}
+        {`${displayPercent}%`}
       </p>
 
       <p
         className={`absolute left-1/2 m-0 w-full -translate-x-1/2 text-center ${arabic ? "" : "uppercase"}`}
         style={{
-          top: isDesktop ? arcTop + arcHeight / 2 + 33.2 : isTablet ? 210 : 164,
+          top: isDesktop
+            ? arcTop + arcHeight / 2 + 33.2
+            : isTablet
+              ? 210
+              : arabic
+                ? 168
+                : 164,
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
-          fontSize: arabic && isDesktop ? 48 : largeType ? 32 : 24,
+          fontSize: arabic ? (isDesktop ? 48 : 40) : largeType ? 32 : 24,
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
@@ -222,24 +232,24 @@ export function ActivityProgressMobileCard({
         {arabic ? "التقدم" : "PROGRESS"}
       </p>
 
-      {isDesktop ? (
-        <p
-          className="absolute left-1/2 m-0 w-full -translate-x-1/2 text-center"
-          style={{
-            top: arcTop + arcHeight + 6,
-            color: "var(--Black, #000)",
-            fontFamily: pangeaFont,
-            fontSize: 16,
-            fontStyle: "normal",
-            fontWeight: 400,
-            lineHeight: "127%",
-            opacity: 0.6,
-            fontVariationSettings: '"wght" 400',
-          }}
-        >
-          {arabic ? "استمر - أنت على المسار الصحيح!" : "Keep going - You're on track!"}
-        </p>
-      ) : null}
+      <p
+        className="absolute left-1/2 m-0 w-[90%] -translate-x-1/2 text-center"
+        style={{
+          ...(isDesktop
+            ? { top: arcTop + arcHeight + 6 }
+            : { bottom: 24 }),
+          color: "var(--Black, #000)",
+          fontFamily: pangeaFont,
+          fontSize: isDesktop ? 16 : 14,
+          fontStyle: "normal",
+          fontWeight: 400,
+          lineHeight: "127%",
+          opacity: 0.6,
+          fontVariationSettings: '"wght" 400',
+        }}
+      >
+        {keepGoing}
+      </p>
     </div>
   );
 }

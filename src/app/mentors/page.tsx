@@ -19,7 +19,7 @@ export default async function MentorsPage() {
     <div className="min-h-screen bg-white font-sans">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Section header - Skillshare style */}
-        <div data-reveal className="mb-10 flex flex-col gap-4 sm:mb-12 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+        <div data-reveal="" className="mb-10 flex flex-col gap-4 sm:mb-12 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Learn from Creative Experts
           </h1>
@@ -29,7 +29,7 @@ export default async function MentorsPage() {
         </div>
 
         {/* Mentor grid */}
-        <div data-reveal-stagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+        <div data-reveal-stagger="" className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {mentors.map((m) => (
             <Link
               key={m.id}

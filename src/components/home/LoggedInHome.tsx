@@ -446,7 +446,7 @@ export function LoggedInHome({
           </h2>
         </div>
 
-        <div data-reveal>
+        <div data-reveal="">
           <ContinueLearningSection
             courses={continueLearningCourses}
             showDesktopIntro={false}
@@ -454,7 +454,7 @@ export function LoggedInHome({
           />
         </div>
 
-        <div data-reveal>
+        <div data-reveal="">
           <TrackActivitySection
             weeklyActivity={weeklyActivity}
             activityHighlightDayIndex={activityHighlightDayIndex}
@@ -587,7 +587,7 @@ export function LoggedInHome({
           )}
         </h2>
 
-        <div data-reveal>
+        <div data-reveal="">
           <HomeTrackExplorerSection
             trackPillRow1={trackExplorer.trackPillRow1}
             trackPillRow2={trackExplorer.trackPillRow2}

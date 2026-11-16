@@ -74,8 +74,8 @@ export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: Cou
       <div
         className={`w-full min-[744px]:max-lg:pt-[100px] min-[744px]:max-lg:-mt-[75.6px] ${
           arabic
-            ? "max-[743px]:pr-[30px] min-[744px]:pr-[38px]"
-            : "max-[743px]:pl-[30px] min-[744px]:pl-[38px]"
+            ? "max-[743px]:pr-[30px] min-[744px]:max-lg:pr-[61px] lg:pr-[38px]"
+            : "max-[743px]:pl-[30px] min-[744px]:max-lg:pl-[61px] lg:pl-[38px]"
         }`}
       >
         <nav
@@ -112,7 +112,7 @@ export function CourseBreadcrumb({ courseTitle, courseTitleAr, fontFamily }: Cou
       {/* Full-width hairline under the path */}
       <div
         aria-hidden
-        className="mt-[7px] box-border h-0 w-full border-0 border-t border-black bg-black opacity-30 min-[744px]:mt-[13px]"
+        className="mt-[7px] box-border h-[0.3px] w-full border-0 bg-black opacity-30 min-[744px]:mt-[13px]"
       />
     </div>
   );

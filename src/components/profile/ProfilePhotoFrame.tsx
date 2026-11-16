@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -203,6 +204,7 @@ export function ProfilePhotoFrame({
   photoSrc?: string | null;
   profession?: string | null;
 }) {
+  const t = useT();
   const rawId = useId().replace(/:/g, "");
   const clipId = `profile-photo-clip-${rawId}`;
   const maskId = `profile-photo-mask-${rawId}`;
@@ -262,7 +264,7 @@ export function ProfilePhotoFrame({
         <p
           className="absolute m-0"
           style={{
-            right: 10,
+            left: 99,
             bottom: 10,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
@@ -271,11 +273,11 @@ export function ProfilePhotoFrame({
             fontWeight: 400,
             lineHeight: "normal",
             opacity: 0.6,
-            textAlign: "right",
+            textAlign: "left",
             whiteSpace: "nowrap",
           }}
         >
-          {professionLabel}
+          {t(professionLabel)}
         </p>
       ) : null}
     </div>

@@ -224,7 +224,7 @@ export function SiteFooter({
           </div>
         </div>
 
-        <hr className="mt-[15px] mb-[38px] border-t border-black" />
+        <hr className="mt-[15px] mb-[38px] border-t border-black opacity-30" />
 
         {/* Four columns — max-content widths so labels stay one line (scroll on narrow viewports) */}
         <div className="overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch]">

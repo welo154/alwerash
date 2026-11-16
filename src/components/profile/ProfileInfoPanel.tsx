@@ -2,6 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { ProfileEditButton } from "@/components/profile/ProfileEditModal";
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -28,6 +30,8 @@ export function ProfileInfoPanel({
   initialSkills,
   onProfessionChange,
 }: ProfileInfoPanelProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const [name, setName] = useState(initialName);
   const [profession, setProfession] = useState(initialProfession);
   const [bio, setBio] = useState(initialBio || FALLBACK_BIO);
@@ -48,75 +52,89 @@ export function ProfileInfoPanel({
         borderRadius: 55,
         background: "var(--Bright-Green, #89F496)",
         paddingTop: 44,
-        paddingLeft: 55,
+        paddingLeft: arabic ? 69 : 55,
+        paddingRight: arabic ? 55 : 69,
         paddingBottom: 44,
       }}
     >
-      <p
-        className="m-0"
-        style={{
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: 32,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "normal",
-        }}
+      <div
+        className={arabic ? "ml-auto" : undefined}
+        style={{ maxWidth: arabic ? 474 : 465 }}
       >
-        {name}
-      </p>
-      {email ? (
         <p
           className="m-0"
           style={{
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 32,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "normal",
+            textAlign: arabic ? "right" : undefined,
+          }}
+        >
+          {t(name)}
+        </p>
+        {email ? (
+          <p
+            className="m-0"
+            style={{
+              color: "var(--Black, #000)",
+              fontFamily: pangeaFont,
+              fontSize: 18,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "120%",
+              opacity: 0.6,
+              textAlign: arabic ? "right" : undefined,
+            }}
+          >
+            {email}
+          </p>
+        ) : null}
+        <p
+          className="m-0"
+          style={{
+            marginTop: 17,
             color: "var(--Black, #000)",
             fontFamily: pangeaFont,
             fontSize: 18,
             fontStyle: "normal",
             fontWeight: 400,
             lineHeight: "120%",
+            opacity: 0.6,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          {email}
+          {t("Bio")}
         </p>
-      ) : null}
-      <p
-        className="m-0"
-        style={{
-          marginTop: 17,
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: 18,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "normal",
-        }}
-      >
-        Bio
-      </p>
-      <p
-        className="m-0"
-        style={{
-          marginTop: 4,
-          width: 465,
-          maxWidth: "100%",
-          color: "var(--Black, #000)",
-          fontFamily: pangeaFont,
-          fontSize: 18,
-          fontStyle: "normal",
-          fontWeight: 400,
-          lineHeight: "normal",
-        }}
-      >
-        {bio}
-      </p>
+        <p
+          className="m-0"
+          dir={arabic ? "rtl" : undefined}
+          style={{
+            marginTop: 4,
+            width: arabic ? 474 : 465,
+            maxWidth: "100%",
+            color: "var(--Black, #000)",
+            fontFamily: pangeaFont,
+            fontSize: 18,
+            fontStyle: "normal",
+            fontWeight: 400,
+            lineHeight: "normal",
+            textAlign: arabic ? "right" : undefined,
+          }}
+        >
+          {t(bio)}
+        </p>
+      </div>
 
       <div
         className="absolute"
-        style={{
-          left: 607,
-          top: 44,
-        }}
+        style={
+          arabic
+            ? { right: 637, left: 69, top: 44 }
+            : { left: 607, right: 69, top: 44 }
+        }
       >
         <p
           className="m-0"
@@ -128,34 +146,41 @@ export function ProfileInfoPanel({
             fontWeight: 400,
             lineHeight: "120%",
             opacity: 0.6,
+            textAlign: arabic ? "right" : undefined,
           }}
         >
-          Skills
+          {t("Skills")}
         </p>
         <div
           className="flex flex-wrap"
+          dir={arabic ? "rtl" : undefined}
           style={{
             marginTop: 9,
             columnGap: 6.5,
             rowGap: 9,
-            maxWidth: 320,
+            justifyContent: arabic ? "flex-start" : undefined,
           }}
         >
           {visibleSkills.map((label) => (
             <div
               key={label}
-              className="box-border flex items-center justify-center"
+              className="box-border inline-flex items-center justify-center"
               style={{
+                display: "inline-flex",
                 width: "auto",
                 height: 35,
                 padding: "0 16px",
-                borderRadius: "var(--Radius-MD, 8px)",
-                border: "0.3px solid var(--Black, #000)",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 25,
+                border: "0.3px solid rgba(0, 0, 0, 0.35)",
                 background: "#FFF",
               }}
             >
               <span
                 style={{
+                  display: "block",
+                  width: "100%",
                   color: "var(--Black, #000)",
                   textAlign: "center",
                   fontFamily: pangeaFont,
@@ -166,7 +191,7 @@ export function ProfileInfoPanel({
                   whiteSpace: "nowrap",
                 }}
               >
-                {label}
+                {t(label)}
               </span>
             </div>
           ))}
@@ -184,9 +209,12 @@ export function ProfileInfoPanel({
               lineHeight: "normal",
               opacity: 0.6,
               cursor: "pointer",
+              display: "block",
+              marginLeft: arabic ? "auto" : undefined,
+              width: "fit-content",
             }}
           >
-            view more
+            {t("view more")}
           </button>
         ) : null}
       </div>

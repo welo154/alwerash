@@ -18,7 +18,7 @@ const TABLET_NAV_WIDTH = 732;
 const TABLET_LOGO_TOP = 3;
 const TABLET_SEARCH_ICON = 26;
 const TABLET_SEARCH_TOP = 31 - 7;
-const TABLET_SEARCH_RIGHT = 74;
+const TABLET_CLOSE_RIGHT = 35;
 const MOBILE_SEARCH_ICON = 23;
 
 const PRIMARY_LINK = {
@@ -258,31 +258,32 @@ export function MobileNavDrawer({
               unoptimized
             />
           </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close menu"
-            className="absolute z-[100] flex h-[26px] w-[26px] items-center justify-center"
-            style={{ top: TABLET_SEARCH_TOP, right: TABLET_SEARCH_RIGHT }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={TABLET_SEARCH_ICON}
-              height={TABLET_SEARCH_ICON}
-              viewBox="0 0 21 21"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M20 1L1 20M1 1L20 20"
-                stroke="#000"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close menu"
+          className="absolute z-[100] hidden h-[26px] w-[26px] items-center justify-center min-[744px]:flex"
+          style={{ top: 7 + TABLET_SEARCH_TOP, right: TABLET_CLOSE_RIGHT }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={TABLET_SEARCH_ICON}
+            height={TABLET_SEARCH_ICON}
+            viewBox="0 0 21 21"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M20 1L1 20M1 1L20 20"
+              stroke="#000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
       <div className="pt-[30px]">

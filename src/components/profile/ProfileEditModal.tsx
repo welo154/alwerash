@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useT } from "@/components/i18n/Tr";
+import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 
 const pangeaFont = pangeaFontFamily;
@@ -438,6 +440,8 @@ export function ProfileEditButton({
   initialSkills,
   onSaved,
 }: ProfileEditButtonProps) {
+  const arabic = useArabicLayout();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -499,18 +503,21 @@ export function ProfileEditButton({
         onClick={() => setOpen(true)}
         className={`absolute box-border flex items-center justify-end border-0 p-0 ${className}`.trim()}
         style={{
-          right: 59,
+          display: "flex",
+          ...(arabic ? { left: 59 } : { right: 59 }),
           bottom: 39,
-          width: 87,
+          width: arabic ? "auto" : 87,
+          minWidth: 87,
           height: 39,
-          paddingRight: 16,
-          paddingLeft: 16,
-          borderRadius: "var(--Radius-MD, 8px)",
+          padding: "0 16px",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          borderRadius: 25,
           border: "0.3px solid var(--Black, #000)",
           background: "var(--Dark-Green, #004B3C)",
           cursor: "pointer",
         }}
-        aria-label="Edit profile"
+        aria-label={t("Edit")}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -521,9 +528,9 @@ export function ProfileEditButton({
           aria-hidden
           className="pointer-events-none absolute"
           style={{
-            left: 0,
+            right: 59,
             top: "50%",
-            transform: "translate(-50%, -50%)",
+            transform: "translateY(-50%)",
           }}
         >
           <path
@@ -552,7 +559,7 @@ export function ProfileEditButton({
             lineHeight: "var(--Line-height-Heading-sm, 19.6px)",
           }}
         >
-          EDIT
+          {t("EDIT")}
         </span>
       </button>
       )}

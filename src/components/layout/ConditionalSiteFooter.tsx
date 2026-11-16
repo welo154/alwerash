@@ -40,11 +40,18 @@ export function ConditionalSiteFooter() {
     return null;
   }
 
+  const flushMobileFooter =
+    pathname.startsWith("/course-access") || pathname.startsWith("/profile");
+
   return (
     <>
       <div className="overflow-x-clip bg-white lg:hidden min-[744px]:overflow-hidden">
         <div className="mx-auto flex w-full max-w-[393px] flex-col items-center px-0 pb-0 min-[744px]:max-w-[744px]">
-          <LandingMobileFooter courseLinks={menu.allCourses} softwareLinks={menu.software} />
+          <LandingMobileFooter
+            courseLinks={menu.allCourses}
+            softwareLinks={menu.software}
+            flushTop={flushMobileFooter}
+          />
         </div>
       </div>
       <div className="max-lg:hidden">

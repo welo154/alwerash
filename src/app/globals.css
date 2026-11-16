@@ -2052,8 +2052,10 @@ label:has(input[type="radio"]) {
 
   .fcl-unit-complete-row {
     padding-top: 35px;
-    padding-bottom: 46px;
-    padding-inline-start: 30px;
+    /* 32px gap to the mobile footer inside the 393px frame */
+    padding-bottom: 32px;
+    /* 30px from left (icon) and right (label) inside the 393px frame */
+    padding-inline: 30px;
   }
 
   @media (min-width: 744px) {
@@ -2090,7 +2092,9 @@ label:has(input[type="radio"]) {
 
     .fcl-unit-complete-row {
       padding-top: 48px;
-      padding-inline-start: 61px;
+      padding-bottom: 46px;
+      /* Match mobile: equal insets inside the 744px tablet frame */
+      padding-inline: 61px;
     }
   }
 
@@ -2098,6 +2102,7 @@ label:has(input[type="radio"]) {
   body:has(.fcl-page) .site-mobile-footer {
     margin-top: 0 !important;
     transform: none !important;
+    translate: 0 !important;
   }
 
   body:has(.profile-page) main {
@@ -2108,6 +2113,7 @@ label:has(input[type="radio"]) {
   body:has(.profile-page) .site-mobile-footer {
     margin-top: 0 !important;
     transform: none !important;
+    translate: 0 !important;
   }
 
   .fcl-unit-check {

@@ -249,7 +249,7 @@ function ContinueLearningDesktopRow({
         width: 1201,
         height: 118,
         borderRadius: 50,
-        border: "0.3px solid var(--Black, #000)",
+        border: "0.3px solid rgba(0, 0, 0, 0.35)",
         background: "var(--White, #FFF)",
       }}
     >
@@ -361,7 +361,7 @@ function ContinueLearningDesktopRow({
           justifyContent: "center",
           alignItems: "center",
           borderRadius: 24,
-          border: "0.3px solid #000",
+          border: "0.3px solid rgba(0, 0, 0, 0.35)",
         }}
         aria-hidden
       >
@@ -377,8 +377,8 @@ function ContinueLearningDesktopRow({
             padding: 0,
             borderRadius: 24,
             border: "none",
-            borderRight: arabic ? undefined : "0.3px solid #000",
-            borderLeft: arabic ? "0.3px solid #000" : undefined,
+            borderRight: arabic ? undefined : "0.3px solid rgba(0, 0, 0, 0.35)",
+            borderLeft: arabic ? "0.3px solid rgba(0, 0, 0, 0.35)" : undefined,
             background: arabic
               ? "linear-gradient(270deg, var(--Blue, #66E0F2) 0%, var(--Bright-Green, #89F496) 100%)"
               : "var(--gradient, linear-gradient(90deg, var(--Blue, #66E0F2) 0%, var(--Bright-Green, #89F496) 100%))",
@@ -395,7 +395,7 @@ function ContinueLearningDesktopRow({
               width: TRACK_TICK_WIDTH_PX,
               height: TRACK_TICK_HEIGHT_PX,
               transform: "translateY(-50%)",
-              background: "#000",
+              background: "rgba(0, 0, 0, 0.35)",
             }}
           />
         ))}
@@ -871,7 +871,7 @@ export function ContinueLearningSection({  courses,
       <div
         className={
           arabic
-            ? "max-[743px]:pr-[27px] max-[743px]:pl-0 min-[744px]:max-lg:pr-[61px] min-[744px]:max-lg:pl-0 lg:pl-[120px] lg:pr-[69px]"
+            ? "max-[743px]:pr-[27px] max-[743px]:pl-0 min-[744px]:max-lg:pr-[61px] min-[744px]:max-lg:pl-0 lg:pr-[120px] lg:pl-[69px]"
             : "max-[743px]:pl-[27px] max-[743px]:pr-0 min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:pr-0 lg:pl-[120px] lg:pr-[69px]"
         }
       >
@@ -973,31 +973,38 @@ export function ContinueLearningSection({  courses,
 
         {showDesktopIntro ? (
           <h2
-            className={`${showTopRule ? "mt-[40px]" : ""} hidden w-full uppercase lg:block`}
+            className={`${showTopRule ? "mt-[40px]" : ""} hidden w-full lg:block ${arabic ? "" : "uppercase"}`}
             style={{
               color: "var(--Black, #000)",
               fontFamily: pangeaFont,
-              fontSize: "36px",
+              fontSize: arabic ? 40 : "36px",
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "120%",
               fontVariationSettings: '"wght" 400',
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            <Tr>CONTINUE</Tr>{" "}
-            <span
-              style={{
-                color: "var(--Black, #000)",
-                fontFamily: pangeaFont,
-                fontSize: "36px",
-                fontStyle: "italic",
-                fontWeight: 700,
-                lineHeight: "120%",
-                fontVariationSettings: '"wght" 700',
-              }}
-            >
-              <Tr>LEARNING</Tr>
-            </span>
+            {arabic ? (
+              "استمر في التعلم"
+            ) : (
+              <>
+                <Tr>CONTINUE</Tr>{" "}
+                <span
+                  style={{
+                    color: "var(--Black, #000)",
+                    fontFamily: pangeaFont,
+                    fontSize: "36px",
+                    fontStyle: "italic",
+                    fontWeight: 700,
+                    lineHeight: "120%",
+                    fontVariationSettings: '"wght" 700',
+                  }}
+                >
+                  <Tr>LEARNING</Tr>
+                </span>
+              </>
+            )}
           </h2>
         ) : null}
       </div>

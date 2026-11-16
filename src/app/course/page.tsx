@@ -111,7 +111,7 @@ export default async function LearnPage() {
 
             <div className="relative z-0 min-w-0 flex-1 overflow-x-visible">
               <section
-                data-reveal
+                data-reveal=""
                 aria-label="Featured tracks"
                 className="mt-5 w-full min-w-0 overflow-x-visible min-[744px]:max-lg:mt-[37px] lg:mt-0 lg:-ms-[73px]"
               >
@@ -126,13 +126,13 @@ export default async function LearnPage() {
 
               <div className="mt-[45px] min-w-0 w-full overflow-x-visible min-[744px]:max-lg:mt-[69px] lg:mt-[90px]">
                 {popularTiles.length > 0 ? (
-                  <section data-reveal id="popular-classes" aria-label="Popular classes" className="scroll-mt-8">
+                  <section data-reveal="" id="popular-classes" aria-label="Popular classes" className="scroll-mt-8">
                     <LearnPopularClassesSection tiles={popularTiles} fullBleed="right" hideNavOnMobile />
                   </section>
                 ) : null}
 
                 {allCourseItems.length > 0 ? (
-                  <div data-reveal className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
+                  <div data-reveal="" className={hasCarouselSections ? "mt-[45px] min-[744px]:max-lg:mt-[69px] lg:mt-[90px]" : ""}>
                     <Suspense fallback={null}>
                       <LearnAllCoursesSection
                         courses={allCourseItems}
@@ -150,7 +150,7 @@ export default async function LearnPage() {
       </div>
 
       {landingMostsMentors.length > 0 ? (
-        <div data-reveal>
+        <div data-reveal="">
           <LandingCurrentMostsSection
             mentors={landingMostsMentors}
             mentorCardWidthPx={383}

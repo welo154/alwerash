@@ -2,6 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import { useT } from "@/components/i18n/Tr";
 import { pangeaFontFamily } from "@/lib/fonts/pangea";
 import { useArabicLayout } from "@/components/providers/LocaleProvider";
 import {
@@ -37,12 +38,29 @@ const DEFAULT_PROJECT_CARDS: ProjectQuoteCardData[] = [
 
 /** Same card as “Why students love Alwerash” / course students section — no panel background. */
 export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
+  const arabic = useArabicLayout();
+  const t = useT();
+
   return (
-    <div className="h-[327px] w-[587px] max-w-full shrink-0 rounded-[36px] border border-black bg-white pb-[38px] pl-[45px] pr-[28px]">
-      <div className="flex h-full items-start justify-between gap-[16px]">
-        <div className="flex h-full min-h-0 flex-1 flex-col pt-[80px]">
+    <div
+      className={`h-[327px] w-[587px] max-w-full shrink-0 rounded-[36px] bg-white pb-[38px] ${
+        arabic ? "pr-[45px] pl-[28px]" : "pl-[45px] pr-[28px]"
+      }`}
+      style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+    >
+      <div
+        className={`flex h-full items-start justify-between gap-[16px] ${
+          arabic ? "flex-row-reverse" : ""
+        }`}
+      >
+        <div
+          className={`flex h-full min-h-0 flex-1 flex-col pt-[80px] ${
+            arabic ? "items-end" : ""
+          }`}
+        >
           <p
             className="m-0"
+            dir={arabic ? "rtl" : undefined}
             style={{
               width: "286px",
               maxWidth: "100%",
@@ -52,12 +70,20 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "normal",
+              textAlign: arabic ? "right" : undefined,
             }}
           >
-            {`"${card.quote}"`}
+            {`"${t(card.quote)}"`}
           </p>
-          <div className="mt-auto flex items-center gap-[10px] pt-[18px]">
-            <div className="flex h-[63px] w-[63px] items-center justify-center rounded-full border border-black bg-white">
+          <div
+            className={`mt-auto flex items-center gap-[10px] pt-[18px] ${
+              arabic ? "flex-row-reverse" : ""
+            }`}
+          >
+            <div
+              className="flex h-[63px] w-[63px] items-center justify-center rounded-full bg-white"
+              style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+            >
               <span
                 style={{
                   color: "var(--Black, #000)",
@@ -71,7 +97,7 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
                 {card.initials}
               </span>
             </div>
-            <div>
+            <div className={arabic ? "text-right" : undefined}>
               <p
                 className="m-0"
                 style={{
@@ -81,13 +107,20 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "normal",
+                  textTransform: arabic ? "none" : "uppercase",
                 }}
               >
-                {card.name}
+                {t(card.name)}
               </p>
               <span
-                className="mt-[6px] inline-flex h-[31px] items-center rounded-[8px] border border-black px-4"
+                className="mt-[6px] box-border"
                 style={{
+                  display: "inline-flex",
+                  height: 31,
+                  padding: "0 16px",
+                  alignItems: "center",
+                  borderRadius: 25,
+                  border: "0.3px solid rgba(0, 0, 0, 0.35)",
                   background: "var(--Blue, #64E1FF)",
                   color: "var(--Text-Primary, #141413)",
                   fontFamily: pangeaFont,
@@ -97,12 +130,15 @@ export function ProjectQuoteCard({ card }: { card: ProjectQuoteCardData }) {
                   lineHeight: "19.6px",
                 }}
               >
-                {card.role}
+                {t(card.role)}
               </span>
             </div>
           </div>
         </div>
-        <div className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] border border-black bg-[#E7E7E7]" />
+        <div
+          className="mt-[29px] h-[260px] w-[203px] shrink-0 rounded-[36px] bg-[#E7E7E7]"
+          style={{ border: "0.3px solid rgba(0, 0, 0, 0.35)" }}
+        />
       </div>
     </div>
   );
@@ -128,7 +164,7 @@ export function ProfileProjectsSection({
       aria-label="Projects"
     >
       <h2
-        className="m-0 hidden uppercase max-[743px]:block"
+        className={`m-0 hidden max-[743px]:block ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -136,14 +172,21 @@ export function ProfileProjectsSection({
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
+          textAlign: arabic ? "right" : undefined,
         }}
       >
-        YOUR{" "}
-        <span style={{ fontStyle: "italic", fontWeight: 700 }}>PROJECTS</span>
+        {arabic ? (
+          "مشاريعك"
+        ) : (
+          <>
+            YOUR{" "}
+            <span style={{ fontStyle: "italic", fontWeight: 700 }}>PROJECTS</span>
+          </>
+        )}
       </h2>
 
       <h2
-        className="m-0 hidden uppercase min-[744px]:max-lg:block"
+        className={`m-0 hidden min-[744px]:max-lg:block ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -151,14 +194,21 @@ export function ProfileProjectsSection({
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
+          textAlign: arabic ? "right" : undefined,
         }}
       >
-        YOUR{" "}
-        <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
+        {arabic ? (
+          "مشاريعك"
+        ) : (
+          <>
+            YOUR{" "}
+            <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
+          </>
+        )}
       </h2>
 
       <h2
-        className="m-0 hidden uppercase lg:block"
+        className={`m-0 hidden lg:block ${arabic ? "" : "uppercase"}`}
         style={{
           color: "var(--Black, #000)",
           fontFamily: pangeaFont,
@@ -166,10 +216,17 @@ export function ProfileProjectsSection({
           fontStyle: "normal",
           fontWeight: 400,
           lineHeight: "120%",
+          textAlign: arabic ? "right" : undefined,
         }}
       >
-        YOUR{" "}
-        <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
+        {arabic ? (
+          "مشاريعك"
+        ) : (
+          <>
+            YOUR{" "}
+            <span style={{ fontStyle: "italic", fontWeight: 600 }}>PROJECTS</span>
+          </>
+        )}
       </h2>
 
       <div className="mt-[27px] flex flex-col items-center gap-[30px] pr-[30px] min-[744px]:hidden">
@@ -201,7 +258,9 @@ export function ProfileProjectsSection({
       </div>
 
       <div
-        className="mt-[45px] hidden flex-nowrap items-start lg:flex"
+        className={`mt-[45px] hidden flex-nowrap items-start lg:flex ${
+          arabic ? "flex-row-reverse justify-start" : ""
+        }`}
         style={{ gap: 31 }}
       >
         {visible.map((card, idx) => (

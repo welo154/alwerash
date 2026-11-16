@@ -135,9 +135,12 @@ function MobileFooterColumn({
 export function LandingMobileFooter({
   courseLinks,
   softwareLinks,
+  flushTop = false,
 }: {
   courseLinks: { label: string; href: string }[];
   softwareLinks: { label: string; href: string }[];
+  /** No top margin / translate — use when the page already owns the gap above the footer. */
+  flushTop?: boolean;
 }) {
   const year = new Date().getFullYear();
   const { locale, toggleLocale } = useLocale();
@@ -145,9 +148,9 @@ export function LandingMobileFooter({
 
   return (
     <footer
-      className={`site-mobile-footer relative z-10 mx-auto mt-[44px] box-border flex w-[382px] max-w-[99%] translate-y-[35px] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:max-w-none min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px] ${
-        arabic ? "min-[744px]:[direction:rtl]" : ""
-      }`}
+      className={`site-mobile-footer relative z-10 mx-auto box-border flex w-[382px] max-w-[99%] flex-col overflow-hidden rounded-[55px] pb-[28px] pt-[25px] max-[743px]:px-[24px] min-[744px]:w-[732px] min-[744px]:max-w-none min-[744px]:translate-y-0 min-[744px]:rounded-t-[55px] min-[744px]:rounded-b-none min-[744px]:pl-[55px] min-[744px]:pr-[55px] min-[744px]:pt-[50px] min-[744px]:pb-[24px] ${
+        flushTop ? "mt-0 translate-y-0" : "mt-[44px] translate-y-[35px]"
+      } ${arabic ? "min-[744px]:[direction:rtl]" : ""}`}
       style={{
         background: "var(--Bright-Green, #89F496)",
       }}
@@ -267,7 +270,7 @@ export function LandingMobileFooter({
       </div>
 
       <hr
-        className="relative left-1/2 mt-[15px] w-[calc(100%+24px)] max-w-none -translate-x-1/2 border-0 bg-black min-[744px]:w-[622px]"
+        className="relative left-1/2 mt-[15px] w-[calc(100%+24px)] max-w-none -translate-x-1/2 border-0 bg-black opacity-30 min-[744px]:w-[622px]"
         style={{ height: "0.3px" }}
       />
 

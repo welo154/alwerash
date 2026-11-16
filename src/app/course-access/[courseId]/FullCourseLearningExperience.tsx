@@ -201,7 +201,7 @@ function CourseAccessSectionRule({
   return (
     <div
       className={[
-        "flex w-full justify-center max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] min-[744px]:max-lg:-ml-[61px] min-[744px]:max-lg:w-[calc(100%+61px)] lg:justify-start lg:ar:translate-x-[33px]",
+        "flex w-full justify-center max-[743px]:-mx-[30px] max-[743px]:w-[calc(100%+60px)] min-[744px]:max-lg:-mx-[61px] min-[744px]:max-lg:w-[calc(100%+122px)] lg:justify-start lg:ar:translate-x-[33px]",
         afterVideo ? "fcl-lesson-rule-after-video" : "",
         className ?? "",
       ]
@@ -330,7 +330,7 @@ function SectionHeader({
     : `A course by ${[displayInstructor, profession].filter(Boolean).join(" , ")}`;
 
   return (
-    <header className="w-full max-[743px]:pl-[30px] max-[743px]:ar:pl-0 max-[743px]:ar:pr-[30px] lg:ar:text-right">
+    <header className="w-full max-[743px]:px-[30px] lg:ar:text-right">
       <h1
         className="m-0 w-[334px] max-w-full text-[18px] font-medium min-[744px]:max-lg:w-auto min-[744px]:max-lg:text-[24px] lg:w-[755px] lg:max-w-full lg:text-[32px] lg:ar:w-full lg:ar:text-right"
         style={{
@@ -458,14 +458,14 @@ function TextContentLessonBlock({
       <div className="w-full lg:mt-[22px] lg:ar:text-right">
         {variant === "article" && !expanded ? (
           <p
-            className={`m-0 line-clamp-4 w-[334px] max-w-full text-[16px] min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right ${variant === "article" ? "min-[744px]:max-lg:w-[619px]" : "min-[744px]:max-lg:w-[620px]"}`}
+            className="m-0 w-full max-w-[334px] text-[16px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:w-full min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right"
             style={textStyle}
           >
             {body}
           </p>
         ) : (
           <p
-            className={`m-0 w-[334px] max-w-full text-[16px] min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right ${variant === "article" ? "min-[744px]:max-lg:w-[619px]" : "min-[744px]:max-lg:w-[620px]"}`}
+            className="m-0 w-full max-w-[334px] text-[16px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:w-full min-[744px]:max-lg:text-[18px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right"
             style={textStyle}
           >
             {body}
@@ -477,7 +477,11 @@ function TextContentLessonBlock({
         <>
           <div className="hidden max-[743px]:block" style={{ height: 38 }} aria-hidden />
           <div className="hidden lg:block" style={{ height: 39 }} aria-hidden />
-          <div className="flex items-center min-[744px]:max-lg:mt-[42px] lg:ar:justify-start">
+          <div
+            className={`flex w-full items-center min-[744px]:max-lg:mt-[42px] ${
+              arabic ? "flex-row-reverse justify-start" : ""
+            }`}
+          >
             <button
               type="button"
               onClick={() => setExpanded((prev) => !prev)}
@@ -509,10 +513,16 @@ function TextContentLessonBlock({
                 {expanded ? "LESS" : "VIEW"}
               </span>
             </button>
-            <span className="inline-flex items-center" style={{ marginInlineStart: 18 }}>
+            <span
+              className="inline-flex items-center"
+              style={arabic ? { marginInlineEnd: 18 } : { marginInlineStart: 18 }}
+            >
               <HeartIcon />
             </span>
-            <span className="inline-flex items-center" style={{ marginInlineStart: 12 }}>
+            <span
+              className="inline-flex items-center"
+              style={arabic ? { marginInlineEnd: 12 } : { marginInlineStart: 12 }}
+            >
               <DownloadIcon />
             </span>
           </div>
@@ -563,7 +573,11 @@ function VideoLessonBlock({
 
   return (
     <article id={`lesson-${lesson.id}`} className="fcl-video-block">
-      <div className="mb-[18px] flex w-full max-w-full items-center justify-between gap-[16px] max-[743px]:pr-[29px] max-[743px]:ar:pr-0 max-[743px]:ar:pl-[29px] min-[744px]:max-lg:mb-[28px] min-[744px]:max-lg:pr-[61px] min-[744px]:max-lg:ar:pr-0 min-[744px]:max-lg:ar:pl-[61px] lg:mb-[20px] lg:w-[675px] lg:ar:w-full">
+      <div
+        className={`mb-[18px] flex w-full max-w-full items-center justify-between gap-[16px] min-[744px]:max-lg:mb-[28px] lg:mb-[20px] lg:w-[675px] lg:ar:w-full ${
+          arabic ? "flex-row-reverse" : ""
+        }`}
+      >
         <h2
           className="m-0 min-w-0 truncate text-[18px] min-[744px]:max-lg:text-[24px] lg:text-[24px] lg:ar:text-right"
           style={{
@@ -578,7 +592,7 @@ function VideoLessonBlock({
           <LocalName en={lesson.title} ar={lesson.titleAr} />
         </h2>
         {durationSeconds != null && durationSeconds > 0 ? (
-          <div className="inline-flex shrink-0 items-center lg:ar:flex-row-reverse">
+          <div className={`inline-flex shrink-0 items-center ${arabic ? "flex-row-reverse" : ""}`}>
             <ClockIcon />
             <span
               className="ms-[6px] text-[14px] min-[744px]:max-lg:text-[16px] min-[744px]:max-lg:opacity-60 lg:text-[16px] lg:opacity-60"
@@ -596,9 +610,9 @@ function VideoLessonBlock({
         ) : null}
       </div>
 
-      <div className="max-[743px]:-ml-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+30px)] max-[743px]:justify-center">
+      <div className="max-[743px]:-mx-[30px] max-[743px]:flex max-[743px]:w-[calc(100%+60px)] max-[743px]:justify-center min-[744px]:max-lg:w-full">
       <div
-        className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
+        className="relative h-[202px] w-[334px] overflow-hidden rounded-[30px] border-[0.2px] border-[var(--Black,#000)] bg-[var(--Grey,#E9E9E9)] min-[744px]:max-lg:h-[420px] min-[744px]:max-lg:w-full min-[744px]:max-lg:max-w-[622px] min-[744px]:max-lg:rounded-[50px] min-[744px]:max-lg:border-[0.3px] lg:h-[410px] lg:w-[675px] lg:rounded-[50px] lg:border-[0.3px]"
       >
         {isPlaying && hasStream ? (
           <div className="h-full w-full">
@@ -653,7 +667,7 @@ function VideoLessonBlock({
 
       {descriptionText ? (
         <p
-          className="m-0 mt-[20px] w-[334px] max-w-full text-[16px] min-[744px]:max-lg:mt-[42px] min-[744px]:max-lg:w-[620px] min-[744px]:max-lg:text-[18px] lg:mt-[46px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right"
+          className="m-0 mt-[20px] w-full max-w-[334px] text-[16px] min-[744px]:max-lg:mt-[42px] min-[744px]:max-lg:max-w-none min-[744px]:max-lg:w-full min-[744px]:max-lg:text-[18px] lg:mt-[46px] lg:w-[673px] lg:max-w-full lg:text-[18px] lg:ar:w-[673px] lg:ar:text-right"
           style={{
             color: "var(--Black, #000)",
             textAlign: arabic ? "right" : undefined,
@@ -948,14 +962,18 @@ export function FullCourseLearningExperience({
   }, [nextModule, selectModule, selectLesson]);
 
   return (
-    <div className="fcl-page mx-auto max-w-[1600px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:ar:pl-[117px] lg:ar:pr-[120px] lg:pt-[28px] lg:ar:[direction:rtl]">
+    <div className="fcl-page mx-auto w-full max-w-[1600px] max-[743px]:max-w-[393px] min-[744px]:max-lg:max-w-[744px] max-lg:overflow-x-clip max-lg:pt-[12px] lg:pl-[120px] lg:pr-[117px] lg:ar:pl-[117px] lg:ar:pr-[120px] lg:pt-[28px] lg:ar:[direction:rtl]">
       {/* Break out of page side padding so path is inset and the HR is full-bleed */}
       <div className="lg:-ml-[120px] lg:-mr-[117px] lg:ar:-ml-[117px] lg:ar:-mr-[120px] lg:w-[calc(100%+237px)]">
         <CourseBreadcrumb courseTitle={courseTitle} courseTitleAr={courseTitleAr} fontFamily={fontFamily} />
       </div>
 
       <div className="mt-[27px] flex justify-center min-[744px]:hidden">
-        <ActivityProgressMobileCard progressPercent={progressPercent} showTrackTicks />
+        <ActivityProgressMobileCard
+          progressPercent={progressPercent}
+          showTrackTicks
+          encouragement={encouragement}
+        />
       </div>
 
       <div className="mt-[60px] hidden justify-center min-[744px]:flex lg:hidden">
@@ -963,6 +981,7 @@ export function FullCourseLearningExperience({
           progressPercent={progressPercent}
           showTrackTicks
           variant="tabletWide"
+          encouragement={encouragement}
         />
       </div>
 
@@ -1079,7 +1098,7 @@ export function FullCourseLearningExperience({
       </section>
 
       <div className="mt-[48px] flex flex-col max-[743px]:gap-[66px] min-[744px]:max-lg:mt-[50px] min-[744px]:max-lg:gap-[60px] lg:flex-row lg:items-start lg:gap-[94px] lg:ar:w-[1201px] lg:ar:max-w-full lg:ar:justify-between lg:ar:gap-0">
-        <div className="min-w-0 max-lg:order-2 max-lg:flex-none min-[744px]:max-lg:w-full min-[744px]:max-lg:pl-[61px] min-[744px]:max-lg:ar:pl-0 min-[744px]:max-lg:ar:pr-[61px] lg:order-1 lg:w-[775px] lg:max-w-[775px] lg:flex-none" aria-label="Section content">
+        <div className="min-w-0 max-lg:order-2 max-lg:flex-none min-[744px]:max-lg:w-full min-[744px]:max-lg:px-[61px] lg:order-1 lg:w-[775px] lg:max-w-[775px] lg:flex-none" aria-label="Section content">
           {selectedModule ? (
             <div className="flex w-full flex-col lg:ar:items-stretch lg:ar:text-right">
               <SectionHeader
@@ -1090,7 +1109,7 @@ export function FullCourseLearningExperience({
                 instructorProfession={instructorProfession}
                 fontFamily={fontFamily}
               />
-              <div className="w-full max-[743px]:pl-[30px] max-[743px]:ar:pl-0 max-[743px]:ar:pr-[30px] lg:pt-[24px] lg:ar:text-right">
+              <div className="w-full max-[743px]:px-[30px] lg:pt-[24px] lg:ar:text-right">
               {selectedModule.lessons.map((lesson, index) => {
                 const isLast = index === selectedModule.lessons.length - 1;
 
@@ -1156,18 +1175,21 @@ export function FullCourseLearningExperience({
             return (
               <div
                 key={module.id}
-                className={`w-[315px] overflow-hidden rounded-[30px] border border-solid bg-white min-[744px]:max-lg:w-[622px] lg:w-[432px] ${
+                className={`w-[315px] overflow-hidden rounded-[30px] border border-solid min-[744px]:max-lg:w-[622px] lg:w-[432px] ${
+                  isOpen || isSelected ? "bg-[#89F496]" : "bg-white"
+                } ${
                   isOpen
                     ? "h-auto"
                     : "h-[60px] min-[744px]:max-lg:h-[74px] lg:h-[60px]"
                 }`}
                 style={{
-                  borderColor: "rgba(0, 0, 0, 0.3)",
+                  borderColor: "rgba(0, 0, 0, 0.45)",
                   backgroundClip: "padding-box",
-                  transition: "height 320ms ease-in-out",
+                  transition: "height 320ms ease-in-out, background-color 300ms ease-in-out",
                 }}
               >
                 <div
+                  dir={arabic ? "rtl" : undefined}
                   className={`flex h-[60px] w-full items-center px-[20px] min-[744px]:max-lg:h-[74px] min-[744px]:max-lg:ps-[31px] ${
                     isOpen || isSelected ? "bg-[#89F496]" : "bg-white"
                   }`}
@@ -1214,7 +1236,9 @@ export function FullCourseLearningExperience({
                     className="ms-[12px] inline-flex min-w-0 flex-1 items-center bg-transparent p-0 text-start transition-opacity hover:opacity-80 min-[744px]:max-lg:ms-[20px]"
                   >
                     <span
-                      className="truncate text-[18px] font-medium min-[744px]:max-lg:text-[24px] lg:ar:w-full lg:ar:text-right"
+                      className={`w-full truncate text-[18px] font-medium min-[744px]:max-lg:text-[24px] ${
+                        arabic ? "text-right" : ""
+                      }`}
                       style={{
                         color: "var(--Black, #000)",
                         fontFamily,
@@ -1234,31 +1258,40 @@ export function FullCourseLearningExperience({
                   {module.lessons.map((lesson, lessonIndex) => {
                     const isActive = activeLessonId === lesson.id;
                     const isComplete = completedIds.has(lesson.id);
+                    const lessonTitle = (
+                      <LocalName en={lesson.title} ar={lesson.titleAr} />
+                    );
+                    const lessonName = `${lessonIndex + 1}. `;
                     return (
                       <button
                         key={lesson.id}
                         type="button"
                         onClick={() => selectLesson(lesson)}
+                        dir={arabic ? "rtl" : undefined}
                         className={`flex h-[60px] w-full items-center justify-between border-t border-solid ps-[20px] pe-[16px] text-start transition-colors duration-200 min-[744px]:max-lg:h-[74px] min-[744px]:max-lg:ps-[24px] ${
                           isActive
                             ? "bg-[#64E1FF]"
                             : "bg-white hover:bg-[#64E1FF]"
-                        }`}
+                        } ${lessonIndex === 0 ? "rounded-t-[30px]" : ""}`}
                         style={{
-                          borderColor: "rgba(0, 0, 0, 0.3)",
+                          borderColor: "rgba(0, 0, 0, 0.45)",
                           backgroundClip: "padding-box",
                         }}
                         aria-current={isActive ? "true" : undefined}
                       >
                         <p
-                          className="m-0 truncate text-[18px] min-[744px]:max-lg:text-[24px] lg:ar:text-right"
+                          dir={arabic ? "rtl" : undefined}
+                          className={`m-0 min-w-0 flex-1 truncate text-[18px] min-[744px]:max-lg:text-[24px] ${
+                            arabic ? "text-right" : ""
+                          }`}
                           style={{
                             color: "var(--Black, #000)",
                             fontFamily,
                             fontWeight: 400,
                           }}
                         >
-                          {lessonIndex + 1}. <LocalName en={lesson.title} ar={lesson.titleAr} />
+                          {lessonName}
+                          {lessonTitle}
                         </p>
                         <span
                           className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center"
@@ -1283,7 +1316,7 @@ export function FullCourseLearningExperience({
           aria-hidden
         />
         <div
-          className="max-[743px]:-ml-[30px] max-[743px]:w-[calc(100%+30px)] max-[743px]:pt-[35px] min-[744px]:max-lg:-ml-[61px] min-[744px]:max-lg:w-[calc(100%+61px)] min-[744px]:max-lg:pt-[73px] lg:hidden"
+          className="max-lg:w-full max-[743px]:pt-[35px] min-[744px]:max-lg:pt-[73px] lg:hidden"
           aria-hidden
         >
           <hr className="m-0 h-0 w-full border-0 border-t border-black bg-black opacity-30" />
@@ -1294,52 +1327,62 @@ export function FullCourseLearningExperience({
             onClick={() => void markCurrentUnitComplete()}
             disabled={unitSaving || isCurrentUnitComplete || persistableUnitLessonIds.length === 0}
             aria-pressed={isCurrentUnitComplete}
-            className="inline-flex items-center bg-transparent p-0 text-start disabled:cursor-default"
+            dir={arabic ? "ltr" : undefined}
+            className={`inline-flex items-center bg-transparent p-0 text-start disabled:cursor-default ${
+              arabic
+                ? "max-[743px]:w-full max-[743px]:justify-between min-[744px]:max-lg:ms-auto min-[744px]:max-lg:gap-[20px] lg:gap-[24px]"
+                : ""
+            }`}
           >
-            <UnitCompleteCheckIcon filled={isCurrentUnitComplete} />
             {arabic ? (
-              <span
-                className="fcl-unit-label"
-                style={{
-                  marginInlineStart: 24,
-                  color: "var(--Black, #000)",
-                  textAlign: "right",
-                  fontFamily,
-                  fontSize: 24,
-                  fontStyle: "normal",
-                  fontWeight: 400,
-                  lineHeight: "normal",
-                }}
-              >
-                حدد هذه الوحدة كمكتملة
-              </span>
-            ) : (
-              <span className="fcl-unit-check-gap">
+              <>
+                <span className="inline-flex max-[743px]:order-1 min-[744px]:max-lg:order-2 lg:order-1">
+                  <UnitCompleteCheckIcon filled={isCurrentUnitComplete} />
+                </span>
                 <span
-                  className="fcl-unit-label"
+                  className="fcl-unit-label max-[743px]:order-2 min-[744px]:max-lg:order-1 lg:order-2"
                   style={{
                     color: "var(--Black, #000)",
+                    textAlign: "right",
                     fontFamily,
                     fontStyle: "normal",
                     fontWeight: 400,
                     lineHeight: "normal",
                   }}
                 >
-                  MARK THIS UNIT AS{" "}
+                  حدد هذه الوحدة كمكتملة
                 </span>
-                <span
-                  className="fcl-unit-label"
-                  style={{
-                    color: "var(--Black, #000)",
-                    fontFamily,
-                    fontStyle: "italic",
-                    fontWeight: 500,
-                    lineHeight: "normal",
-                  }}
-                >
-                  COMPLETED
+              </>
+            ) : (
+              <>
+                <UnitCompleteCheckIcon filled={isCurrentUnitComplete} />
+                <span className="fcl-unit-check-gap">
+                  <span
+                    className="fcl-unit-label"
+                    style={{
+                      color: "var(--Black, #000)",
+                      fontFamily,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "normal",
+                    }}
+                  >
+                    MARK THIS UNIT AS{" "}
+                  </span>
+                  <span
+                    className="fcl-unit-label"
+                    style={{
+                      color: "var(--Black, #000)",
+                      fontFamily,
+                      fontStyle: "italic",
+                      fontWeight: 500,
+                      lineHeight: "normal",
+                    }}
+                  >
+                    COMPLETED
+                  </span>
                 </span>
-              </span>
+              </>
             )}
           </button>
           <button
